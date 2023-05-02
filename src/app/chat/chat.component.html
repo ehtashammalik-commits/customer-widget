@@ -1,0 +1,36 @@
+<div class="top-wrapper">
+  <ng-container *ngIf="chatActive">
+    <!-- Active chat screen -->
+    <div class="widget-chat-area">
+      <div class="widget-chat">
+        <div class="widget-chat-header widget-color" onclick="chatFormAction()">
+          <h5 id="title">Expertflow Live Chat</h5>
+          <p id="subtitle">Let's Chat</p>
+
+          <div class="font-adjust-main">
+
+            <div class="dropdown">
+              <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">A+
+              <span class="caret"></span></button>
+              <ul class="dropdown-menu">
+                <li><a href="#">A+</a></li>
+                <li><a href="#">A++</a></li>
+                <li><a href="#">A+++</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <span class="widget-header-icon"><img src="../../assets/images/remove.svg" alt="minimize"> </span>
+          <span class="widget-header-close"><img src="../../assets/images/add.svg" alt="close"> </span>
+        </div>
+        <div class="widget-chat-area">
+
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="chatEnded">
+    <!-- End chat screen -->
+  </ng-container>
+</div>

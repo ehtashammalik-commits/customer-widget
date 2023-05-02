@@ -1,4 +1,32 @@
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+$orange-color: #EE7F00;
+$white-color: #fff;
+$dark-color: #010101;
+$danger-color: #FF0000;
+$medium-font: 13px;
+$text-color: #464646;
+
+:root {
+  --main-color: #79A3DD;
+}
+body {
+  font-family: "Roboto", Arial, Helvetica, sans-serif !important;
+  font-size: 12px;
+  font-weight: 400;
+  // position: fixed;
+  // bottom: 0px;
+  // right: 0px;
+}
+
+// .top-wrapper {
+//   font-family: "Roboto", Arial, Helvetica, sans-serif !important;
+//   font-size: 12px;
+//   font-weight: 400;
+//   position: fixed;
+//   bottom: 0px;
+//   right: 0px;
+//   // overflow: hidden;
+// }

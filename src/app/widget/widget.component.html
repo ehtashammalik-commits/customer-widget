@@ -3,16 +3,16 @@
   <!-- /Addition Panel HTML/ -->
   <!--------------------------->
   <ng-container *ngIf="additionalPanel">
-    <div class="welcomeWrapper">
-      <div class="welcome-header ef-widget-color">
-        <button class="close-wrapper" (click)="closeWrapper()"><img src="../../assets/images/add.svg" alt="close">
+    <div class="widget-wrapper">
+      <div class="widget-wrapper-header widget-color">
+        <button class="close-widget-wrapper" (click)="closeWrapper()"><img src="../../assets/images/add.svg" alt="close">
         </button>
         <strong>Expertflow Live</strong>
         <p>Available 8am - 12am</p>
       </div>
-      <div class="welcome-content">
+      <div class="widget-wrapper-content">
         <p>Ask us a question, our support team is pleased to help you.</p>
-        <button class="ef-widget-color" (click)="showPreChatForm()">Connect with us</button>
+        <button class="widget-color" (click)="showPreChatForm()">Connect with us</button>
       </div>
     </div>
   </ng-container>
@@ -21,10 +21,10 @@
   <!--/Chat Icon HTML/ -->
   <!--------------------->
   <ng-container *ngIf="isIconWidget">
-    <div class="ef-widget-dropdown ef-widget-is-loading " id="dropdownTrigger">
-      <div id="myDropdown" class="ef-widget-dropdown-content">
+    <div class="widget-dropdown widget-loading" id="dropdownTrigger">
+      <div id="myDropdown" class="widget-dropdown-content">
         <button id="chatIconBtn" title="Live Chat"
-          class="ef-widget-inner-trigger ef-widget-chat-trigger ef-widget-option-trigger ef-widget-color"
+          class="widget-inner-trigger widget-chat-trigger widget-option-trigger widget-color"
           (click)="showPreChatForm()">
           <span id="chatText">Live Chat</span>
         </button>
@@ -36,9 +36,9 @@
   <!-- /Chat Bar HTML/ --->
   <!---------------------->
   <ng-container *ngIf="isBarWidget">
-    <div class="ef-widget-is-loading ef-widget-dropdown ef-widget-bar-view" id="dropdownTrigger">
-      <div id="myDropdown" class="ef-widget-bar-content">
-        <button id="chatIconBtn" title="Live Chat" class="ef-widget-bar-trigger ef-widget-chat-trigger ef-widget-color"
+    <div class="widget-loading widget-dropdown widget-bar-view" id="dropdownTrigger">
+      <div id="myDropdown" class="widget-bar-content">
+        <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
           (click)="showPreChatForm()">
           <span id="chatText">Live Chat</span>
         </button>
@@ -50,30 +50,30 @@
   <!-- /PreChat Form HTML /->
   <!- ------------------- -->
   <ng-container *ngIf="preChatForm">
-    <div class="ef-widget-chat-form-area">
-      <div class="ef-widget-chat-form">
-        <div class="ef-widget-form-header ef-widget-color" onclick="chatFormAction()">
+    <div class="widget-form-area">
+      <div class="widget-form">
+        <div class="widget-form-header widget-color" onclick="chatFormAction()">
           <h5 id="headerHeading">Let's Chat</h5>
-          <span class="ef-widget-header-icon"><img src="../../assets/images/remove.svg" alt="minimize"> </span>
+          <span class="widget-header-icon"><img src="../../assets/images/remove.svg" alt="minimize"> </span>
         </div>
-        <div class="ef-widget-form-area">
+        <div class="widget-form-area">
 
           <form [formGroup]="preChatFormGroup" (ngSubmit)="onSubmit()">
-            <div class="ef-widget-chat-form-content">
+            <div class="widget-form-content">
 
-              <div class="ef-widget-form-group">
-                <label><span id="name">Full Name</span><span class="ef-widget-required"></span></label>
-                <input matInput type="text" formControlName="name" class="ef-widget-form-control" autocomplete="off"
+              <div class="widget-form-group">
+                <label><span id="name">Full Name</span><span class="widget-required"></span></label>
+                <input matInput type="text" formControlName="name" class="widget-form-control" autocomplete="off"
                   required>
                 <mat-error class="form-error">
                   {{formErrors.name}}
                 </mat-error>
               </div>
-              <div class="ef-widget-clearfix"></div>
+              <div class="widget-clearfix"></div>
 
-              <div class="ef-widget-form-group">
+              <div class="widget-form-group">
                 <label><span id="email">Email</span></label>
-                <input matInput type="email" formControlName="email" class="ef-widget-form-control" autocomplete="off"
+                <input matInput type="email" formControlName="email" class="widget-form-control" autocomplete="off"
                   required>
                 <mat-error class="form-error">
                   {{formErrors.email}}
@@ -81,9 +81,9 @@
               </div>
               <div class="clearfix"></div>
 
-              <div class="ef-widget-form-group">
+              <div class="widget-form-group">
                 <label><span id="phone">Phone</span></label>
-                <input type="text" matInput formControlName="phone" class="ef-widget-form-control" autocomplete="off"
+                <input type="text" matInput formControlName="phone" class="widget-form-control" autocomplete="off"
                   required>
                 <mat-error class="form-error">
                   {{formErrors.phone}}
@@ -91,33 +91,25 @@
               </div>
               <div class="clearfix"></div>
 
-              <div class="ef-widget-form-group">
-                <label><span id="channel_identifier">Customer Channel Identifier</span><span
-                    class="ef-widget-required">*</span></label>
-                <input type="text" matInput formControlName="channel_identifier" class="ef-widget-form-control"
+              <div class="widget-form-group">
+                <label><span id="channelIdentifier">Customer Channel Identifier</span><span
+                    class="widget-required">*</span></label>
+                <input type="text" matInput formControlName="channelIdentifier" class="widget-form-control"
                   autocomplete="off" required>
                 <mat-error class="form-error">
-                  {{formErrors.channel}}
+                  {{formErrors.channelIdentifier}}
                 </mat-error>
               </div>
               <div class="clearfix"></div>
             </div>
             <input id="formTrigger" type="submit" [disabled]="preChatFormGroup.invalid"
-              class="ef-widget-btn ef-widget-form-trigger ef-widget-color" value="Start Chat">
+              class="widget-btn widget-form-trigger widget-color" value="Start Chat">
 
           </form>
         </div>
       </div>
     </div>
 
-  </ng-container>
-
-  <ng-container *ngIf="chatActive">
-    <!-- Active chat screen -->
-  </ng-container>
-
-  <ng-container *ngIf="chatEnded">
-    <!-- End chat screen -->
   </ng-container>
 
 </div>

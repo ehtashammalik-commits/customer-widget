@@ -11,8 +11,6 @@ export class WidgetComponent implements OnInit {
   isIconWidget = false;
   isBarWidget = true;
   preChatForm = false;
-  chatActive = false;
-  chatEnded = false;
 
   // preChatFormGroup!: FormGroup;
   constructor(private fb: FormBuilder) { }
@@ -30,7 +28,7 @@ export class WidgetComponent implements OnInit {
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern(/^[\d-+\s()]+$/)]],
-      channel: ['', Validators.required]
+      channelIdentifier: ['', Validators.required]
     });
   }
 
@@ -52,7 +50,7 @@ export class WidgetComponent implements OnInit {
       maxlength: "Max 40 characters allowed",
       pattern: 'Allowed special characters "[!@#$%^&*()-_=+~`"]+"',
     },
-    channel: {
+    channelIdentifier: {
       required: "This field is required",
       maxlength: "Max 256 characters allowed",
       pattern: 'Allowed special characters "[!@#$%^&*()-_=+~`"]+"',
@@ -63,14 +61,14 @@ export class WidgetComponent implements OnInit {
     name: "",
     email: "",
     phone: "",
-    channel: ""
+    channelIdentifier: ""
   };
 
   preChatFormGroup: FormGroup = new FormGroup({
     name: new FormControl('', Validators.required),
     email: new FormControl('', [Validators.required, Validators.email]),
     phone: new FormControl('', Validators.required),
-    customerChannelIdentifier: new FormControl('', Validators.required)
+    channelIdentifier: new FormControl('', Validators.required)
   });
 
   onSubmit(): void {
@@ -96,15 +94,13 @@ export class WidgetComponent implements OnInit {
   }
 
   showActiveChatScreen() {
+    this.additionalPanel = false;
+    this.isBarWidget = false;
     this.preChatForm = false;
-    this.chatActive = true;
-    this.chatEnded = false;
   }
 
   showEndChatScreen() {
     this.preChatForm = false;
-    this.chatActive = false;
-    this.chatEnded = true;
   }
 
 }

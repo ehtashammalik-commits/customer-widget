@@ -1,0 +1,237 @@
+.widget-color {
+  background-color: #093543; /*Changes the complete backgroud of web widget*/
+  color: rgb(255, 255, 255); /*Changes the text of web widget*/
+}
+.widget-color:hover, .widget-color:focus {
+  background-color: #235c5e;  /*Changes the complete backgroud of web widget on hover*/
+  color: rgb(255, 255, 255);  /*Changes the text of web widget on hover*/
+}
+
+.top-wrapper {
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+}
+
+  /*/---------------------/*/
+ /*/ Style for chat area /*/
+/*/---------------------/*/
+
+.widget-chat-area {
+  position: relative;
+  right: 0;
+  bottom: 0;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+  display: block;
+  z-index: 99;
+  width: 315px;
+  height: 490px;
+}
+
+/*Mobile and Application Version*/
+.widget-chat-area.widget-mobile-version {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+.widget-chat-area.widget-mobile-version .widget-chat {
+  background: #ffffff;
+  height: calc(100% - 20px);
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+}
+
+.widget-chat-area.widget-mobile-version .widget-header-icon {
+  display: none !important;
+}
+
+/* for Arabic language rtl direction */
+.widget-chat-area.lang-arabic {
+  text-align: right;
+  direction: rtl;
+}
+
+.widget-chat-area.lang-arabic #phone{
+  text-align: left;
+  direction: ltr;
+}
+
+.widget-chat {
+  background: #ffffff;
+  height: 100%;
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+}
+
+.widget-chat-header {
+  padding: 0 5px;
+  height: 50px;
+  z-index: 99;
+  position: relative;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+}
+
+.widget-chat-header h5 {
+  font-size: 12px;
+  font-weight: 500;
+  height: 36px;
+  line-height: 36px;
+  margin: 0;
+  display: inline-block;
+  padding: 0 0 0 10px;
+}
+
+.widget-chat-header p {
+  position: absolute;
+  left: 15px;
+  top: 25px;
+  font-size: 10px;
+}
+
+.widget-chat-header .widget-header-icon {
+  position: absolute;
+  right: 35px;
+  top: 5px;
+}
+
+.widget-chat-header .widget-header-icon img {
+  height: 40px;
+  width: 22px;
+}
+
+.widget-chat-header .widget-header-close {
+  position: absolute;
+  right: 8px;
+  top: 12px;
+  transform: rotate(45deg);
+}
+
+// .widget-chat-area form{
+//   margin: 0;
+//   height: 100%;
+// }
+.font-adjust-main {
+  display: inline-block;
+  position: absolute;
+  top: 0px;
+  right: 76px;
+
+  // mat-form-field {
+  //   width: 65px;
+
+  //   mat-select {
+  //     border-radius: 5px;
+  //     border: 1px solid white;
+  //     height: 25px;
+  //   }
+  // }
+
+  /* Change the border color and text color of the mat-select field */
+  .mat-form-field {
+    border: 1px solid #ccc;
+    color: #333;
+  }
+
+  /* Change the border color of the mat-select field when focused */
+  .mat-form-field.mat-focused .mat-form-field-outline {
+    border-color: #4c7ef3;
+  }
+
+  /* Change the height of the mat-select field */
+  .mat-form-field-wrapper {
+    height: 25px;
+  }
+
+  /* Change the width of the mat-select field */
+  .mat-form-field-flex {
+    width: 65px;
+  }
+
+}
+
+.widget-chat-content {
+  height: calc(100% - 85px);
+  overflow: auto;
+  padding: 10px 15px;
+}
+
+.widget-chat-area .widget-chat-group {
+  margin-bottom: 10px;
+}
+
+.widget-chat-area .widget-chat-group label{
+  font-size: 12px;
+  color: #010101;
+  font-weight: normal;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.widget-chat-group .widget-chat-control {
+  display: block;
+  border-radius: 3px;
+  border: 1px solid rgba(114, 114, 114, 0.3);
+  height: 36px;
+  line-height: 36px;
+  padding: 0 5px;
+  outline: none;
+  width: calc(100% - 10px);
+  font-size: 16px !important;
+
+}
+
+.widget-chat-group select.widget-chat-control {
+  width: 100%;
+}
+
+.widget-chat-group .widget-chat-control.widget-error {
+  border-color: #f00 !important;
+}
+
+.widget-chat-group textarea.widget-chat-control {
+  height: 80px;
+  line-height: 18px;
+}
+
+.widget-btn.widget-chat-trigger {
+  width: calc(100% - 30px);
+  font-size: 14px;
+  font-weight: 500;
+  height: 34px;
+  line-height: 34px;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  display: block;
+  margin: 0 auto;
+  cursor: pointer;
+  max-width: 300px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.widget-chat-group .widget-chat-control:focus {
+  border: 2px inset rgba(0,0,0,.2) !important;
+}
+
+.widget-chat-group span.widget-required {
+  color: #f44336;
+  font-size: 15px;
+  position: relative;
+  top: 2px;
+}
+
+.widget-chat-group small {
+  color: #f44336;
+  position: relative;
+  font-size: 10px;
+  top: 2px;
+  display: block;
+}
+
+  /*/---------------------/*/
+ /*/ Style for chat area /*/
+/*/---------------------/*/

@@ -1,0 +1,53 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+
+interface Food {
+  value: string;
+  viewValue: string;
+}
+
+@Component({
+  selector: 'app-chat',
+  templateUrl: './chat.component.html',
+  styleUrls: ['./chat.component.scss']
+})
+export class ChatComponent implements OnInit {
+  chatActive = false;
+  chatEnded = false;
+
+  fontSize = new FormControl("13");
+
+  foods: Food[] = [
+    {value: 'steak-0', viewValue: 'Steak'},
+    {value: 'pizza-1', viewValue: 'Pizza'},
+    {value: 'tacos-2', viewValue: 'Tacos'},
+  ];
+  constructor() { }
+
+  ngOnInit(): void {
+    // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
+    const userAuthenticated = false; // Replace with your own authentication logic
+    if (userAuthenticated) {
+      this.showActiveChatScreen();
+    } else {
+      this.showActiveChatScreen();
+    }
+
+  }
+
+  showActiveChatScreen() {
+    this.chatActive = true;
+    this.chatEnded = false;
+  }
+
+  showEndChatScreen() {
+    this.chatActive = false;
+    this.chatEnded = true;
+  }
+
+  changeFont(e:any) {
+    try {
+      localStorage.setItem("fontSize", e.value);
+    } catch (error) { }
+  }
+}

@@ -1,80 +1,65 @@
-$orange-color: #EE7F00;
-$white-color: #fff;
-$dark-color: #010101;
-$danger-color: #FF0000;
-$medium-font: 13px;
-$text-color: #464646;
-
-:root {
-  --main-color: #79A3DD;
-}
-
-.top-wrapper {
-  font-family: "Roboto", Arial, Helvetica, sans-serif !important;
-  font-size: 12px;
-  font-weight: 400;
-  position: fixed;
-  bottom: 0px;
-  right: 0px;
-  // overflow: hidden;
-}
-
-.ef-widget-color {
+.widget-color {
   background-color: #093543; /*Changes the complete backgroud of web widget*/
   color: rgb(255, 255, 255); /*Changes the text of web widget*/
 }
-.ef-widget-color:hover, .ef-widget-color:focus {
+.widget-color:hover, .widget-color:focus {
   background-color: #235c5e;  /*Changes the complete backgroud of web widget on hover*/
   color: rgb(255, 255, 255);  /*Changes the text of web widget on hover*/
+}
+
+.top-wrapper {
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
 }
 
 /**
 * Welcome Wrapper Styling
 **/
-.welcomeWrapper {
+.widget-wrapper {
   background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 45px 55px 100px #efefef;
-    transition: all 0.3s;
-    max-width: 300px;
-    position: relative;
-    z-index: 10000;
-    width: 300px;
-    height: 200px;
-    border: none;
-    bottom: 50px;
-    right: 10px;
+  border-radius: 8px;
+  box-shadow: 45px 55px 100px #efefef;
+  transition: all 0.3s;
+  max-width: 300px;
+  position: relative;
+  z-index: 10000;
+  width: 300px;
+  height: 200px;
+  border: none;
+  bottom: 50px;
+  right: 10px;
 }
-.welcome-header {
+.widget-wrapper-header {
   background: #093543;
   color: #fff;
   text-align: center;
   padding: 10px 0;
   border-radius: 8px 8px 0 0;
 }
-.welcome-header p {
+.widget-wrapper-header p {
   margin: 0;
   font-size: 12px;
   font-weight: 400;
 }
-.welcome-header strong {
+.widget-wrapper-header strong {
   font-weight: 400;
   font-size: 16px;
 }
-.welcome-content {
+.widget-wrapper-content {
   padding: 15px;
   text-align: center;
   min-height: 90px;
   min-width: 200px;
 }
-.welcome-content p{
+.widget-wrapper-content p{
   text-align: left;
   font-size: 13px;
   color: #555;
   margin: 0;
   line-height: 1.5;
 }
-.welcome-content button {
+.widget-wrapper-content button {
   padding: 10px;
   outline: none;
   border: 0;
@@ -83,10 +68,10 @@ $text-color: #464646;
   cursor: pointer;
   transition: all .3s;
 }
-.welcome-content button:hover {
+.widget-wrapper-content button:hover {
   transition: all .3s;
 }
-button.close-wrapper {
+button.close-widget-wrapper {
   background: transparent;
   border: 0;
   position: absolute;
@@ -99,7 +84,7 @@ button.close-wrapper {
   cursor: pointer;
   outline: none;
 }
-.welcomeWrapper:hover  button.close-wrapper{
+.widget-wrapper:hover  button.close-widget-wrapper{
   display: inline-block;
   transition: all .3s;
 }
@@ -108,24 +93,22 @@ button.close-wrapper {
 * Bar View Chat Button
 **/
 
-.ef-widget-is-loading{
+.widget-loading{
   display: block;
 }
-.ef-widget-dropdown.ef-widget-bar-view {
+.widget-dropdown.widget-bar-view {
   right: 0;
   width: calc(100% - 10px);
   bottom: 1px;
   max-width: 325px;
 }
-.ef-widget-bar-view button#chatIconBtn {
+.widget-bar-view button#chatIconBtn {
   width: 100%;
   border-radius: 5px 5px 0 0;
   height: 36px;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
 }
-.ef-widget-bar-view button#chatIconBtn span {
-  // bottom: inherit;
-  // left: 0;
+.widget-bar-view button#chatIconBtn span {
   text-align: left;
   padding: 0 15px;
   line-height: 0;
@@ -133,14 +116,14 @@ button.close-wrapper {
   font-weight: 500;
   color: #fff;
 }
-.ef-widget-dropdown {
+.widget-dropdown {
   position: fixed;
   right: 10px;
   bottom: 20px;
   width: 50px;
   z-index: 10000;
 }
-.ef-widget-dropdown-content {
+.widget-dropdown-content {
   position: absolute;
   min-width: 55px;
   overflow: auto;
@@ -152,18 +135,18 @@ button.close-wrapper {
   max-width: 315px;
   right: 0;
 }
-div#myDropdown.ef-widget-show-option {
+div#myDropdown.widget-show-option {
   display: block;
   height: 70px;
   top: -35px;
   overflow:hidden;
 }
-div#myDropdown.ef-widget-show {
+div#myDropdown.widget-show {
   display: block !important;
   height: 120px;
   top: -112px;
 }
-.ef-widget-bar-trigger {
+.widget-bar-trigger {
   width: 100%;
   height: 35px;
   padding: 10px;
@@ -177,8 +160,7 @@ div#myDropdown.ef-widget-show {
   position: relative;
   overflow: visible;
 }
-
-.ef-widget-bar-content {
+.widget-bar-content {
   position: absolute;
   z-index: 1;
   top: -35px;
@@ -187,8 +169,7 @@ div#myDropdown.ef-widget-show {
   min-width: 300px;
   right: 10px;
 }
-
-.ef-widget-option-trigger.ef-widget-chat-trigger{
+.widget-option-trigger.widget-chat-trigger{
   background-image: url("../../assets/images/chat.svg");
 }
 
@@ -196,7 +177,7 @@ div#myDropdown.ef-widget-show {
  /*/ Style for form area /*/
 /*/---------------------/*/
 
-.ef-widget-chat-form-area {
+.widget-form-area {
   position: relative;
   right: 0;
   bottom: 0;
@@ -208,42 +189,42 @@ div#myDropdown.ef-widget-show {
 }
 
 /*Mobile and Application Version*/
-.ef-widget-chat-form-area.ef-widget-mobile-version {
+.widget-form-area.widget-mobile-version {
   display: none;
   width: 100%;
   height: 100%;
 }
 
-.ef-widget-chat-form-area.ef-widget-mobile-version .ef-widget-chat-form {
+.widget-form-area.widget-mobile-version .widget-form {
   background: #ffffff;
   height: calc(100% - 20px);
   width: 100%;
   border-radius: 5px 5px 0 0;
 }
 
-.ef-widget-chat-form-area.ef-widget-mobile-version .ef-widget-header-icon {
+.widget-form-area.widget-mobile-version .widget-header-icon {
   display: none !important;
 }
 
 /* for Arabic language rtl direction */
-.ef-widget-chat-form-area.lang-arabic {
+.widget-form-area.lang-arabic {
   text-align: right;
   direction: rtl;
 }
 
-.ef-widget-chat-form-area.lang-arabic #phone{
+.widget-form-area.lang-arabic #phone{
   text-align: left;
   direction: ltr;
 }
 
-.ef-widget-chat-form {
+.widget-form {
   background: #ffffff;
   height: 100%;
   width: 100%;
   border-radius: 5px 5px 0 0;
 }
 
-.ef-widget-form-header {
+.widget-form-header {
   padding: 0 5px;
   height: 36px;
   z-index: 99;
@@ -252,7 +233,7 @@ div#myDropdown.ef-widget-show {
   cursor: pointer;
 }
 
-.ef-widget-form-header h5 {
+.widget-form-header h5 {
   font-size: 13px;
   font-weight: 500;
   height: 36px;
@@ -262,36 +243,32 @@ div#myDropdown.ef-widget-show {
   padding: 0 0 0 10px;
 }
 
-.ef-widget-form-header .ef-widget-header-icon {
+.widget-form-header .widget-header-icon {
   position: absolute;
   right: 10px;
 }
 
-.ef-widget-form-header .ef-widget-header-icon img {
+.widget-form-header .widget-header-icon img {
   height: 36px;
   width: 24px;
 }
 
-.ef-widget-form-area {
-  height: calc(100% - 38px);
-}
-
-.ef-widget-form-area form{
+.widget-form-area form{
   margin: 0;
   height: 100%;
 }
 
-.ef-widget-chat-form-content {
-  height: calc(100% - 45px);
+.widget-form-content {
+  height: calc(100% - 85px);
   overflow: auto;
   padding: 10px 15px;
 }
 
-.ef-widget-form-area .ef-widget-form-group {
+.widget-form-area .widget-form-group {
   margin-bottom: 10px;
 }
 
-.ef-widget-form-area .ef-widget-form-group label{
+.widget-form-area .widget-form-group label{
   font-size: 12px;
   color: #010101;
   font-weight: normal;
@@ -299,7 +276,7 @@ div#myDropdown.ef-widget-show {
   margin-bottom: 5px;
 }
 
-.ef-widget-form-group .ef-widget-form-control {
+.widget-form-group .widget-form-control {
   display: block;
   border-radius: 3px;
   border: 1px solid rgba(114, 114, 114, 0.3);
@@ -312,20 +289,20 @@ div#myDropdown.ef-widget-show {
 
 }
 
-.ef-widget-form-group select.ef-widget-form-control {
+.widget-form-group select.widget-form-control {
   width: 100%;
 }
 
-.ef-widget-form-group .ef-widget-form-control.ef-widget-error {
+.widget-form-group .widget-form-control.widget-error {
   border-color: #f00 !important;
 }
 
-.ef-widget-form-group textarea.ef-widget-form-control {
+.widget-form-group textarea.widget-form-control {
   height: 80px;
   line-height: 18px;
 }
 
-.ef-widget-btn.ef-widget-form-trigger {
+.widget-btn.widget-form-trigger {
   width: calc(100% - 30px);
   font-size: 14px;
   font-weight: 500;
@@ -343,18 +320,18 @@ div#myDropdown.ef-widget-show {
   -moz-appearance: none;
 }
 
-.ef-widget-form-group .ef-widget-form-control:focus {
+.widget-form-group .widget-form-control:focus {
   border: 2px inset rgba(0,0,0,.2) !important;
 }
 
-.ef-widget-form-group span.ef-widget-required {
+.widget-form-group span.widget-required {
   color: #f44336;
   font-size: 15px;
   position: relative;
   top: 2px;
 }
 
-.ef-widget-form-group small {
+.widget-form-group small {
   color: #f44336;
   position: relative;
   font-size: 10px;
