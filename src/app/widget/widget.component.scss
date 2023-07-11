@@ -1,10 +1,12 @@
 .widget-color {
-  background-color: #093543; /*Changes the complete backgroud of web widget*/
-  color: rgb(255, 255, 255); /*Changes the text of web widget*/
+  background-color: #1A50A3;
+  color: rgb(255, 255, 255);
 }
-.widget-color:hover, .widget-color:focus {
-  background-color: #235c5e;  /*Changes the complete backgroud of web widget on hover*/
-  color: rgb(255, 255, 255);  /*Changes the text of web widget on hover*/
+
+.widget-color:hover,
+.widget-color:focus {
+  background-color: #1A50A3;
+  color: rgb(255, 255, 255);
 }
 
 .top-wrapper {
@@ -27,38 +29,44 @@
   width: 300px;
   height: 200px;
   border: none;
-  bottom: 50px;
+  bottom: 65px;
   right: 10px;
 }
+
 .widget-wrapper-header {
-  background: #093543;
+  background: #1A50A3;
   color: #fff;
   text-align: center;
   padding: 10px 0;
   border-radius: 8px 8px 0 0;
 }
+
 .widget-wrapper-header p {
   margin: 0;
   font-size: 12px;
   font-weight: 400;
 }
+
 .widget-wrapper-header strong {
   font-weight: 400;
   font-size: 16px;
 }
+
 .widget-wrapper-content {
   padding: 15px;
   text-align: center;
   min-height: 90px;
   min-width: 200px;
 }
-.widget-wrapper-content p{
+
+.widget-wrapper-content p {
   text-align: left;
   font-size: 13px;
   color: #555;
   margin: 0;
   line-height: 1.5;
 }
+
 .widget-wrapper-content button {
   padding: 10px;
   outline: none;
@@ -68,9 +76,11 @@
   cursor: pointer;
   transition: all .3s;
 }
+
 .widget-wrapper-content button:hover {
   transition: all .3s;
 }
+
 button.close-widget-wrapper {
   background: transparent;
   border: 0;
@@ -84,7 +94,8 @@ button.close-widget-wrapper {
   cursor: pointer;
   outline: none;
 }
-.widget-wrapper:hover  button.close-widget-wrapper{
+
+.widget-wrapper:hover button.close-widget-wrapper {
   display: inline-block;
   transition: all .3s;
 }
@@ -93,21 +104,24 @@ button.close-widget-wrapper {
 * Bar View Chat Button
 **/
 
-.widget-loading{
+.widget-loading {
   display: block;
 }
+
 .widget-dropdown.widget-bar-view {
   right: 0;
   width: calc(100% - 10px);
   bottom: 1px;
   max-width: 325px;
 }
+
 .widget-bar-view button#chatIconBtn {
   width: 100%;
   border-radius: 5px 5px 0 0;
   height: 36px;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
 }
+
 .widget-bar-view button#chatIconBtn span {
   text-align: left;
   padding: 0 15px;
@@ -116,6 +130,7 @@ button.close-widget-wrapper {
   font-weight: 500;
   color: #fff;
 }
+
 .widget-dropdown {
   position: fixed;
   right: 10px;
@@ -123,6 +138,7 @@ button.close-widget-wrapper {
   width: 50px;
   z-index: 10000;
 }
+
 .widget-dropdown-content {
   position: absolute;
   min-width: 55px;
@@ -135,17 +151,20 @@ button.close-widget-wrapper {
   max-width: 315px;
   right: 0;
 }
+
 div#myDropdown.widget-show-option {
   display: block;
   height: 70px;
   top: -35px;
-  overflow:hidden;
+  overflow: hidden;
 }
+
 div#myDropdown.widget-show {
   display: block !important;
   height: 120px;
   top: -112px;
 }
+
 .widget-bar-trigger {
   width: 100%;
   height: 35px;
@@ -160,6 +179,7 @@ div#myDropdown.widget-show {
   position: relative;
   overflow: visible;
 }
+
 .widget-bar-content {
   position: absolute;
   z-index: 1;
@@ -169,23 +189,25 @@ div#myDropdown.widget-show {
   min-width: 300px;
   right: 10px;
 }
-.widget-option-trigger.widget-chat-trigger{
+
+.widget-option-trigger.widget-chat-trigger {
   background-image: url("../../assets/images/chat.svg");
 }
 
-  /*/---------------------/*/
- /*/ Style for form area /*/
+/*/---------------------/*/
+/*/ Style for form area /*/
 /*/---------------------/*/
 
 .widget-form-area {
-  position: relative;
-  right: 0;
+  position: absolute;
+  right: 10px;
   bottom: 0;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
   display: block;
-  z-index: 99;
-  width: 315px;
-  height: 490px;
+  width: 335px;
+  height: 559px;
+  border-radius: 10px;
+  filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.4));
+  background: #ffffff;
 }
 
 /*Mobile and Application Version*/
@@ -212,81 +234,113 @@ div#myDropdown.widget-show {
   direction: rtl;
 }
 
-.widget-form-area.lang-arabic #phone{
+.widget-form-area.lang-arabic #phone {
   text-align: left;
   direction: ltr;
 }
 
 .widget-form {
   background: #ffffff;
-  height: 100%;
-  width: 100%;
-  border-radius: 5px 5px 0 0;
+  height: 97%;
+  width: 97%;
+  border-radius: 10px;
+  position: relative;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
 }
 
 .widget-form-header {
   padding: 0 5px;
-  height: 36px;
-  z-index: 99;
-  position: relative;
-  border-radius: 3px 3px 0 0;
+  height: 50px;
+  border-radius: 10px;
   cursor: pointer;
 }
 
 .widget-form-header h5 {
-  font-size: 13px;
-  font-weight: 500;
-  height: 36px;
   line-height: 36px;
   margin: 0;
   display: inline-block;
-  padding: 0 0 0 10px;
+  position: absolute;
+  left: 10px;
+  height: 15px;
+  font-family: "Roboto";
+  font-size: 14px;
+  font-weight: bold;
+  font-style: normal;
+  text-align: left;
+  color: #ffffff;
 }
 
 .widget-form-header .widget-header-icon {
   position: absolute;
+  top: 7px;
   right: 10px;
+  width: 21px;
+  height: 21px;
+  border-color: rgba(14, 50, 105, 0.3);
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 7px;
+  background: #1a50a3;
 }
 
 .widget-form-header .widget-header-icon img {
-  height: 36px;
-  width: 24px;
+  height: 20px;
+  width: 20px;
 }
 
-.widget-form-area form{
+.widget-form-area form {
   margin: 0;
   height: 100%;
 }
 
 .widget-form-content {
-  height: calc(100% - 85px);
-  overflow: auto;
-  padding: 10px 15px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 10px;
+  position: relative;
+  top: -15px;
+}
+
+.widget-form-content h4 {
+  /* Please fill out the form below to start chatting with an agent now!  */
+  font-family: "Roboto";
+  font-size: 13px;
+  font-weight: normal;
+  font-style: normal;
+  text-align: left;
+  color: #010101;
 }
 
 .widget-form-area .widget-form-group {
   margin-bottom: 10px;
 }
 
-.widget-form-area .widget-form-group label{
-  font-size: 12px;
-  color: #010101;
-  font-weight: normal;
+.widget-form-area .widget-form-group label {
   display: inline-block;
-  margin-bottom: 5px;
+  margin-bottom: 0px;
+  margin-left: 10px;
+  font-family: "Roboto";
+  font-size: 12px;
+  font-weight: 500;
+  font-style: normal;
+  text-align: left;
+  color: #454545;
 }
 
 .widget-form-group .widget-form-control {
   display: block;
-  border-radius: 3px;
-  border: 1px solid rgba(114, 114, 114, 0.3);
-  height: 36px;
+  border-radius: 7px;
+  border: none;
+  height: 40px;
   line-height: 36px;
   padding: 0 5px;
   outline: none;
-  width: calc(100% - 10px);
+  width: 100%;
   font-size: 16px !important;
-
+  background: #eff2f7;
 }
 
 .widget-form-group select.widget-form-control {
@@ -306,10 +360,10 @@ div#myDropdown.widget-show {
   width: calc(100% - 30px);
   font-size: 14px;
   font-weight: 500;
-  height: 34px;
+  height: 45px;
   line-height: 34px;
   border: 0;
-  border-radius: 4px;
+  border-radius: 7px;
   box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
   display: block;
   margin: 0 auto;
@@ -321,7 +375,7 @@ div#myDropdown.widget-show {
 }
 
 .widget-form-group .widget-form-control:focus {
-  border: 2px inset rgba(0,0,0,.2) !important;
+  border: 2px inset rgba(0, 0, 0, .2) !important;
 }
 
 .widget-form-group span.widget-required {
@@ -339,6 +393,30 @@ div#myDropdown.widget-show {
   display: block;
 }
 
-  /*/---------------------/*/
- /*/ Style for form area /*/
+.widget-form-button {
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  left: 0px;
+}
+
+.transript-checkbox {
+  display: inline-flex;
+}
+
+.transript-checkbox label {
+  position: relative;
+  left: 15px;
+  top: 5px;
+}
+
+.check-box {
+  width: 25px;
+  position: relative;
+  left: 5px;
+  bottom: 8px;
+}
+
+/*/---------------------/*/
+/*/ Style for form area /*/
 /*/---------------------/*/
