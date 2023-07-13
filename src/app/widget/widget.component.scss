@@ -19,44 +19,64 @@
 * Welcome Wrapper Styling
 **/
 .widget-wrapper {
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 45px 55px 100px #efefef;
-  transition: all 0.3s;
-  max-width: 300px;
-  position: relative;
-  z-index: 10000;
-  width: 300px;
-  height: 200px;
-  border: none;
-  bottom: 65px;
-  right: 10px;
+  background: #eff2f7;
+    border-radius: 10px;
+    box-shadow: 45px 55px 100px #efefef;
+    transition: all 0.3s;
+    max-width: 300px;
+    position: relative;
+    z-index: 10000;
+    width: 300px;
+    height: 200px;
+    border: none;
+    bottom: 50px;
+    right: 10px;
 }
 
 .widget-wrapper-header {
   background: #1A50A3;
   color: #fff;
   text-align: center;
-  padding: 10px 0;
-  border-radius: 8px 8px 0 0;
+  padding: 10px;
+  border-radius: 10px;
+  position: relative;
+  top: 6px;
+  width: 96%;
+  left: 6px;
+  height: 100px;
 }
 
 .widget-wrapper-header p {
   margin: 0;
   font-size: 12px;
   font-weight: 400;
+  margin: 0;
+    font-family: "Roboto";
+    font-style: normal;
+    color: #ffffff;
 }
 
 .widget-wrapper-header strong {
   font-weight: 400;
-  font-size: 16px;
+    font-size: 16px;
+    margin: 0;
+    display: inline-block;
+    font-family: "Roboto";
+    font-weight: 500;
+    font-style: normal;
+    color: #ffffff;
 }
 
 .widget-wrapper-content {
-  padding: 15px;
+  padding: 10px;
   text-align: center;
-  min-height: 90px;
-  min-width: 200px;
+  background: white;
+  position: absolute;
+  top: 70px;
+  width: 96%;
+  height: 125px;
+  left: 6px;
+  border-radius: 10px;
 }
 
 .widget-wrapper-content p {
@@ -85,10 +105,11 @@ button.close-widget-wrapper {
   background: transparent;
   border: 0;
   position: absolute;
-  right: 10px;
-  top: 10px;
+  right: 5px;
+  top: 15px;
   opacity: .8;
-  transform: rotate(45deg);
+  color: white;
+  // transform: rotate(45deg);
   display: block;
   transition: all .3s;
   cursor: pointer;
@@ -207,7 +228,7 @@ div#myDropdown.widget-show {
   height: 559px;
   border-radius: 10px;
   filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.4));
-  background: #ffffff;
+  background: #eff2f7;
 }
 
 /*Mobile and Application Version*/
@@ -241,7 +262,7 @@ div#myDropdown.widget-show {
 
 .widget-form {
   background: #ffffff;
-  height: 97%;
+  height: 98%;
   width: 97%;
   border-radius: 10px;
   position: relative;

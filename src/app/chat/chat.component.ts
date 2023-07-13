@@ -13,7 +13,7 @@ interface Food {
 })
 export class ChatComponent implements OnInit {
   chatActive = false;
-  chatEnded = false;
+  chatError = false;
 
   fontSize = new FormControl("13");
 
@@ -36,13 +36,13 @@ export class ChatComponent implements OnInit {
   }
 
   showActiveChatScreen() {
-    this.chatActive = true;
-    this.chatEnded = false;
+    this.chatActive = false;
+    this.chatError = true;
   }
 
   showEndChatScreen() {
     this.chatActive = false;
-    this.chatEnded = true;
+    this.chatError = true;
   }
 
   changeFont(e:any) {

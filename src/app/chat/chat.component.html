@@ -5,8 +5,21 @@
       <div class="widget-chat">
         <div class="widget-chat-header widget-color" onclick="chatFormAction()">
           <h5 id="title">Let's Talk</h5>
-          <span class="widget-header-icon"><img src="../../assets/images/remove.svg" alt="minimize"> </span>
-          <span class="widget-header-close"><img src="../../assets/images/add.svg" alt="close"> </span>
+          <div class="widget-header-icon iconThree">
+            <span class="material-symbols-outlined">
+              pan_zoom
+            </span>
+          </div>
+          <div class="widget-header-icon iconTwo">
+            <span class="material-symbols-outlined minimize">
+              minimize
+            </span>
+          </div>
+          <div class="widget-header-icon iconOne">
+            <span class="material-symbols-outlined">
+              close
+            </span>
+          </div>
         </div>
         <div class="widget-chat-content">
           <div class="widget-chat-navbar">
@@ -26,12 +39,110 @@
               forum
             </span>
           </div>
+          <div class="widget-chat-alert">
+            <span>Please wait we are finding an agent for you</span>
+          </div>
+
+          <div class="widget-chat-notification">
+            <span>Adam Reeds joined the chat</span>
+          </div>
+
+          <div class="widget-chat-messages">
+            <div class="widget-chat-message-agent">
+              <div class="agent-message">
+                <span class="name">Adam Reeds</span>
+                <span class="message">Welcome Sam! Thank you for contacting us. Please let me know how can I assist you?</span>
+                <span class="time">1:52 PM</span>
+              </div>
+              <div class="agent-img">
+                <img src="../../assets/images/agent.png" alt="" srcset="">
+              </div>
+
+            </div>
+            <div class="widget-chat-message-customer">
+              <div class="customer-img">
+                <img src="../../assets/images/user.png" alt="" srcset="">
+              </div>
+              <div class="customer-message">
+                <span class="name">Sam Wallace</span>
+                <span class="message">Hello! I need general info regarding your upcoming products line.</span>
+                <span class="time">1:52 PM</span>
+              </div>
+
+            </div>
+            <div class="widget-chat-message-agent">
+              <div class="agent-message">
+                <span class="name">Adam Reeds</span>
+                <span class="message">Welcome Sam! Thank you for contacting us. Please let me know how can I assist you?</span>
+                <span class="time">1:52 PM</span>
+              </div>
+              <div class="agent-img">
+                <img src="../../assets/images/agent.png" alt="" srcset="">
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+        <div class="widget-composer">
+          <span class="material-symbols-outlined emoji-btn">
+            add_reaction
+            </span>
+          <input class="widget-chat-composer" type="text" placeholder="Hello">
+          <span class="material-symbols-outlined send-btn">
+            send
+            </span>
+
         </div>
       </div>
     </div>
   </ng-container>
 
-  <ng-container *ngIf="chatEnded">
-    <!-- End chat screen -->
+  <ng-container *ngIf="chatError">
+    <!-- Error screen -->
+    <div class="widget-chat-area">
+      <div class="widget-chat">
+        <div class="widget-chat-header widget-color" onclick="chatFormAction()">
+          <h5 id="title">Let's Talk</h5>
+          <div class="widget-header-icon iconTwo">
+            <span class="material-symbols-outlined">
+              pan_zoom
+            </span>
+          </div>
+          <div class="widget-header-icon iconOne">
+            <span class="material-symbols-outlined minimize">
+              minimize
+            </span>
+          </div>
+          <!-- <div class="widget-header-icon iconOne">
+            <span class="material-symbols-outlined">
+              close
+            </span>
+          </div> -->
+        </div>
+        <div class="widget-chat-content">
+          <div class="error-icon">
+            <span class="material-symbols-outlined error-emoji">
+              sentiment_dissatisfied
+              </span>
+              <span>Sorry!</span>
+          </div>
+          <div class="error-message">
+            <p>We are experiencing some technical problem with our server. Your chat with agent / BOT has been disabled.</p>
+            <p><b>However, you can view your chat session.</b></p>
+            <p>We will get back to you as soon as issue is resolved.</p>
+          </div>
+        </div>
+        <div class="widget-composer">
+          <div class="widget-error-button">
+            <input id="formTrigger" type="submit"
+              class="widget-error-trigger call-btn" value="Call on my number">
+
+              <input id="formTrigger" type="submit"
+              class="widget-error-trigger" value="Send me transcript">
+          </div>
+        </div>
+      </div>
+    </div>
   </ng-container>
 </div>
