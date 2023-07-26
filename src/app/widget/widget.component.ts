@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { SdkService } from "../services/sdk.service";
 
 @Component({
   selector: 'app-widget',
@@ -12,11 +13,20 @@ export class WidgetComponent implements OnInit {
   isBarWidget = true;
   preChatForm = false;
 
-  // preChatFormGroup!: FormGroup;
-  constructor(private fb: FormBuilder) { }
+  constructor(
+    private fb: FormBuilder,
+    public sdk: SdkService,
+  ) { }
 
   ngOnInit(): void {
-    // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
+
+    // this.sdk.getConfigurations().subscribe(sdkConfig => {
+    //     if (sdkConfig) {
+    //       console.log('SocketUrl:', sdkConfig);
+    //     }
+    //   });
+
+      // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
     const userAuthenticated = false; // Replace with your own authentication logic
     if (userAuthenticated) {
       this.showActiveChatScreen();

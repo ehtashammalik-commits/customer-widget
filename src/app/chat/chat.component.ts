@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl } from '@angular/forms';
+import { SdkService } from "../services/sdk.service";
 
 interface Food {
   value: string;
@@ -22,7 +23,9 @@ export class ChatComponent implements OnInit {
     {value: 'pizza-1', viewValue: 'Pizza'},
     {value: 'tacos-2', viewValue: 'Tacos'},
   ];
-  constructor() { }
+  constructor(
+    public sdk: SdkService,
+  ) { }
 
   ngOnInit(): void {
     // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
@@ -36,8 +39,8 @@ export class ChatComponent implements OnInit {
   }
 
   showActiveChatScreen() {
-    this.chatActive = false;
-    this.chatError = true;
+    this.chatActive = true;
+    this.chatError = false;
   }
 
   showEndChatScreen() {
