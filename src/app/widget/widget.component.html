@@ -20,35 +20,6 @@
     </div>
   </ng-container>
 
-  <!--------------------->
-  <!--/Chat Icon HTML/ -->
-  <!--------------------->
-  <ng-container *ngIf="isIconWidget">
-    <div class="widget-dropdown widget-loading" id="dropdownTrigger">
-      <div id="myDropdown" class="widget-dropdown-content">
-        <button id="chatIconBtn" title="Live Chat"
-          class="widget-inner-trigger widget-chat-trigger widget-option-trigger widget-color"
-          (click)="showPreChatForm()">
-          <span id="chatText">Live Chat</span>
-        </button>
-      </div>
-    </div>
-  </ng-container>
-
-  <!---------------------->
-  <!-- /Chat Bar HTML/ --->
-  <!---------------------->
-  <ng-container *ngIf="isBarWidget">
-    <div class="widget-loading widget-dropdown widget-bar-view" id="dropdownTrigger">
-      <div id="myDropdown" class="widget-bar-content">
-        <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="showPreChatForm()">
-          <span id="chatText">Live Chat</span>
-        </button>
-      </div>
-    </div>
-  </ng-container>
-
   <!------------------------>
   <!-- /PreChat Form HTML /->
   <!- ------------------- -->
@@ -57,7 +28,11 @@
       <div class="widget-form">
         <div class="widget-form-header widget-color" onclick="chatFormAction()">
           <h5 id="headerHeading">Let's Talk</h5>
-          <span class="widget-header-icon"><img src="../../assets/images/remove.svg" alt="minimize"> </span>
+          <span class="widget-header-icon">
+            <span class="topbar-icon material-symbols-outlined">
+              minimize
+            </span>
+          </span>
         </div>
         <div class="widget-form-content">
           <h4>Please fill out the form below to start chatting with an agent now!</h4>
@@ -71,7 +46,6 @@
               </mat-error>
             </div>
             <div class="widget-clearfix"></div>
-
             <div class="widget-form-group">
               <label><span id="email">Email</span></label>
               <input matInput type="email" formControlName="email" class="widget-form-control" autocomplete="off"
@@ -81,7 +55,6 @@
               </mat-error>
             </div>
             <div class="clearfix"></div>
-
             <div class="widget-form-group">
               <label><span id="phone">Phone</span></label>
               <input type="text" matInput formControlName="phone" class="widget-form-control" autocomplete="off"
@@ -91,7 +64,6 @@
               </mat-error>
             </div>
             <div class="clearfix"></div>
-
             <div class="widget-form-group">
               <label><span id="channelIdentifier">Customer Channel Identifier</span><span
                   class="widget-required">*</span></label>
@@ -116,7 +88,22 @@
         </div>
       </div>
     </div>
+  </ng-container>
 
+  <!---------------------->
+  <!-- /Chat Bar HTML/ --->
+  <!---------------------->
+  <ng-container *ngIf="isIconWidget">
+    <div class="widget-loading widget-dropdown widget-bar-view" id="dropdownTrigger">
+      <div id="myDropdown" class="widget-bar-content">
+        <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
+          (click)="showPreChatForm()">
+          <span class="chat-icon material-symbols-outlined">
+            sms
+          </span>
+        </button>
+      </div>
+    </div>
   </ng-container>
 
 </div>

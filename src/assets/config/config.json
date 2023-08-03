@@ -4,7 +4,7 @@
     "BOT_FRAMEWORK_URL": "https://cim-dev.expertflow.com/bot-framework",
     "CCM_URL" : "https://cim-dev.expertflow.com/ccm",
     "TRANSCRIPT_URL": "https://cim-dev.expertflow.com/web-widget/chat-transcript",
-    "WIDGET_IDENTIFIER": "Mubeen",
+    "WIDGET_IDENTIFIER": "Web",
     "SERVICE_IDENTIFIER":"1122",
     "CONVERSATIONAL_URL" : "https://cim-dev.expertflow.com/conversation-manager/customer-topics",
     "FORM_URL" : "https://cim-dev.expertflow.com/unified-admin"

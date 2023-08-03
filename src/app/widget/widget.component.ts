@@ -8,9 +8,8 @@ import { SdkService } from "../services/sdk.service";
   styleUrls: ['./widget.component.scss']
 })
 export class WidgetComponent implements OnInit {
-  additionalPanel = true;
-  isIconWidget = false;
-  isBarWidget = true;
+  additionalPanel = false;
+  isIconWidget = true;
   preChatForm = false;
 
   constructor(
@@ -20,13 +19,7 @@ export class WidgetComponent implements OnInit {
 
   ngOnInit(): void {
 
-    // this.sdk.getConfigurations().subscribe(sdkConfig => {
-    //     if (sdkConfig) {
-    //       console.log('SocketUrl:', sdkConfig);
-    //     }
-    //   });
-
-      // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
+    // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
     const userAuthenticated = false; // Replace with your own authentication logic
     if (userAuthenticated) {
       this.showActiveChatScreen();
@@ -91,21 +84,18 @@ export class WidgetComponent implements OnInit {
 
   showWelcomePanel() {
     this.preChatForm = false;
-    this.additionalPanel = true;
-    this.isIconWidget = false;
-    this.isBarWidget = true;
+    this.additionalPanel = false;
+    this.isIconWidget = true;
   }
 
   showPreChatForm() {
     this.preChatForm = true;
     this.additionalPanel = false;
-    this.isIconWidget = false;
-    this.isBarWidget = false;
+    this.isIconWidget = true;
   }
 
   showActiveChatScreen() {
     this.additionalPanel = false;
-    this.isBarWidget = false;
     this.preChatForm = false;
   }
 
