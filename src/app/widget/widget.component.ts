@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { SdkService } from "../services/sdk.service";
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-widget',
@@ -8,9 +9,25 @@ import { SdkService } from "../services/sdk.service";
   styleUrls: ['./widget.component.scss']
 })
 export class WidgetComponent implements OnInit {
+  private widgetConfigsSubscription: Subscription = new Subscription;
+  private preChatFormSubscription: Subscription = new Subscription;
   additionalPanel = false;
   isIconWidget = true;
   preChatForm = false;
+
+  // Widget Configuration
+  title = '';
+  subtitle = '' ;
+  theme = '';
+  enableFileTransfer = false;
+  enableDownloadTranscript = false;
+  enableDynamicLink = false;
+  enableEmoji = false;
+  enableFontResize = false;
+  preChatFormId = '';
+  enableWebRtc = false;
+
+  preChatFormAttributes = {};
 
   constructor(
     private fb: FormBuilder,
@@ -18,6 +35,19 @@ export class WidgetComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+
+    this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe((configs) => {
+      this.setWidgetConfigs(configs)
+      console.log('Widget configurations:', configs);
+      if (configs.form !== '') {
+        this.sdk.renderPreChatForm(configs.form);
+      }
+    });
+
+    this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe((formData) => {
+      this.preChatFormAttributes = formData.attributes;
+      console.log('Widget configurations:', formData.attributes);
+    });
 
     // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
     const userAuthenticated = false; // Replace with your own authentication logic
@@ -74,6 +104,19 @@ export class WidgetComponent implements OnInit {
     channelIdentifier: new FormControl('', Validators.required)
   });
 
+  setWidgetConfigs(configs: any) {
+    this.title = configs.title;
+    this.subtitle = configs.subTitle;
+    this.theme = configs.theme;
+    this.enableFileTransfer = configs.enableFileTransfer;
+    this.enableDownloadTranscript = configs.enableDownloadTranscript;
+    this.enableDynamicLink = configs.enableDynamicLink;
+    this.enableEmoji = configs.enableEmoji;
+    this.enableFontResize = configs.enableFontResize;
+    this.preChatFormId = configs.form;
+    this.enableWebRtc = configs.enableWebRtc;
+  }
+
   onSubmit(): void {
     console.log(this.preChatFormGroup.value);
   }
@@ -84,7 +127,7 @@ export class WidgetComponent implements OnInit {
 
   showWelcomePanel() {
     this.preChatForm = false;
-    this.additionalPanel = false;
+    this.additionalPanel = true;
     this.isIconWidget = true;
   }
 
