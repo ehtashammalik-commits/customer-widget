@@ -26,57 +26,30 @@
   <ng-container *ngIf="preChatForm">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-color" onclick="chatFormAction()">
+        <div class="widget-form-header widget-color" (click)="showWelcomePanel()">
           <h5 id="headerHeading">{{title}}</h5>
           <span class="widget-header-icon">
-            <span class="topbar-icon material-symbols-outlined">
-              minimize
-            </span>
+            <span class="topbar-icon material-symbols-outlined">minimize</span>
           </span>
         </div>
         <div class="widget-form-content">
           <h4>Please fill out the form below to start chatting with an agent now!</h4>
           <form [formGroup]="preChatFormGroup" (ngSubmit)="onSubmit()">
-            <div class="widget-form-group">
-              <label><span id="name">Name</span><span class="widget-required"></span></label>
-              <input matInput type="text" formControlName="name" class="widget-form-control" autocomplete="off"
-                required>
-              <mat-error class="form-error">
-                {{formErrors.name}}
-              </mat-error>
-            </div>
-            <div class="widget-clearfix"></div>
-            <div class="widget-form-group">
-              <label><span id="email">Email</span></label>
-              <input matInput type="email" formControlName="email" class="widget-form-control" autocomplete="off"
-                required>
-              <mat-error class="form-error">
-                {{formErrors.email}}
-              </mat-error>
-            </div>
-            <div class="clearfix"></div>
-            <div class="widget-form-group">
-              <label><span id="phone">Phone</span></label>
-              <input type="text" matInput formControlName="phone" class="widget-form-control" autocomplete="off"
-                required>
-              <mat-error class="form-error">
-                {{formErrors.phone}}
-              </mat-error>
-            </div>
-            <div class="clearfix"></div>
-            <div class="widget-form-group">
-              <label><span id="channelIdentifier">Customer Channel Identifier</span><span
-                  class="widget-required">*</span></label>
-              <input type="text" matInput formControlName="channelIdentifier" class="widget-form-control"
-                autocomplete="off" required>
-              <mat-error class="form-error">
-                {{formErrors.channelIdentifier}}
-              </mat-error>
-            </div>
-            <div class="clearfix"></div>
+            <ng-container *ngFor="let formAttribute of formData">
+              <div class="widget-form-group">
+                <label>
+                  <span id="{{formAttribute.key}}">{{formAttribute.label}}</span>
+                  <span class="widget-required" *ngIf="formAttribute.isRequired === true">*</span>
+                </label>
+                <input matInput [type]="formAttribute.valueType" [formControlName]="formAttribute.key"
+                  class="widget-form-control" autocomplete="off" [required]="formAttribute.isRequired">
+              </div>
+              <div class="widget-clearfix"></div>
+            </ng-container>
             <div class="transript-checkbox">
-              <input class="check-box widget-form-control" type="checkbox" id="transcript" formControlName="transcript">
-              <label><span id="transcript"> I would like to receive the transcript of this session at the
+              <input class="check-box widget-form-control" type="checkbox" id="enabled_transcript"
+                formControlName="enabled_transcript">
+              <label><span id="enabled_transcript"> I would like to receive the transcript of this session at the
                   end.</span></label>
             </div>
             <div class="clearfix"></div>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ConfigService } from "../services/config.service";
 import { Observable, Subject } from 'rxjs';
 
-declare var widgetConfigs: any, getPreChatForm: any;
+declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest:any;
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +15,9 @@ export class SdkService {
 
   private preChatFormSubject: Subject<any> = new Subject<any>();
   public renderPreChatForm$: Observable<any> = this.preChatFormSubject.asObservable();
+
+  private establishConnectionSubject: Subject<any> = new Subject<any>();
+  public connectionResponse$: Observable<any> = this.establishConnectionSubject.asObservable();
 
   constructor(private _ConfigService: ConfigService) {
     this.ConfigData = this._ConfigService.appConfig;
@@ -47,10 +50,21 @@ export class SdkService {
     });
   }
 
-  renderPreChatForm(form_id:any) {
-    getPreChatForm(this.ConfigData.FORM_URL, form_id, (res:any) =>{
+  renderPreChatForm(form_id: any) {
+    getPreChatForm(this.ConfigData.FORM_URL, form_id, (res: any) => {
       this.preChatFormSubject.next(res);
     });
+  }
+
+  makeConnection(serviceIdentifier: any, channelCustomerIdentifier: any) {
+    establishConnection(this.ConfigData.SOCKET_URL, serviceIdentifier, channelCustomerIdentifier, (res: any) => {
+      this.establishConnectionSubject.next(res);
+    });
+  }
+
+  sendChatRequest(payload: any) {
+    console.log('Chat Payload:', payload);
+    chatRequest(payload);
   }
 
 }

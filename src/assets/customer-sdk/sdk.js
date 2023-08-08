@@ -85,6 +85,18 @@ function getPreChatForm(formUrl, formId, callback) {
     });
 }
 /**
+ *
+ * @param {*} formUrl
+ * @param {*} callback
+ */
+function formValidation(formUrl, callback) {
+  fetch(`${formUrl}/formValidation`)
+    .then(response => response.json())
+    .then((data) => {
+      callback(data);
+    });
+}
+/**
  * Function to Establish Connection
  * Two Parameters
  * 1- Customer Data
@@ -93,7 +105,7 @@ function getPreChatForm(formUrl, formId, callback) {
  * @param {*} channelCustomerIdentifier
  * @param {*} callback
  */
-function establishConnection(serviceIdentifier, channelCustomerIdentifier, callback) {
+function establishConnection(socket_url, serviceIdentifier, channelCustomerIdentifier, callback) {
   try {
     if (this.socket === undefined || !this.socket.connected) {
       if (socket_url !== '') {
@@ -183,7 +195,7 @@ function chatRequest(data) {
         serviceIdentifier: data.data.serviceIdentifier,
         additionalAttributes: additionalAttributesData
       };
-      webhookNotifications(data.data.formData);
+      // webhookNotifications(data.data.formData);
       this.socket.emit('CHAT_REQUESTED', obj);
       console.log(`SEND CHAT_REQUESTED DATA:`, obj);
     }

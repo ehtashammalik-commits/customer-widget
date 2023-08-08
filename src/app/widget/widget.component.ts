@@ -1,7 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { SdkService } from "../services/sdk.service";
+import { ConfigService } from "../services/config.service";
 import { Subscription } from 'rxjs';
+
+interface FormAttribute {
+  _id: string;
+  attributeType: string;
+  helpText: string;
+  isRequired: boolean;
+  key: string;
+  label: string;
+  valueType: string;
+}
 
 @Component({
   selector: 'app-widget',
@@ -11,13 +22,18 @@ import { Subscription } from 'rxjs';
 export class WidgetComponent implements OnInit {
   private widgetConfigsSubscription: Subscription = new Subscription;
   private preChatFormSubscription: Subscription = new Subscription;
+  private establishConnectionSubject: Subscription = new Subscription;
   additionalPanel = false;
   isIconWidget = true;
   preChatForm = false;
 
+  customerData: any;
+  chatPayLoad: any;
+  cimMessage: [] = [];
+
   // Widget Configuration
   title = '';
-  subtitle = '' ;
+  subtitle = '';
   theme = '';
   enableFileTransfer = false;
   enableDownloadTranscript = false;
@@ -27,11 +43,12 @@ export class WidgetComponent implements OnInit {
   preChatFormId = '';
   enableWebRtc = false;
 
-  preChatFormAttributes = {};
+  formData: FormAttribute[] = [];
 
   constructor(
     private fb: FormBuilder,
     public sdk: SdkService,
+    public __appConfig: ConfigService,
   ) { }
 
   ngOnInit(): void {
@@ -45,8 +62,13 @@ export class WidgetComponent implements OnInit {
     });
 
     this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe((formData) => {
-      this.preChatFormAttributes = formData.attributes;
+      this.formData = formData.attributes;
       console.log('Widget configurations:', formData.attributes);
+    });
+
+    this.establishConnectionSubject = this.sdk.connectionResponse$.subscribe((response) => {
+      console.log('Connection Response:', response);
+      this.eventListener(response);
     });
 
     // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
@@ -61,7 +83,8 @@ export class WidgetComponent implements OnInit {
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern(/^[\d-+\s()]+$/)]],
-      channelIdentifier: ['', Validators.required]
+      customer_channel_identifier: ['', Validators.required],
+      enabled_transcript: [false]
     });
   }
 
@@ -83,25 +106,19 @@ export class WidgetComponent implements OnInit {
       maxlength: "Max 40 characters allowed",
       pattern: 'Allowed special characters "[!@#$%^&*()-_=+~`"]+"',
     },
-    channelIdentifier: {
+    customer_channel_identifier: {
       required: "This field is required",
       maxlength: "Max 256 characters allowed",
       pattern: 'Allowed special characters "[!@#$%^&*()-_=+~`"]+"',
     },
   };
 
-  formErrors = {
-    name: "",
-    email: "",
-    phone: "",
-    channelIdentifier: ""
-  };
-
   preChatFormGroup: FormGroup = new FormGroup({
     name: new FormControl('', Validators.required),
     email: new FormControl('', [Validators.required, Validators.email]),
     phone: new FormControl('', Validators.required),
-    channelIdentifier: new FormControl('', Validators.required)
+    customer_channel_identifier: new FormControl('', Validators.required),
+    enabled_transcript: new FormControl(false, Validators.required)
   });
 
   setWidgetConfigs(configs: any) {
@@ -117,8 +134,94 @@ export class WidgetComponent implements OnInit {
     this.enableWebRtc = configs.enableWebRtc;
   }
 
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
+  }
+
   onSubmit(): void {
-    console.log(this.preChatFormGroup.value);
+    try {
+      let preChatData = this.preChatFormGroup.value;
+      if (preChatData.customer_channel_identifier && this.__appConfig.appConfig.SERVICE_IDENTIFIER) {
+        let eventPayload = this.getEventPayload(preChatData);
+        console.log('Event Payload: ==>', eventPayload);
+        this.setUserData(eventPayload, 'startChat');
+      }
+      // Proceed with form submission
+      console.log(this.preChatFormGroup.value);
+    } catch (error) {
+      alert("Error while submitting the form");
+    }
+  }
+
+  setUserData(data: any, eventType: any) {
+    this.customerData = data;
+    if (
+      this.customerData.channelCustomerIdentifier == '' ||
+      this.customerData.serviceIdentifier == '' ||
+      this.customerData.browserDeviceInfo.deviceType == ''
+    ) {
+      let Response = {
+        type: 'ERROR',
+        data: {
+          code: 400,
+          description: 'BAD REQUEST',
+          message: 'Mandatory attributes are missing'
+        }
+      }
+      console.log(Response);
+
+    } else if (eventType == 'startChat') {
+      let user = { data: this.customerData }
+      localStorage.setItem('user', JSON.stringify(user));
+      if (localStorage.getItem('user')) {
+        this.sdk.makeConnection(this.customerData.serviceIdentifier, this.customerData.channelCustomerIdentifier);
+      }
+    }
+  }
+
+  getEventPayload(preChatFormData: any) {
+    return {
+      serviceIdentifier: this.__appConfig.appConfig.SERVICE_IDENTIFIER,
+      channelCustomerIdentifier: preChatFormData.customer_channel_identifier,
+      browserDeviceInfo: {
+        browserId: '123456',
+        browserIdExpiryTime: '9999',
+        browserName: 'chrome',
+        deviceType: 'desktop'
+      },
+      queue: '',
+      locale: {
+        timezone: 'asia/karachi',
+        language: 'english',
+        country: 'pakistan'
+      },
+      formData: this.getFormDataByPreChatForm(preChatFormData),
+    }
+  }
+
+  getFormDataByPreChatForm(preChatFormData: any[]): any {
+    // const modifiedFormData = preChatFormData.map(formData => {
+    //   const modifiedData = {
+    //     key: formData.name,
+    //     type: 'string',
+    //     // Copy other properties from the original data if needed
+    //   };
+    //   return modifiedData;
+    // });
+
+    return {
+      id: Math.random(),
+      formId: this.preChatFormId,
+      filledBy: 'web-widget',
+      attributes: preChatFormData,
+      createdOn: new Date(),
+    };
   }
 
   closeWrapper() {
@@ -144,6 +247,69 @@ export class WidgetComponent implements OnInit {
 
   showEndChatScreen() {
     this.preChatForm = false;
+  }
+
+  changeScreen(screen: any) {
+    console.log('Change Screen:', screen);
+    switch (screen) {
+      case 'chat':
+
+        break;
+      case 'form':
+
+        break;
+      case 'error':
+
+        break;
+    }
+  }
+
+  eventListener(event: any) {
+    try {
+      if (event.id !== undefined || event.id !== '' || event.id !== null) {
+        switch (event.type) {
+          case 'SOCKET_CONNECTED':
+            this.chatPayLoad = { type: "CHAT_REQUESTED", data: this.customerData };
+            this.sdk.sendChatRequest(this.chatPayLoad);
+            // this.changeScreen('chat');
+            console.log('event response:', this.chatPayLoad);
+            break;
+          case 'CHANNEL_SESSION_STARTED':
+            console.log('event response:', event.data);
+
+            break;
+          case 'MESSAGE_RECEIVED':
+            console.log('event response:', event.data);
+            break;
+          case 'SOCKET_DISCONNECTED':
+            console.log('event response:', event.data);
+            break;
+          case 'CONNECT_ERROR':
+            console.log('event response:', event.data);
+            break;
+          case 'CHAT_ENDED':
+            console.log('event response:', event.data);
+            break;
+          case 'ERRORS':
+            if (event.data.task.toUpperCase() == 'CHAT_REQUESTED') {
+              if (event.data.code == 408) {
+                alert('Unable to connect with end server');
+              } else if (event.data.code == 400) {
+                alert('data is invalid');
+              } else if (event.data.code == 500) {
+                alert('Internal error with end server');
+              } else {
+                alert('Unable to send request');
+              }
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    } catch (error) {
+
+    }
   }
 
 }

@@ -5,7 +5,7 @@
     "CCM_URL" : "https://cim-dev.expertflow.com/ccm",
     "TRANSCRIPT_URL": "https://cim-dev.expertflow.com/web-widget/chat-transcript",
     "WIDGET_IDENTIFIER": "Web",
-    "SERVICE_IDENTIFIER":"1122",
+    "SERVICE_IDENTIFIER":"5155",
     "CONVERSATIONAL_URL" : "https://cim-dev.expertflow.com/conversation-manager/customer-topics",
     "FORM_URL" : "https://cim-dev.expertflow.com/unified-admin"
 }
