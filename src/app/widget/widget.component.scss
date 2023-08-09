@@ -1,12 +1,50 @@
+/*/-----------------------/*/
+/*/ Variables for Colors /*/
+/*/---------------------/*/
+
+$widget-color: #1A50A3;
+$white-color: rgb(255, 255, 255);
+$dark-color: #010101;
+$danger-color: #FF0000;
+$font-color : rgba(14, 50, 105, 0.3);
+$medium-font: 13px;
+$text-color: #464646;
+
+/*/--------------------------/*/
+/*/ Style for Widget Scroll /*/
+/*/------------------------/*/
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey;
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $font-color;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--main-color);
+}
+
+/*/---------------/*/
+/*/ Widget Color /*/
+/*/-------------/*/
 .widget-color {
-  background-color: #1A50A3;
-  color: rgb(255, 255, 255);
+  background-color: var(--main-color);
+  color: $white-color;
 }
 
 .widget-color:hover,
 .widget-color:focus {
-  background-color: #1A50A3;
-  color: rgb(255, 255, 255);
+  background-color: var(--main-color);
+  color: $white-color;
 }
 
 .top-wrapper {
@@ -17,9 +55,9 @@
   height: 663px;
 }
 
-/**
-* Welcome Wrapper Styling
-**/
+/*/----------------------------/*/
+/*/ Style For Welcome Wrapper /*/
+/*/--------------------------/*/
 .widget-wrapper {
   background: #eff2f7;
   border-radius: 10px;
@@ -36,8 +74,8 @@
 }
 
 .widget-wrapper-header {
-  background: #1A50A3;
-  color: #fff;
+  background: var(--main-color);
+  color: $white-color;
   text-align: center;
   padding: 10px;
   border-radius: 10px;
@@ -55,7 +93,7 @@
   margin: 0;
   font-family: "Roboto";
   font-style: normal;
-  color: #ffffff;
+  color: $white-color;
 }
 
 .widget-wrapper-header strong {
@@ -66,13 +104,13 @@
   font-family: "Roboto";
   font-weight: 500;
   font-style: normal;
-  color: #ffffff;
+  color: $white-color;
 }
 
 .widget-wrapper-content {
   padding: 10px;
   text-align: center;
-  background: white;
+  background: $white-color;
   position: absolute;
   top: 70px;
   width: 96%;
@@ -110,8 +148,7 @@ button.close-widget-wrapper {
   right: 5px;
   top: 15px;
   opacity: .8;
-  color: white;
-  // transform: rotate(45deg);
+  color: $white-color;
   display: block;
   transition: all .3s;
   cursor: pointer;
@@ -131,13 +168,6 @@ button.close-widget-wrapper {
   display: block;
 }
 
-// .widget-dropdown.widget-bar-view {
-//   // right: 0;
-//   // width: calc(100% - 10px);
-//   // bottom: 1px;
-//   // max-width: 325px;
-// }
-
 .widget-bar-view button#chatIconBtn {
   width: 60px;
   border-radius: 50%;
@@ -151,14 +181,13 @@ button.close-widget-wrapper {
   line-height: 0;
   font-size: 12px;
   font-weight: 500;
-  color: #fff;
+  color: $white-color;
 }
 
 .widget-dropdown {
   position: absolute;
   right: 15px;
   bottom: 15px;
-  /* width: 60px; */
   z-index: 10000;
 }
 
@@ -204,17 +233,10 @@ div#myDropdown.widget-show {
 }
 
 .widget-bar-content {
-  // position: absolute;
-  // z-index: 1;
-  // top: -35px;
   display: block;
-  // width: 85%;
-  // min-width: 300px;
-  // right: 10px;
 }
 
 .widget-chat-trigger {
-  // background-image: url("../../assets/images/chat.svg");
   background-repeat: no-repeat;
 }
 
@@ -222,7 +244,7 @@ div#myDropdown.widget-show {
   position: relative;
   top: -10px;
   right: 2px;
-  color: rgba(14, 50, 105, 0.3);
+  color: $font-color;
 }
 
 .chat-icon {
@@ -258,7 +280,7 @@ div#myDropdown.widget-show {
 }
 
 .widget-form-area.widget-mobile-version .widget-form {
-  background: #ffffff;
+  background: $white-color;
   height: calc(100% - 20px);
   width: 100%;
   border-radius: 5px 5px 0 0;
@@ -280,7 +302,7 @@ div#myDropdown.widget-show {
 }
 
 .widget-form {
-  background: #ffffff;
+  background: $white-color;
   height: 98%;
   width: 97%;
   border-radius: 10px;
@@ -310,7 +332,7 @@ div#myDropdown.widget-show {
   font-weight: bold;
   font-style: normal;
   text-align: left;
-  color: #ffffff;
+  color: $white-color;
 }
 
 .widget-form-header .widget-header-icon {
@@ -319,11 +341,11 @@ div#myDropdown.widget-show {
   right: 10px;
   width: 21px;
   height: 21px;
-  border-color: rgba(14, 50, 105, 0.3);
+  border-color: $font-color;
   border-width: 1px;
   border-style: solid;
   border-radius: 7px;
-  background: #1a50a3;
+  background: var(--main-color);
 }
 
 .widget-form-header .widget-header-icon img {
@@ -338,14 +360,13 @@ div#myDropdown.widget-show {
 
 .widget-form-content {
   padding: 10px;
-  background-color: white;
+  background-color: $white-color;
   border-radius: 10px;
   position: relative;
   top: -15px;
 }
 
 .widget-form-content h4 {
-  /* Please fill out the form below to start chatting with an agent now!  */
   font-family: "Roboto";
   font-size: 13px;
   font-weight: normal;
@@ -458,66 +479,8 @@ div#myDropdown.widget-show {
 }
 
 /*/---------------------/*/
-/*/ Style for form area /*/
-/*/---------------------/*/
-
-/*/---------------------/*/
 /*/ Style for chat area /*/
 /*/---------------------/*/
-
-// .widget-chat-area {
-//   position: absolute;
-//   right: 10px;
-//   bottom: 0;
-//   display: block;
-//   width: 335px;
-//   height: 559px;
-//   border-radius: 10px;
-//   filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.4));
-//   background: #eff2f7;
-// }
-
-/*Mobile and Application Version*/
-// .widget-chat-area.widget-mobile-version {
-//   display: none;
-//   width: 100%;
-//   height: 100%;
-// }
-
-// .widget-chat-area.widget-mobile-version .widget-chat {
-//   background: #ffffff;
-//   height: calc(100% - 20px);
-//   width: 100%;
-//   border-radius: 5px 5px 0 0;
-// }
-
-// .widget-chat-area.widget-mobile-version .widget-header-icon {
-//   display: none !important;
-// }
-
-// /* for Arabic language rtl direction */
-// .widget-chat-area.lang-arabic {
-//   text-align: right;
-//   direction: rtl;
-// }
-
-// .widget-chat-area.lang-arabic #phone {
-//   text-align: left;
-//   direction: ltr;
-// }
-
-// // Widget Header
-// .widget-chat {
-//   background: #ffffff;
-//   height: 98%;
-//   width: 97%;
-//   border-radius: 10px;
-//   position: relative;
-//   top: 5px;
-//   left: 5px;
-//   right: 5px;
-//   bottom: 5px;
-// }
 
 .widget-chat-header {
   padding: 0 5px;
@@ -542,10 +505,10 @@ div#myDropdown.widget-show {
   top: 5px;
   width: 25px;
   height: 25px;
-  border: 1px solid rgba(14, 50, 105, 0.3);
+  border: 1px solid $font-color;
   border-radius: 7px;
-  color: white;
-  background: #1a50a3;
+  color: $font-color;
+  background: var(--main-color);
   font-size: 20px !important;
   text-align: center;
 }
@@ -568,33 +531,46 @@ div#myDropdown.widget-show {
 }
 
 .widget-chat-content {
-  // padding: 10px;
-  background-color: white;
+  background-color: $white-color;
   border-radius: 10px;
   position: relative;
-  top: -15px;
-  height: 82%;
+  top: 20px;
+  height: 78%;
+  overflow-y: scroll;
 }
 
 .widget-chat-navbar {
-  /* padding: 0 5px; */
-  height: 40px;
   border-radius: 10px 10px 0px 0px;
   border-bottom: 1px solid #eff2f7;
   cursor: pointer;
+  position: fixed;
+  right: 5px;
+  background-color: white;
+  z-index: 999999;
+  top: 40px;
+  height: 36px;
+  width: inherit;
 }
 
 .widget-navbar-icon {
   position: absolute;
   top: 5px;
-  width: 32px;
-  height: 30px;
-  border: 1px solid rgba(14, 50, 105, 0.3);
+  width: 24px;
+  height: 24px;
+  border: 1px solid $font-color;
   border-radius: 7px;
-  color: #1a50a3;
+  color: var(--main-color);
   background: white;
-  font-size: 28px;
+  font-size: 18px;
   text-align: center;
+  padding-top: 2px;
+}
+
+.widget-navbar-divider {
+  position: absolute;
+  top: 6px;
+  right: 70px;
+  color: var(--main-color);
 }
 
 .btnOne {
@@ -602,19 +578,19 @@ div#myDropdown.widget-show {
 }
 
 .btnTwo {
-  right: 50px;
+  right: 40px;
 }
 
 .btnThree {
-  right: 90px;
+  right: 80px;
 }
 
 .btnFour {
-  right: 130px;
+  right: 110px;
 }
 
 .btnFive {
-  right: 170px;
+  right: 140px;
 }
 
 .widget-navbar-icon img {
@@ -641,7 +617,7 @@ div#myDropdown.widget-show {
   text-align: center;
   border: 1px solid #eff2f7;
   border-radius: 25px;
-  background: #ffffff;
+  background: $white-color;
   left: 28%;
   margin-bottom: 10px;
 }
@@ -662,87 +638,21 @@ div#myDropdown.widget-show {
   height: auto;
 }
 
-.widget-chat-message-agent {
-  display: flex;
-  float: right;
-  width: 250px;
-  height: auto;
-  margin-top: 25px;
-  margin-right: 5px;
-
-  .agent-message {
-    display: grid;
-    width: 215px;
-    border: 1px solid;
-    border-color: #EFF2F7;
-    background: #EFF2F7;
-    border-radius: 5px 0px 10px 5px;
-    padding: 5px;
-
-    .name {
-      font-family: "Roboto";
-      font-size: 9px;
-      font-weight: 500;
-      font-style: normal;
-      text-align: left;
-      color: #3e3e3e;
-    }
-
-    .message {
-      font-family: "Roboto";
-      font-size: 12px;
-      font-weight: normal;
-      line-height: 15px;
-      font-style: normal;
-      text-align: left;
-      color: #000000;
-      width: 200px;
-    }
-  }
-
-  .agent-img {
-    width: 30px;
-    height: auto;
-    border: 1px solid #ffffff;
-    border-radius: 10px 0px 0px 0px;
-    position: relative;
-    right: 5px;
-    background: white;
-    padding: 0px 5px;
-  }
-
-  .time {
-    position: relative;
-    width: 35px;
-    height: 5px;
-    font-family: "Roboto";
-    font-size: 9px;
-    font-weight: normal;
-    font-style: normal;
-    /* text-align: left; */
-    color: #777777;
-    top: 7px;
-    left: -5px;
-  }
-
-}
-
 .widget-chat-message-customer {
   display: flex;
-  float: left;
-  width: 250px;
+  float: right;
+  width: 200px;
   height: auto;
   margin-top: 25px;
-  margin-left: 5px;
+  margin-right: 20px;
 
   .customer-message {
     display: grid;
-    width: 215px;
     border: 1px solid;
-    border-color: #F2F2F2;
-    background: #F2F2F2;
-    border-radius: 0px 5px 5px 10px;
-    padding: 5px 15px;
+    border-color: #EFF2F7;
+    background: #EFF2F7;
+    border-radius: 5px;
+    padding: 0px 5px;
 
     .name {
       font-family: "Roboto";
@@ -766,14 +676,78 @@ div#myDropdown.widget-show {
   }
 
   .customer-img {
+    width: 30px;
     height: auto;
-    border: 1px solid white;
+    border: 1px solid $white-color;
+    border-radius: 10px 0px 0px 0px;
+    position: relative;
+    right: 5px;
+    background: $white-color;
+    padding: 0px 5px;
+  }
+
+  .time {
+    position: relative;
+    width: 35px;
+    height: 5px;
+    font-family: "Roboto";
+    font-size: 9px;
+    font-weight: normal;
+    font-style: normal;
+    color: #777777;
+    top: 2px;
+    left: 0px;
+  }
+
+}
+
+.widget-chat-message-agent {
+  display: flex;
+  float: left;
+  width: 250px;
+  height: auto;
+  margin-top: 25px;
+  margin-left: 5px;
+
+  .agent-message {
+    display: grid;
+    width: 215px;
+    border: 1px solid;
+    border-color: #F2F2F2;
+    background: #F2F2F2;
+    border-radius: 0px 5px 5px 10px;
+    padding: 0px 10px;
+
+    .name {
+      font-family: "Roboto";
+      font-size: 9px;
+      font-weight: 500;
+      font-style: normal;
+      text-align: left;
+      color: #3e3e3e;
+    }
+
+    .message {
+      font-family: "Roboto";
+      font-size: 12px;
+      font-weight: normal;
+      line-height: 15px;
+      font-style: normal;
+      text-align: left;
+      color: #000000;
+      width: 200px;
+    }
+  }
+
+  .agent-img {
+    height: auto;
+    border: 1px solid $white-color;
     border-radius: 0px 10px 0px 0px;
-    background: white;
+    background: $white-color;
     padding: 0px;
     position: relative;
     left: 5px;
-    width: 32px;
+    width: 35px;
 
     img {
       margin-left: -8px;
@@ -790,19 +764,28 @@ div#myDropdown.widget-show {
     font-weight: normal;
     font-style: normal;
     color: #777777;
-    top: 7px;
-    left: -8px;
+    top: 2px;
+    left: 0px;
   }
 
 }
 
-/*/---------------------/*/
-/*/ Style for chat area /*/
-/*/---------------------/*/
+/*/
+  ---------------------
+  /*/
+/*/
+  Style for chat area
+  /*/
+/*/
+  ---------------------
+  /*/
 
 .widget-composer {
+
   display: flex;
-  position: relative;
+  position: fixed;
+  bottom: 15px;
+  width: inherit;
 
   .emoji-btn {
     position: absolute;
@@ -895,7 +878,7 @@ div#myDropdown.widget-show {
     -webkit-appearance: none;
     -moz-appearance: none;
     background: #eff2f7;
-    color: #1A50A3;
+    color: var(--main-color);
   }
 
   .call-btn {

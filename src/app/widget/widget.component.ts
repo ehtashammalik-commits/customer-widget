@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ElementRef } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { SdkService } from "../services/sdk.service";
 import { ConfigService } from "../services/config.service";
@@ -19,7 +19,7 @@ interface FormAttribute {
   templateUrl: './widget.component.html',
   styleUrls: ['./widget.component.scss']
 })
-export class WidgetComponent implements OnInit {
+export class WidgetComponent implements OnInit, AfterViewInit {
   private widgetConfigsSubscription: Subscription = new Subscription;
   private preChatFormSubscription: Subscription = new Subscription;
   private establishConnectionSubject: Subscription = new Subscription;
@@ -51,7 +51,13 @@ export class WidgetComponent implements OnInit {
     private fb: FormBuilder,
     public sdk: SdkService,
     public __appConfig: ConfigService,
+    private el: ElementRef,
   ) { }
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      (this.el.nativeElement as HTMLElement).style.setProperty("--main-color", this.theme);
+    }, 1000);
+  }
 
   ngOnInit(): void {
 
@@ -236,8 +242,8 @@ export class WidgetComponent implements OnInit {
     this.isIconWidget = true;
   }
 
-  showPreChatForm() {
-    this.preChatForm = true;
+  showWidget() {
+    this.preChatForm = false;
     this.additionalPanel = false;
     this.isIconWidget = true;
     this.chatActive = true;
