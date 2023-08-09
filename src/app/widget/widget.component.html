@@ -63,8 +63,110 @@
     </div>
   </ng-container>
 
+  <!------------------------>
+  <!-- /Active Chat HTML/ -->
+  <!------------------------>
+
+  <ng-container *ngIf="chatActive">
+    <!-- Active chat screen -->
+    <div class="widget-form-area">
+      <div class="widget-form">
+        <div class="widget-chat-header widget-color" (click)="showWelcomePanel()">
+          <h5 id="title">{{title}}</h5>
+          <div class="widget-header-icon iconThree">
+            <span class="material-symbols-outlined">
+              pan_zoom
+            </span>
+          </div>
+          <div class="widget-header-icon iconTwo">
+            <span class="material-symbols-outlined minimize">
+              minimize
+            </span>
+          </div>
+          <div class="widget-header-icon iconOne">
+            <span class="material-symbols-outlined">
+              close
+            </span>
+          </div>
+        </div>
+        <div class="widget-chat-content">
+          <div class="widget-chat-navbar">
+            <span class="widget-navbar-icon btnOne material-symbols-outlined">
+              more_vert
+            </span>
+            <span class="material-symbols-outlined btnTwo widget-navbar-icon">
+              text_fields
+            </span>
+            <span class="widget-navbar-icon btnThree material-symbols-outlined">
+              videocam
+            </span>
+            <span class="widget-navbar-icon btnFour material-symbols-outlined">
+              call
+            </span>
+            <span class="widget-navbar-icon btnFive material-symbols-outlined">
+              forum
+            </span>
+          </div>
+          <div class="widget-chat-alert">
+            <span>Please wait we are finding an agent for you</span>
+          </div>
+          <div class="widget-chat-notification">
+            <span>Adam Reeds joined the chat</span>
+          </div>
+          <div class="widget-chat-messages">
+            <div class="widget-chat-message-agent">
+              <div class="agent-message">
+                <span class="name">Adam Reeds</span>
+                <span class="message">Welcome Sam! Thank you for contacting us. Please let me know how can I assist
+                  you?</span>
+                <span class="time">1:52 PM</span>
+              </div>
+              <div class="agent-img">
+                <img src="../../assets/images/agent.png" alt="" srcset="">
+              </div>
+
+            </div>
+            <div class="widget-chat-message-customer">
+              <div class="customer-img">
+                <img src="../../assets/images/user.png" alt="" srcset="">
+              </div>
+              <div class="customer-message">
+                <span class="name">Sam Wallace</span>
+                <span class="message">Hello! I need general info regarding your upcoming products line.</span>
+                <span class="time">1:52 PM</span>
+              </div>
+
+            </div>
+            <div class="widget-chat-message-agent">
+              <div class="agent-message">
+                <span class="name">Adam Reeds</span>
+                <span class="message">Welcome Sam! Thank you for contacting us. Please let me know how can I assist
+                  you?</span>
+                <span class="time">1:52 PM</span>
+              </div>
+              <div class="agent-img">
+                <img src="../../assets/images/agent.png" alt="" srcset="">
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <div class="widget-composer">
+          <span class="material-symbols-outlined emoji-btn">
+            add_reaction
+          </span>
+          <input class="widget-chat-composer" type="text" placeholder="Hello">
+          <span class="material-symbols-outlined send-btn">
+            send
+          </span>
+
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
   <!---------------------->
-  <!-- /Chat Bar HTML/ --->
+  <!-- /Chat Icon HTML/ -->
   <!---------------------->
   <ng-container *ngIf="isIconWidget">
     <div class="widget-loading widget-dropdown widget-bar-view" id="dropdownTrigger">

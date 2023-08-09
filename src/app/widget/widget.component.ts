@@ -26,6 +26,8 @@ export class WidgetComponent implements OnInit {
   additionalPanel = false;
   isIconWidget = true;
   preChatForm = false;
+  chatActive = false;
+  chatError = false;
 
   customerData: any;
   chatPayLoad: any;
@@ -238,15 +240,21 @@ export class WidgetComponent implements OnInit {
     this.preChatForm = true;
     this.additionalPanel = false;
     this.isIconWidget = true;
+    this.chatActive = true;
+    this.chatError = false;
   }
 
   showActiveChatScreen() {
     this.additionalPanel = false;
     this.preChatForm = false;
+    this.chatActive = true;
+    this.chatError = false;
   }
 
   showEndChatScreen() {
     this.preChatForm = false;
+    this.chatActive = false;
+    this.chatError = true;
   }
 
   changeScreen(screen: any) {
@@ -272,6 +280,7 @@ export class WidgetComponent implements OnInit {
             this.chatPayLoad = { type: "CHAT_REQUESTED", data: this.customerData };
             this.sdk.sendChatRequest(this.chatPayLoad);
             // this.changeScreen('chat');
+            this.showActiveChatScreen();
             console.log('event response:', this.chatPayLoad);
             break;
           case 'CHANNEL_SESSION_STARTED':
