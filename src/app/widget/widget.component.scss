@@ -456,7 +456,7 @@ div#myDropdown.widget-show {
 
 .widget-form-button {
   position: fixed;
-  bottom: 10px;
+  bottom: 20px;
   width: 100%;
   left: 0px;
 }
@@ -609,17 +609,26 @@ div#myDropdown.widget-show {
   color: #8e8e8e;
 }
 
-.widget-chat-notification {
+.widget-chat-notification-area {
   position: relative;
-  top: 15px;
+  width: auto;
+  height: auto;
+}
+
+.widget-chat-notification {
   width: 150px;
-  height: 25px;
   text-align: center;
   border: 1px solid #eff2f7;
   border-radius: 25px;
   background: $white-color;
-  left: 28%;
   margin-bottom: 10px;
+  display: flex;
+  height: auto;
+  justify-content: center;
+  position: relative;
+  top: 20px;
+  left: 28%;
+
 }
 
 .widget-chat-notification span {
@@ -636,12 +645,14 @@ div#myDropdown.widget-show {
   position: relative;
   width: auto;
   height: auto;
+  display: grid;
 }
 
 .widget-chat-message-customer {
   display: flex;
   float: right;
-  width: 200px;
+  width: auto;
+  max-width: 250px;
   height: auto;
   margin-top: 25px;
   margin-right: 20px;
@@ -653,6 +664,9 @@ div#myDropdown.widget-show {
     background: #EFF2F7;
     border-radius: 5px;
     padding: 0px 5px;
+    width: auto;
+    max-width: 210px;
+    min-width: 85px;
 
     .name {
       font-family: "Roboto";
@@ -671,7 +685,8 @@ div#myDropdown.widget-show {
       font-style: normal;
       text-align: left;
       color: #000000;
-      width: 200px;
+      width: auto;
+      max-width: 190px;
     }
   }
 
@@ -704,14 +719,17 @@ div#myDropdown.widget-show {
 .widget-chat-message-agent {
   display: flex;
   float: left;
-  width: 250px;
+  width: auto;
+  max-width: 250px;
   height: auto;
   margin-top: 25px;
   margin-left: 5px;
 
   .agent-message {
     display: grid;
-    width: 215px;
+    width: auto;
+    max-width: 210px;
+    min-width: 85px;
     border: 1px solid;
     border-color: #F2F2F2;
     background: #F2F2F2;
@@ -735,7 +753,8 @@ div#myDropdown.widget-show {
       font-style: normal;
       text-align: left;
       color: #000000;
-      width: 200px;
+      width: auto;
+      max-width: 190px;
     }
   }
 
@@ -751,6 +770,24 @@ div#myDropdown.widget-show {
 
     img {
       margin-left: -8px;
+    }
+  }
+
+  .bot-img {
+    height: auto;
+    border: 1px solid $white-color;
+    border-radius: 0px 10px 0px 0px;
+    background: $white-color;
+    padding: 0px;
+    position: relative;
+    left: 5px;
+    width: 35px;
+
+    img {
+      margin-left: -5px;
+      margin-top: 0px;
+      width: 30px;
+      height: 30px;
     }
   }
 

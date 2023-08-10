@@ -31,15 +31,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   customerData: any;
   chatPayLoad: any;
-  cimMessage: [] = [];
+  public cimMessage: any[] = [];
 
+  conversationId = '';
+  isChatActive = false;
   // Widget Configuration
   title = '';
   subtitle = '';
   theme = '';
   enableFileTransfer = false;
   enableDownloadTranscript = false;
-  enableDynamicLink = false;
+  enableDynamicLink = true;
   enableEmoji = false;
   enableFontResize = false;
   preChatFormId = '';
@@ -82,9 +84,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
     const userAuthenticated = false; // Replace with your own authentication logic
     if (userAuthenticated) {
-      this.showActiveChatScreen();
+      this.changeScreen('chat');
     } else {
-      this.showWelcomePanel();
+      this.changeScreen('widget');
     }
 
     this.preChatFormGroup = this.fb.group({
@@ -214,15 +216,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   getFormDataByPreChatForm(preChatFormData: any[]): any {
-    // const modifiedFormData = preChatFormData.map(formData => {
-    //   const modifiedData = {
-    //     key: formData.name,
-    //     type: 'string',
-    //     // Copy other properties from the original data if needed
-    //   };
-    //   return modifiedData;
-    // });
-
     return {
       id: Math.random(),
       formId: this.preChatFormId,
@@ -236,44 +229,41 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log("wrapper closed");
   }
 
-  showWelcomePanel() {
-    this.preChatForm = false;
-    this.additionalPanel = true;
-    this.isIconWidget = true;
-  }
-
-  showWidget() {
-    this.preChatForm = false;
-    this.additionalPanel = false;
-    this.isIconWidget = true;
-    this.chatActive = true;
-    this.chatError = false;
-  }
-
-  showActiveChatScreen() {
-    this.additionalPanel = false;
-    this.preChatForm = false;
-    this.chatActive = true;
-    this.chatError = false;
-  }
-
-  showEndChatScreen() {
-    this.preChatForm = false;
-    this.chatActive = false;
-    this.chatError = true;
-  }
-
   changeScreen(screen: any) {
     console.log('Change Screen:', screen);
     switch (screen) {
+      case 'widget':
+        this.additionalPanel = true;
+        this.preChatForm = false;
+        this.chatActive = false;
+        this.isIconWidget = true;
+        this.chatError = false;
+        break;
       case 'chat':
-
+        this.additionalPanel = false;
+        this.preChatForm = false;
+        this.chatActive = true;
+        this.isIconWidget = true;
+        this.chatError = false;
         break;
       case 'form':
-
+        this.preChatForm = true;
+        this.additionalPanel = false;
+        this.isIconWidget = true;
+        this.chatActive = false;
+        this.chatError = false;
+        break;
+      case 'end':
+        this.preChatForm = false;
+        this.chatActive = false;
+        this.chatError = true;
+        this.isIconWidget = true;
         break;
       case 'error':
-
+        this.preChatForm = false;
+        this.chatActive = false;
+        this.chatError = true;
+        this.isIconWidget = true;
         break;
     }
   }
@@ -285,16 +275,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'SOCKET_CONNECTED':
             this.chatPayLoad = { type: "CHAT_REQUESTED", data: this.customerData };
             this.sdk.sendChatRequest(this.chatPayLoad);
-            // this.changeScreen('chat');
-            this.showActiveChatScreen();
+            this.changeScreen('chat');
             console.log('event response:', this.chatPayLoad);
             break;
           case 'CHANNEL_SESSION_STARTED':
             console.log('event response:', event.data);
-
+            this.conversationId = event.data.header.channelSession.conversationId;
+            localStorage.setItem('conversationId', event.data.header.channelSession.conversationId);
             break;
           case 'MESSAGE_RECEIVED':
             console.log('event response:', event.data);
+            this.cimMessage.push(event.data);
+            console.log('Cim Message Array: ',this.cimMessage);
+
             break;
           case 'SOCKET_DISCONNECTED':
             console.log('event response:', event.data);

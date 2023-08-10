@@ -15,7 +15,7 @@
       </div>
       <div class="widget-wrapper-content">
         <p>Ask us a question, our support team is pleased to help you.</p>
-        <button class="widget-color" (click)="showWidget()">Connect with us</button>
+        <button class="widget-color" (click)="changeScreen('form')">Connect with us</button>
       </div>
     </div>
   </ng-container>
@@ -26,7 +26,7 @@
   <ng-container *ngIf="preChatForm">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-color" (click)="showWelcomePanel()">
+        <div class="widget-form-header widget-color" (click)="changeScreen('widget')">
           <h5 id="headerHeading">{{title}}</h5>
           <span class="widget-header-icon">
             <span class="topbar-icon material-symbols-outlined">minimize</span>
@@ -71,7 +71,7 @@
     <!-- Active chat screen -->
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-chat-header widget-color" (click)="showWelcomePanel()">
+        <div class="widget-chat-header widget-color" (click)="changeScreen('widget')">
           <h5 id="title">{{title}}</h5>
           <div class="widget-header-icon iconThree">
             <span class="material-symbols-outlined">
@@ -90,13 +90,13 @@
           </div>
         </div>
         <div class="widget-chat-navbar">
-            <span class="widget-navbar-icon btnOne material-symbols-outlined">
-              more_vert
-            </span>
-            <span class="material-symbols-outlined btnTwo widget-navbar-icon">
-              text_fields
-            </span>
-            <span class=" widget-navbar-divider">|</span>
+          <span class="widget-navbar-icon btnOne material-symbols-outlined">
+            more_vert
+          </span>
+          <span class="material-symbols-outlined btnTwo widget-navbar-icon">
+            text_fields
+          </span>
+          <span class=" widget-navbar-divider">|</span>
           <span class="widget-navbar-icon btnThree material-symbols-outlined">
             videocam
           </span>
@@ -108,63 +108,188 @@
           </span>
         </div>
         <div class="widget-chat-content">
-          <div class="widget-chat-alert">
-            <span>Please wait we are finding an agent for you</span>
-          </div>
-          <div class="widget-chat-notification">
-            <span>Adam Reeds joined the chat</span>
-          </div>
-          <div class="widget-chat-messages">
-            <div class="widget-chat-message-customer">
-              <div class="customer-message">
-                <span class="name">Adam Reeds</span>
-                <span class="message">Welcome Sam! Thank you for contacting us. Please let me know how can I assist
-                  you?</span>
-                <span class="time">1:52 PM</span>
+          <div *ngFor="let message of cimMessage">
+            <!-- <div class="widget-chat-alert">
+              <span>Please wait we are finding an agent for you</span>
+            </div> -->
+            <div class="widget-chat-notification-area">
+              <div class="widget-chat-notification"
+                *ngIf="message.body.type == 'NOTIFICATION' && ((message.body.notificationType == 'NO_AGENT_AVAILABLE') || (message.body.notificationType == 'TASK_ENQUEUED' && message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER') || message.body.notificationType == 'AGENT_SUBSCRIBED' || message.body.notificationType == 'AGENT_UNSUBSCRIBED' || message.body.notificationType == 'PARTICIPANT_ROLE_CHANGED')">
+                <span
+                  *ngIf="message.body.notificationType=='AGENT_SUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY'"
+                  innerHTML="{{enableDynamicLink ?
+              (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username) :
+              (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} joined the chat">
+                </span>
+
+                <span
+                  *ngIf="message.body.notificationType=='PARTICIPANT_ROLE_CHANGED' && message.body.notificationData.data.conversationParticipant.role == 'PRIMARY'"
+                  innerHTML="{{enableDynamicLink ?
+              (message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username) :
+              (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} joined the chat">
+                </span>
+
+                <span
+                  *ngIf="message.body.notificationType=='AGENT_UNSUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY'"
+                  innerHTML="{{enableDynamicLink ?
+                (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username) :
+              (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} left the chat">
+                </span>
+
+                <span *ngIf="message.body.notificationType == 'NO_AGENT_AVAILABLE' "
+                  innerHTML="{{enableDynamicLink ? 'No agents are available at the moment' : 'No agents are available at the moment'}}">
+                </span>
+
+                <div *ngIf="message.body.notificationType == 'TASK_ENQUEUED'">
+                  <span *ngIf="message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER'"
+                    innerHTML="Your request is being transferred to '{{message.body.notificationData.data.queue.name}}' queue, please wait!">
+                  </span>
+                </div>
               </div>
             </div>
-            <div class="widget-chat-message-agent">
-              <div class="agent-img">
-                <img src="../../assets/images/user.png" alt="" srcset="">
+            <div class="widget-chat-messages"
+              *ngIf="message.body.type != 'DELIVERYNOTIFICATION' && message.body.type != 'NOTIFICATION' && message.body.type != 'BUTTON' && message.body.type != 'WRAPUP'">
+              <div class="widget-chat-message-customer"
+                *ngIf="message.header.sender.type=='CUSTOMER' || message.header.sender.type=='CONNECTOR'">
+                <div class="customer-message">
+                  <span class="name">YOU</span>
+                  <span class="message" *ngIf="message.body.type=='PLAIN'"
+                    innerHTML="{{enableDynamicLink ? (message.body.markdownText) : (message.body.markdownText)}}">
+                  </span>
+                  <!-- Message Type Contact -->
+                  <div *ngFor="let contact of message.body.contacts">
+                    <div *ngIf="message.body.type=='CONTACT'" class="file-message">
+                      <span class="message"
+                        innerHTML="{{enableDynamicLink ? (contact.name.formattedName) : (contact.name.formattedName)}}">
+                      </span>
+                      <a href="https://api.whatsapp.com/send?phone={{contact.phones[0].phone}}&text=Hello%2C%20I%20want%20more%20info%20about%20the%20product."
+                        target="_blank">
+                        {{contact.phones[0].phone}}
+                      </a>
+                    </div>
+                  </div>
+                  <!-- Message Type Location -->
+                  <div *ngIf="message.body.type=='LOCATION'" class="file-message">
+                    <span class="message"
+                      innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.name) : (message.body.additionalDetails.name)}}">
+                    </span>
+                    <a href="http://maps.google.com/?q={{message.body.location.latitude}},{{message.body.location.longitude}}"
+                      target="_blank">
+                      CLICK HERE
+                    </a>
+                  </div>
+                  <!-- Message Type Image, File, Video, Url -->
+                  <div
+                    *ngIf="message.body.type=='IMAGE' || message.body.type=='FILE' || message.body.type=='VIDEO' || message.body.type=='URL' ||  message.body.type=='AUDIO'"
+                    class="file-message">
+                    <span class="message"
+                      innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText : message.body.caption) : (message.body.markdownText ? message.body.markdownText : message.body.caption)}}">
+                    </span>
+                    <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                      <img src="{{message.body.attachment.mediaUrl}}" alt="{{message.body.caption}}" />
+                    </a>
+                    <a *ngIf="message.body.type=='VIDEO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                      <video width="200" height="120" controls>
+                        <source src="{{message.body.attachment.mediaUrl}}" type="video/mp4">
+                        {{message.body.caption}}
+                      </video>
+                    </a>
+                    <a *ngIf="message.body.type=='AUDIO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                      <audio class="audioPlayer" controls>
+                        <source src="{{message.body.attachment.mediaUrl}}" type="audio/mpeg">
+                        {{message.body.caption}}
+                      </audio>
+                    </a>
+                    <a *ngIf="message.body.type=='URL'" href="{{message.body.mediaUrl}}" target="_blank">
+                      CLICK HERE
+                    </a>
+                    <a *ngIf="message.body.type=='FILE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                      <span class="file-name"
+                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName) : (message.body.additionalDetails.fileName)}}"></span>
+                      <img class="file-type-message" src="assets/images/file-type.svg"
+                        alt="{{message.body.additionalDetails.fileName}}" />
+                      <span class="file-ext-main">{{message.body.attachment.mimeType.split('/')[1] ==
+                        'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
+                        message.body.attachment.mimeType.split('/')[1]}}</span>
+                    </a>
+                  </div>
+                  <span class="time">{{message.header.timestamp | date:'h:mm a'}}</span>
+                </div>
               </div>
-              <div class="agent-message">
-                <span class="name">Sam Wallace</span>
-                <span class="message">Hello! I need general info regarding your upcoming products line.</span>
-                <span class="time">1:52 PM</span>
-              </div>
-            </div>
-            <div class="widget-chat-message-customer">
-              <div class="customer-message">
-                <span class="name">Adam Reeds</span>
-                <span class="message">Welcome Sam! Thank you for contacting us. Please let me know how can I assist
-                  you?</span>
-                <span class="time">1:52 PM</span>
-              </div>
-            </div>
-            <div class="widget-chat-message-customer">
-              <div class="customer-message">
-                <span class="name">Adam Reeds</span>
-                <span class="message">Welcome Sam! Thank you for contacting us. Please let me know how can I assist
-                  you?</span>
-                <span class="time">1:52 PM</span>
-              </div>
-            </div>
-            <div class="widget-chat-message-agent">
-              <div class="agent-img">
-                <img src="../../assets/images/user.png" alt="" srcset="">
-              </div>
-              <div class="agent-message">
-                <span class="name">Sam Wallace</span>
-                <span class="message">Hello! I need general info regarding your upcoming products line.</span>
-                <span class="time">1:52 PM</span>
-              </div>
-            </div>
-            <div class="widget-chat-message-customer">
-              <div class="customer-message">
-                <span class="name">Adam Reeds</span>
-                <span class="message">Welcome Sam! Thank you for contacting us. Please let me know how can I assist
-                  you?</span>
-                <span class="time">1:52 PM</span>
+              <div class="widget-chat-message-agent"
+                *ngIf="message.header.sender.type == 'AGENT' || message.header.sender.type == 'BOT'">
+                <div [ngClass]="(message.header.sender.type == 'AGENT') ? 'agent-img' : 'bot-img'">
+                  <img src="../../assets/images/{{(message.header.sender.type == 'AGENT') ? 'user.png' : 'robot-dark.svg'}}"
+                    alt="avatar">
+                </div>
+                <div class="agent-message">
+                  <span class="name"
+                    *ngIf="message.header.sender.type == 'BOT' || message.header.sender.type == 'SYSTEM'">BOT</span>
+                  <span class="name"
+                    *ngIf="message.header.sender.type == 'AGENT'">{{message.header.sender.senderName.toUpperCase()}}</span>
+                  <!-- <span class="message">Hello! I need general info regarding your upcoming products line.</span> -->
+                  <span class="message" *ngIf="message.body.type=='PLAIN'"
+                    innerHTML="{{enableDynamicLink ? (message.body.markdownText) : (message.body.markdownText)}}">
+                  </span>
+                  <!-- Message Type Contact -->
+                  <div *ngFor="let contact of message.body.contacts">
+                    <div *ngIf="message.body.type=='CONTACT'" class="file-message">
+                      <span class="message"
+                        innerHTML="{{enableDynamicLink ? (contact.name.formattedName) : (contact.name.formattedName)}}">
+                      </span>
+                      <a href="https://api.whatsapp.com/send?phone={{contact.phones[0].phone}}&text=Hello%2C%20I%20want%20more%20info%20about%20the%20product."
+                        target="_blank">
+                        {{contact.phones[0].phone}}
+                      </a>
+                    </div>
+                  </div>
+                  <!-- Message Type Location -->
+                  <div *ngIf="message.body.type=='LOCATION'" class="file-message">
+                    <span class="message"
+                      innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.name) : (message.body.additionalDetails.name)}}">
+                    </span>
+                    <a href="http://maps.google.com/?q={{message.body.location.latitude}},{{message.body.location.longitude}}"
+                      target="_blank">
+                      CLICK HERE
+                    </a>
+                  </div>
+                  <!-- Message Type Image, File, Video, Url -->
+                  <div
+                    *ngIf="message.body.type=='IMAGE' || message.body.type=='FILE' || message.body.type=='VIDEO' || message.body.type=='URL' ||  message.body.type=='AUDIO'"
+                    class="file-message">
+                    <span class="message"
+                      innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText : message.body.caption) : (message.body.markdownText ? message.body.markdownText : message.body.caption)}}">
+                    </span>
+                    <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                      <img src="{{message.body.attachment.mediaUrl}}" alt="{{message.body.caption}}" />
+                    </a>
+                    <a *ngIf="message.body.type=='VIDEO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                      <video width="200" height="120" controls>
+                        <source src="{{message.body.attachment.mediaUrl}}" type="video/mp4">
+                        {{message.body.caption}}
+                      </video>
+                    </a>
+                    <a *ngIf="message.body.type=='AUDIO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                      <audio class="audioPlayer" controls>
+                        <source src="{{message.body.attachment.mediaUrl}}" type="audio/mpeg">
+                        {{message.body.caption}}
+                      </audio>
+                    </a>
+                    <a *ngIf="message.body.type=='URL'" href="{{message.body.mediaUrl}}" target="_blank">
+                      CLICK HERE
+                    </a>
+                    <a *ngIf="message.body.type=='FILE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                      <span class="file-name"
+                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName) : (message.body.additionalDetails.fileName)}}"></span>
+                      <img class="file-type-message" src="assets/images/file-type.svg"
+                        alt="{{message.body.additionalDetails.fileName}}" />
+                      <span class="file-ext-main">{{message.body.attachment.mimeType.split('/')[1] ==
+                        'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
+                        message.body.attachment.mimeType.split('/')[1]}}</span>
+                    </a>
+                  </div>
+                  <span class="time">{{message.header.timestamp | date:'h:mm a'}}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -237,7 +362,7 @@
     <div class="widget-loading widget-dropdown widget-bar-view" id="dropdownTrigger">
       <div id="myDropdown" class="widget-bar-content">
         <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="showWidget()">
+          (click)="changeScreen('form')">
           <span class="chat-icon material-symbols-outlined">
             sms
           </span>
