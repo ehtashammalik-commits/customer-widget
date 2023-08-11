@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { SdkService } from "../services/sdk.service";
 
 interface Food {
@@ -16,7 +16,7 @@ export class ChatComponent implements OnInit {
   chatActive = false;
   chatError = false;
 
-  fontSize = new FormControl("13");
+  fontSize = new UntypedFormControl("13");
 
   foods: Food[] = [
     {value: 'steak-0', viewValue: 'Steak'},

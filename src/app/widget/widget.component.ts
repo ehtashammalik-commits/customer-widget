@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnInit, ElementRef } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { SdkService } from "../services/sdk.service";
 import { ConfigService } from "../services/config.service";
 import { Subscription } from 'rxjs';
@@ -52,7 +52,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   formData: FormAttribute[] = [];
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public sdk: SdkService,
     public __appConfig: ConfigService,
     private el: ElementRef,
@@ -125,12 +125,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     },
   };
 
-  preChatFormGroup: FormGroup = new FormGroup({
-    name: new FormControl('', Validators.required),
-    email: new FormControl('', [Validators.required, Validators.email]),
-    phone: new FormControl('', Validators.required),
-    customer_channel_identifier: new FormControl('', Validators.required),
-    enabled_transcript: new FormControl(false, Validators.required)
+  preChatFormGroup: UntypedFormGroup = new UntypedFormGroup({
+    name: new UntypedFormControl('', Validators.required),
+    email: new UntypedFormControl('', [Validators.required, Validators.email]),
+    phone: new UntypedFormControl('', Validators.required),
+    customer_channel_identifier: new UntypedFormControl('', Validators.required),
+    enabled_transcript: new UntypedFormControl(false, Validators.required)
   });
 
   setWidgetConfigs(configs: any) {
@@ -146,11 +146,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.enableWebRtc = configs.enableWebRtc;
   }
 
-  private markFormGroupTouched(formGroup: FormGroup) {
+  private markFormGroupTouched(formGroup: UntypedFormGroup) {
     Object.values(formGroup.controls).forEach(control => {
       control.markAsTouched();
 
-      if (control instanceof FormGroup) {
+      if (control instanceof UntypedFormGroup) {
         this.markFormGroupTouched(control);
       }
     });
