@@ -539,6 +539,14 @@ div#myDropdown.widget-show {
   overflow-y: scroll;
 }
 
+.widget-error-content {
+  background-color: $white-color;
+  border-radius: 10px;
+  position: relative;
+  height: 78%;
+  bottom: 14px;
+}
+
 .widget-chat-navbar {
   border-radius: 10px 10px 0px 0px;
   border-bottom: 1px solid #eff2f7;
@@ -650,12 +658,14 @@ div#myDropdown.widget-show {
 
 .widget-chat-message-customer {
   display: flex;
-  float: right;
   width: auto;
   max-width: 250px;
   height: auto;
   margin-top: 25px;
-  margin-right: 20px;
+  position: inherit;
+  float: right;
+  justify-content: flex-end;
+  left: 50px;
 
   .customer-message {
     display: grid;
@@ -834,8 +844,7 @@ div#myDropdown.widget-show {
     border-radius: 10px;
     border: none;
     height: 40px;
-    line-height: 36px;
-    padding: 0 30px;
+    padding: 10px 45px 5px 30px;
     outline: none;
     width: 95%;
     font-size: 16px !important;
@@ -847,13 +856,12 @@ div#myDropdown.widget-show {
   .send-btn {
     position: absolute;
     right: 12px;
-    bottom: 10px;
+    bottom: 8px;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 24px;
   }
 
 }
-
 
 .error-icon {
   text-align: center;
@@ -918,4 +926,165 @@ div#myDropdown.widget-show {
   .call-btn {
     margin: 0 auto 10px !important;
   }
+}
+
+//Composer Preview File
+.file-preview-cover {
+  display: inline-block;
+  position: absolute;
+  background: #f1f1f1;
+  bottom: 50px;
+  left: 35px;
+
+
+  mat-icon {
+    position: absolute;
+    right: 0;
+    background: rgba(255, 255, 255, .4);
+    border-radius: 100%;
+    font-size: 14px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 24px;
+    color: #000;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(0, 0, 0, .3);
+    }
+  }
+}
+
+.preview-file {
+  position: relative;
+  display: inline-block;
+  margin-right: 10px;
+  text-align: center;
+  overflow: hidden;
+
+  mat-spinner {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 25%;
+    left: 25%;
+    transform: translate(-25%, -25%);
+    display: block;
+  }
+
+  img {
+    max-width: 250px;
+    min-height: 150px;
+    width: 100%;
+    height: 100%;
+    min-width: 100px;
+  }
+
+
+
+  span {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    margin: 5px auto;
+    text-align: center;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: pre;
+    position: absolute;
+    bottom: -3px;
+    width: 100%;
+    padding: 5px;
+    transform: translate(0, 100px);
+    transition: all .3s;
+
+    &.file-type {
+      bottom: 50px !important;
+      background: #F15642 !important;
+      border-radius: 4px;
+      max-width: 80px;
+      font-size: 14px !important;
+      text-transform: uppercase;
+      padding: 2px 5px !important;
+      transform: translate(0) !important;
+    }
+
+  }
+
+  &:hover {
+    span {
+      background: rgba(0, 0, 0, .3);
+      transform: translate(0);
+      transition: all .3s;
+    }
+  }
+}
+
+.file-message {
+  position: relative;
+
+  .file-type-message {
+    max-width: 55px;
+    min-width: 50px;
+  }
+
+  .file-name {
+    white-space: pre;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: grid;
+  }
+
+  .file-ext-main {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    text-transform: uppercase;
+    background: #F15642;
+    padding: 5px 5px;
+    font-size: 12px;
+    color: #fff;
+    font-weight: 600;
+    min-width: 45px;
+    text-align: center;
+    border-radius: 4px;
+  }
+}
+
+.audioPlayer {
+  width: 200px;
+}
+
+.videoPlayer {
+  width: 250px;
+  height: 150px;
+}
+
+.message-image {
+  max-width: 190px;
+  min-width: 85px;
+  width: auto;
+  height: auto;
+}
+
+.file-btn {
+  position: absolute;
+  right: 40px;
+  bottom: 8px;
+  cursor: pointer;
+  font-size: 24px;
+  transform: rotate(39deg);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+#file-btn>label {
+  margin-bottom: 0 !important;
+}
+
+#file-btn>input {
+  display: none;
 }

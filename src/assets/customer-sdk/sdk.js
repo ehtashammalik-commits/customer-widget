@@ -229,8 +229,8 @@ function chatEnd(data) {
  * @param {*} formData
  * @param {*} callback
  */
-function uploadToFileEngine(formData, callback) {
-  fetch(`${file_server_url}/api/uploadFileStream`, {
+function uploadToFileEngine(fileServerUrl,formData, callback) {
+  fetch(`${fileServerUrl}/api/uploadFileStream`, {
     method: 'POST',
     body: formData
   })

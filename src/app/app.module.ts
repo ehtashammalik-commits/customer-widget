@@ -12,11 +12,15 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {MatDialogModule} from '@angular/material/dialog';
 
 import { AppComponent } from './app.component';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { AppRoutingModule, routingComponents } from './app-routing.module';
 import { ConfigService } from './services/config.service';
+import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 
 
 export function initializeApp1(appConfigService: ConfigService) {
@@ -29,7 +33,8 @@ export function initializeApp1(appConfigService: ConfigService) {
 @NgModule({
   declarations: [
     AppComponent,
-    routingComponents
+    routingComponents,
+    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -44,7 +49,10 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatIconModule,
     FormsModule,
     MatTooltipModule,
-    MatSelectModule
+    MatSelectModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    MatDialogModule
   ],
   providers: [
     {

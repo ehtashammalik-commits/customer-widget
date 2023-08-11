@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ConfigService } from "../services/config.service";
 import { Observable, Subject } from 'rxjs';
 
-declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest:any;
+declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest: any, sendMessage: any, uploadToFileEngine: any, chatEnd:any;
 
 @Injectable({
   providedIn: 'root'
@@ -66,5 +66,18 @@ export class SdkService {
     console.log('Chat Payload:', payload);
     chatRequest(payload);
   }
+  sendChatMessage(payload: any) {
+    console.log('Customer Message Payload:', payload);
+    sendMessage(payload);
+  }
 
+  moveToFileServer(filePayload: any, callback: any) {
+    uploadToFileEngine(this.ConfigData.FILE_SERVER_URL, filePayload, (res: { type: string; name: string; size: any; }) => {
+      callback(res)
+    });
+  }
+
+  handleChatEnd(customerPayload: any) {
+    chatEnd(customerPayload);
+  }
 }

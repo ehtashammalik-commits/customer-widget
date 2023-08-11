@@ -1,8 +1,13 @@
-import { AfterViewInit, Component, OnInit, ElementRef } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ElementRef, ViewChild, Input, ChangeDetectorRef } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { SdkService } from "../services/sdk.service";
 import { ConfigService } from "../services/config.service";
 import { Subscription } from 'rxjs';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 interface FormAttribute {
   _id: string;
@@ -23,12 +28,25 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private widgetConfigsSubscription: Subscription = new Subscription;
   private preChatFormSubscription: Subscription = new Subscription;
   private establishConnectionSubject: Subscription = new Subscription;
+  @ViewChild("autosize")
+  autosize!: CdkTextareaAutosize;
+  @ViewChild("myFileInput")
+  myInputVariable!: ElementRef;
+  @ViewChild("message")
+  messageElement!: ElementRef;
+  @ViewChild("messageComposer")
+  elementView!: ElementRef;
+  @ViewChild("scrollMe")
+  private scrollContainer!: ElementRef;
+  @Input() conversation: any;
+  scrollTop = 0;
+  public scrollCon: any;
+  sendTypingStartedEventTimer: any = null;
   additionalPanel = false;
   isIconWidget = true;
   preChatForm = false;
   chatActive = false;
   chatError = false;
-
 
   customerData: any;
   chatPayLoad: any;
@@ -36,6 +54,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   conversationId = '';
   isChatActive = false;
+
   // Widget Configuration
   title = '';
   subtitle = '';
@@ -48,15 +67,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   preChatFormId = '';
   enableWebRtc = false;
   messageLimit: number = 300; // Set the desired maximum length
+  text: string = "";
+  composer_input_disabled: boolean = false;
 
   formData: FormAttribute[] = [];
+  isMobile = false;
+
+  imageUrls: { filesPath: SafeUrl, fileType: string, fileExt: string, fileName: string }[] = [];
+  fileLoading = false;
+  selectedFile!: File;
 
   constructor(
     private fb: UntypedFormBuilder,
     public sdk: SdkService,
     public __appConfig: ConfigService,
     private el: ElementRef,
+    private cdRef: ChangeDetectorRef,
+    private sanitizer: DomSanitizer,
+    private snackBar: MatSnackBar,
+    public dialog: MatDialog
   ) { }
+
   ngAfterViewInit(): void {
     setTimeout(() => {
       (this.el.nativeElement as HTMLElement).style.setProperty("--main-color", this.theme);
@@ -64,7 +95,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe((configs) => {
       this.setWidgetConfigs(configs)
       console.log('Widget configurations:', configs);
@@ -156,7 +186,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onSubmit(): void {
+  onFormSubmit(): void {
     try {
       let preChatData = this.preChatFormGroup.value;
       if (preChatData.customer_channel_identifier && this.__appConfig.appConfig.SERVICE_IDENTIFIER) {
@@ -288,7 +318,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'MESSAGE_RECEIVED':
             console.log('event response:', event.data);
             this.cimMessage.push(event.data);
-            console.log('Cim Message Array: ',this.cimMessage);
+            console.log('Cim Message Array: ', this.cimMessage);
             break;
           case 'SOCKET_DISCONNECTED':
             console.log('event response:', event.data);
@@ -322,4 +352,233 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+  textChanged() {
+    this.messageElement.nativeElement.focus();
+    const el: any = document.getElementById("messageTextarea");
+    this.text = el.value;
+    this.scrollCon = this.elementView.nativeElement.scrollHeight;
+    this.scrollContainer = this.scrollContainer.nativeElement.scrollHeight;
+  }
+
+  onSendMessage() {
+    this.cdRef.detectChanges();
+    this.scrollToBottom();
+
+    if (this.imageUrls.length > 0) {
+      this.fileLoading = true;
+      let additionalText = "";
+      if (this.text.trim() !== "") {
+        additionalText = this.text.trim();
+        this.clearMessageData();
+      }
+      this.uploadFile(this.selectedFile, additionalText);
+    } else {
+
+      if (this.text.trim() !== "") {
+        console.log('Customer message: ', this.text.trim());
+
+        this.constructCimMessage("PLAIN", this.text.trim(), null, null);
+        this.clearMessageData();
+      }
+    }
+  }
+
+  scrollToBottom(): void {
+    setTimeout(() => {
+      try {
+        this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
+      } catch (err) { }
+    }, 350);
+  }
+
+  clearMessageData() {
+    this.composer_input_disabled = false;
+    this.text = "";
+    this.scrollToBottom();
+    this.scrollCon = 45;
+  }
+
+  constructCimMessage(
+    msgType: string,
+    text?: string,
+    intent: null | string = null,
+    replyToMessageId: null | string = null,
+    fileMimeType?: string,
+    fileName?: string,
+    fileSize?: number,
+    additionalText?: string,
+    fileType?: string
+  ) {
+    let header = {
+      replyToMessageId: null as null | string,
+      intent: null as null | string,
+      sender: {
+        id: "460df46c-adf9-11ed-afa1-0242ac120002",
+        type: "CUSTOMER",
+        senderName: "JANE DOE",
+        additionalDetail: null,
+      },
+    };
+    let body: { markdownText: string; type: string; caption?: string; additionalDetails?: any; attachment?: any } = {
+      markdownText: "",
+      type: "",
+    };
+
+    if (msgType.toLowerCase() == "plain") {
+      header.replyToMessageId = replyToMessageId ? replyToMessageId : null;
+      header.intent = intent !== null ? intent : null;
+      body.type = "PLAIN";
+      body.markdownText = text!.trim();
+    } else if (msgType.toLowerCase() == "application" || msgType.toLowerCase() == "text") {
+      body.type = "FILE";
+      body.markdownText = additionalText || "";
+      body["caption"] = ""; // Here is the 'caption' property
+      body["additionalDetails"] = { fileName: fileName };
+      body["attachment"] = {
+        mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
+        type: fileMimeType || "",
+        size: fileSize || 0,
+        extType: fileType || "",
+        mimeType: fileMimeType || "",
+      };
+    } else if (msgType.toLowerCase() == "image") {
+      body.type = "IMAGE";
+      body.markdownText = additionalText || "";
+      body["caption"] = fileName;
+      body["additionalDetails"] = {};
+      body["attachment"] = {
+        mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
+        type: fileMimeType,
+        size: fileSize,
+        thumbnail: ""
+      };
+    } else if (msgType.toLowerCase() == "video") {
+      body.type = "VIDEO";
+      body.markdownText = additionalText || "";
+      body["caption"] = fileName;
+      body["additionalDetails"] = {};
+      body["attachment"] = {
+        mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
+        type: fileMimeType,
+        size: fileSize,
+        thumbnail: ""
+      };
+    } else if (msgType.toLowerCase() == "audio") {
+      body.type = "AUDIO";
+      body.markdownText = additionalText || "";
+      body["caption"] = fileName;
+      body["additionalDetails"] = {};
+      body["attachment"] = {
+        mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
+        type: fileMimeType,
+        size: fileSize,
+        thumbnail: ""
+      };
+    } else {
+      console.log('Unable to process the file');
+      this.snackBar.open("unable to process the file", "err");
+      return;
+    }
+
+    let msgPayload = {
+      type: msgType,
+      header: header,
+      body: body,
+      customer: this.chatPayLoad.data,
+    };
+    this.sdk.sendChatMessage(msgPayload);
+    this.clearMessageData();
+    this.fileLoading = false;
+    this.imageUrls = [];
+    this.selectedFile = null as any;
+  }
+
+  previewFile(event: any) {
+    if (event.target.files && event.target.files[0]) {
+      var filesAmount = event.target.files;
+    } else if (event.dataTransfer.files.length > 0) {
+      filesAmount = event.dataTransfer.files;
+    }
+
+    if (filesAmount) {
+      this.selectedFile = filesAmount;
+      for (let i = 0; i < filesAmount.length; i++) {
+        const reader = new FileReader();
+        reader.onload = (event: any) => {
+          console.log(this.imageUrls, "urlssssssss");
+          this.imageUrls.push({
+            filesPath: this.sanitizer.bypassSecurityTrustUrl(event.target.result),
+            fileType: event.target.result.split(':')[1].split('/')[0],
+            fileExt: event.target.result.split(':')[1].split('/')[1].split(';')[0],
+            fileName: filesAmount[i].name
+          });
+        };
+        reader.readAsDataURL(filesAmount[i]);
+      }
+    }
+  }
+
+  uploadFile(files: any, additionalText: string) {
+    let availableExtensions = ["txt", "png", "jpg", "jpeg", "pdf", "ppt", "pptx", "xlsx", "xls", "doc", "docx", "rtf", "mp3", "mp4", "webp"];
+    let ln = files.length;
+    if (ln > 0) {
+      for (var i = 0; i < ln; i++) {
+        const fileSize = files[i].size;
+        const fileMimeType = files[i].name.split(".").pop();
+
+        if (fileSize <= 5000000) {
+          if (availableExtensions.includes(fileMimeType.toLowerCase())) {
+            let fd = new FormData();
+            fd.append("file", files[i]);
+            fd.append("conversationId", `${Math.floor(Math.random() * 90000) + 10000}`);
+            console.log("ready to Upload File", fileSize, fileMimeType);
+
+            this.sdk.moveToFileServer(fd, (res: { type: string; name: string; size: any; }) => {
+              this.constructCimMessage(
+                res.type.split('/')[0],
+                '',
+                null,
+                null,
+                res.type,
+                res.name,
+                res.size,
+                additionalText,
+                res.name.split('.').pop()
+              );
+            });
+          } else {
+            console.log(files[i].name + " File size should be less than 5MB");
+            this.snackBar.open(files[i].name + " unsupported type", "err", {
+              panelClass: "custom-snackbar"
+            });
+            this.removeUploadFile();
+          }
+        } else {
+          console.log(files[i].name + " File size should be less than 5MB");
+          this.snackBar.open(files[i].name + " File size should be less than 5MB", "err", {
+            panelClass: "custom-snackbar"
+          });
+          this.removeUploadFile();
+        }
+      }
+    }
+  }
+
+  removeUploadFile() {
+    this.imageUrls = [];
+    this.selectedFile = null as any;
+  }
+
+  endChat(): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.cimMessage = [];
+        this.changeScreen('end');
+        this.sdk.handleChatEnd(this.chatPayLoad.data);
+        this.clearMessageData()
+      }
+    });
+  }
 }

@@ -1,12 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { WidgetComponent } from './widget/widget.component';
-import { ChatComponent } from './chat/chat.component';
 
 const routes: Routes = [
   { path: 'widget', component: WidgetComponent },
   { path: '', redirectTo: '/widget', pathMatch: 'full' },
-  { path: 'chat', component: ChatComponent },
 ];
 
 @NgModule({
@@ -14,4 +12,4 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
-export const routingComponents = [WidgetComponent, ChatComponent]
+export const routingComponents = [WidgetComponent]

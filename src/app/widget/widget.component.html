@@ -34,7 +34,7 @@
         </div>
         <div class="widget-form-content">
           <h4>Please fill out the form below to start chatting with an agent now!</h4>
-          <form [formGroup]="preChatFormGroup" (ngSubmit)="onSubmit()">
+          <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
             <ng-container *ngFor="let formAttribute of formData">
               <div class="widget-form-group">
                 <label>
@@ -71,19 +71,19 @@
     <!-- Active chat screen -->
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-chat-header widget-color" (click)="changeScreen('widget')">
+        <div class="widget-chat-header widget-color">
           <h5 id="title">{{title}}</h5>
           <div class="widget-header-icon iconThree">
             <span class="material-symbols-outlined">
               pan_zoom
             </span>
           </div>
-          <div class="widget-header-icon iconTwo">
+          <div class="widget-header-icon iconTwo" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize">
               minimize
             </span>
           </div>
-          <div class="widget-header-icon iconOne">
+          <div class="widget-header-icon iconOne" mat-raised-button (click)="endChat()">
             <span class="material-symbols-outlined">
               close
             </span>
@@ -107,7 +107,7 @@
             forum
           </span>
         </div>
-        <div class="widget-chat-content">
+        <div class="widget-chat-content" #scrollMe>
           <div *ngFor="let message of cimMessage">
             <!-- <div class="widget-chat-alert">
               <span>Please wait we are finding an agent for you</span>
@@ -186,10 +186,11 @@
                       innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText : message.body.caption) : (message.body.markdownText ? message.body.markdownText : message.body.caption)}}">
                     </span>
                     <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <img src="{{message.body.attachment.mediaUrl}}" alt="{{message.body.caption}}" />
+                      <img class="message-image" src="{{message.body.attachment.mediaUrl}}"
+                        alt="{{message.body.caption}}" />
                     </a>
                     <a *ngIf="message.body.type=='VIDEO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <video width="200" height="120" controls>
+                      <video width="190" height="120" controls>
                         <source src="{{message.body.attachment.mediaUrl}}" type="video/mp4">
                         {{message.body.caption}}
                       </video>
@@ -219,7 +220,8 @@
               <div class="widget-chat-message-agent"
                 *ngIf="message.header.sender.type == 'AGENT' || message.header.sender.type == 'BOT'">
                 <div [ngClass]="(message.header.sender.type == 'AGENT') ? 'agent-img' : 'bot-img'">
-                  <img src="../../assets/images/{{(message.header.sender.type == 'AGENT') ? 'user.png' : 'robot-dark.svg'}}"
+                  <img
+                    src="../../assets/images/{{(message.header.sender.type == 'AGENT') ? 'user.png' : 'robot-dark.svg'}}"
                     alt="avatar">
                 </div>
                 <div class="agent-message">
@@ -261,10 +263,11 @@
                       innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText : message.body.caption) : (message.body.markdownText ? message.body.markdownText : message.body.caption)}}">
                     </span>
                     <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <img src="{{message.body.attachment.mediaUrl}}" alt="{{message.body.caption}}" />
+                      <img class="message-image" src="{{message.body.attachment.mediaUrl}}"
+                        alt="{{message.body.caption}}" />
                     </a>
                     <a *ngIf="message.body.type=='VIDEO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <video width="200" height="120" controls>
+                      <video width="190" height="120" controls>
                         <source src="{{message.body.attachment.mediaUrl}}" type="video/mp4">
                         {{message.body.caption}}
                       </video>
@@ -294,12 +297,58 @@
             </div>
           </div>
         </div>
+        <!-- File Preview Area -->
+        <div class="file-preview-cover" *ngIf="imageUrls.length > 0">
+          <div *ngFor='let file of imageUrls; let i = index' class="preview-file">
+            <mat-spinner [diameter]="50" color="primary" *ngIf="fileLoading"></mat-spinner>
+            <!-- Preview for Image & Docx File -->
+            <div *ngIf="file.fileType != 'video' && file.fileType != 'audio'">
+              <img *ngIf="file.filesPath"
+                [attr.src]="file.fileType == 'image' ? file.filesPath : 'assets/images/file-type.svg'" />
+              <span>{{file.fileName}}</span>
+              <span *ngIf="file.fileType !== 'image'" class="file-type">
+                <!-- {{file.fileExt}} -->
+                {{file.fileExt == 'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
+                file.fileExt}}
+              </span>
+            </div>
+            <!-- Preview for Video File -->
+            <div *ngIf="file.fileType == 'video'">
+              <video class="videoPlayer" *ngIf="file.filesPath" controls>
+                <source [attr.src]="file.filesPath" [attr.type]="file.fileType+'/'+file.fileExt">
+                Your browser does not support the video tag.
+              </video>
+              <span>{{file.fileName}}</span>
+            </div>
+            <!-- Preview for Audio File -->
+            <div class="audioPlayer" *ngIf="file.fileType == 'audio'">
+              <audio *ngIf="file.filesPath" controls>
+                <source [attr.src]="file.filesPath" [attr.type]="file.fileType+'/'+file.fileExt">
+                Your browser does not support the video tag.
+              </audio>
+              <span>{{file.fileName}}</span>
+            </div>
+          </div>
+          <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()">close</mat-icon>
+        </div>
         <div class="widget-composer">
           <span class="material-symbols-outlined emoji-btn">
             add_reaction
           </span>
-          <input class="widget-chat-composer" type="text" placeholder="Hello">
-          <span class="material-symbols-outlined send-btn">
+          <textarea class="widget-chat-composer" data-emoji-picker="true" matInput id="messageTextarea"
+            cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
+            placeholder="Type Message Here ..." #message maxlength="{{messageLimit}}" [(ngModel)]="text"
+            (change)="textChanged()" (keyup.enter)="isMobile ? '':onSendMessage()"></textarea>
+          <div id="file-btn" *ngIf="enableFileTransfer  && message.value.length < 1 && imageUrls?.length == 0">
+            <label for="file-upload">
+              <span class="material-symbols-outlined file-btn">
+                attach_file
+              </span>
+            </label>
+            <input accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp"
+            id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
+          </div>
+          <span class="material-symbols-outlined send-btn" (click)="onSendMessage()">
             send
           </span>
 
@@ -316,20 +365,20 @@
     <!-- Error screen -->
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-chat-header widget-color" onclick="chatFormAction()">
+        <div class="widget-chat-header widget-color">
           <h5 id="title">Let's Talk</h5>
           <div class="widget-header-icon iconTwo">
             <span class="material-symbols-outlined">
               pan_zoom
             </span>
           </div>
-          <div class="widget-header-icon iconOne">
+          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize">
               minimize
             </span>
           </div>
         </div>
-        <div class="widget-chat-content">
+        <div class="widget-error-content">
           <div class="error-icon">
             <span class="material-symbols-outlined error-emoji">
               sentiment_dissatisfied
