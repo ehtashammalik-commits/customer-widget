@@ -703,7 +703,7 @@ div#myDropdown.widget-show {
 
   .time {
     position: relative;
-    width: 35px;
+    width: auto;
     height: 5px;
     font-family: "Roboto";
     font-size: 9px;
@@ -712,6 +712,8 @@ div#myDropdown.widget-show {
     color: #777777;
     top: 2px;
     left: 0px;
+    max-width: 50px;
+    min-width: 35px;
   }
 
 }
@@ -792,9 +794,8 @@ div#myDropdown.widget-show {
   }
 
   .time {
-    // text-align: left;
     position: relative;
-    width: 35px;
+    width: auto;
     height: 5px;
     font-family: "Roboto";
     font-size: 9px;
@@ -803,19 +804,15 @@ div#myDropdown.widget-show {
     color: #777777;
     top: 2px;
     left: 0px;
+    max-width: 50px;
+    min-width: 35px;
   }
 
 }
 
-/*/
-  ---------------------
-  /*/
-/*/
-  Style for chat area
-  /*/
-/*/
-  ---------------------
-  /*/
+/*/--------------------/*/
+/*/Style for chat area/*/
+/*/------------------/*/
 
 .widget-composer {
 

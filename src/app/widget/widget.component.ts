@@ -29,6 +29,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   chatActive = false;
   chatError = false;
 
+
   customerData: any;
   chatPayLoad: any;
   public cimMessage: any[] = [];
@@ -46,6 +47,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   enableFontResize = false;
   preChatFormId = '';
   enableWebRtc = false;
+  messageLimit: number = 300; // Set the desired maximum length
 
   formData: FormAttribute[] = [];
 
@@ -287,7 +289,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             console.log('event response:', event.data);
             this.cimMessage.push(event.data);
             console.log('Cim Message Array: ',this.cimMessage);
-
             break;
           case 'SOCKET_DISCONNECTED':
             console.log('event response:', event.data);
@@ -296,6 +297,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             console.log('event response:', event.data);
             break;
           case 'CHAT_ENDED':
+            this.changeScreen('form');
             console.log('event response:', event.data);
             break;
           case 'ERRORS':
@@ -316,7 +318,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
       }
     } catch (error) {
-
+      console.error('Error on establishing connection: ', error)
     }
   }
 
