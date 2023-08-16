@@ -30,16 +30,16 @@ const getDynamicExt = () => new Promise((resolve, reject) => {
 });
 
 // /* Function to Include js files in the customer application*/
-function include(file) {
-  var script = document.createElement('script');
-  script.src = file;
-  script.type = 'text/javascript';
-  script.defer = true;
-  document.getElementsByTagName('head').item(0).appendChild(script);
-}
-// /* Include js files */
-include('https://cdn.socket.io/4.5.4/socket.io.min.js');
-include('https://cdnjs.cloudflare.com/ajax/libs/sip.js/0.15.11/sip-0.15.11.min.js');
+// function include(file) {
+//   var script = document.createElement('script');
+//   script.src = file;
+//   script.type = 'text/javascript';
+//   script.defer = true;
+//   document.getElementsByTagName('head').item(0).appendChild(script);
+// }
+// // /* Include js files */
+// include('https://cdn.socket.io/4.5.4/socket.io.min.js');
+// include('https://cdnjs.cloudflare.com/ajax/libs/sip.js/0.15.11/sip-0.15.11.min.js');
 
 // console.log("socket url :", libConfig.socket_url);
 let socket = {};
@@ -107,8 +107,12 @@ function formValidation(formUrl, callback) {
  */
 function establishConnection(socket_url, serviceIdentifier, channelCustomerIdentifier, callback) {
   try {
+    // console.log("Socket ", this.socket);
+    // console.log("Socket connected ", this.socket.connected);
+    // console.log("this.config.SocketUrl ", socket_url);
     if (this.socket === undefined || !this.socket.connected) {
       if (socket_url !== '') {
+        console.log("going new connection");
         let origin = new URL(socket_url).origin;
         let path = new URL(socket_url).pathname;
         this.socket = io(origin, {
@@ -142,6 +146,14 @@ function eventListeners(callback) {
   this.socket.on('connect', () => {
     if (this.socket.id != undefined) {
       console.log(`you are connected with socket:`, this.socket);
+      let error = localStorage.getItem("error");
+      if (error) {
+        console.log(`${error}`);
+        resumeChat({
+          serviceIdentifier: this.socket.auth.serviceIdentifier,
+          channelCustomerIdentifier: this.socket.auth.channelCustomerIdentifier
+        });
+      }
       callback({ type: "SOCKET_CONNECTED", data: this.socket });
     }
   });
@@ -158,7 +170,8 @@ function eventListeners(callback) {
     callback({ type: "SOCKET_DISCONNECTED", data: reason });
   });
   this.socket.on('connect_error', (error) => {
-    console.log(`unable to establish connection with the server: `, error);
+    console.log(`unable to establish connection with the server: `, error.message);
+    localStorage.setItem("error", "1");
     callback({ type: "CONNECT_ERROR", data: error });
   });
   this.socket.on('CHAT_ENDED', (data) => {
@@ -225,11 +238,54 @@ function chatEnd(data) {
   this.socket.emit('CHAT_ENDED', data);
 }
 /**
+ *
+ * @param {*} data
+ */
+function resumeChat(data) {
+  this.socket.emit("CHAT_RESUMED", data, (res) => {
+    if (res) {
+      console.log(res, 'resume chat response in sdk.');
+      // callback(res);
+      return res;
+    }
+  });
+}
+
+function sendJoinConversation(data) {
+  this.socket.emit("joinConversation", data, (res) => {
+    console.log("[sendJoinConversation] ", data);
+    return res;
+  });
+}
+
+function getInitChat(customer) {
+  console.log("[initChat] customer ", customer);
+
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(customer)
+  };
+
+  fetch(`${config.ServerUrl}/api/customer/init`, requestOptions)
+    .then(response => response.json())
+    .then(data => {
+      onInitChat(data);
+      isConversationActive = true;
+    })
+    .catch(error => {
+      console.error(`[initChat] `, error);
+      onInitChat({ error: error });
+    });
+}
+/**
  * File Upload to File Engine Function
  * @param {*} formData
  * @param {*} callback
  */
-function uploadToFileEngine(fileServerUrl,formData, callback) {
+function uploadToFileEngine(fileServerUrl, formData, callback) {
   fetch(`${fileServerUrl}/api/uploadFileStream`, {
     method: 'POST',
     body: formData

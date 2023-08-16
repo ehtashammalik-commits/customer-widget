@@ -148,7 +148,7 @@
               </div>
             </div>
             <div class="widget-chat-messages"
-              *ngIf="message.body.type != 'DELIVERYNOTIFICATION' && message.body.type != 'NOTIFICATION' && message.body.type != 'BUTTON' && message.body.type != 'WRAPUP'">
+              *ngIf="message.body.type != 'DELIVERYNOTIFICATION' && message.body.type != 'NOTIFICATION' && message.body.type != 'WRAPUP'">
               <div class="widget-chat-message-customer"
                 *ngIf="message.header.sender.type=='CUSTOMER' || message.header.sender.type=='CONNECTOR'">
                 <div class="customer-message">
@@ -215,6 +215,10 @@
                     </a>
                   </div>
                   <span class="time">{{message.header.timestamp | date:'h:mm a'}}</span>
+                  <span class="material-symbols-outlined delivery-checks"
+                  [ngClass]="{'delivered' : message.sendStatus == 'successed' , 'failed' : message.sendStatus == 'failed', 'seen' : message.sendStatus == 'seen'}">
+                    done_all
+                  </span>
                 </div>
               </div>
               <div class="widget-chat-message-agent"
@@ -233,6 +237,20 @@
                   <span class="message" *ngIf="message.body.type=='PLAIN'"
                     innerHTML="{{enableDynamicLink ? (message.body.markdownText) : (message.body.markdownText)}}">
                   </span>
+                  <!-- Message Type Button -->
+                  <div class="structured-message-area" [ngClass]="{'custom-theme': theme !== ''}"
+                    *ngIf="message.body.type=='BUTTON'">
+                    <span class="structured-btn-heading"
+                      innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.header.text) : (message.body.additionalDetails.interactive.header.text)}}">
+                    </span>
+                    <span class="message"
+                      innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.body.text) : (message.body.additionalDetails.interactive.body.text)}}">
+                    </span>
+                    <mat-chip-list aria-label="Fish selection">
+                      <mat-chip *ngFor="let btn of message.body.buttons" (click)="sendButtonMessage(btn, message.id)">
+                        {{btn.title}}</mat-chip>
+                    </mat-chip-list>
+                  </div>
                   <!-- Message Type Contact -->
                   <div *ngFor="let contact of message.body.contacts">
                     <div *ngIf="message.body.type=='CONTACT'" class="file-message">
@@ -346,12 +364,58 @@
               </span>
             </label>
             <input accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp"
-            id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
+              id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
           </div>
           <span class="material-symbols-outlined send-btn" (click)="onSendMessage()">
             send
           </span>
 
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!------------------------>
+  <!-- /Chat End HTML/ -->
+  <!------------------------>
+
+  <ng-container *ngIf="chatEndScreen">
+    <!-- Error screen -->
+    <div class="widget-form-area">
+      <div class="widget-form">
+        <div class="widget-chat-header widget-color">
+          <h5 id="title">Let's Talk</h5>
+          <div class="widget-header-icon iconTwo">
+            <span class="material-symbols-outlined">
+              pan_zoom
+            </span>
+          </div>
+          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
+            <span class="material-symbols-outlined minimize">
+              minimize
+            </span>
+          </div>
+        </div>
+        <div class="widget-error-content">
+          <div class="error-icon">
+            <span class="material-symbols-outlined error-emoji">
+              sentiment_satisfied
+            </span>
+            <span>Thank You!</span>
+          </div>
+          <div class="error-message">
+            <p>It was our pleasure assisting you with your query.
+            </p>
+            <!-- <p><b>However, you can view your chat session.</b></p>
+            <p>We will get back to you as soon as issue is resolved.</p> -->
+          </div>
+        </div>
+        <div class="widget-composer">
+          <div class="widget-error-button">
+            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number">
+
+            <input id="formTrigger" type="submit" class="widget-error-trigger" value="Send me transcript">
+          </div>
         </div>
       </div>
     </div>
@@ -421,3 +485,14 @@
   </ng-container>
 
 </div>
+
+
+<!-- Sound Notification Starts-->
+<div id="notificationSound">
+  <audio controls id="soundNotif" [muted]="false" [hidden]="true">
+    <source src="assets/sounds/beep.ogg" type="audio/ogg">
+    <source src="assets/sounds/beep.mp3" type="audio/mpeg">
+    <source src="assets/sounds/beep.wav" type="audio/wav">
+  </audio>
+</div>
+<!-- Sound Notification Ends-->

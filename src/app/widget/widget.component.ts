@@ -2,6 +2,8 @@ import { AfterViewInit, Component, OnInit, ElementRef, ViewChild, Input, ChangeD
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { SdkService } from "../services/sdk.service";
 import { ConfigService } from "../services/config.service";
+import { browserNotificationService } from "../services/browser-notification.service";
+import { DeliveryNotificationService } from "../services/delivery-notification.service";
 import { Subscription } from 'rxjs';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -28,6 +30,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private widgetConfigsSubscription: Subscription = new Subscription;
   private preChatFormSubscription: Subscription = new Subscription;
   private establishConnectionSubject: Subscription = new Subscription;
+  private onChatResumedSubject: Subscription = new Subscription;
   @ViewChild("autosize")
   autosize!: CdkTextareaAutosize;
   @ViewChild("myFileInput")
@@ -47,11 +50,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   preChatForm = false;
   chatActive = false;
   chatError = false;
+  chatEndScreen = false;
 
   customerData: any;
   chatPayLoad: any;
   public cimMessage: any[] = [];
-
+  typingIndicatorTimer: any;
+  lastSeenMessageId: any = null;
   conversationId = '';
   isChatActive = false;
 
@@ -85,10 +90,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private cdRef: ChangeDetectorRef,
     private sanitizer: DomSanitizer,
     private snackBar: MatSnackBar,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private browserNotificationService: browserNotificationService,
+    private deliveryNotificationService: DeliveryNotificationService
   ) { }
 
   ngAfterViewInit(): void {
+    this.customerChatResumed();
     setTimeout(() => {
       (this.el.nativeElement as HTMLElement).style.setProperty("--main-color", this.theme);
     }, 1000);
@@ -108,9 +116,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       console.log('Widget configurations:', formData.attributes);
     });
 
+    this.onChatResumedSubject = this.sdk.onChatResumedResponse$.subscribe((data) => {
+      if (data.isChatAvailable == true) {
+        this.changeScreen('chat');
+        this.cimMessage = data.data;
+        this.processSeenMessages();
+      }
+      this.scrollToBottom();
+    });
+
     this.establishConnectionSubject = this.sdk.connectionResponse$.subscribe((response) => {
       console.log('Connection Response:', response);
-      this.eventListener(response);
+      if (response) {
+        this.eventListener(response);
+      }
     });
 
     // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
@@ -270,6 +289,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatActive = false;
         this.isIconWidget = true;
         this.chatError = false;
+        this.chatEndScreen = false;
         break;
       case 'chat':
         this.additionalPanel = false;
@@ -277,6 +297,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatActive = true;
         this.isIconWidget = true;
         this.chatError = false;
+        this.chatEndScreen = false;
         break;
       case 'form':
         this.preChatForm = true;
@@ -284,16 +305,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isIconWidget = true;
         this.chatActive = false;
         this.chatError = false;
+        this.chatEndScreen = false;
         break;
       case 'end':
         this.preChatForm = false;
         this.chatActive = false;
-        this.chatError = true;
+        this.chatEndScreen = true;
+        this.chatError = false;
         this.isIconWidget = true;
         break;
       case 'error':
         this.preChatForm = false;
         this.chatActive = false;
+        this.chatEndScreen = false
         this.chatError = true;
         this.isIconWidget = true;
         break;
@@ -312,16 +336,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
           case 'CHANNEL_SESSION_STARTED':
             console.log('event response:', event.data);
-            this.conversationId = event.data.header.channelSession.conversationId;
-            localStorage.setItem('conversationId', event.data.header.channelSession.conversationId);
+            this.conversationId = event.data.header.conversationId;
+            localStorage.setItem('conversationId', event.data.header.conversationId);
             break;
           case 'MESSAGE_RECEIVED':
             console.log('event response:', event.data);
-            this.cimMessage.push(event.data);
+            this.handleCimMessage(event.data);
             console.log('Cim Message Array: ', this.cimMessage);
             break;
           case 'SOCKET_DISCONNECTED':
             console.log('event response:', event.data);
+            localStorage.removeItem("user");
             break;
           case 'CONNECT_ERROR':
             console.log('event response:', event.data);
@@ -329,6 +354,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'CHAT_ENDED':
             this.changeScreen('form');
             console.log('event response:', event.data);
+            // localStorage.removeItem("user");
             break;
           case 'ERRORS':
             if (event.data.task.toUpperCase() == 'CHAT_REQUESTED') {
@@ -349,6 +375,161 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     } catch (error) {
       console.error('Error on establishing connection: ', error)
+    }
+  }
+
+  handleCimMessage(cimMessage: any) {
+    if (
+      cimMessage.body.type.toLowerCase() == "deliverynotification" &&
+      cimMessage.header.sender &&
+      (cimMessage.header.sender.type.toLowerCase() == "agent" || cimMessage.header.sender.type.toLowerCase() == "bot")
+    ) {
+      this.updateStatusOfCustomerMessage(cimMessage.body.messageId, cimMessage.body.status.toLowerCase());
+    } else if (
+      cimMessage.body.type.toLowerCase() == "notification" &&
+      cimMessage.body.notificationType.toLowerCase() == "typing_started"
+    ) {
+      if (cimMessage.header.sender.type.toLowerCase() == "agent") {
+        console.log("Event  received with data  ", cimMessage.body);
+
+        //if timer exist restart the timer
+        if (!this.typingIndicatorTimer) {
+          console.log("timer started for indicator to show ", cimMessage.body);
+
+          this.typingIndicatorTimer = setTimeout(() => {
+            console.log("timer ended for indicator to show ", cimMessage.body);
+            this.typingIndicatorTimer = null;
+          }, 5000);
+        } else {
+          clearTimeout(this.typingIndicatorTimer);
+          this.typingIndicatorTimer = setTimeout(() => {
+            this.typingIndicatorTimer = null;
+          }, 5000);
+        }
+      }
+    } else {
+      if (
+        cimMessage.body.type.toLowerCase() != "notification" &&
+        cimMessage.header.sender.type.toLowerCase() == "agent"
+      ) {
+        clearTimeout(this.typingIndicatorTimer);
+        this.typingIndicatorTimer = null;
+      }
+      this.cimMessage.push(cimMessage);
+      this.browserNotificationService.notify(cimMessage);
+      this.scrollToBottom();
+      this.handleMessageReport(cimMessage);
+    }
+  }
+
+  updateStatusOfCustomerMessage(messageId: string, status: string) {
+    // Implement your logic to update the message status
+    let msgStatus;
+    if (status.toLowerCase() == "read") {
+      msgStatus = "seen";
+      this.markMessageStatusToSeenOrSuccessed(messageId, msgStatus);
+    } else if (status.toLowerCase() == "failed") {
+      msgStatus = "failed";
+      this.changeMessageStatusToFailed(messageId, msgStatus);
+    }
+  }
+
+  markMessageStatusToSeenOrSuccessed(msgId: any, msgStatus: string) {
+    // find index of the message for the delivery notification
+    let index = this.cimMessage.findIndex((message: { id: any; }) => message.id == msgId);
+    // mark all the previous messages as 'seen' or 'successed' before that message except failed messages
+
+    this.cimMessage.forEach((message: { header: { sender: { type: string; }; }; }, i: number) => {
+      if (i <= index && (message.header.sender.type.toLowerCase() == "customer" || message.header.sender.type.toLowerCase() == "connector")) {
+        if (!this.cimMessage[i]["sendStatus"] || (this.cimMessage[i]["sendStatus"] && this.cimMessage[i]["sendStatus"] != "failed")) {
+          this.cimMessage[i]["sendStatus"] = msgStatus;
+        }
+      }
+    });
+  }
+
+  changeMessageStatusToFailed(msgId: any, msgStatus: string) {
+    // find index of the message for the notification
+    let index = this.cimMessage.findIndex((message: { id: any; }) => message.id == msgId);
+
+    if (index != -1) {
+      if (this.cimMessage[index].header.sender.type.toLowerCase() == "customer") {
+        this.cimMessage[index]["sendStatus"] = msgStatus;
+      }
+    } else {
+      if (msgStatus.toLowerCase() == "failed") {
+        alert("unable to start chat");
+      }
+    }
+  }
+
+  handleMessageReport(cimMessage: { header: { sender: { type: string; }; }; body: { type: string; }; id: any; }) {
+    if (document.hasFocus() && (cimMessage.header.sender.type.toLowerCase() == "agent" || cimMessage.header.sender.type.toLowerCase() == "bot")) {
+      if (cimMessage.body.type.toLowerCase() != "notification") {
+        this.constructAndPublishMessageSeenNotification(cimMessage.id);
+      }
+    }
+  }
+
+  constructAndPublishMessageSeenNotification(msgId: any) {
+    if (this.lastSeenMessageId != msgId) {
+      let header = { replyToMessageId: null, intent: null };
+      let body = { markdownText: "", type: "DELIVERYNOTIFICATION", messageId: msgId, status: "READ", reasonCode: 200 };
+
+      this.sdk.sendChatMessage({ type: "DELIVERYNOTIFICATION", header: header, body: body, customer: this.customerData });
+      this.lastSeenMessageId = msgId;
+    }
+  }
+
+  processSeenMessages() {
+    let latestMessage = this.cimMessage[this.cimMessage.length - 1];
+    if (latestMessage) {
+      // mark all the message Successed
+      this.markMessageStatusToSeenOrSuccessed(latestMessage.id, "successed");
+
+      // mark all the message to seen which are seen by agent or bot
+      let latestReadNotificationMessage = this.getLatestDeliveryMessage();
+      if (
+        latestReadNotificationMessage &&
+        latestReadNotificationMessage.body.status.toLowerCase() == "read"
+      ) {
+        this.markMessageStatusToSeenOrSuccessed(latestReadNotificationMessage.body.messageId, "seen");
+      }
+    }
+    // mark failed status
+
+    this.cimMessage.forEach((message: any) => {
+      if (
+        message.body.type.toLowerCase() == "deliverynotification" &&
+        message.body.status.toLowerCase() == "failed"
+      ) {
+        this.changeMessageStatusToFailedInHistoryMessages(message.body.messageId);
+      }
+    });
+  }
+
+  getLatestDeliveryMessage() {
+    for (let i = (this.cimMessage.length - 1); i >= 0; i--) {
+      const message = this.cimMessage[i];
+      if (
+        message &&
+        message.body.type.toLowerCase() == "deliverynotification" &&
+        message.header.sender &&
+        (message.header.sender.type.toLowerCase() == "agent" || message.header.sender.type.toLowerCase() == "bot")
+      ) {
+        return message;
+      }
+    }
+  }
+
+  changeMessageStatusToFailedInHistoryMessages( msgId: any) {
+    // find index of the message for the notification
+    let index = this.cimMessage.findIndex((message: { id: any; }) => message.id == msgId);
+
+    if (index != -1) {
+      if (this.cimMessage[index].header.sender.type.toLowerCase() == "customer") {
+        this.cimMessage[index]["sendStatus"] = "failed";
+      }
     }
   }
 
@@ -569,6 +750,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.selectedFile = null as any;
   }
 
+  sendButtonMessage(data: { title: string; payload: any; }, replyToMessageId: any) {
+    if (data.title.trim() !== "") {
+      this.constructCimMessage("PLAIN", data.title.trim(), data.payload, replyToMessageId);
+    }
+  }
+
   endChat(): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent);
 
@@ -581,4 +768,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     });
   }
+
+  customerChatResumed() {
+    let userData: string | null = localStorage.getItem('user');
+
+    if (userData !== null) {
+      let parsedUserData = JSON.parse(userData);
+      this.customerData = parsedUserData.data;
+      console.log("Checking data ", parsedUserData.data.channelCustomerIdentifier, parsedUserData.data.serviceIdentifier);
+      this.sdk.makeConnection(parsedUserData.data.serviceIdentifier, parsedUserData.data.channelCustomerIdentifier);
+    }
+  }
+
 }
