@@ -70,7 +70,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   enableEmoji = false;
   enableFontResize = false;
   preChatFormId = '';
-  enableWebRtc = false;
+  enableWebRtc: Boolean = false;
+  webRTCConfig: any;
   messageLimit: number = 300; // Set the desired maximum length
   text: string = "";
   composer_input_disabled: boolean = false;
@@ -192,7 +193,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.enableEmoji = configs.enableEmoji;
     this.enableFontResize = configs.enableFontResize;
     this.preChatFormId = configs.form;
-    this.enableWebRtc = configs.enableWebRtc;
+    this.webRTCConfig = configs.webRtc;
+    this.enableWebRtc = configs.webRtc.enableWebRtc;
   }
 
   private markFormGroupTouched(formGroup: UntypedFormGroup) {
@@ -335,6 +337,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             console.log('event response:', this.chatPayLoad);
             break;
           case 'CHANNEL_SESSION_STARTED':
+            this.isChatActive = true;
             console.log('event response:', event.data);
             this.conversationId = event.data.header.conversationId;
             localStorage.setItem('conversationId', event.data.header.conversationId);
@@ -352,6 +355,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             console.log('event response:', event.data);
             break;
           case 'CHAT_ENDED':
+            this.isChatActive = false;
             this.changeScreen('form');
             console.log('event response:', event.data);
             // localStorage.removeItem("user");

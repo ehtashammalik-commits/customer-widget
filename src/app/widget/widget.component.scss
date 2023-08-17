@@ -17,18 +17,20 @@ $text-color: #464646;
 ::-webkit-scrollbar {
   width: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 5px grey;
   border-radius: 5px;
   margin-top: 5px;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: $font-color;
+  background: transparent;
   border-radius: 5px;
 }
-
+.widget-chat-content:hover::-webkit-scrollbar-thumb {
+  background: var(--main-color);
+}
+.widget-chat-content:not(:hover)::-webkit-scrollbar-thumb {
+  background: transparent;
+}
 ::-webkit-scrollbar-thumb:hover {
   background: var(--main-color);
 }
@@ -121,7 +123,7 @@ $text-color: #464646;
 
 .widget-wrapper-content p {
   text-align: left;
-  font-size: 13px;
+  font-size: 12px;
   color: #555;
   margin: 0;
   line-height: 1.5;
@@ -244,14 +246,14 @@ div#myDropdown.widget-show {
   position: relative;
   top: -10px;
   right: 2px;
-  color: $font-color;
+  color: #0E3269;
 }
 
 .chat-icon {
-  font-size: 32px !important;
+  font-size: 25px !important;
   position: relative;
-  top: 10px;
-  right: 10px;
+  top: 8px;
+  right: 8px;
   opacity: 1;
 }
 
@@ -368,7 +370,7 @@ div#myDropdown.widget-show {
 
 .widget-form-content h4 {
   font-family: "Roboto";
-  font-size: 13px;
+  font-size: 12px;
   font-weight: normal;
   font-style: normal;
   text-align: left;
@@ -503,11 +505,11 @@ div#myDropdown.widget-show {
 .widget-header-icon {
   position: absolute;
   top: 5px;
-  width: 25px;
-  height: 25px;
+  width: 22px;
+  height: 22px;
   border: 1px solid $font-color;
   border-radius: 7px;
-  color: $font-color;
+  color: #0E3269;
   background: var(--main-color);
   font-size: 20px !important;
   text-align: center;
@@ -527,7 +529,14 @@ div#myDropdown.widget-show {
 
 .widget-header-icon .minimize {
   position: relative;
-  top: -7px;
+  top: -9px;
+  left: -2px;
+  font-weight: normal;
+}
+
+.widget-header-icon .close-icon {
+  font-size: 20px;
+  font-weight: normal;
 }
 
 .widget-chat-content {
@@ -562,43 +571,50 @@ div#myDropdown.widget-show {
 
 .widget-navbar-icon {
   position: absolute;
-  top: 5px;
+  /* top: 5px; */
   width: 24px;
   height: 24px;
-  border: 1px solid $font-color;
+  border: 1px solid #EFF2F7;
   border-radius: 7px;
   color: var(--main-color);
-  background: $white-color;
-  font-size: 18px;
+  background: rgb(255, 255, 255);
+  font-size: 15px;
   text-align: center;
-  padding-top: 2px;
+  padding-top: 5px;
+  margin: 6px 4px 6px 4px;
+}
+
+.focus-icon {
+  // border: 1px solid $white-color !important;
+  color: $white-color !important;
+  background: var(--main-color) !important;
 }
 
 .widget-navbar-divider {
   position: absolute;
   top: 6px;
   right: 70px;
-  color: var(--main-color);
+  color: #EFF2F7;
 }
 
 .btnOne {
-  right: 10px;
+  right: 5px;
 }
 
 .btnTwo {
-  right: 40px;
+  right: 35px;
 }
 
 .btnThree {
-  right: 80px;
+  right: 75px;
 }
 
 .btnFour {
-  right: 110px;
+  right: 105px;
 }
 
 .btnFive {
-  right: 140px;
+  right: 135px;
 }
 
 .widget-navbar-icon img {
@@ -658,24 +674,28 @@ div#myDropdown.widget-show {
 .widget-chat-message-customer {
   display: flex;
   width: auto;
-  max-width: 250px;
+  max-width: 280px;
   height: auto;
   margin-top: 25px;
   position: inherit;
   float: right;
   justify-content: flex-end;
-  left: 50px;
+  left: 25px;
 
   .customer-message {
     display: grid;
     border: 1px solid;
     border-color: #EFF2F7;
     background: #EFF2F7;
-    border-radius: 5px;
+    border-radius: 3px;
     padding: 0px 5px;
     width: auto;
-    max-width: 210px;
+    max-width: 250px;
     min-width: 85px;
+
+    .header {
+      display: inline-flex;
+    }
 
     .name {
       font-family: "Roboto";
@@ -684,31 +704,30 @@ div#myDropdown.widget-show {
       font-style: normal;
       text-align: left;
       color: #3e3e3e;
+      word-break: break-word;
     }
 
     .message {
       font-family: "Roboto";
       font-size: 12px;
       font-weight: normal;
-      line-height: 15px;
+      line-height: 18px;
       font-style: normal;
       text-align: left;
       color: #000000;
       width: auto;
-      max-width: 190px;
+      max-width: 225px;
     }
 
     .delivery-checks {
       position: absolute;
-      bottom: -15px;
-      right: 0px;
+      top: 0px;
+      right: 2px;
       font-size: 20px;
 
       &.delivered {
-        // .chat-time:after {
-          content: "done_all";
-         color: #bdb6b6;
-        // }
+        content: "done_all";
+        color: #bdb6b6;
       }
 
       &.seen {
@@ -754,7 +773,7 @@ div#myDropdown.widget-show {
   display: flex;
   float: left;
   width: auto;
-  max-width: 250px;
+  max-width: 280px;
   height: auto;
   margin-top: 25px;
   margin-left: 5px;
@@ -762,13 +781,14 @@ div#myDropdown.widget-show {
   .agent-message {
     display: grid;
     width: auto;
-    max-width: 210px;
+    max-width: 240px;
     min-width: 85px;
     border: 1px solid;
     border-color: #F2F2F2;
     background: #F2F2F2;
-    border-radius: 0px 5px 5px 10px;
+    border-radius: 0px 3px 3px 10px;
     padding: 0px 10px;
+    word-break: break-word;
 
     .name {
       font-family: "Roboto";
@@ -777,18 +797,19 @@ div#myDropdown.widget-show {
       font-style: normal;
       text-align: left;
       color: #3e3e3e;
+      word-break: break-word;
     }
 
     .message {
       font-family: "Roboto";
       font-size: 12px;
       font-weight: normal;
-      line-height: 15px;
+      line-height: 18px;
       font-style: normal;
       text-align: left;
       color: #000000;
       width: auto;
-      max-width: 190px;
+      max-width: 215px;
     }
   }
 
@@ -826,18 +847,19 @@ div#myDropdown.widget-show {
   }
 
   .time {
-    position: relative;
-    width: auto;
-    height: 5px;
+    position: absolute;
+    /* width: auto; */
+    height: 2px;
     font-family: "Roboto";
     font-size: 9px;
     font-weight: normal;
     font-style: normal;
     color: #777777;
-    top: 2px;
-    left: 0px;
-    max-width: 50px;
-    min-width: 35px;
+    bottom: 0px;
+    max-width: inherit;
+    right: 0px;
+    min-width: inherit;
+    padding-left: 8px;
   }
 
 }
@@ -864,10 +886,10 @@ div#myDropdown.widget-show {
     border-radius: 10px;
     border: none;
     height: 40px;
-    padding: 10px 45px 5px 30px;
+    padding: 10px 30px 10px 30px;
     outline: none;
     width: 95%;
-    font-size: 16px !important;
+    font-size: 13px !important;
     background: #eff2f7;
     color: #3e3e3e;
     margin: 0px 8px;
@@ -876,9 +898,9 @@ div#myDropdown.widget-show {
   .send-btn {
     position: absolute;
     right: 12px;
-    bottom: 8px;
+    bottom: 10px;
     cursor: pointer;
-    font-size: 24px;
+    font-size: 20px;
   }
 }
 
@@ -985,8 +1007,8 @@ div#myDropdown.widget-show {
     width: 50px;
     height: 50px;
     position: absolute;
-    top: 25%;
-    left: 25%;
+    top: 45%;
+    left: 45%;
     transform: translate(-25%, -25%);
     display: block;
   }
@@ -998,8 +1020,6 @@ div#myDropdown.widget-show {
     height: 100%;
     min-width: 100px;
   }
-
-
 
   span {
     display: block;
@@ -1019,14 +1039,15 @@ div#myDropdown.widget-show {
     transition: all .3s;
 
     &.file-type {
-      bottom: 50px !important;
-      background: #F15642 !important;
+      bottom: 50px;
+      right: 0px;
+      background: #F15642;
       border-radius: 4px;
       max-width: 80px;
-      font-size: 14px !important;
+      font-size: 14px;
       text-transform: uppercase;
-      padding: 2px 5px !important;
-      transform: translate(0) !important;
+      padding: 2px 5px;
+      transform: translate(0);
     }
 
   }
@@ -1062,18 +1083,19 @@ div#myDropdown.widget-show {
     left: 20px;
     text-transform: uppercase;
     background: #F15642;
-    padding: 5px 5px;
-    font-size: 12px;
-    color: $white-color;
+    padding: 0px 5px;
+    font-size: 13px;
+    color: rgb(255, 255, 255);
     font-weight: 600;
     min-width: 45px;
+    height: 20px;
     text-align: center;
     border-radius: 4px;
   }
 }
 
 .audioPlayer {
-  width: 200px;
+  width: 240px;
 }
 
 .videoPlayer {
@@ -1082,7 +1104,7 @@ div#myDropdown.widget-show {
 }
 
 .message-image {
-  max-width: 190px;
+  max-width: 238px;
   min-width: 85px;
   width: auto;
   height: auto;
@@ -1090,10 +1112,10 @@ div#myDropdown.widget-show {
 
 .file-btn {
   position: absolute;
-  right: 40px;
-  bottom: 8px;
+  right: 30px;
+  bottom: 10px;
   cursor: pointer;
-  font-size: 24px;
+  font-size: 20px;
   transform: rotate(39deg);
   background: transparent;
   border: none;
@@ -1116,6 +1138,7 @@ div#myDropdown.widget-show {
   border-radius: 3px;
   width: -webkit-fill-available;
   justify-content: center;
+  margin: 4px !important;
 
   &:hover {
     background: var(--main-color);
@@ -1126,12 +1149,13 @@ div#myDropdown.widget-show {
 .structured-message-area {
   width: 100%;
   flex: 1 100%;
-  margin: 10px 0;
+  margin: 5px 2px;
 
   mat-chip {
     background: transparent;
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
+    margin: 2px;
   }
 }
 

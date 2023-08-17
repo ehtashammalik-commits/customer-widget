@@ -46,7 +46,7 @@
               </div>
               <div class="widget-clearfix"></div>
             </ng-container>
-            <div class="transript-checkbox">
+            <div class="transript-checkbox" *ngIf="enableDownloadTranscript">
               <input class="check-box widget-form-control" type="checkbox" id="enabled_transcript"
                 formControlName="enabled_transcript">
               <label><span id="enabled_transcript"> I would like to receive the transcript of this session at the
@@ -73,18 +73,18 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{title}}</h5>
-          <div class="widget-header-icon iconThree">
+          <!-- <div class="widget-header-icon iconThree">
             <span class="material-symbols-outlined">
               pan_zoom
             </span>
-          </div>
+          </div> -->
           <div class="widget-header-icon iconTwo" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize">
               minimize
             </span>
           </div>
           <div class="widget-header-icon iconOne" mat-raised-button (click)="endChat()">
-            <span class="material-symbols-outlined">
+            <span class="material-symbols-outlined close-icon">
               close
             </span>
           </div>
@@ -97,13 +97,14 @@
             text_fields
           </span>
           <span class=" widget-navbar-divider">|</span>
-          <span class="widget-navbar-icon btnThree material-symbols-outlined">
+          <span class="widget-navbar-icon btnThree material-symbols-outlined" *ngIf="enableWebRtc">
             videocam
           </span>
-          <span class="widget-navbar-icon btnFour material-symbols-outlined">
+          <span class="widget-navbar-icon btnFour material-symbols-outlined" *ngIf="enableWebRtc">
             call
           </span>
-          <span class="widget-navbar-icon btnFive material-symbols-outlined">
+          <span class="widget-navbar-icon material-symbols-outlined"
+            [ngClass]="{'btnFive' :enableWebRtc === true, 'btnThree' :enableWebRtc === false , 'focus-icon' : isChatActive === true }">
             forum
           </span>
         </div>
@@ -152,7 +153,14 @@
               <div class="widget-chat-message-customer"
                 *ngIf="message.header.sender.type=='CUSTOMER' || message.header.sender.type=='CONNECTOR'">
                 <div class="customer-message">
-                  <span class="name">YOU</span>
+                  <div class="header">
+                    <span class="name">YOU</span>
+                    <span class="material-symbols-outlined delivery-checks"
+                      [ngClass]="{'delivered' : message.sendStatus == 'successed' , 'failed' : message.sendStatus == 'failed', 'seen' : message.sendStatus == 'seen'}">
+                      done_all
+                    </span>
+                  </div>
+
                   <span class="message" *ngIf="message.body.type=='PLAIN'"
                     innerHTML="{{enableDynamicLink ? (message.body.markdownText) : (message.body.markdownText)}}">
                   </span>
@@ -183,14 +191,14 @@
                     *ngIf="message.body.type=='IMAGE' || message.body.type=='FILE' || message.body.type=='VIDEO' || message.body.type=='URL' ||  message.body.type=='AUDIO'"
                     class="file-message">
                     <span class="message"
-                      innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText : message.body.caption) : (message.body.markdownText ? message.body.markdownText : message.body.caption)}}">
+                      innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText : '') : (message.body.markdownText ? message.body.markdownText : '')}}">
                     </span>
                     <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
                       <img class="message-image" src="{{message.body.attachment.mediaUrl}}"
                         alt="{{message.body.caption}}" />
                     </a>
                     <a *ngIf="message.body.type=='VIDEO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <video width="190" height="120" controls>
+                      <video width="238" height="120" controls>
                         <source src="{{message.body.attachment.mediaUrl}}" type="video/mp4">
                         {{message.body.caption}}
                       </video>
@@ -215,10 +223,10 @@
                     </a>
                   </div>
                   <span class="time">{{message.header.timestamp | date:'h:mm a'}}</span>
-                  <span class="material-symbols-outlined delivery-checks"
-                  [ngClass]="{'delivered' : message.sendStatus == 'successed' , 'failed' : message.sendStatus == 'failed', 'seen' : message.sendStatus == 'seen'}">
+                  <!-- <span class="material-symbols-outlined delivery-checks"
+                    [ngClass]="{'delivered' : message.sendStatus == 'successed' , 'failed' : message.sendStatus == 'failed', 'seen' : message.sendStatus == 'seen'}">
                     done_all
-                  </span>
+                  </span> -->
                 </div>
               </div>
               <div class="widget-chat-message-agent"
@@ -278,14 +286,14 @@
                     *ngIf="message.body.type=='IMAGE' || message.body.type=='FILE' || message.body.type=='VIDEO' || message.body.type=='URL' ||  message.body.type=='AUDIO'"
                     class="file-message">
                     <span class="message"
-                      innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText : message.body.caption) : (message.body.markdownText ? message.body.markdownText : message.body.caption)}}">
+                      innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText :'') : (message.body.markdownText ? message.body.markdownText : '')}}">
                     </span>
                     <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
                       <img class="message-image" src="{{message.body.attachment.mediaUrl}}"
                         alt="{{message.body.caption}}" />
                     </a>
                     <a *ngIf="message.body.type=='VIDEO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <video width="190" height="120" controls>
+                      <video width="225" height="120" controls>
                         <source src="{{message.body.attachment.mediaUrl}}" type="video/mp4">
                         {{message.body.caption}}
                       </video>
@@ -385,11 +393,11 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <h5 id="title">Let's Talk</h5>
-          <div class="widget-header-icon iconTwo">
+          <!-- <div class="widget-header-icon iconTwo">
             <span class="material-symbols-outlined">
               pan_zoom
             </span>
-          </div>
+          </div> -->
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize">
               minimize
@@ -412,9 +420,9 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number">
+            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number" *ngIf="enableWebRtc">
 
-            <input id="formTrigger" type="submit" class="widget-error-trigger" value="Send me transcript">
+            <input id="formTrigger" type="submit" class="widget-error-trigger" value="Send me transcript" *ngIf="enableDownloadTranscript">
           </div>
         </div>
       </div>
@@ -431,11 +439,11 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <h5 id="title">Let's Talk</h5>
-          <div class="widget-header-icon iconTwo">
+          <!-- <div class="widget-header-icon iconTwo">
             <span class="material-symbols-outlined">
               pan_zoom
             </span>
-          </div>
+          </div> -->
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize">
               minimize
@@ -458,9 +466,9 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number">
+            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number" *ngIf="enableWebRtc">
 
-            <input id="formTrigger" type="submit" class="widget-error-trigger" value="Send me transcript">
+            <input id="formTrigger" type="submit" class="widget-error-trigger" value="Send me transcript" *ngIf="enableDownloadTranscript">
           </div>
         </div>
       </div>
