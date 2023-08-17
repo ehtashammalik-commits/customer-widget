@@ -55,7 +55,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   customerData: any;
   chatPayLoad: any;
   public cimMessage: any[] = [];
-  typingIndicatorTimer: any;
+  typingIndicatorTimer: any = null;
   lastSeenMessageId: any = null;
   conversationId = '';
   isChatActive = false;
@@ -83,6 +83,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   fileLoading = false;
   selectedFile!: File;
 
+  customerIdentifier: any;
+  serviceIdentifier: any;
+
+  selectedLanguage: any;
+  browserLang:any;
+
+  textDirection = "";
+
   constructor(
     private fb: UntypedFormBuilder,
     public sdk: SdkService,
@@ -105,7 +113,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe((configs) => {
-      this.setWidgetConfigs(configs)
+      this.setWidgetConfigs(configs);
+      this.loadBrowserLanguage();
       console.log('Widget configurations:', configs);
       if (configs.form !== '') {
         this.sdk.renderPreChatForm(configs.form);
@@ -148,6 +157,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       customer_channel_identifier: ['', Validators.required],
       enabled_transcript: [false]
     });
+
+    this.loadBrowserLanguage();
   }
 
   validationMessages = {
@@ -244,6 +255,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       localStorage.setItem('user', JSON.stringify(user));
       if (localStorage.getItem('user')) {
         this.sdk.makeConnection(this.customerData.serviceIdentifier, this.customerData.channelCustomerIdentifier);
+        this.customerIdentifier = this.customerData.channelCustomerIdentifier;
+        this.serviceIdentifier = this.customerData.serviceIdentifier;
       }
     }
   }
@@ -526,7 +539,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  changeMessageStatusToFailedInHistoryMessages( msgId: any) {
+  changeMessageStatusToFailedInHistoryMessages(msgId: any) {
     // find index of the message for the notification
     let index = this.cimMessage.findIndex((message: { id: any; }) => message.id == msgId);
 
@@ -784,4 +797,73 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+  //on every key press
+  onKeyPress(event: { key: string; }) {
+    //not to sent typing started event on enter key
+    if (event.key !== "Enter") {
+      this.sendTypingStartedEvent();
+    }
+  }
+
+  //when enter key is pressed
+  onEnterKey(event: { preventDefault: () => void; }) {
+    if (!this.isMobile) {
+      event.preventDefault();
+    }
+    // clear the timer on enter key press so that we can send fresh typing started event
+    //on next key press as receiving message on another end will stop its typing indication
+    clearTimeout(this.sendTypingStartedEventTimer);
+    this.sendTypingStartedEventTimer = null;
+  }
+
+  //to send typing started event
+  sendTypingStartedEvent() {
+    //if timer is true not to send the event
+    if (!this.sendTypingStartedEventTimer) {
+      let header = { replyToMessageId: null, intent: null };
+      let body = { markdownText: "", type: "NOTIFICATION", notificationType: "TYPING_STARTED" };
+
+      this.sdk.sendChatMessage({ type: "NOTIFICATION", header: header, body: body, customer: this.customerData });
+      this.sendTypingStartedEventTimer = setTimeout(() => {
+        this.sendTypingStartedEventTimer = null;
+      }, 3000);
+    }
+  }
+
+  onTextAreaFocus() {
+    let latestAgentMessage = this.getLatestAgentMessage();
+
+    if (latestAgentMessage && latestAgentMessage.body.type != "notification") {
+      this.constructAndPublishMessageSeenNotification(latestAgentMessage.id);
+    }
+  }
+
+  getLatestAgentMessage() {
+    for (let index = this.cimMessage.length - 1; index >= 0; index--) {
+      const message = this.cimMessage[index];
+      if (message.header.sender.type.toLowerCase() == "agent") {
+        return message;
+      }
+    }
+  }
+
+  chatTranscript() {
+    if (localStorage.getItem("conversationId") !== "") {
+      window.open(
+        `${this.__appConfig.appConfig.TRANSCRIPT_URL}/?ccmUrl=${this.__appConfig.appConfig.CCM_URL}&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier}&conversationId=${localStorage.getItem("conversationId")}&browserLang=${this.browserLang}`,
+        "_blank"
+      );
+      localStorage.removeItem("conversationId");
+    }
+  }
+
+  loadBrowserLanguage() {
+    this.browserLang = navigator.language;
+    console.log("Browser language is :" + this.browserLang);
+    this.selectedLanguage = this.browserLang;
+
+    if (this.selectedLanguage == "ar") {
+      this.textDirection = "right-direction";
+    }
+  }
 }
