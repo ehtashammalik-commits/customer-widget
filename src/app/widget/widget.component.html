@@ -16,7 +16,7 @@
       </div>
       <div class="widget-wrapper-content">
         <p>Ask us a question, our support team is pleased to help you.</p>
-        <button class="widget-color" (click)="changeScreen('form')">Connect with us</button>
+        <button class="widget-color" (click)="changeScreen((isChatActive == true) ? 'chat' : 'form')">Connect with us</button>
       </div>
     </div>
   </ng-container>

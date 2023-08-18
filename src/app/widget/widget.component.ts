@@ -132,6 +132,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.changeScreen('chat');
         console.log('on Chat Resumed Response:', data);
         this.cimMessage = data.data;
+        this.isChatActive = true;
         this.processSeenMessages();
       }
       this.scrollToBottom();
