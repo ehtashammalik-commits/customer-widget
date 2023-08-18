@@ -58,8 +58,8 @@ $text-color: #464646;
   position: fixed;
   bottom: 0px;
   right: 0px;
-  width: 335px;
-  height: 663px;
+  width: 350px;
+  height: 665px;
 }
 
 /*/----------------------------/*/
@@ -1233,43 +1233,53 @@ div#myDropdown.widget-show {
     direction: rtl;
     text-align: right !important;
   }
-  .gadget-header{
+
+  .gadget-header {
     display: flex;
-  h5{
-    text-align: right;
-  }
-    .font-adjust-main{
+
+    h5 {
+      text-align: right;
+    }
+
+    .font-adjust-main {
       right: inherit;
       left: 68px;
     }
+
     span.trigger-layer {
       display: inline-flex !important;
       flex-direction: row-reverse;
-      .right-trigger{
+
+      .right-trigger {
         right: inherit;
         left: 30px;
-        &.not-connected{
+
+        &.not-connected {
           left: 0;
         }
       }
     }
-    .close-trigger{
+
+    .close-trigger {
       right: inherit;
       left: 0;
     }
   }
-  .user-message{
-    .chat-header{
-      .chat-time{
+
+  .user-message {
+    .chat-header {
+      .chat-time {
         float: none;
         margin-right: 10px;
       }
-      h5{
+
+      h5 {
         float: right;
         top: 3px;
       }
     }
   }
+
   .send-trigger {
     left: 10px;
     transform: translate(0, -50%) rotateY(180deg);

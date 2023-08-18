@@ -433,7 +433,7 @@
               *ngIf="enableWebRtc">
 
             <input id="formTrigger" type="submit" class="widget-error-trigger" value="Send me transcript"
-              *ngIf="enableDownloadTranscript">
+              *ngIf="enableDownloadTranscript" (click)="chatTranscript()">
           </div>
         </div>
       </div>
@@ -496,7 +496,7 @@
     <div class="widget-loading widget-dropdown widget-bar-view" id="dropdownTrigger">
       <div id="myDropdown" class="widget-bar-content">
         <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="changeScreen('form')">
+          (click)="changeScreen((isChatActive == true) ? 'chat' : 'form')">
           <span class="chat-icon material-symbols-outlined">
             sms
           </span>

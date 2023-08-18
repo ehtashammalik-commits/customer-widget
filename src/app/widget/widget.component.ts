@@ -59,6 +59,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   lastSeenMessageId: any = null;
   conversationId = '';
   isChatActive = false;
+  eventTriggerType = '';
 
   // Widget Configuration
   title = '';
@@ -87,7 +88,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   serviceIdentifier: any;
 
   selectedLanguage: any;
-  browserLang:any;
+  browserLang: any;
 
   textDirection = "";
 
@@ -129,6 +130,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.onChatResumedSubject = this.sdk.onChatResumedResponse$.subscribe((data) => {
       if (data.isChatAvailable == true) {
         this.changeScreen('chat');
+        console.log('on Chat Resumed Response:', data);
         this.cimMessage = data.data;
         this.processSeenMessages();
       }
@@ -139,6 +141,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       console.log('Connection Response:', response);
       if (response) {
         this.eventListener(response);
+        console.log('event listener:', response);
       }
     });
 
@@ -251,6 +254,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       console.log(Response);
 
     } else if (eventType == 'startChat') {
+      this.eventTriggerType = 'startChat';
       let user = { data: this.customerData }
       localStorage.setItem('user', JSON.stringify(user));
       if (localStorage.getItem('user')) {
@@ -344,10 +348,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (event.id !== undefined || event.id !== '' || event.id !== null) {
         switch (event.type) {
           case 'SOCKET_CONNECTED':
-            this.chatPayLoad = { type: "CHAT_REQUESTED", data: this.customerData };
-            this.sdk.sendChatRequest(this.chatPayLoad);
+            if (this.eventTriggerType === 'startChat') {
+              this.chatPayLoad = { type: "CHAT_REQUESTED", data: this.customerData };
+              this.sdk.sendChatRequest(this.chatPayLoad);
+              console.log('New Chat Start Request Sent');
+            } else if (this.eventTriggerType === '') {
+              console.log('Chat Resume Request Sent');
+              this.sdk.onChatResumed(this.customerData.serviceIdentifier, this.customerData.channelCustomerIdentifier);
+            }
             this.changeScreen('chat');
-            console.log('event response:', this.chatPayLoad);
+            console.log('event response:', this.customerData);
             break;
           case 'CHANNEL_SESSION_STARTED':
             this.isChatActive = true;
@@ -366,12 +376,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
           case 'CONNECT_ERROR':
             console.log('event response:', event.data);
-            break;
-          case 'CHAT_ENDED':
-            this.isChatActive = false;
-            this.changeScreen('form');
-            console.log('event response:', event.data);
-            // localStorage.removeItem("user");
             break;
           case 'ERRORS':
             if (event.data.task.toUpperCase() == 'CHAT_REQUESTED') {
@@ -444,18 +448,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     let msgStatus;
     if (status.toLowerCase() == "read") {
       msgStatus = "seen";
-      this.markMessageStatusToSeenOrSuccessed(messageId, msgStatus);
+      this.markMessageStatusToSeenOrSucceed(messageId, msgStatus);
     } else if (status.toLowerCase() == "failed") {
       msgStatus = "failed";
       this.changeMessageStatusToFailed(messageId, msgStatus);
     }
   }
 
-  markMessageStatusToSeenOrSuccessed(msgId: any, msgStatus: string) {
+  markMessageStatusToSeenOrSucceed(msgId: any, msgStatus: string) {
     // find index of the message for the delivery notification
     let index = this.cimMessage.findIndex((message: { id: any; }) => message.id == msgId);
     // mark all the previous messages as 'seen' or 'successed' before that message except failed messages
-
     this.cimMessage.forEach((message: { header: { sender: { type: string; }; }; }, i: number) => {
       if (i <= index && (message.header.sender.type.toLowerCase() == "customer" || message.header.sender.type.toLowerCase() == "connector")) {
         if (!this.cimMessage[i]["sendStatus"] || (this.cimMessage[i]["sendStatus"] && this.cimMessage[i]["sendStatus"] != "failed")) {
@@ -502,7 +505,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     let latestMessage = this.cimMessage[this.cimMessage.length - 1];
     if (latestMessage) {
       // mark all the message Successed
-      this.markMessageStatusToSeenOrSuccessed(latestMessage.id, "successed");
+      this.markMessageStatusToSeenOrSucceed(latestMessage.id, "successed");
 
       // mark all the message to seen which are seen by agent or bot
       let latestReadNotificationMessage = this.getLatestDeliveryMessage();
@@ -510,7 +513,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         latestReadNotificationMessage &&
         latestReadNotificationMessage.body.status.toLowerCase() == "read"
       ) {
-        this.markMessageStatusToSeenOrSuccessed(latestReadNotificationMessage.body.messageId, "seen");
+        this.markMessageStatusToSeenOrSucceed(latestReadNotificationMessage.body.messageId, "seen");
       }
     }
     // mark failed status
@@ -682,7 +685,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       type: msgType,
       header: header,
       body: body,
-      customer: this.chatPayLoad.data,
+      customer: this.customerData,
     };
     this.sdk.sendChatMessage(msgPayload);
     this.clearMessageData();
@@ -779,8 +782,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.cimMessage = [];
+        this.isChatActive = false;
         this.changeScreen('end');
-        this.sdk.handleChatEnd(this.chatPayLoad.data);
+        this.sdk.handleChatEnd(this.customerData);
         this.clearMessageData()
       }
     });

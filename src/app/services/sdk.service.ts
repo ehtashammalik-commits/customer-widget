@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ConfigService } from "../services/config.service";
 import { Observable, Subject } from 'rxjs';
 
-declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest: any, sendMessage: any, uploadToFileEngine: any, chatEnd: any, resumeChat: any, sendJoinConversation:any;
+declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest: any, sendMessage: any, uploadToFileEngine: any, chatEnd: any, resumeChat: any;
 
 @Injectable({
   providedIn: 'root'
@@ -92,16 +92,11 @@ export class SdkService {
   }
 
   onChatResumed(serviceIdentifier: any, channelCustomerIdentifier: any) {
-    resumeChat(serviceIdentifier, channelCustomerIdentifier, (res: any) => {
+    console.log('onChatResumed in service');
+    resumeChat({serviceIdentifier, channelCustomerIdentifier}, (res: any) => {
         this.onChatResumedSubject.next(res);
     });
   }
-
-  // onJoinConversation(data:any) {
-  //   sendJoinConversation(data, (res:any) => {
-  //     console.log(res, 'send Join Conversation Data');
-  //   })
-  // }
 
   sendChatRequest(payload: any) {
     console.log('Chat Payload:', payload);

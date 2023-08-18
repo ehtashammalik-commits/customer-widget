@@ -241,12 +241,11 @@ function chatEnd(data) {
  *
  * @param {*} data
  */
-function resumeChat(data) {
+function resumeChat(data, callback) {
   this.socket.emit("CHAT_RESUMED", data, (res) => {
     if (res) {
       console.log(res, 'resume chat response in sdk.');
-      // callback(res);
-      return res;
+      callback(res);
     }
   });
 }
