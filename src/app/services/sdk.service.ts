@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ConfigService } from "../services/config.service";
 import { Observable, Subject } from 'rxjs';
 
-declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest: any, sendMessage: any, uploadToFileEngine: any, chatEnd: any, resumeChat: any;
+declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest: any, sendMessage: any, uploadToFileEngine: any, chatEnd: any, resumeChat: any, webhookNotifications:any;
 
 @Injectable({
   providedIn: 'root'
@@ -101,6 +101,7 @@ export class SdkService {
   sendChatRequest(payload: any) {
     console.log('Chat Payload:', payload);
     chatRequest(payload);
+    webhookNotifications(this.ConfigData.WEBHOOK_URL, payload.data.formData);
   }
   sendChatMessage(payload: any) {
     console.log('Customer Message Payload:', payload);

@@ -7,5 +7,6 @@
     "WIDGET_IDENTIFIER": "Web",
     "SERVICE_IDENTIFIER":"5155",
     "CONVERSATIONAL_URL" : "https://cim-dev.expertflow.com/conversation-manager/customer-topics",
-    "FORM_URL" : "https://cim-dev.expertflow.com/unified-admin"
+    "FORM_URL" : "https://cim-dev.expertflow.com/unified-admin",
+    "WEBHOOK_URL" : "https://chat.googleapis.com/v1/spaces/AAAAcqK1bnk/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=fIoc7oZJdT9NjDQgjlrXH1snbl2WxhsjTVTlWr9cTes%3D"
 }

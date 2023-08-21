@@ -789,7 +789,7 @@ div#myDropdown.widget-show {
     border-color: #F2F2F2;
     background: #F2F2F2;
     border-radius: 0px 3px 3px 10px;
-    padding: 5px 10px;
+    padding: 5px 5px 5px 10px;
     word-break: break-word;
 
     .name {
@@ -1105,7 +1105,7 @@ div#myDropdown.widget-show {
 .message-image {
   max-width: 240px;
   min-width: 85px;
-  width: 223px;
+  width: 100%;
   height: auto;
 }
 
@@ -1131,13 +1131,16 @@ div#myDropdown.widget-show {
 
 // Button Messages
 .structured-message-area.custom-theme mat-chip.mat-chip {
-  color: var(--main-color);
-  background: transparent;
-  border: 1px solid var(--main-color);
+  // color: var(--main-color);
+  color: #000000;
+  // background: transparent;
+  background: #bfcadb;
+  border: 1px solid #bfcadb;
   border-radius: 3px;
   width: -webkit-fill-available;
   justify-content: center;
   margin: 4px 4px 0px 4px !important;
+  // padding-top: 15px;
 
   &:hover {
     background: var(--main-color);
@@ -1147,12 +1150,13 @@ div#myDropdown.widget-show {
 
 .structured-message-area {
   width: 100%;
-  flex: 1 100%;
-  margin: 5px 2px;
+  margin: 5px 0px 15px 0px;
 
   mat-chip {
     background: transparent;
-    font-size: 13px;
+    // background: #bfcadb !important;
+    font-size: 12px;
+    font-weight: normal;
     cursor: pointer;
     margin: 2px;
   }
@@ -1166,6 +1170,11 @@ div#myDropdown.widget-show {
   text-align: left;
   width: auto;
   max-width: 190px;
+}
+
+.structure-message-chips {
+  position: relative;
+  top: 10px;
 }
 
 //Typing indicator

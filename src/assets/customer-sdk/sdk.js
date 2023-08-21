@@ -330,10 +330,10 @@ async function getConversationData(url, conversationId) {
  * Webhook Notifications Functions
  * @param {*} data
  */
-function webhookNotifications(data) {
+function webhookNotifications(url,data) {
   let notifications = {};
-  notifications['text'] = `Name: ${data.attributes[0].value} ${data.attributes[1].value} Email: ${data.attributes[2].value} started a chat`
-  fetch(`${chatWebhook}`, {
+  notifications['text'] = `Name: ${data.attributes.name} Email: ${data.attributes.email} started a chat`
+  fetch(`${url}`, {
     method: 'POST',
     body: JSON.stringify(notifications),
     headers: {
