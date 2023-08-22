@@ -47,10 +47,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   sendTypingStartedEventTimer: any = null;
   additionalPanel = false;
   isIconWidget = true;
-  preChatForm = false;
-  chatActive = false;
+  preChatFormScreen = false;
+  widgetChatScreen = false;
   chatError = false;
   chatEndScreen = false;
+
+  // Main Screen Views
+  activeChatView = false;
+  activeAudioView = false;
+  activeVideoView = false;
 
   customerData: any;
   chatPayLoad: any;
@@ -59,7 +64,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   lastSeenMessageId: any = null;
   conversationId = '';
   isChatActive = false;
+  isCallActive = false;
   eventTriggerType = '';
+  isCallMute = false;
+  isCallOnHold = false;
 
   // Widget Configuration
   title = '';
@@ -305,38 +313,39 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     switch (screen) {
       case 'widget':
         this.additionalPanel = true;
-        this.preChatForm = false;
-        this.chatActive = false;
+        this.preChatFormScreen = false;
+        this.widgetChatScreen = false;
         this.isIconWidget = true;
         this.chatError = false;
         this.chatEndScreen = false;
         break;
       case 'chat':
         this.additionalPanel = false;
-        this.preChatForm = false;
-        this.chatActive = true;
+        this.preChatFormScreen = false;
+        this.widgetChatScreen = true;
         this.isIconWidget = true;
         this.chatError = false;
         this.chatEndScreen = false;
+        this.changeView('chat');
         break;
       case 'form':
-        this.preChatForm = true;
+        this.preChatFormScreen = true;
         this.additionalPanel = false;
         this.isIconWidget = true;
-        this.chatActive = false;
+        this.widgetChatScreen = false;
         this.chatError = false;
         this.chatEndScreen = false;
         break;
       case 'end':
-        this.preChatForm = false;
-        this.chatActive = false;
+        this.preChatFormScreen = false;
+        this.widgetChatScreen = false;
         this.chatEndScreen = true;
         this.chatError = false;
         this.isIconWidget = true;
         break;
       case 'error':
-        this.preChatForm = false;
-        this.chatActive = false;
+        this.preChatFormScreen = false;
+        this.widgetChatScreen = false;
         this.chatEndScreen = false
         this.chatError = true;
         this.isIconWidget = true;
@@ -344,6 +353,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+  changeView(view: any) {
+    console.log('Change Screen:', view);
+    switch (view) {
+      case 'chat':
+        this.activeChatView = true;
+        this.activeAudioView = false;
+        this.activeVideoView = false;
+        break;
+      case 'audio':
+        this.activeChatView = false;
+        this.activeAudioView = true;
+        this.activeVideoView = false;
+        break;
+      case 'video':
+        this.activeChatView = false;
+        this.activeAudioView = false;
+        this.activeVideoView = true;
+        break;
+    }
+  }
   eventListener(event: any) {
     try {
       if (event.id !== undefined || event.id !== '' || event.id !== null) {
@@ -376,6 +405,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             localStorage.removeItem("user");
             break;
           case 'CONNECT_ERROR':
+            this.changeScreen('error');
             console.log('event response:', event.data);
             break;
           case 'ERRORS':
@@ -870,5 +900,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (this.selectedLanguage == "ar") {
       this.textDirection = "right-direction";
     }
+  }
+
+  // Audio Functions
+  toggleCallMic() {
+    this.isCallMute = !this.isCallMute; // Use assignment operator and logical NOT operator
+    console.log(this.isCallMute);
+  }
+
+  toggleCallHold() {
+    this.isCallOnHold = !this.isCallOnHold; // Use assignment operator and logical NOT operator
+    console.log(this.isCallOnHold);
   }
 }

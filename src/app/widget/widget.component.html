@@ -1,5 +1,4 @@
-<div class="top-wrapper"
-[ngClass]="{'right-direction': selectedLanguage == 'ar', 'mobile-view': isMobile}">
+<div class="top-wrapper" [ngClass]="{'right-direction': selectedLanguage == 'ar', 'mobile-view': isMobile}">
   <!--------------------------->
   <!-- /Addition Panel HTML/ -->
   <!--------------------------->
@@ -16,7 +15,8 @@
       </div>
       <div class="widget-wrapper-content">
         <p>Ask us a question, our support team is pleased to help you.</p>
-        <button class="widget-color" (click)="changeScreen((isChatActive == true) ? 'chat' : 'form')">Connect with us</button>
+        <button class="widget-color" (click)="changeScreen((isChatActive == true) ? 'chat' : 'form')">Connect with
+          us</button>
       </div>
     </div>
   </ng-container>
@@ -24,7 +24,8 @@
   <!------------------------>
   <!-- /PreChat Form HTML /->
   <!- ------------------- -->
-  <ng-container *ngIf="preChatForm">
+
+  <ng-container *ngIf="preChatFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
         <div class="widget-form-header widget-color" (click)="changeScreen('widget')">
@@ -68,10 +69,11 @@
   <!-- /Active Chat HTML/ -->
   <!------------------------>
 
-  <ng-container *ngIf="chatActive">
+  <ng-container *ngIf="widgetChatScreen">
     <!-- Active chat screen -->
     <div class="widget-form-area">
       <div class="widget-form">
+        <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{title}}</h5>
           <!-- <div class="widget-header-icon iconThree">
@@ -90,6 +92,7 @@
             </span>
           </div>
         </div>
+        <!-- Widget Chat Control Toolbar -->
         <div class="widget-chat-navbar">
           <span class="widget-navbar-icon btnOne material-symbols-outlined">
             more_vert
@@ -98,296 +101,345 @@
             text_fields
           </span>
           <span class=" widget-navbar-divider">|</span>
-          <span class="widget-navbar-icon btnThree material-symbols-outlined" *ngIf="enableWebRtc">
+          <span class="widget-navbar-icon btnThree material-symbols-outlined" (click)="changeView('video')"
+            *ngIf="enableWebRtc">
             videocam
           </span>
-          <span class="widget-navbar-icon btnFour material-symbols-outlined" *ngIf="enableWebRtc">
+          <span class="widget-navbar-icon btnFour material-symbols-outlined" (click)="changeView('audio')"
+          [ngClass]="{'focus-icon' : isCallActive === false && activeAudioView === true , 'away-icon' : isCallActive === true  && activeAudioView === false }"
+            *ngIf="enableWebRtc">
             call
           </span>
-          <span class="widget-navbar-icon material-symbols-outlined"
-            [ngClass]="{'btnFive' :enableWebRtc === true, 'btnThree' :enableWebRtc === false , 'focus-icon' : isChatActive === true }">
+          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')"
+            [ngClass]="{'btnFive' :enableWebRtc === true, 'btnThree' :enableWebRtc === false , 'focus-icon' : isChatActive === true && activeChatView === true , 'away-icon' : isChatActive === true  && activeChatView === false }">
             forum
           </span>
         </div>
-        <div class="widget-chat-content" #scrollMe>
-          <div *ngFor="let message of cimMessage">
-            <!-- <div class="widget-chat-alert">
-              <span>Please wait we are finding an agent for you</span>
-            </div> -->
-            <div class="widget-chat-notification-area">
-              <div class="widget-chat-notification"
-                *ngIf="message.body.type == 'NOTIFICATION' && ((message.body.notificationType == 'NO_AGENT_AVAILABLE') || (message.body.notificationType == 'TASK_ENQUEUED' && message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER') || message.body.notificationType == 'AGENT_SUBSCRIBED' || message.body.notificationType == 'AGENT_UNSUBSCRIBED' || message.body.notificationType == 'PARTICIPANT_ROLE_CHANGED')">
-                <span
-                  *ngIf="message.body.notificationType=='AGENT_SUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY'"
-                  innerHTML="{{enableDynamicLink ?
-              (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username) :
-              (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} joined the chat">
-                </span>
-
-                <span
-                  *ngIf="message.body.notificationType=='PARTICIPANT_ROLE_CHANGED' && message.body.notificationData.data.conversationParticipant.role == 'PRIMARY'"
-                  innerHTML="{{enableDynamicLink ?
-              (message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username) :
-              (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} joined the chat">
-                </span>
-
-                <span
-                  *ngIf="message.body.notificationType=='AGENT_UNSUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY'"
-                  innerHTML="{{enableDynamicLink ?
-                (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username) :
-              (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} left the chat">
-                </span>
-
-                <span *ngIf="message.body.notificationType == 'NO_AGENT_AVAILABLE' "
-                  innerHTML="{{enableDynamicLink ? 'No agents are available at the moment' : 'No agents are available at the moment'}}">
-                </span>
-
-                <div *ngIf="message.body.notificationType == 'TASK_ENQUEUED'">
-                  <span *ngIf="message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER'"
-                    innerHTML="Your request is being transferred to '{{message.body.notificationData.data.queue.name}}' queue, please wait!">
+        <ng-container *ngIf="activeChatView">
+          <!-- Widget Chat Content -->
+          <div class="widget-chat-content" #scrollMe>
+            <div *ngFor="let message of cimMessage">
+              <!-- <div class="widget-chat-alert">
+                <span>Please wait we are finding an agent for you</span>
+              </div> -->
+              <div class="widget-chat-notification-area">
+                <div class="widget-chat-notification"
+                  *ngIf="message.body.type == 'NOTIFICATION' && ((message.body.notificationType == 'NO_AGENT_AVAILABLE') || (message.body.notificationType == 'TASK_ENQUEUED' && message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER') || message.body.notificationType == 'AGENT_SUBSCRIBED' || message.body.notificationType == 'AGENT_UNSUBSCRIBED' || message.body.notificationType == 'PARTICIPANT_ROLE_CHANGED')">
+                  <span
+                    *ngIf="message.body.notificationType=='AGENT_SUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY'"
+                    innerHTML="{{enableDynamicLink ?
+(message.body.notificationData.data.agentParticipant.participant.keycloakUser.username) :
+(message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} joined the chat">
                   </span>
-                </div>
-              </div>
-            </div>
-            <div class="widget-chat-messages"
-              *ngIf="message.body.type != 'DELIVERYNOTIFICATION' && message.body.type != 'NOTIFICATION' && message.body.type != 'WRAPUP'">
-              <div class="widget-chat-message-customer"
-                *ngIf="message.header.sender.type=='CUSTOMER' || message.header.sender.type=='CONNECTOR'">
-                <div class="customer-message">
-                  <div class="header">
-                    <span class="name">YOU</span>
-                    <span class="material-symbols-outlined delivery-checks"
-                      [ngClass]="{'delivered' : message.sendStatus == 'successed' , 'failed' : message.sendStatus == 'failed', 'seen' : message.sendStatus == 'seen'}">
-                      done_all
+
+                  <span
+                    *ngIf="message.body.notificationType=='PARTICIPANT_ROLE_CHANGED' && message.body.notificationData.data.conversationParticipant.role == 'PRIMARY'"
+                    innerHTML="{{enableDynamicLink ?
+(message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username) :
+(message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} joined the chat">
+                  </span>
+
+                  <span
+                    *ngIf="message.body.notificationType=='AGENT_UNSUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY'"
+                    innerHTML="{{enableDynamicLink ?
+(message.body.notificationData.data.agentParticipant.participant.keycloakUser.username) :
+(message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} left the chat">
+                  </span>
+
+                  <span *ngIf="message.body.notificationType == 'NO_AGENT_AVAILABLE' "
+                    innerHTML="{{enableDynamicLink ? 'No agents are available at the moment' : 'No agents are available at the moment'}}">
+                  </span>
+
+                  <div *ngIf="message.body.notificationType == 'TASK_ENQUEUED'">
+                    <span *ngIf="message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER'"
+                      innerHTML="Your request is being transferred to '{{message.body.notificationData.data.queue.name}}' queue, please wait!">
                     </span>
                   </div>
-
-                  <span class="message" *ngIf="message.body.type=='PLAIN'"
-                    innerHTML="{{enableDynamicLink ? (message.body.markdownText) : (message.body.markdownText)}}">
-                  </span>
-                  <!-- Message Type Contact -->
-                  <div *ngFor="let contact of message.body.contacts">
-                    <div *ngIf="message.body.type=='CONTACT'" class="file-message">
-                      <span class="message"
-                        innerHTML="{{enableDynamicLink ? (contact.name.formattedName) : (contact.name.formattedName)}}">
+                </div>
+              </div>
+              <div class="widget-chat-messages"
+                *ngIf="message.body.type != 'DELIVERYNOTIFICATION' && message.body.type != 'NOTIFICATION' && message.body.type != 'WRAPUP'">
+                <div class="widget-chat-message-customer"
+                  *ngIf="message.header.sender.type=='CUSTOMER' || message.header.sender.type=='CONNECTOR'">
+                  <div class="customer-message">
+                    <div class="header">
+                      <span class="name">YOU</span>
+                      <span class="material-symbols-outlined delivery-checks"
+                        [ngClass]="{'delivered' : message.sendStatus == 'successed' , 'failed' : message.sendStatus == 'failed', 'seen' : message.sendStatus == 'seen'}">
+                        done_all
                       </span>
-                      <a href="https://api.whatsapp.com/send?phone={{contact.phones[0].phone}}&text=Hello%2C%20I%20want%20more%20info%20about%20the%20product."
+                    </div>
+
+                    <span class="message" *ngIf="message.body.type=='PLAIN'"
+                      innerHTML="{{enableDynamicLink ? (message.body.markdownText) : (message.body.markdownText)}}">
+                    </span>
+                    <!-- Message Type Contact -->
+                    <div *ngFor="let contact of message.body.contacts">
+                      <div *ngIf="message.body.type=='CONTACT'" class="file-message">
+                        <span class="message"
+                          innerHTML="{{enableDynamicLink ? (contact.name.formattedName) : (contact.name.formattedName)}}">
+                        </span>
+                        <a href="https://api.whatsapp.com/send?phone={{contact.phones[0].phone}}&text=Hello%2C%20I%20want%20more%20info%20about%20the%20product."
+                          target="_blank">
+                          {{contact.phones[0].phone}}
+                        </a>
+                      </div>
+                    </div>
+                    <!-- Message Type Location -->
+                    <div *ngIf="message.body.type=='LOCATION'" class="file-message">
+                      <span class="message"
+                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.name) : (message.body.additionalDetails.name)}}">
+                      </span>
+                      <a href="http://maps.google.com/?q={{message.body.location.latitude}},{{message.body.location.longitude}}"
                         target="_blank">
-                        {{contact.phones[0].phone}}
+                        CLICK HERE
                       </a>
                     </div>
-                  </div>
-                  <!-- Message Type Location -->
-                  <div *ngIf="message.body.type=='LOCATION'" class="file-message">
-                    <span class="message"
-                      innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.name) : (message.body.additionalDetails.name)}}">
-                    </span>
-                    <a href="http://maps.google.com/?q={{message.body.location.latitude}},{{message.body.location.longitude}}"
-                      target="_blank">
-                      CLICK HERE
-                    </a>
-                  </div>
-                  <!-- Message Type Image, File, Video, Url -->
-                  <div
-                    *ngIf="message.body.type=='IMAGE' || message.body.type=='FILE' || message.body.type=='VIDEO' || message.body.type=='URL' ||  message.body.type=='AUDIO'"
-                    class="file-message">
-                    <span class="message"
-                      innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText : '') : (message.body.markdownText ? message.body.markdownText : '')}}">
-                    </span>
-                    <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <img class="message-image" src="{{message.body.attachment.mediaUrl}}"
-                        alt="{{message.body.caption}}" />
-                    </a>
-                    <a *ngIf="message.body.type=='VIDEO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <video width="238" height="120" controls>
-                        <source src="{{message.body.attachment.mediaUrl}}" type="video/mp4">
-                        {{message.body.caption}}
-                      </video>
-                    </a>
-                    <a *ngIf="message.body.type=='AUDIO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <audio class="audioPlayer" controls>
-                        <source src="{{message.body.attachment.mediaUrl}}" type="audio/mpeg">
-                        {{message.body.caption}}
-                      </audio>
-                    </a>
-                    <a *ngIf="message.body.type=='URL'" href="{{message.body.mediaUrl}}" target="_blank">
-                      CLICK HERE
-                    </a>
-                    <a *ngIf="message.body.type=='FILE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <span class="file-name"
-                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName) : (message.body.additionalDetails.fileName)}}"></span>
-                      <img class="file-type-message" src="assets/images/file-type.svg"
-                        alt="{{message.body.additionalDetails.fileName}}" />
-                      <span class="file-ext-main">{{message.body.attachment.mimeType.split('/')[1] ==
-                        'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
-                        message.body.attachment.mimeType.split('/')[1]}}</span>
-                    </a>
-                  </div>
-                  <span class="time">{{message.header.timestamp | date:'h:mm a'}}</span>
-                  <!-- <span class="material-symbols-outlined delivery-checks"
-                    [ngClass]="{'delivered' : message.sendStatus == 'successed' , 'failed' : message.sendStatus == 'failed', 'seen' : message.sendStatus == 'seen'}">
-                    done_all
-                  </span> -->
-                </div>
-              </div>
-              <div class="widget-chat-message-agent"
-                *ngIf="message.header.sender.type == 'AGENT' || message.header.sender.type == 'BOT'">
-                <div [ngClass]="(message.header.sender.type == 'AGENT') ? 'agent-img' : 'bot-img'">
-                  <img
-                    src="../../assets/images/{{(message.header.sender.type == 'AGENT') ? 'user.png' : 'robot-dark.svg'}}"
-                    alt="avatar">
-                </div>
-                <div class="agent-message">
-                  <!-- <span class="name"
-                    *ngIf="message.header.sender.type == 'BOT' || message.header.sender.type == 'SYSTEM'">BOT</span> -->
-                  <span class="name"
-                    *ngIf="message.header.sender.type == 'AGENT'">{{message.header.sender.senderName.toUpperCase()}}</span>
-                  <!-- <span class="message">Hello! I need general info regarding your upcoming products line.</span> -->
-                  <span class="message" *ngIf="message.body.type=='PLAIN'"
-                    innerHTML="{{enableDynamicLink ? (message.body.markdownText) : (message.body.markdownText)}}">
-                  </span>
-                  <!-- Message Type Button -->
-                  <div class="structured-message-area" [ngClass]="{'custom-theme': theme !== ''}"
-                    *ngIf="message.body.type=='BUTTON'">
-                    <span class="structured-btn-heading"
-                      innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.header.text) : (message.body.additionalDetails.interactive.header.text)}}">
-                    </span>
-                    <span class="message"
-                      innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.body.text) : (message.body.additionalDetails.interactive.body.text)}}">
-                    </span>
-                    <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
-                      <mat-chip *ngFor="let btn of message.body.buttons" (click)="sendButtonMessage(btn, message.id)">
-                        {{btn.title}}</mat-chip>
-                    </mat-chip-list>
-                  </div>
-                  <!-- Message Type Contact -->
-                  <div *ngFor="let contact of message.body.contacts">
-                    <div *ngIf="message.body.type=='CONTACT'" class="file-message">
+                    <!-- Message Type Image, File, Video, Url -->
+                    <div
+                      *ngIf="message.body.type=='IMAGE' || message.body.type=='FILE' || message.body.type=='VIDEO' || message.body.type=='URL' ||  message.body.type=='AUDIO'"
+                      class="file-message">
                       <span class="message"
-                        innerHTML="{{enableDynamicLink ? (contact.name.formattedName) : (contact.name.formattedName)}}">
+                        innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText : '') : (message.body.markdownText ? message.body.markdownText : '')}}">
                       </span>
-                      <a href="https://api.whatsapp.com/send?phone={{contact.phones[0].phone}}&text=Hello%2C%20I%20want%20more%20info%20about%20the%20product."
-                        target="_blank">
-                        {{contact.phones[0].phone}}
+                      <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                        <img class="message-image" src="{{message.body.attachment.mediaUrl}}"
+                          alt="{{message.body.caption}}" />
+                      </a>
+                      <a *ngIf="message.body.type=='VIDEO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                        <video width="238" height="120" controls>
+                          <source src="{{message.body.attachment.mediaUrl}}" type="video/mp4">
+                          {{message.body.caption}}
+                        </video>
+                      </a>
+                      <a *ngIf="message.body.type=='AUDIO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                        <audio class="audioPlayer" controls>
+                          <source src="{{message.body.attachment.mediaUrl}}" type="audio/mpeg">
+                          {{message.body.caption}}
+                        </audio>
+                      </a>
+                      <a *ngIf="message.body.type=='URL'" href="{{message.body.mediaUrl}}" target="_blank">
+                        CLICK HERE
+                      </a>
+                      <a *ngIf="message.body.type=='FILE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                        <span class="file-name"
+                          innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName) : (message.body.additionalDetails.fileName)}}"></span>
+                        <img class="file-type-message" src="assets/images/file-type.svg"
+                          alt="{{message.body.additionalDetails.fileName}}" />
+                        <span class="file-ext-main">{{message.body.attachment.mimeType.split('/')[1] ==
+                          'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
+                          message.body.attachment.mimeType.split('/')[1]}}</span>
                       </a>
                     </div>
+                    <span class="time">{{message.header.timestamp | date:'h:mm a'}}</span>
+                    <!-- <span class="material-symbols-outlined delivery-checks"
+  [ngClass]="{'delivered' : message.sendStatus == 'successed' , 'failed' : message.sendStatus == 'failed', 'seen' : message.sendStatus == 'seen'}">
+  done_all
+</span> -->
                   </div>
-                  <!-- Message Type Location -->
-                  <div *ngIf="message.body.type=='LOCATION'" class="file-message">
-                    <span class="message"
-                      innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.name) : (message.body.additionalDetails.name)}}">
+                </div>
+                <div class="widget-chat-message-agent"
+                  *ngIf="message.header.sender.type == 'AGENT' || message.header.sender.type == 'BOT'">
+                  <div [ngClass]="(message.header.sender.type == 'AGENT') ? 'agent-img' : 'bot-img'">
+                    <img
+                      src="../../assets/images/{{(message.header.sender.type == 'AGENT') ? 'user.png' : 'robot-dark.svg'}}"
+                      alt="avatar">
+                  </div>
+                  <div class="agent-message">
+                    <span class="name"
+                      *ngIf="message.header.sender.type == 'AGENT'">{{message.header.sender.senderName.toUpperCase()}}</span>
+                    <!-- <span class="message">Hello! I need general info regarding your upcoming products line.</span> -->
+                    <span class="message" *ngIf="message.body.type=='PLAIN'"
+                      innerHTML="{{enableDynamicLink ? (message.body.markdownText) : (message.body.markdownText)}}">
                     </span>
-                    <a href="http://maps.google.com/?q={{message.body.location.latitude}},{{message.body.location.longitude}}"
-                      target="_blank">
-                      CLICK HERE
-                    </a>
+                    <!-- Message Type Button -->
+                    <div class="structured-message-area" [ngClass]="{'custom-theme': theme !== ''}"
+                      *ngIf="message.body.type=='BUTTON'">
+                      <span class="structured-btn-heading"
+                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.header.text) : (message.body.additionalDetails.interactive.header.text)}}">
+                      </span>
+                      <span class="message"
+                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.body.text) : (message.body.additionalDetails.interactive.body.text)}}">
+                      </span>
+                      <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
+                        <mat-chip *ngFor="let btn of message.body.buttons" (click)="sendButtonMessage(btn, message.id)">
+                          {{btn.title}}</mat-chip>
+                      </mat-chip-list>
+                    </div>
+                    <!-- Message Type Contact -->
+                    <div *ngFor="let contact of message.body.contacts">
+                      <div *ngIf="message.body.type=='CONTACT'" class="file-message">
+                        <span class="message"
+                          innerHTML="{{enableDynamicLink ? (contact.name.formattedName) : (contact.name.formattedName)}}">
+                        </span>
+                        <a href="https://api.whatsapp.com/send?phone={{contact.phones[0].phone}}&text=Hello%2C%20I%20want%20more%20info%20about%20the%20product."
+                          target="_blank">
+                          {{contact.phones[0].phone}}
+                        </a>
+                      </div>
+                    </div>
+                    <!-- Message Type Location -->
+                    <div *ngIf="message.body.type=='LOCATION'" class="file-message">
+                      <span class="message"
+                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.name) : (message.body.additionalDetails.name)}}">
+                      </span>
+                      <a href="http://maps.google.com/?q={{message.body.location.latitude}},{{message.body.location.longitude}}"
+                        target="_blank">
+                        CLICK HERE
+                      </a>
+                    </div>
+                    <!-- Message Type Image, File, Video, Url -->
+                    <div
+                      *ngIf="message.body.type=='IMAGE' || message.body.type=='FILE' || message.body.type=='VIDEO' || message.body.type=='URL' ||  message.body.type=='AUDIO'"
+                      class="file-message">
+                      <span class="message"
+                        innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText :'') : (message.body.markdownText ? message.body.markdownText : '')}}">
+                      </span>
+                      <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                        <img class="message-image" src="{{message.body.attachment.mediaUrl}}"
+                          alt="{{message.body.caption}}" />
+                      </a>
+                      <a *ngIf="message.body.type=='VIDEO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                        <video width="225" height="120" controls>
+                          <source src="{{message.body.attachment.mediaUrl}}" type="video/mp4">
+                          {{message.body.caption}}
+                        </video>
+                      </a>
+                      <a *ngIf="message.body.type=='AUDIO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                        <audio class="audioPlayer" controls>
+                          <source src="{{message.body.attachment.mediaUrl}}" type="audio/mpeg">
+                          {{message.body.caption}}
+                        </audio>
+                      </a>
+                      <a *ngIf="message.body.type=='URL'" href="{{message.body.mediaUrl}}" target="_blank">
+                        CLICK HERE
+                      </a>
+                      <a *ngIf="message.body.type=='FILE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
+                        <span class="file-name"
+                          innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName) : (message.body.additionalDetails.fileName)}}"></span>
+                        <img class="file-type-message" src="assets/images/file-type.svg"
+                          alt="{{message.body.additionalDetails.fileName}}" />
+                        <span class="file-ext-main">{{message.body.attachment.mimeType.split('/')[1] ==
+                          'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
+                          message.body.attachment.mimeType.split('/')[1]}}</span>
+                      </a>
+                    </div>
+                    <span class="time">{{message.header.timestamp | date:'h:mm a'}}</span>
                   </div>
-                  <!-- Message Type Image, File, Video, Url -->
-                  <div
-                    *ngIf="message.body.type=='IMAGE' || message.body.type=='FILE' || message.body.type=='VIDEO' || message.body.type=='URL' ||  message.body.type=='AUDIO'"
-                    class="file-message">
-                    <span class="message"
-                      innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText :'') : (message.body.markdownText ? message.body.markdownText : '')}}">
-                    </span>
-                    <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <img class="message-image" src="{{message.body.attachment.mediaUrl}}"
-                        alt="{{message.body.caption}}" />
-                    </a>
-                    <a *ngIf="message.body.type=='VIDEO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <video width="225" height="120" controls>
-                        <source src="{{message.body.attachment.mediaUrl}}" type="video/mp4">
-                        {{message.body.caption}}
-                      </video>
-                    </a>
-                    <a *ngIf="message.body.type=='AUDIO'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <audio class="audioPlayer" controls>
-                        <source src="{{message.body.attachment.mediaUrl}}" type="audio/mpeg">
-                        {{message.body.caption}}
-                      </audio>
-                    </a>
-                    <a *ngIf="message.body.type=='URL'" href="{{message.body.mediaUrl}}" target="_blank">
-                      CLICK HERE
-                    </a>
-                    <a *ngIf="message.body.type=='FILE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
-                      <span class="file-name"
-                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName) : (message.body.additionalDetails.fileName)}}"></span>
-                      <img class="file-type-message" src="assets/images/file-type.svg"
-                        alt="{{message.body.additionalDetails.fileName}}" />
-                      <span class="file-ext-main">{{message.body.attachment.mimeType.split('/')[1] ==
-                        'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
-                        message.body.attachment.mimeType.split('/')[1]}}</span>
-                    </a>
-                  </div>
-                  <span class="time">{{message.header.timestamp | date:'h:mm a'}}</span>
                 </div>
               </div>
             </div>
           </div>
-
-        </div>
-        <div class="typing-indicator" *ngIf="typingIndicatorTimer">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <!-- File Preview Area -->
-        <div class="file-preview-cover" *ngIf="imageUrls.length > 0">
-          <div *ngFor='let file of imageUrls; let i = index' class="preview-file">
-            <mat-spinner [diameter]="50" color="primary" *ngIf="fileLoading"></mat-spinner>
-            <!-- Preview for Image & Docx File -->
-            <div *ngIf="file.fileType != 'video' && file.fileType != 'audio'">
-              <img *ngIf="file.filesPath"
-                [attr.src]="file.fileType == 'image' ? file.filesPath : 'assets/images/file-type.svg'" />
-              <span>{{file.fileName}}</span>
-              <span *ngIf="file.fileType !== 'image'" class="file-type">
-                <!-- {{file.fileExt}} -->
-                {{file.fileExt == 'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
-                file.fileExt}}
-              </span>
+          <!-- Widget Typing Indicators -->
+          <div class="typing-indicator" *ngIf="typingIndicatorTimer">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <!-- File Preview Area -->
+          <div class="file-preview-cover" *ngIf="imageUrls.length > 0">
+            <div *ngFor='let file of imageUrls; let i = index' class="preview-file">
+              <mat-spinner [diameter]="50" color="primary" *ngIf="fileLoading"></mat-spinner>
+              <!-- Preview for Image & Docx File -->
+              <div *ngIf="file.fileType != 'video' && file.fileType != 'audio'">
+                <img *ngIf="file.filesPath"
+                  [attr.src]="file.fileType == 'image' ? file.filesPath : 'assets/images/file-type.svg'" />
+                <span>{{file.fileName}}</span>
+                <span *ngIf="file.fileType !== 'image'" class="file-type">
+                  <!-- {{file.fileExt}} -->
+                  {{file.fileExt == 'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
+                  file.fileExt}}
+                </span>
+              </div>
+              <!-- Preview for Video File -->
+              <div *ngIf="file.fileType == 'video'">
+                <video class="videoPlayer" *ngIf="file.filesPath" controls>
+                  <source [attr.src]="file.filesPath" [attr.type]="file.fileType+'/'+file.fileExt">
+                  Your browser does not support the video tag.
+                </video>
+                <span>{{file.fileName}}</span>
+              </div>
+              <!-- Preview for Audio File -->
+              <div class="audioPlayer" *ngIf="file.fileType == 'audio'">
+                <audio *ngIf="file.filesPath" controls>
+                  <source [attr.src]="file.filesPath" [attr.type]="file.fileType+'/'+file.fileExt">
+                  Your browser does not support the video tag.
+                </audio>
+                <span>{{file.fileName}}</span>
+              </div>
             </div>
-            <!-- Preview for Video File -->
-            <div *ngIf="file.fileType == 'video'">
-              <video class="videoPlayer" *ngIf="file.filesPath" controls>
-                <source [attr.src]="file.filesPath" [attr.type]="file.fileType+'/'+file.fileExt">
-                Your browser does not support the video tag.
-              </video>
-              <span>{{file.fileName}}</span>
+            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()">close</mat-icon>
+          </div>
+          <!-- Widget Message Composer -->
+          <div class="widget-composer">
+            <span class="material-symbols-outlined emoji-btn">
+              add_reaction
+            </span>
+            <textarea class="widget-chat-composer" data-emoji-picker="true" matInput id="messageTextarea"
+              cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
+              placeholder="Type Message Here ..." #message maxlength="{{messageLimit}}" [(ngModel)]="text"
+              (change)="textChanged()" (focus)="onTextAreaFocus()" (keyup.enter)="isMobile ? '':onSendMessage()"
+              (keyup)="onKeyPress($event)" (keyup.enter)="onEnterKey($event)"></textarea>
+            <div id="file-btn" *ngIf="enableFileTransfer  && message.value.length < 1 && imageUrls?.length == 0">
+              <label for="file-upload">
+                <span class="material-symbols-outlined file-btn">
+                  attach_file
+                </span>
+              </label>
+              <input accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp"
+                id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
             </div>
-            <!-- Preview for Audio File -->
-            <div class="audioPlayer" *ngIf="file.fileType == 'audio'">
-              <audio *ngIf="file.filesPath" controls>
-                <source [attr.src]="file.filesPath" [attr.type]="file.fileType+'/'+file.fileExt">
-                Your browser does not support the video tag.
-              </audio>
-              <span>{{file.fileName}}</span>
+            <span class="material-symbols-outlined send-btn" (click)="onSendMessage()">
+              send
+            </span>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="activeAudioView">
+          <div class="widget-audio-section">
+            <div class="audio-agent">
+              <img src="../../assets/images/face-agent.svg" alt="agent call icon">
+            </div>
+            <div class="agent-detail">
+              <p class="name">Adam Reeds</p>
+              <p class="text">Call in Progress</p>
+              <p class="timer">03:37</p>
+            </div>
+            <div class="widget-composer">
+              <div class="widget-call-controls">
+                <div class="control-btn">
+                  <span class="material-symbols-outlined">
+                    present_to_all
+                  </span>
+                </div>
+                <div class="control-btn">
+                  <span class="material-symbols-outlined">
+                    videocam
+                  </span>
+                </div>
+                <div class="control-btn">
+                  <span class="material-symbols-outlined" innerHTML="{{isCallMute ? 'mic_off' : 'mic'}}"
+                    (click)="toggleCallMic()">
+                  </span>
+                </div>
+                <div class="control-btn">
+                  <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'play_arrow' : 'pause'}}"
+                    (click)="toggleCallHold()">
+                  </span>
+                </div>
+                <div class="control-btn">
+                  <span class="material-symbols-outlined">
+                    more_horiz
+                  </span>
+                </div>
+                <div class="control-btn end-call">
+                  <span class="material-symbols-outlined">
+                    call_end
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-          <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()">close</mat-icon>
-        </div>
-
-        <div class="widget-composer">
-          <span class="material-symbols-outlined emoji-btn">
-            add_reaction
-          </span>
-          <textarea class="widget-chat-composer" data-emoji-picker="true" matInput id="messageTextarea"
-            cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
-            placeholder="Type Message Here ..." #message maxlength="{{messageLimit}}" [(ngModel)]="text"
-            (change)="textChanged()"  (focus)="onTextAreaFocus()" (keyup.enter)="isMobile ? '':onSendMessage()"
-            (keyup)="onKeyPress($event)" (keyup.enter)="onEnterKey($event)"></textarea>
-          <div id="file-btn" *ngIf="enableFileTransfer  && message.value.length < 1 && imageUrls?.length == 0">
-            <label for="file-upload">
-              <span class="material-symbols-outlined file-btn">
-                attach_file
-              </span>
-            </label>
-            <input accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp"
-              id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
-          </div>
-          <span class="material-symbols-outlined send-btn" (click)="onSendMessage()">
-            send
-          </span>
-
-        </div>
+        </ng-container>
       </div>
     </div>
   </ng-container>

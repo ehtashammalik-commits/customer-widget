@@ -592,6 +592,11 @@ div#myDropdown.widget-show {
   background: var(--main-color) !important;
 }
 
+.away-icon {
+  color: var(--main-color) !important;
+  background: $white-color !important;
+}
+
 .widget-navbar-divider {
   position: absolute;
   top: 8px;
@@ -841,10 +846,10 @@ div#myDropdown.widget-show {
     width: 35px;
 
     img {
-      margin-left: -5px;
+      margin-left: 0px;
       margin-top: 0px;
-      width: 30px;
-      height: 30px;
+      width: 25px;
+      height: 25px;
     }
   }
 
@@ -1137,10 +1142,11 @@ div#myDropdown.widget-show {
   background: #bfcadb;
   border: 1px solid #bfcadb;
   border-radius: 3px;
-  width: -webkit-fill-available;
+  width: 100%;
+  text-align: center;
   justify-content: center;
   margin: 4px 4px 0px 4px !important;
-  // padding-top: 15px;
+  line-height: 13px;
 
   &:hover {
     background: var(--main-color);
@@ -1232,7 +1238,6 @@ div#myDropdown.widget-show {
 
 
 // Language Direction Right
-
 .right-direction {
 
   input,
@@ -1308,13 +1313,6 @@ div#myDropdown.widget-show {
     textarea {
       text-align: right;
     }
-
-    //.area-code{
-    //
-    //  left: inherit;
-    //  right: 0;
-    //
-    //}
   }
 
   .form-group * {
@@ -1327,9 +1325,101 @@ div#myDropdown.widget-show {
 
   .chat-message-content {
     p {
-      //direction: rtl !important;
       text-align: right;
     }
+  }
+
+}
+
+.widget-audio-section {
+  width: 315px;
+  position: relative;
+  top: 25px;
+  left: 5px;
+  height: 85.5%;
+  border-radius: 10px;
+  background: #4e4e4e;
+  opacity: 0.8;
+
+  .audio-agent {
+    position: absolute;
+    width: 100%;
+    top: 15%;
+    left: 34%;
+
+    img {
+      position: absolute;
+      width: 91px;
+      height: 91px;
+    }
+  }
+
+  .agent-detail {
+    position: relative;
+    top: 40%;
+    right: 8px;
+    text-align: center;
+    line-height: 10px;
+    font-style: normal;
+    color: #ffffff;
+
+    .name {
+      text-align: center;
+      font-family: "Roboto";
+      font-size: 19px;
+      font-weight: 500;
+    }
+
+    .text {
+      font-family: "Roboto";
+      font-size: 12px;
+      font-weight: normal;
+      text-align: center;
+    }
+
+    .timer {
+      font-family: "Roboto";
+      font-size: 17px;
+      font-weight: 500;
+      font-style: normal;
+      text-align: center;
+    }
+  }
+}
+
+.widget-call-controls {
+  bottom: 24px;
+  left: 24px;
+  position: relative;
+  width: 265px;
+  height: 45px;
+  border-radius: 50px;
+  filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.16));
+  background: #191919;
+  display: flex;
+  color: white;
+  justify-content: space-evenly;
+
+  .control-btn {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    top: 7px;
+    border-radius: 50px;
+    background: #000000;
+    cursor: pointer;
+
+    span {
+      font-size: 20px;
+      position: relative;
+      top: 5px;
+      left: 5px;
+    }
+
+  }
+
+  .end-call {
+    background: #DA3030 !important;
   }
 
 }

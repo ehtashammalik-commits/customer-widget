@@ -15,10 +15,10 @@ export class browserNotificationService {
       const messageText = cimMessage.body.markdownText;
       const textType = cimMessage.body.type;
       if (messageType == "BOT" || messageType == "AGENT" || messageType == "SYSTEM") {
-        if (textType == "PLAIN" && document.hidden) {
+        if ((textType == "PLAIN" || textType == "BUTTON") && document.hidden) {
           this.openBrowserNotification(messageType, messageText);
         }
-        if (textType == "PLAIN") {
+        if (textType == "PLAIN" || textType == "BUTTON") {
           this.playSound();
         }
       }
