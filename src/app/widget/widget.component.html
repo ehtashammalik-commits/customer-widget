@@ -33,29 +33,37 @@
           </span>
         </div>
         <div class="widget-form-content">
-          <h4>Please fill out the form below to start chatting with an agent now!</h4>
+          <p>Please fill out the form below to start chatting with an agent now!</p>
           <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
-            <ng-container *ngFor="let formAttribute of formData">
-              <div class="widget-form-group">
-                <label>
-                  <span id="{{formAttribute.key}}">{{formAttribute.label}}</span>
-                  <span class="widget-required" *ngIf="formAttribute.isRequired === true">*</span>
-                </label>
-                <input matInput [type]="formAttribute.valueType" [formControlName]="formAttribute.key"
-                  class="widget-form-control" autocomplete="off" [required]="formAttribute.isRequired">
+            <div class="widget-form-group" *ngFor="let attribute of formData">
+              <div [ngSwitch]="attribute.attributeType">
+                <ng-container *ngSwitchCase="'INPUT'">
+                  <label>
+                    <span id="{{attribute.key}}">{{attribute.label}}</span>
+                    <span class="widget-required" *ngIf="attribute?.isRequired === true">*</span>
+                  </label>
+                  <input matInput type="text" [formControlName]="attribute.key" [placeholder]="attribute.helpText"
+                    class="widget-form-control" autocomplete="off" [required]="attribute?.isRequired" />
+                </ng-container>
+                <ng-container *ngSwitchCase="'OPTIONS'">
+                  <label>{{ attribute.categoryOptions.categories[0].categoryName }}</label>
+                  <div *ngFor="let option of attribute.categoryOptions.categories[0].values">
+                    <input class="radio-btn" type="radio" [id]="option" [name]="attribute.key"
+                      [formControlName]="attribute.key" [value]="option" />
+                    <label [for]="option">{{ option }}</label>
+                  </div>
+                </ng-container>
+                <!-- <div class="transcript-checkbox" *ngIf="enableDownloadTranscript">
+                  <input class="check-box widget-form-control" type="checkbox" id="enabled_transcript"
+                    formControlName="enabled_transcript">
+                  <label><span id="enabled_transcript"> I would like to receive future promotions, offers, and communication.</span></label>
+                </div> -->
+                <div class="clearfix"></div>
+                <div class="widget-form-button">
+                  <input id="formTrigger" type="submit" [disabled]="preChatFormGroup.invalid"
+                    class="widget-btn widget-form-trigger widget-color" value="Start Chat">
+                </div>
               </div>
-              <div class="widget-clearfix"></div>
-            </ng-container>
-            <div class="transcript-checkbox" *ngIf="enableDownloadTranscript">
-              <input class="check-box widget-form-control" type="checkbox" id="enabled_transcript"
-                formControlName="enabled_transcript">
-              <label><span id="enabled_transcript"> I would like to receive the transcript of this session at the
-                  end.</span></label>
-            </div>
-            <div class="clearfix"></div>
-            <div class="widget-form-button">
-              <input id="formTrigger" type="submit" [disabled]="preChatFormGroup.invalid"
-                class="widget-btn widget-form-trigger widget-color" value="Start Chat">
             </div>
           </form>
         </div>
@@ -99,17 +107,16 @@
             text_fields
           </span>
           <span class=" widget-navbar-divider">|</span>
-          <span class="widget-navbar-icon btnThree material-symbols-outlined" (click)="changeView('video')"
-            *ngIf="enableWebRtc">
+          <span class="widget-navbar-icon btnThree material-symbols-outlined disable-icon" *ngIf="enableWebRtc">
             videocam
           </span>
           <span class="widget-navbar-icon btnFour material-symbols-outlined" (click)="changeView('audio')"
-          [ngClass]="{'focus-icon' : isCallActive === false && activeAudioView === true , 'away-icon' : isCallActive === true  && activeAudioView === false }"
+            [ngClass]="{'focus-icon' : isCallActive === true && activeAudioView === true , 'away-call-icon' : isCallActive === true  && activeAudioView === false }"
             *ngIf="enableWebRtc">
             call
           </span>
           <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')"
-            [ngClass]="{'btnFive' :enableWebRtc === true, 'btnThree' :enableWebRtc === false , 'focus-icon' : isChatActive === true && activeChatView === true , 'away-icon' : isChatActive === true  && activeChatView === false }">
+            [ngClass]="{'btnFive' :enableWebRtc === true, 'btnThree' :enableWebRtc === false , 'focus-icon' : isChatActive === true && activeChatView === true , 'away-chat-icon' : isChatActive === true  && activeChatView === false }">
             forum
           </span>
         </div>
@@ -399,18 +406,18 @@
               <img src="../../assets/images/face-agent.svg" alt="agent call icon">
             </div>
             <div class="agent-detail">
-              <p class="name">Adam Reeds</p>
+              <p class="name">Mubeen Hussain</p>
               <p id='call_status' class="text">Call in Progress</p>
               <p class="timer">{{callTime}}</p>
             </div>
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div class="control-btn">
+                <div class="control-btn disable-icon">
                   <span class="material-symbols-outlined">
                     present_to_all
                   </span>
                 </div>
-                <div class="control-btn">
+                <div class="control-btn disable-icon">
                   <span class="material-symbols-outlined">
                     videocam
                   </span>
@@ -420,9 +427,8 @@
                     (click)="toggleCallMic()">
                   </span>
                 </div>
-                <div class="control-btn">
-                  <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'play_arrow' : 'pause'}}"
-                    (click)="toggleCallHold()">
+                <div class="control-btn disable-icon">
+                  <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'play_arrow' : 'pause'}}">
                   </span>
                 </div>
                 <div class="control-btn">
@@ -455,7 +461,7 @@
         <div class="agent-detail">
           <p class="name">Adam Reeds</p>
         </div>
-        <div class="end-call-btn" (click)="changeView('chat')">
+        <div class="end-call-btn"  (click)="callEnd()">
           <div class="end-call-btn-sm">
             <span class="material-symbols-outlined">
               call_end

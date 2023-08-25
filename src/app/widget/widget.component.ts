@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnInit, ElementRef, ViewChild, Input, ChangeDetectorRef } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { SdkService } from "../services/sdk.service";
 import { ConfigService } from "../services/config.service";
 import { browserNotificationService } from "../services/browser-notification.service";
@@ -10,16 +10,6 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
-
-interface FormAttribute {
-  _id: string;
-  attributeType: string;
-  helpText: string;
-  isRequired: boolean;
-  key: string;
-  label: string;
-  valueType: string;
-}
 
 @Component({
   selector: 'app-widget',
@@ -88,7 +78,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   text: string = "";
   composer_input_disabled: boolean = false;
 
-  formData: FormAttribute[] = [];
+  @Input() formData!: any[];
+  preChatFormGroup!: FormGroup;
+
   isMobile = false;
 
   imageUrls: { filesPath: SafeUrl, fileType: string, fileExt: string, fileName: string }[] = [];
@@ -104,12 +96,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   textDirection = "";
 
   // Audio Screen Variables
-  // timer = "00:00";
   counterVar: any;
   callTime: string = "00:00";
 
   constructor(
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     public sdk: SdkService,
     public __appConfig: ConfigService,
     private el: ElementRef,
@@ -129,6 +120,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.preChatFormGroup = this.fb.group({});
+
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe((configs) => {
       this.setWidgetConfigs(configs);
       this.loadBrowserLanguage();
@@ -140,6 +133,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe((formData) => {
       this.formData = formData.attributes;
+      this.createFormControls();
       console.log('Widget configurations:', formData.attributes);
     });
 
@@ -175,49 +169,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.changeScreen('widget');
     }
 
-    this.preChatFormGroup = this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, Validators.pattern(/^[\d-+\s()]+$/)]],
-      customer_channel_identifier: ['', Validators.required],
-      enabled_transcript: [false]
-    });
-
     this.loadBrowserLanguage();
   }
 
-  validationMessages = {
-    name: {
-      required: "This field is required",
-      minlength: "More characters required",
-      maxlength: "Max 40 characters allowed",
-      pattern: 'Allowed special characters "[!@#$%^&*()-_=+~`"]+"',
-    },
-    email: {
-      required: "This field is required",
-      maxlength: "Max 256 characters allowed",
-      pattern: 'Allowed special characters "[!@#$%^&*()-_=+~`"]+"',
-    },
-    phone: {
-      required: "This field is required",
-      minlength: "More characters required",
-      maxlength: "Max 40 characters allowed",
-      pattern: 'Allowed special characters "[!@#$%^&*()-_=+~`"]+"',
-    },
-    customer_channel_identifier: {
-      required: "This field is required",
-      maxlength: "Max 256 characters allowed",
-      pattern: 'Allowed special characters "[!@#$%^&*()-_=+~`"]+"',
-    },
-  };
-
-  preChatFormGroup: UntypedFormGroup = new UntypedFormGroup({
-    name: new UntypedFormControl('', Validators.required),
-    email: new UntypedFormControl('', [Validators.required, Validators.email]),
-    phone: new UntypedFormControl('', Validators.required),
-    customer_channel_identifier: new UntypedFormControl('', Validators.required),
-    enabled_transcript: new UntypedFormControl(false, Validators.required)
-  });
+  private createFormControls(): void {
+    for (const attribute of this.formData) {
+      const validators = attribute.isRequired ? [Validators.required] : [];
+      this.preChatFormGroup.addControl(
+        attribute.key,
+        this.fb.control('', validators)
+      );
+    }
+  }
 
   setWidgetConfigs(configs: any) {
     this.title = configs.title;
@@ -233,11 +196,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.enableWebRtc = configs.webRtc.enableWebRtc;
   }
 
-  private markFormGroupTouched(formGroup: UntypedFormGroup) {
+  private markFormGroupTouched(formGroup: FormGroup) {
     Object.values(formGroup.controls).forEach(control => {
       control.markAsTouched();
 
-      if (control instanceof UntypedFormGroup) {
+      if (control instanceof FormGroup) {
         this.markFormGroupTouched(control);
       }
     });
@@ -1010,6 +973,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         break;
       case 'session-session_ended':
         console.log('session-session_ended ->');
+        this.isCallActive = false;
+        this.endCountdown();
+        this.changeView('chat');
         break;
       case 'session-SessionDescriptionHandler-Media acquire start':
         console.log('session-SessionDescriptionHandler-Media acquire start ->');

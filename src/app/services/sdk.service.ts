@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ConfigService } from "../services/config.service";
 import { Observable, Subject } from 'rxjs';
 
-declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest: any, sendMessage: any, uploadToFileEngine: any, chatEnd: any, resumeChat: any, webhookNotifications:any, dialCall:any, sendInvite:any, closeSession:any, audioControl:any;
+declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest: any, sendMessage: any, uploadToFileEngine: any, chatEnd: any, resumeChat: any, webhookNotifications: any, dialCall: any, sendInvite: any, closeSession: any, audioControl: any;
 
 @Injectable({
   providedIn: 'root'
@@ -96,15 +96,21 @@ export class SdkService {
 
   onChatResumed(serviceIdentifier: any, channelCustomerIdentifier: any) {
     console.log('onChatResumed in service');
-    resumeChat({serviceIdentifier, channelCustomerIdentifier}, (res: any) => {
-        this.onChatResumedSubject.next(res);
+    resumeChat({ serviceIdentifier, channelCustomerIdentifier }, (res: any) => {
+      this.onChatResumedSubject.next(res);
     });
   }
 
   sendChatRequest(payload: any) {
     console.log('Chat Payload:', payload);
     chatRequest(payload);
-    webhookNotifications(this.ConfigData.WEBHOOK_URL, payload.data.formData);
+    let notificationPayload = {
+      "name": payload.data.formData.attributes.first_name,
+      "email": payload.data.formData.attributes.business_email,
+      "phone": payload.data.formData.attributes.phone,
+      "type": payload.data.formData.attributes.customer_type,
+    }
+    webhookNotifications(this.ConfigData.WEBHOOK_URL, notificationPayload);
   }
   sendChatMessage(payload: any) {
     console.log('Customer Message Payload:', payload);
@@ -122,20 +128,20 @@ export class SdkService {
   }
 
   handleCallStart() {
-    dialCall((res:any) => {
+    dialCall((res: any) => {
       this.onCallSubject.next(res);
     });
   }
 
   sendCallRequest(type: string, remoteElementId: string, localElementId: string, customerData: any) {
-    sendInvite(type, remoteElementId, localElementId, customerData, (res:any) => {
+    sendInvite(type, remoteElementId, localElementId, customerData, (res: any) => {
       this.onCallSubject.next(res);
     })
   }
 
   handleCallEnd() {
     console.log('handle end call in sdk service');
-    closeSession((res:any) => {
+    closeSession((res: any) => {
       this.onCallSubject.next(res);
     });
   }

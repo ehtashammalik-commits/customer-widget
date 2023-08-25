@@ -372,9 +372,10 @@ div#myDropdown.widget-show {
   top: -15px;
 }
 
-.widget-form-content h4 {
+.widget-form-content p {
   font-family: "Roboto";
-  font-size: 12px;
+  font-size: 13px;
+  margin-left: 5px;
   font-weight: normal;
   font-style: normal;
   text-align: left;
@@ -403,11 +404,15 @@ div#myDropdown.widget-show {
   border: none;
   height: 40px;
   line-height: 36px;
-  padding: 0 5px;
+  padding: 0 10px;
   outline: none;
   width: 100%;
-  font-size: 16px !important;
+  font-size: 13px !important;
   background: #eff2f7;
+}
+
+.radio-btn {
+  margin-left: 10px;
 }
 
 .widget-form-group select.widget-form-control {
@@ -592,9 +597,20 @@ div#myDropdown.widget-show {
   background: var(--main-color) !important;
 }
 
-.away-icon {
+.away-chat-icon {
   color: var(--main-color) !important;
   background: $white-color !important;
+}
+
+.away-call-icon {
+  color: $white-color !important;
+  background: #79a31d !important;
+}
+
+.disable-icon {
+  color: #c7d5e9 !important;
+  background: $white-color !important;
+  cursor: not-allowed !important;
 }
 
 .widget-navbar-divider {

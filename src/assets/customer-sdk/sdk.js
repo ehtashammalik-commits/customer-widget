@@ -24,11 +24,13 @@ var audio;
 var screen;
 var mediaAcquire = 'end';
 var endCallBtn = false;
-
+/**
+ *
+ * @returns
+ */
 const getDynamicExt = () => new Promise((resolve, reject) => {
   resolve(sipExtension);
 });
-
 // /* Function to Include js files in the customer application*/
 // function include(file) {
 //   var script = document.createElement('script');
@@ -43,7 +45,6 @@ const getDynamicExt = () => new Promise((resolve, reject) => {
 
 // console.log("socket url :", libConfig.socket_url);
 let socket = {};
-
 /**
  * Widget Configurations Fetching Function
  * @param {*} ccmUrl
@@ -249,14 +250,20 @@ function resumeChat(data, callback) {
     }
   });
 }
-
+/**
+ *
+ * @param {*} data
+ */
 function sendJoinConversation(data) {
   this.socket.emit("joinConversation", data, (res) => {
     console.log("[sendJoinConversation] ", data);
     return res;
   });
 }
-
+/**
+ *
+ * @param {*} customer
+ */
 function getInitChat(customer) {
   console.log("[initChat] customer ", customer);
 
@@ -299,7 +306,6 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
       callback(error);
     });
 }
-
 /**
  * Set Conversation Data Api
  */
@@ -313,7 +319,6 @@ async function setConversationData(url, conversationId, data) {
   });
   return response;
 }
-
 /**
 * Get Conversation Data Api
 */
@@ -325,14 +330,13 @@ async function getConversationData(url, conversationId) {
   const data = await response.json();
   return data;
 }
-
 /**
  * Webhook Notifications Functions
  * @param {*} data
  */
-function webhookNotifications(url,data) {
+function webhookNotifications(url, data) {
   let notifications = {};
-  notifications['text'] = `Name: ${data.attributes.name} Email: ${data.attributes.email} started a chat`
+  notifications['text'] = `${data.type} ${data.name}, ${data.email}, ${data.phone} started a chat`
   fetch(`${url}`, {
     method: 'POST',
     body: JSON.stringify(notifications),
@@ -343,31 +347,15 @@ function webhookNotifications(url,data) {
     .then((response) => response.json())
     .then((result) => {
       console.log('Success: ', result);
-      // callback(result);
     })
     .catch((error) => {
       console.error('Error: ', error);
-      // callback(error);
     });
 }
-
-// function endCall() {
-//   if (session === true) {
-//     closeSession();
-//     // clearInterval(countervar);
-//   }
-//   // else {
-//   //   toggleFab();
-//   //   hideChat(0);
-//   // }
-// }
-
-// function endCall(eventsCallback) {
-  // if (session === true) {
-    // closeSession(eventsCallback);
-  // }
-// }
-
+/**
+ *
+ * @param {*} eventsCallback
+ */
 function dialCall(eventsCallback) {
   getDynamicExt().then((extension) => {
     ext = extension;
@@ -441,7 +429,15 @@ function dialCall(eventsCallback) {
       }
     });
 }
-
+/**
+ *
+ * @param {*} mediaType
+ * @param {*} videoName
+ * @param {*} videoLocal
+ * @param {*} userData
+ * @param {*} eventsCallback
+ * @returns
+ */
 const sendInvite = (mediaType, videoName, videoLocal, userData, eventsCallback) => {
   return new Promise((resolve, reject) => {
     var mediaConstraints = { audio: true, video: true };
@@ -643,8 +639,9 @@ const sendInvite = (mediaType, videoName, videoLocal, userData, eventsCallback) 
   });
 
 }
-
-
+/**
+ * Close Video Function
+ */
 function closeVideo() {
   let pc = this.session.sessionDescriptionHandler.peerConnection;
   pc.getSenders().find(function (s) {
@@ -653,29 +650,10 @@ function closeVideo() {
     }
   });
 }
-// function terminateCurrentSession(eventsCallback) {
-//   promise1.then((value) => {
-//     userAgent.stop();
-//   }).then(function (results) {
-//     userAgent.transport.disconnect();
-//   }).then(function (results) {
-//     var options = {
-//       'all': true
-//     };
-//     userAgent.unregister(options);
-//   }).then(function (results) {
-//     if (typeof eventsCallback === "function") {
-//       let event = {
-//         event: 'session-session_ended',
-//         response: 'userAgent unregistered',
-//         cause: ''
-//       };
-//       eventsCallback(event);
-//     }
-//   });
-
-// }
-
+/**
+ *
+ * @param {*} eventsCallback
+ */
 function terminateCurrentSession(eventsCallback) {
   promise1.then((value) => {
     userAgent.stop();
@@ -706,19 +684,17 @@ function terminateCurrentSession(eventsCallback) {
     }
   });
 }
-
+/**
+ * Promise
+ * @param {resolve , reject}
+ */
 const promise1 = new Promise((resolve, reject) => {
   resolve('Success!');
 });
-
-// function closeSession() {
-//   if (mediaAcquire === 'start') {
-//     endCallBtn = true;
-//   } else {
-//     terminateCurrentSession();
-//   }
-// }
-
+/**
+ *
+ * @param {*} eventsCallback
+ */
 function closeSession(eventsCallback) {
   if (mediaAcquire === 'start') {
     endCallBtn = true;
@@ -734,7 +710,9 @@ function closeSession(eventsCallback) {
     terminateCurrentSession(eventsCallback);
   }
 }
-
+/**
+ * Audio Call Control
+ */
 function audioControl() {
   let pc = session.sessionDescriptionHandler.peerConnection;
   if (audio === 'true') {
@@ -767,7 +745,9 @@ function audioControl() {
     audio = 'true';
   }
 }
-
+/**
+ * Video Call Control
+ */
 function videoControl() {
   let pc = session.sessionDescriptionHandler.peerConnection;
   if (video === 'true') {
@@ -802,6 +782,9 @@ function videoControl() {
   }
 
 }
+/**
+ * ScreenControl
+ */
 function screenControl() {
   if (screen === 'false') {
     screen = 'true';
