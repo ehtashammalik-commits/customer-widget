@@ -1331,6 +1331,108 @@ div#myDropdown.widget-show {
 
 }
 
+// Call Stylings
+.widget-call-area {
+  position: absolute;
+  right: 20px;
+  width: 325px;
+  height: 513px;
+  border-radius: 10px;
+  background: rgba(171, 173, 176, 0.8);
+  top: 55px;
+
+  .call-popup {
+    position: absolute;
+    bottom: 32%;
+    left: 13%;
+    width: 242px;
+    height: 219px;
+    border: 1px solid rgba(52, 52, 52);
+    border-radius: 5px;
+    background: rgba(52, 52, 52, 1);
+
+    p {
+      font-family: "Roboto";
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 2px;
+      font-style: normal;
+      text-align: center;
+      color: #ffffff;
+      position: inherit;
+      top: 30px;
+      left: 62px;
+    }
+
+    .name {
+      margin-top: 130px;
+      font-size: 12px;
+      font-weight: 300;
+    }
+
+
+    .audio-agent {
+      position: inherit;
+      width: 60px;
+      height: 60px;
+      top: 25%;
+      left: 37%;
+      border-radius: 50%;
+      border: 1px solid white;
+      background: rgba(171, 173, 176);
+      opacity: 0.8;
+
+      img {
+        position: inherit;
+        width: 100%;
+        height: 100%;
+        border-radius: 50px;
+        opacity: 0.68;
+        top: 0px;
+      }
+
+      span {
+        color: white;
+        position: absolute;
+        top: 17px;
+        left: 17px;
+      }
+    }
+
+    .end-call-btn {
+      position: relative;
+      left: 72px;
+      bottom: -20px;
+      width: 92px;
+      height: 37px;
+      border-radius: 50px;
+      filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.16));
+      background: rgba(218, 48, 48, 0.68);
+      cursor: pointer;
+
+      .end-call-btn-sm {
+        position: relative;
+        top: 3px;
+        left: 4px;
+        width: 85px;
+        height: 31px;
+        border-radius: 25px;
+        filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.16));
+        background: #da3030;
+
+        span {
+          color: white;
+          position: relative;
+          top: 2px;
+          left: 28px;
+        }
+      }
+
+    }
+  }
+}
+
+
 .widget-audio-section {
   width: 315px;
   position: relative;
@@ -1345,7 +1447,7 @@ div#myDropdown.widget-show {
     position: absolute;
     width: 100%;
     top: 15%;
-    left: 34%;
+    left: 36%;
 
     img {
       position: absolute;
@@ -1357,7 +1459,7 @@ div#myDropdown.widget-show {
   .agent-detail {
     position: relative;
     top: 40%;
-    right: 8px;
+    right: 0px;
     text-align: center;
     line-height: 10px;
     font-style: normal;
@@ -1405,7 +1507,7 @@ div#myDropdown.widget-show {
     width: 30px;
     height: 30px;
     top: 7px;
-    border-radius: 50px;
+    border-radius: 50%;
     background: #000000;
     cursor: pointer;
 
@@ -1422,4 +1524,41 @@ div#myDropdown.widget-show {
     background: #DA3030 !important;
   }
 
+}
+
+
+
+// Loader Circle
+.loader {
+  border: 2px solid #f3f3f3;
+  border-radius: 100%;
+  border-top: 2px solid #3498db;
+  width: 60px;
+  height: 60px;
+  -webkit-animation: spin 2s linear infinite;
+  /* Safari */
+  animation: spin 2s linear infinite;
+  position: absolute;
+  z-index: 1;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

@@ -20,11 +20,9 @@
       </div>
     </div>
   </ng-container>
-
   <!------------------------>
   <!-- /PreChat Form HTML /->
   <!- ------------------- -->
-
   <ng-container *ngIf="preChatFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
@@ -394,6 +392,7 @@
             </span>
           </div>
         </ng-container>
+        <!-- Call View Screen -->
         <ng-container *ngIf="activeAudioView">
           <div class="widget-audio-section">
             <div class="audio-agent">
@@ -401,8 +400,8 @@
             </div>
             <div class="agent-detail">
               <p class="name">Adam Reeds</p>
-              <p class="text">Call in Progress</p>
-              <p class="timer">03:37</p>
+              <p id='call_status' class="text">Call in Progress</p>
+              <p class="timer">{{callTime}}</p>
             </div>
             <div class="widget-composer">
               <div class="widget-call-controls">
@@ -431,7 +430,7 @@
                     more_horiz
                   </span>
                 </div>
-                <div class="control-btn end-call">
+                <div class="control-btn end-call" (click)="callEnd()">
                   <span class="material-symbols-outlined">
                     call_end
                   </span>
@@ -443,7 +442,29 @@
       </div>
     </div>
   </ng-container>
-
+  <!-- Call Popup -->
+  <ng-container *ngIf="callPopUpView">
+    <div class="widget-call-area">
+      <div class="call-popup">
+        <p>Initiating Voice Call</p>
+        <div class="audio-agent">
+          <div class="loader"></div>
+          <img src="../../assets/images/user.png" alt="agent call icon">
+          <!-- <span class="material-symbols-outlined">videocam</span> -->
+        </div>
+        <div class="agent-detail">
+          <p class="name">Adam Reeds</p>
+        </div>
+        <div class="end-call-btn" (click)="changeView('chat')">
+          <div class="end-call-btn-sm">
+            <span class="material-symbols-outlined">
+              call_end
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
   <!------------------------>
   <!-- /Chat End HTML/ -->
   <!------------------------>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ConfigService } from "../services/config.service";
 import { Observable, Subject } from 'rxjs';
 
-declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest: any, sendMessage: any, uploadToFileEngine: any, chatEnd: any, resumeChat: any, webhookNotifications:any;
+declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest: any, sendMessage: any, uploadToFileEngine: any, chatEnd: any, resumeChat: any, webhookNotifications:any, dialCall:any, sendInvite:any, closeSession:any, audioControl:any;
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +23,9 @@ export class SdkService {
 
   private onChatResumedSubject: Subject<any> = new Subject<any>();
   public onChatResumedResponse$: Observable<any> = this.onChatResumedSubject.asObservable();
+
+  private onCallSubject: Subject<any> = new Subject<any>();
+  public onCallResponse$: Observable<any> = this.onCallSubject.asObservable();
 
   constructor(private _ConfigService: ConfigService) {
     this.ConfigData = this._ConfigService.appConfig;
@@ -116,5 +119,29 @@ export class SdkService {
 
   handleChatEnd(customerPayload: any) {
     chatEnd(customerPayload);
+  }
+
+  handleCallStart() {
+    dialCall((res:any) => {
+      this.onCallSubject.next(res);
+    });
+  }
+
+  sendCallRequest(type: string, remoteElementId: string, localElementId: string, customerData: any) {
+    sendInvite(type, remoteElementId, localElementId, customerData, (res:any) => {
+      this.onCallSubject.next(res);
+    })
+  }
+
+  handleCallEnd() {
+    console.log('handle end call in sdk service');
+    closeSession((res:any) => {
+      this.onCallSubject.next(res);
+    });
+  }
+
+  handleCallMic() {
+    console.log('handle mic mute/unmute in sdk service');
+    audioControl();
   }
 }

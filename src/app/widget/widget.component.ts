@@ -31,6 +31,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private preChatFormSubscription: Subscription = new Subscription;
   private establishConnectionSubject: Subscription = new Subscription;
   private onChatResumedSubject: Subscription = new Subscription;
+  private onCallSubject: Subscription = new Subscription;
   @ViewChild("autosize")
   autosize!: CdkTextareaAutosize;
   @ViewChild("myFileInput")
@@ -56,6 +57,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   activeChatView = false;
   activeAudioView = false;
   activeVideoView = false;
+
+  callPopUpView = false;
 
   customerData: any;
   chatPayLoad: any;
@@ -99,6 +102,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   browserLang: any;
 
   textDirection = "";
+
+  // Audio Screen Variables
+  // timer = "00:00";
+  counterVar: any;
+  callTime: string = "00:00";
 
   constructor(
     private fb: UntypedFormBuilder,
@@ -144,6 +152,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.processSeenMessages();
       }
       this.scrollToBottom();
+    });
+
+    this.onCallSubject = this.sdk.onCallResponse$.subscribe((data) => {
+      console.log('call response events => ', data);
+      this.processCallResponses(data);
     });
 
     this.establishConnectionSubject = this.sdk.connectionResponse$.subscribe((response) => {
@@ -306,6 +319,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   closeWrapper() {
     console.log("wrapper closed");
+    this.additionalPanel = false;
   }
 
   changeScreen(screen: any) {
@@ -360,11 +374,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.activeChatView = true;
         this.activeAudioView = false;
         this.activeVideoView = false;
+        this.callPopUpView = false;
         break;
       case 'audio':
-        this.activeChatView = false;
-        this.activeAudioView = true;
-        this.activeVideoView = false;
+        if (this.isCallActive) {
+          this.activeChatView = false;
+          this.activeAudioView = true;
+          this.activeVideoView = false;
+          this.callPopUpView = false;
+          this.startCountdown();
+        } else {
+          this.callPopUpView = true;
+          this.activeChatView = true;
+          this.activeAudioView = false;
+          this.activeVideoView = false;
+          this.initiateVoiceCall(view);
+        }
+
         break;
       case 'video':
         this.activeChatView = false;
@@ -906,10 +932,96 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   toggleCallMic() {
     this.isCallMute = !this.isCallMute; // Use assignment operator and logical NOT operator
     console.log(this.isCallMute);
+    this.sdk.handleCallMic();
   }
 
   toggleCallHold() {
     this.isCallOnHold = !this.isCallOnHold; // Use assignment operator and logical NOT operator
     console.log(this.isCallOnHold);
   }
+
+  initiateVoiceCall(callType: any) {
+    this.sdk.handleCallStart();
+    this.isCallActive = true;
+  }
+
+  startCountdown(): void {
+    const countDownDate = new Date().getTime();
+    this.counterVar = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = now - countDownDate;
+      const minutes = ("0" + Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).slice(-2);
+      const seconds = ("0" + Math.floor((distance % (1000 * 60)) / 1000)).slice(-2);
+      this.callTime = `${minutes}:${seconds}`;
+    }, 1000);
+  }
+
+  endCountdown(): void {
+    this.callTime = "00:00";
+    clearInterval(this.counterVar);
+  }
+
+  processCallResponses(data: any): void {
+    console.log('sip.js events => ', JSON.stringify(data.event));
+    switch (data.event) {
+      case 'registered':
+        console.log('customer_data', this.customerData);
+        let userData = {
+          'phone': this.customerData.formData.attributes.phone,
+          'name': this.customerData.formData.attributes.name,
+          'email': this.customerData.formData.attributes.email,
+          // 'message': 'hello world'
+        }
+        this.sdk.sendCallRequest('audio', 'remoteAudio', '', userData)
+        break;
+      case 'unregistered':
+        console.log('unregistered');
+        break;
+      case 'registrationFailed':
+        console.log('registrationFailed');
+        break;
+      case 'get_dynamic_ext':
+        console.log("get dynamic ext");
+        break;
+      case 'Channel Creating':
+        console.log('Channel Creating');
+        break;
+      case 'session-accepted':
+        console.log('session-accepted');
+        this.changeView('audio');
+        break;
+      case 'session-progress':
+        console.log('session-progress ->' + data.response);
+        break;
+      case 'session-rejected':
+        console.log('session-rejected->' + data.response + '------' + data.cause);
+        break;
+      case 'session-failed':
+        console.log('session-failed ->');
+        break;
+      case 'session-terminated':
+        console.log('testing->' + data.response + '------' + data.cause);
+        this.isCallActive = false;
+        this.endCountdown();
+        this.changeView('chat');
+        break;
+      case 'session-bye':
+        console.log('testing->' + data.response);
+        break;
+      case 'session-session_ended':
+        console.log('session-session_ended ->');
+        break;
+      case 'session-SessionDescriptionHandler-Media acquire start':
+        console.log('session-SessionDescriptionHandler-Media acquire start ->');
+        break;
+      case 'session-SessionDescriptionHandler-Media acquire end':
+        console.log('session-SessionDescriptionHandler-Media acquire end ->');
+        break;
+    }
+  }
+
+  callEnd() {
+    this.sdk.handleCallEnd();
+  }
+
 }

@@ -351,19 +351,25 @@ function webhookNotifications(url,data) {
     });
 }
 
-function endCall() {
-  if (session === true) {
-    closeSession();
-    clearInterval(countervar);
-  } else {
-    toggleFab();
-    hideChat(0);
-  }
-}
+// function endCall() {
+//   if (session === true) {
+//     closeSession();
+//     // clearInterval(countervar);
+//   }
+//   // else {
+//   //   toggleFab();
+//   //   hideChat(0);
+//   // }
+// }
 
-function dialCall(callType, userData) {
+// function endCall(eventsCallback) {
+  // if (session === true) {
+    // closeSession(eventsCallback);
+  // }
+// }
+
+function dialCall(eventsCallback) {
   getDynamicExt().then((extension) => {
-    // Create a user agent named extension, connect, and register to receive invitations.
     ext = extension;
     console.log(wssServerIp, 'ip at call time');
     userAgent = new SIP.UA({
@@ -373,12 +379,13 @@ function dialCall(callType, userData) {
       password: extensionPassword,
       log: {
         builtinEnabled: enableLogs,
-        level: 3 // log log level
+        level: 3
       },
       register: true
     });
-    // Connect the user agent
+
     userAgent.start();
+
     if (typeof eventsCallback === "function") {
       let event = {
         event: 'get_dynamic_ext',
@@ -398,7 +405,6 @@ function dialCall(callType, userData) {
         };
         eventsCallback(event);
       }
-
     });
 
     userAgent.on('registered', function () {
@@ -434,10 +440,9 @@ function dialCall(callType, userData) {
         eventsCallback(event);
       }
     });
-
 }
 
-const sendInvite = (mediaType, videoName, videoLocal, userData) => {
+const sendInvite = (mediaType, videoName, videoLocal, userData, eventsCallback) => {
   return new Promise((resolve, reject) => {
     var mediaConstraints = { audio: true, video: true };
     toggleVideo = 'web_cam';
@@ -459,12 +464,16 @@ const sendInvite = (mediaType, videoName, videoLocal, userData) => {
 
     console.log("invite function has been triggered");
     if (userData !== null) {
-      var extraHeaderString = []
-      var index = 0
+      var extraHeaderString = [];
+      var index = 0;
       for (const key in userData) {
-        var keyvalue = userData[key].trim();
-        extraHeaderString.push('X-variable' + index + ":" + key + "|" + keyvalue);
-        index++;
+        if (typeof userData[key] === 'string') {
+          var keyvalue = userData[key].trim();
+          extraHeaderString.push('X-variable' + index + ":" + key + "|" + keyvalue);
+          index++;
+        } else {
+          console.warn(`Value for key ${key} is not a string and will be skipped.`);
+        }
       }
     }
     session = userAgent.invite('sip:' + diallingURI + '@' + wssServerIp, {
@@ -550,7 +559,7 @@ const sendInvite = (mediaType, videoName, videoLocal, userData) => {
       userAgent.unregister(options);
     })
     session.on('terminated', function (message, cause) {
-      closeSession();
+      closeSession(eventsCallback);
       if (typeof eventsCallback === "function") {
         let event = {
           event: 'session-terminated',
@@ -604,7 +613,9 @@ const sendInvite = (mediaType, videoName, videoLocal, userData) => {
       })
       session.sessionDescriptionHandler.on('Media acquire end', function () {
         if (endCallBtn === true) {
-          terminateCurrentSession();
+          terminateCurrentSession(() => {
+            eventsCallback();
+          });
           endCallBtn = false;
         }
         mediaAcquire = 'end';
@@ -642,17 +653,40 @@ function closeVideo() {
     }
   });
 }
-function terminateCurrentSession() {
+// function terminateCurrentSession(eventsCallback) {
+//   promise1.then((value) => {
+//     userAgent.stop();
+//   }).then(function (results) {
+//     userAgent.transport.disconnect();
+//   }).then(function (results) {
+//     var options = {
+//       'all': true
+//     };
+//     userAgent.unregister(options);
+//   }).then(function (results) {
+//     if (typeof eventsCallback === "function") {
+//       let event = {
+//         event: 'session-session_ended',
+//         response: 'userAgent unregistered',
+//         cause: ''
+//       };
+//       eventsCallback(event);
+//     }
+//   });
+
+// }
+
+function terminateCurrentSession(eventsCallback) {
   promise1.then((value) => {
     userAgent.stop();
-  }).then(function (results) {
-    userAgent.transport.disconnect();
-  }).then(function (results) {
+  }).then(function () {
+    return userAgent.transport.disconnect();
+  }).then(function () {
     var options = {
       'all': true
     };
-    userAgent.unregister(options);
-  }).then(function (results) {
+    return userAgent.unregister(options);
+  }).then(function () {
     if (typeof eventsCallback === "function") {
       let event = {
         event: 'session-session_ended',
@@ -661,17 +695,43 @@ function terminateCurrentSession() {
       };
       eventsCallback(event);
     }
+  }).catch(function (error) {
+    if (typeof eventsCallback === "function") {
+      let event = {
+        event: 'session-termination-failed',
+        response: 'An error occurred during session termination',
+        cause: error.message
+      };
+      eventsCallback(event);
+    }
   });
-
 }
+
 const promise1 = new Promise((resolve, reject) => {
   resolve('Success!');
 });
-function closeSession() {
+
+// function closeSession() {
+//   if (mediaAcquire === 'start') {
+//     endCallBtn = true;
+//   } else {
+//     terminateCurrentSession();
+//   }
+// }
+
+function closeSession(eventsCallback) {
   if (mediaAcquire === 'start') {
     endCallBtn = true;
+    if (typeof eventsCallback === "function") {
+      let event = {
+        event: 'session-terminated',
+        response: 'Session terminated due to media acquire start',
+        cause: ''
+      };
+      eventsCallback(event);
+    }
   } else {
-    terminateCurrentSession();
+    terminateCurrentSession(eventsCallback);
   }
 }
 
@@ -706,8 +766,8 @@ function audioControl() {
 
     audio = 'true';
   }
-
 }
+
 function videoControl() {
   let pc = session.sessionDescriptionHandler.peerConnection;
   if (video === 'true') {
