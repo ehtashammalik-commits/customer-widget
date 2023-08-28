@@ -77,6 +77,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   messageLimit: number = 300; // Set the desired maximum length
   text: string = "";
   composer_input_disabled: boolean = false;
+  isTyping: boolean = true;
 
   @Input() formData!: any[];
   preChatFormGroup!: FormGroup;
@@ -820,7 +821,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.sdk.makeConnection(parsedUserData.data.serviceIdentifier, parsedUserData.data.channelCustomerIdentifier);
     }
   }
-
+  onTyping() {
+    this.isTyping = this.text.trim().length > 0;
+  }
   //on every key press
   onKeyPress(event: { key: string; }) {
     //not to sent typing started event on enter key

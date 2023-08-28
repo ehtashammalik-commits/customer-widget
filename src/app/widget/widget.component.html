@@ -376,16 +376,27 @@
             <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()">close</mat-icon>
           </div>
           <!-- Widget Message Composer -->
+          <div class="maxLimitError" *ngIf="text.length == messageLimit"><span>Max Limit Reached</span></div>
           <div class="widget-composer">
             <span class="material-symbols-outlined emoji-btn">
               add_reaction
             </span>
-            <textarea class="widget-chat-composer" data-emoji-picker="true" matInput id="messageTextarea"
-              cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
-              placeholder="Type Message Here ..." #message maxlength="{{messageLimit}}" [(ngModel)]="text"
-              (change)="textChanged()" (focus)="onTextAreaFocus()" (keyup.enter)="isMobile ? '':onSendMessage()"
-              (keyup)="onKeyPress($event)" (keyup.enter)="onEnterKey($event)"></textarea>
-            <div id="file-btn" *ngIf="enableFileTransfer  && message.value.length < 1 && imageUrls?.length == 0">
+            <textarea class="widget-chat-composer"
+              data-emoji-picker="true"
+              matInput id="messageTextarea"
+              cdkTextareaAutosize #autosize="cdkTextareaAutosize"
+              cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
+              placeholder="Type Message Here ..."
+              #message maxlength="{{messageLimit}}"
+              [(ngModel)]="text"
+              (change)="textChanged()"
+              (focus)="onTextAreaFocus();"
+              (keyup)="onKeyPress($event)"
+              (keyup.enter)="isMobile ? '' : onSendMessage()"
+              (keyup.enter)="onEnterKey($event)"
+              [ngClass]="{'error-border': text.length == messageLimit}"
+              ></textarea>
+            <div id="file-btn" *ngIf="enableFileTransfer && text.length < 1 && imageUrls?.length == 0">
               <label for="file-upload">
                 <span class="material-symbols-outlined file-btn">
                   attach_file
@@ -394,40 +405,41 @@
               <input accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp"
                 id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
             </div>
-            <span class="material-symbols-outlined send-btn" (click)="onSendMessage()">
+            <span class="material-symbols-outlined send-btn" *ngIf="isTyping" (click)="onSendMessage()">
               send
             </span>
           </div>
+
         </ng-container>
         <!-- Call View Screen -->
         <ng-container *ngIf="activeAudioView">
           <div class="widget-audio-section">
             <div class="audio-agent">
-              <img src="../../assets/images/face-agent.svg" alt="agent call icon">
+              <img src="../../assets/images/dummy-user.svg" alt="agent call icon">
             </div>
             <div class="agent-detail">
-              <p class="name">Mubeen Hussain</p>
+              <p class="name">Expertflow Agent</p>
               <p id='call_status' class="text">Call in Progress</p>
               <p class="timer">{{callTime}}</p>
             </div>
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div class="control-btn disable-icon">
+                <div class="control-btn disable-icon-callControl">
                   <span class="material-symbols-outlined">
                     present_to_all
                   </span>
                 </div>
-                <div class="control-btn disable-icon">
+                <div class="control-btn disable-icon-callControl">
                   <span class="material-symbols-outlined">
                     videocam
                   </span>
                 </div>
-                <div class="control-btn">
+                <div class="control-btn" [ngClass]="{'end-call' : isCallMute === true}">
                   <span class="material-symbols-outlined" innerHTML="{{isCallMute ? 'mic_off' : 'mic'}}"
                     (click)="toggleCallMic()">
                   </span>
                 </div>
-                <div class="control-btn disable-icon">
+                <div class="control-btn disable-icon-callControl">
                   <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'play_arrow' : 'pause'}}">
                   </span>
                 </div>
@@ -455,13 +467,13 @@
         <p>Initiating Voice Call</p>
         <div class="audio-agent">
           <div class="loader"></div>
-          <img src="../../assets/images/user.png" alt="agent call icon">
+          <img src="../../assets/images/dummy-user.svg" alt="agent call icon">
           <!-- <span class="material-symbols-outlined">videocam</span> -->
         </div>
         <div class="agent-detail">
-          <p class="name">Adam Reeds</p>
+          <p class="name">Expertflow Agent</p>
         </div>
-        <div class="end-call-btn"  (click)="callEnd()">
+        <div class="end-call-btn" (click)="callEnd()">
           <div class="end-call-btn-sm">
             <span class="material-symbols-outlined">
               call_end

@@ -613,6 +613,12 @@ div#myDropdown.widget-show {
   cursor: not-allowed !important;
 }
 
+.disable-icon-callControl {
+  color: #c7d5e9 !important;
+  background: rgb(51 51 51) !important;
+  cursor: not-allowed !important;
+}
+
 .widget-navbar-divider {
   position: absolute;
   top: 8px;
@@ -901,6 +907,7 @@ div#myDropdown.widget-show {
     left: 15px;
     font-size: 20px;
     cursor: pointer;
+    z-index: 999999;
   }
 
   .widget-chat-composer {
@@ -908,6 +915,9 @@ div#myDropdown.widget-show {
     border-radius: 10px;
     border: none;
     height: 40px;
+    // min-height: 40px;
+    // max-height: 160px;
+    // height: 120px;
     padding: 10px 30px 10px 30px;
     outline: none;
     width: 95%;
@@ -915,6 +925,9 @@ div#myDropdown.widget-show {
     background: #eff2f7;
     color: #3e3e3e;
     margin: 0px 8px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
   }
 
   .send-btn {
@@ -1542,7 +1555,17 @@ div#myDropdown.widget-show {
 
 }
 
+.error-border {
+  border: 1px solid #DA3030 !important;
+}
 
+.maxLimitError {
+  position: relative;
+  bottom: 75px;
+  left: 225px;
+  font-size: 10px;
+  color: red;
+}
 
 // Loader Circle
 .loader {
