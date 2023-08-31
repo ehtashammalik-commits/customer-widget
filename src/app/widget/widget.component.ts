@@ -10,6 +10,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-widget',
@@ -35,6 +36,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   @Input() conversation: any;
   scrollTop = 0;
   public scrollCon: any;
+  customerIdentifier: any;
+
+  widgetIdentifier: any;
+  serviceIdentifier: any;
+
   sendTypingStartedEventTimer: any = null;
   additionalPanel = false;
   isIconWidget = true;
@@ -88,9 +94,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   fileLoading = false;
   selectedFile!: File;
 
-  customerIdentifier: any;
-  serviceIdentifier: any;
-
   selectedLanguage: any;
   browserLang: any;
 
@@ -101,6 +104,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   callTime: string = "00:00";
 
   constructor(
+    private route:ActivatedRoute,
     private fb: FormBuilder,
     public sdk: SdkService,
     public __appConfig: ConfigService,
@@ -121,6 +125,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      this.customerIdentifier = params['channelCustomerIdentifier'];
+      this.serviceIdentifier = params['serviceIdentifier'];
+      this.widgetIdentifier = params['widgetIdentifier'];
+
+      console.log('parameters from iframe url', this.customerIdentifier, this.serviceIdentifier, this.widgetIdentifier);
+      // this.customerIdentifier = this.channelCustomerIdentifier;
+
+      // Pass parameters to service after you have received them.
+      this.passUrlParamsToServices();
+    });
+
     this.preChatFormGroup = this.fb.group({});
 
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe((configs) => {
@@ -173,6 +189,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.loadBrowserLanguage();
   }
 
+  async passUrlParamsToServices() {
+    await this.sdk.receiveUrlParamsValue(this.widgetIdentifier, this.serviceIdentifier);
+  }
+
   private createFormControls(): void {
     for (const attribute of this.formData) {
       const validators = attribute.isRequired ? [Validators.required] : [];
@@ -210,7 +230,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   onFormSubmit(): void {
     try {
       let preChatData = this.preChatFormGroup.value;
-      if (preChatData.customer_channel_identifier && this.__appConfig.appConfig.SERVICE_IDENTIFIER) {
+      if (preChatData.customer_channel_identifier && this.serviceIdentifier) {
         let eventPayload = this.getEventPayload(preChatData);
         console.log('Event Payload: ==>', eventPayload);
         this.setUserData(eventPayload, 'startChat');
@@ -253,7 +273,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   getEventPayload(preChatFormData: any) {
     return {
-      serviceIdentifier: this.__appConfig.appConfig.SERVICE_IDENTIFIER,
+      serviceIdentifier: this.serviceIdentifier,
       channelCustomerIdentifier: preChatFormData.customer_channel_identifier,
       browserDeviceInfo: {
         browserId: '123456',

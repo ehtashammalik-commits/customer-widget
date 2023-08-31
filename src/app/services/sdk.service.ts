@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { ConfigService } from "../services/config.service";
 import { Observable, Subject } from 'rxjs';
 
@@ -7,10 +7,11 @@ declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, c
 @Injectable({
   providedIn: 'root'
 })
-export class SdkService {
+export class SdkService implements OnInit {
   private sdkLoaded: boolean = false;
   ConfigData: any;
-
+  widgetIdentifier: any;
+  serviceIdentifier: any;
 
   private widgetConfigsSubject: Subject<any> = new Subject<any>();
   public widgetConfigs$: Observable<any> = this.widgetConfigsSubject.asObservable();
@@ -29,30 +30,16 @@ export class SdkService {
 
   constructor(private _ConfigService: ConfigService) {
     this.ConfigData = this._ConfigService.appConfig;
-    console.log('SDK service initialized', this.ConfigData);
-
-    this.loadSdk().then(() => {
-      this.loadWidget(this.ConfigData.CCM_URL, this.ConfigData.WIDGET_IDENTIFIER);
-    });
+    this.loadSdk();
   }
   ngOnInit(): void { }
 
-  // loadSdk(): Promise<void> {
-  //   return new Promise<void>((resolve) => {
-  //     if (typeof widgetConfigs !== 'undefined') {
-  //       console.log('SDK script loaded successfully');
-  //       resolve();
-  //     } else {
-  //       const sdkLib = document.createElement('script');
-  //       sdkLib.setAttribute('src', 'assets/customer-sdk/sdk.js');
-  //       document.head.appendChild(sdkLib);
-  //       sdkLib.onload = () => {
-  //         console.log('SDK script loaded successfully');
-  //         resolve();
-  //       };
-  //     }
-  //   });
-  // }
+  receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
+    this.widgetIdentifier = widgetIdentifier;
+    this.serviceIdentifier = serviceIdentifier;
+    this.loadWidget(this.ConfigData.CCM_URL, this.widgetIdentifier);
+    console.log('Received params in sdk service:', this.widgetIdentifier, this.serviceIdentifier);
+  }
 
   loadSdk(): Promise<void> {
     return new Promise<void>((resolve) => {
@@ -78,11 +65,6 @@ export class SdkService {
     });
   }
 
-  // makeConnection(serviceIdentifier: any, channelCustomerIdentifier: any) {
-  //   establishConnection(this.ConfigData.SOCKET_URL, serviceIdentifier, channelCustomerIdentifier, (res: any) => {
-  //     this.establishConnectionSubject.next(res);
-  //   });
-  // }
   makeConnection(serviceIdentifier: any, channelCustomerIdentifier: any) {
     if (!this.sdkLoaded) {
       console.error('SDK script is not loaded yet');

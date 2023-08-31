@@ -1,60 +1,50 @@
-// var init_widget_url = __cim.initWidgetUrl;
-var customer_widget_url = __cim.customerWidgetUrl;
-var service_identifier = encodeURIComponent(__cim.serviceIdentifier);
-var widget_identifier = encodeURIComponent(__cim.widgetIdentifier);
+const { customerWidgetUrl, serviceIdentifier, widgetIdentifier } = __cim;
+const priorityCookies = ['mtc_id', '_ga']; // Add any other cookies you want to prioritize
 
 function getCookieValue(cookieName) {
-    var cookies = document.cookie.split('; ');
-    for (var i = 0; i < cookies.length; i++) {
-        var cookie = cookies[i];
-        var parts = cookie.split('=');
-        if (parts[0] === cookieName) {
-            return decodeURIComponent(parts[1]);
-        }
+  const cookies = document.cookie.split('; ');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.split('=');
+    if (name === cookieName) {
+      return decodeURIComponent(value);
     }
-    return null;
+  }
+  return null;
 }
 
-var priorityCookies = ['mtc_id', '_ga']; // Add any other cookies you want to prioritize
-var selectedCookie = null;
+let selectedCookie = null;
 
-for (var i = 0; i < priorityCookies.length; i++) {
-    var cookieName = priorityCookies[i];
-    var cookieValue = getCookieValue(cookieName);
-    if (cookieValue) {
-        selectedCookie = { name: cookieName, value: cookieValue };
-        break;
-    }
+for (const cookieName of priorityCookies) {
+  const cookieValue = getCookieValue(cookieName);
+  if (cookieValue) {
+    selectedCookie = { name: cookieName, value: cookieValue };
+    break;
+  }
 }
 
 if (!selectedCookie) {
-    // If none of the priority cookies exist, generate a random UUID
-    selectedCookie = { name: 'generated_uuid', value: generateRandomUUID() };
+  selectedCookie = { name: 'generated_uuid', value: generateRandomUUID() };
 }
 
-var channel_customer_identifier = encodeURIComponent(selectedCookie.value);
+const channelCustomerIdentifier = encodeURIComponent(selectedCookie.value);
 
 function generateRandomUUID() {
-    // This is a simple UUID generation function, you might want to use a more robust method in a production environment
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0;
-        var v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
-
-// var channel_customer_identifier = encodeURIComponent(('; ' + document.cookie).split(`; mtc_id=`).pop().split(';')[0]);
 
 console.log(__cim);
 
 const params = new URLSearchParams();
-// params.append('customerWidgetUrl', customer_widget_url);
-params.append('widgetIdentifier', widget_identifier);
-params.append('serviceIdentifier', service_identifier);
-params.append('channelCustomerIdentifier', channel_customer_identifier);
+params.append('widgetIdentifier', encodeURIComponent(widgetIdentifier));
+params.append('serviceIdentifier', encodeURIComponent(serviceIdentifier));
+params.append('channelCustomerIdentifier', channelCustomerIdentifier);
 
-const URL = `${customer_widget_url}?${params.toString()}`;
-console.log('web widget iframe URL: ', URL);
+const URL = `${customerWidgetUrl}/#/widget?${params.toString()}`;
+console.log('web widget iframe URL:', URL);
 
 var parentSection = document.createElement('div');
 parentSection.setAttribute('id', 'init_widget_main');
@@ -77,6 +67,8 @@ chatIframe.setAttribute('id', 'init_widget');
 chatIframe.setAttribute('width', '100%');
 chatIframe.setAttribute('height', '100%');
 chatIframe.setAttribute('src', URL);
+chatIframe.setAttribute('allow', 'camera *;microphone *;autoplay *');
+chatIframe.setAttribute('allowusermedia', 'camera *;microphone *');
 chatIframe.style.border = '0';
 chatIframe.style.float = 'right';
 chatIframe.style.position = 'absolute';

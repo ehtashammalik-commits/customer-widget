@@ -36,14 +36,16 @@
           <p>Please fill out the form below to start chatting with an agent now!</p>
           <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
             <div class="widget-form-group" *ngFor="let attribute of formData">
-              <div [ngSwitch]="attribute.attributeType">
+              <div [ngSwitch]="attribute.attributeType"
+                [style.display]="attribute.key === 'customer_channel_identifier' ? 'none' : 'block'">
                 <ng-container *ngSwitchCase="'INPUT'">
                   <label>
                     <span id="{{attribute.key}}">{{attribute.label}}</span>
                     <span class="widget-required" *ngIf="attribute?.isRequired === true">*</span>
                   </label>
                   <input matInput type="text" [formControlName]="attribute.key" [placeholder]="attribute.helpText"
-                    class="widget-form-control" autocomplete="off" [required]="attribute?.isRequired" />
+                    class="widget-form-control" autocomplete="off" [required]="attribute?.isRequired"
+                    [ngModel]="attribute.key === 'customer_channel_identifier' ? customerIdentifier : ''" />
                 </ng-container>
                 <ng-container *ngSwitchCase="'OPTIONS'">
                   <label>{{ attribute.categoryOptions.categories[0].categoryName }}</label>
@@ -381,21 +383,12 @@
             <span class="material-symbols-outlined emoji-btn">
               add_reaction
             </span>
-            <textarea class="widget-chat-composer"
-              data-emoji-picker="true"
-              matInput id="messageTextarea"
-              cdkTextareaAutosize #autosize="cdkTextareaAutosize"
-              cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
-              placeholder="Type Message Here ..."
-              #message maxlength="{{messageLimit}}"
-              [(ngModel)]="text"
-              (change)="textChanged()"
-              (focus)="onTextAreaFocus();"
-              (keyup)="onKeyPress($event)"
-              (keyup.enter)="isMobile ? '' : onSendMessage()"
-              (keyup.enter)="onEnterKey($event)"
-              [ngClass]="{'error-border': text.length == messageLimit}"
-              ></textarea>
+            <textarea class="widget-chat-composer" data-emoji-picker="true" matInput id="messageTextarea"
+              cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
+              placeholder="Type Message Here ..." #message maxlength="{{messageLimit}}" [(ngModel)]="text"
+              (change)="textChanged()" (focus)="onTextAreaFocus();" (keyup)="onKeyPress($event)"
+              (keyup.enter)="isMobile ? '' : onSendMessage()" (keyup.enter)="onEnterKey($event)"
+              [ngClass]="{'error-border': text.length == messageLimit}"></textarea>
             <div id="file-btn" *ngIf="enableFileTransfer && text.length < 1 && imageUrls?.length == 0">
               <label for="file-upload">
                 <span class="material-symbols-outlined file-btn">
