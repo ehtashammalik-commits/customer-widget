@@ -30,7 +30,7 @@ stages:
 node-test:
   stage: test
   when: on_success
-  image: gitlab.expertflow.com:9242/general/node:CSN-3623
+  image: node:18.14.1-alpine3.17
   script:
     - npm install
     - npm run coverage
@@ -58,7 +58,7 @@ node-test:
 node-format:
   stage: code_format
   when: on_success
-  image: gitlab.expertflow.com:9242/general/node:CSN-3623
+  image: node:18.14.1-alpine3.17
   script:
     - npm run format:check
 
@@ -90,7 +90,7 @@ time_build:
 node_artifacts:
    stage: artifacts
    when: on_success
-   image: gitlab.expertflow.com:9242/general/node:CSN-3623
+   image: node:18.14.1-alpine3.17
    script:
      - npm install
      - npm run build
