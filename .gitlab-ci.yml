@@ -6,6 +6,7 @@ include:
   - project: 'cim/ci-templates'
     ref: 'main'
     file:
+      - sonarqube.yaml
       - trivy.yaml
       - grype.yaml
       - trivy-merge.yaml
