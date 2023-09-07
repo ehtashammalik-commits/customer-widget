@@ -140,7 +140,9 @@ sonarqube-test:
       - .sonar/cache
   script:
     - ls 
-    - ls coverage
+    #- ls coverage
+
+    - ls -lah coverage 
 
 
 
