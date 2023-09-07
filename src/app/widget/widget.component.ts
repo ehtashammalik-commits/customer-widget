@@ -1,9 +1,17 @@
-import { AfterViewInit, Component, OnInit, ElementRef, ViewChild, Input, ChangeDetectorRef } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnInit,
+  ElementRef,
+  ViewChild,
+  Input,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { SdkService } from "../services/sdk.service";
-import { ConfigService } from "../services/config.service";
-import { browserNotificationService } from "../services/browser-notification.service";
-import { DeliveryNotificationService } from "../services/delivery-notification.service";
+import { SdkService } from '../services/sdk.service';
+import { ConfigService } from '../services/config.service';
+import { browserNotificationService } from '../services/browser-notification.service';
+import { DeliveryNotificationService } from '../services/delivery-notification.service';
 import { Subscription } from 'rxjs';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -15,23 +23,23 @@ import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-widget',
   templateUrl: './widget.component.html',
-  styleUrls: ['./widget.component.scss']
+  styleUrls: ['./widget.component.scss'],
 })
 export class WidgetComponent implements OnInit, AfterViewInit {
-  private widgetConfigsSubscription: Subscription = new Subscription;
-  private preChatFormSubscription: Subscription = new Subscription;
-  private establishConnectionSubject: Subscription = new Subscription;
-  private onChatResumedSubject: Subscription = new Subscription;
-  private onCallSubject: Subscription = new Subscription;
-  @ViewChild("autosize")
+  private widgetConfigsSubscription: Subscription = new Subscription();
+  private preChatFormSubscription: Subscription = new Subscription();
+  private establishConnectionSubject: Subscription = new Subscription();
+  private onChatResumedSubject: Subscription = new Subscription();
+  private onCallSubject: Subscription = new Subscription();
+  @ViewChild('autosize')
   autosize!: CdkTextareaAutosize;
-  @ViewChild("myFileInput")
+  @ViewChild('myFileInput')
   myInputVariable!: ElementRef;
-  @ViewChild("message")
+  @ViewChild('message')
   messageElement!: ElementRef;
-  @ViewChild("messageComposer")
+  @ViewChild('messageComposer')
   elementView!: ElementRef;
-  @ViewChild("scrollMe")
+  @ViewChild('scrollMe')
   private scrollContainer!: ElementRef;
   @Input() conversation: any;
   scrollTop = 0;
@@ -81,7 +89,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   enableWebRtc: Boolean = false;
   webRTCConfig: any;
   messageLimit: number = 300; // Set the desired maximum length
-  text: string = "";
+  text: string = '';
   composer_input_disabled: boolean = false;
   isTyping: boolean = true;
 
@@ -90,21 +98,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   isMobile = false;
 
-  imageUrls: { filesPath: SafeUrl, fileType: string, fileExt: string, fileName: string }[] = [];
+  imageUrls: {
+    filesPath: SafeUrl;
+    fileType: string;
+    fileExt: string;
+    fileName: string;
+  }[] = [];
   fileLoading = false;
   selectedFile!: File;
 
   selectedLanguage: any;
   browserLang: any;
 
-  textDirection = "";
+  textDirection = '';
 
   // Audio Screen Variables
   counterVar: any;
-  callTime: string = "00:00";
+  callTime: string = '00:00';
 
   constructor(
-    private route:ActivatedRoute,
+    private route: ActivatedRoute,
     private fb: FormBuilder,
     public sdk: SdkService,
     public __appConfig: ConfigService,
@@ -114,23 +127,31 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private snackBar: MatSnackBar,
     public dialog: MatDialog,
     private browserNotificationService: browserNotificationService,
-    private deliveryNotificationService: DeliveryNotificationService
-  ) { }
+    private deliveryNotificationService: DeliveryNotificationService,
+  ) {}
 
   ngAfterViewInit(): void {
     this.customerChatResumed();
     setTimeout(() => {
-      (this.el.nativeElement as HTMLElement).style.setProperty("--main-color", this.theme);
+      (this.el.nativeElement as HTMLElement).style.setProperty(
+        '--main-color',
+        this.theme,
+      );
     }, 1000);
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
       this.widgetIdentifier = params['widgetIdentifier'];
 
-      console.log('parameters from iframe url', this.customerIdentifier, this.serviceIdentifier, this.widgetIdentifier);
+      console.log(
+        'parameters from iframe url',
+        this.customerIdentifier,
+        this.serviceIdentifier,
+        this.widgetIdentifier,
+      );
       // this.customerIdentifier = this.channelCustomerIdentifier;
 
       // Pass parameters to service after you have received them.
@@ -139,44 +160,52 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.preChatFormGroup = this.fb.group({});
 
-    this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe((configs) => {
-      this.setWidgetConfigs(configs);
-      this.loadBrowserLanguage();
-      console.log('Widget configurations:', configs);
-      if (configs.form !== '') {
-        this.sdk.renderPreChatForm(configs.form);
-      }
-    });
+    this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe(
+      (configs) => {
+        this.setWidgetConfigs(configs);
+        this.loadBrowserLanguage();
+        console.log('Widget configurations:', configs);
+        if (configs.form !== '') {
+          this.sdk.renderPreChatForm(configs.form);
+        }
+      },
+    );
 
-    this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe((formData) => {
-      this.formData = formData.attributes;
-      this.createFormControls();
-      console.log('Widget configurations:', formData.attributes);
-    });
+    this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
+      (formData) => {
+        this.formData = formData.attributes;
+        this.createFormControls();
+        console.log('Widget configurations:', formData.attributes);
+      },
+    );
 
-    this.onChatResumedSubject = this.sdk.onChatResumedResponse$.subscribe((data) => {
-      if (data.isChatAvailable == true) {
-        this.changeScreen('chat');
-        console.log('on Chat Resumed Response:', data);
-        this.cimMessage = data.data;
-        this.isChatActive = true;
-        this.processSeenMessages();
-      }
-      this.scrollToBottom();
-    });
+    this.onChatResumedSubject = this.sdk.onChatResumedResponse$.subscribe(
+      (data) => {
+        if (data.isChatAvailable == true) {
+          this.changeScreen('chat');
+          console.log('on Chat Resumed Response:', data);
+          this.cimMessage = data.data;
+          this.isChatActive = true;
+          this.processSeenMessages();
+        }
+        this.scrollToBottom();
+      },
+    );
 
     this.onCallSubject = this.sdk.onCallResponse$.subscribe((data) => {
       console.log('call response events => ', data);
       this.processCallResponses(data);
     });
 
-    this.establishConnectionSubject = this.sdk.connectionResponse$.subscribe((response) => {
-      console.log('Connection Response:', response);
-      if (response) {
-        this.eventListener(response);
-        console.log('event listener:', response);
-      }
-    });
+    this.establishConnectionSubject = this.sdk.connectionResponse$.subscribe(
+      (response) => {
+        console.log('Connection Response:', response);
+        if (response) {
+          this.eventListener(response);
+          console.log('event listener:', response);
+        }
+      },
+    );
 
     // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
     const userAuthenticated = false; // Replace with your own authentication logic
@@ -190,7 +219,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async passUrlParamsToServices() {
-    await this.sdk.receiveUrlParamsValue(this.widgetIdentifier, this.serviceIdentifier);
+    await this.sdk.receiveUrlParamsValue(
+      this.widgetIdentifier,
+      this.serviceIdentifier,
+    );
   }
 
   private createFormControls(): void {
@@ -198,7 +230,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const validators = attribute.isRequired ? [Validators.required] : [];
       this.preChatFormGroup.addControl(
         attribute.key,
-        this.fb.control('', validators)
+        this.fb.control('', validators),
       );
     }
   }
@@ -218,7 +250,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private markFormGroupTouched(formGroup: FormGroup) {
-    Object.values(formGroup.controls).forEach(control => {
+    Object.values(formGroup.controls).forEach((control) => {
       control.markAsTouched();
 
       if (control instanceof FormGroup) {
@@ -238,7 +270,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       // Proceed with form submission
       console.log(this.preChatFormGroup.value);
     } catch (error) {
-      alert("Error while submitting the form");
+      alert('Error while submitting the form');
     }
   }
 
@@ -254,17 +286,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         data: {
           code: 400,
           description: 'BAD REQUEST',
-          message: 'Mandatory attributes are missing'
-        }
-      }
+          message: 'Mandatory attributes are missing',
+        },
+      };
       console.log(Response);
-
     } else if (eventType == 'startChat') {
       this.eventTriggerType = 'startChat';
-      let user = { data: this.customerData }
+      let user = { data: this.customerData };
       localStorage.setItem('user', JSON.stringify(user));
       if (localStorage.getItem('user')) {
-        this.sdk.makeConnection(this.customerData.serviceIdentifier, this.customerData.channelCustomerIdentifier);
+        this.sdk.makeConnection(
+          this.customerData.serviceIdentifier,
+          this.customerData.channelCustomerIdentifier,
+        );
         this.customerIdentifier = this.customerData.channelCustomerIdentifier;
         this.serviceIdentifier = this.customerData.serviceIdentifier;
       }
@@ -279,16 +313,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         browserId: '123456',
         browserIdExpiryTime: '9999',
         browserName: 'chrome',
-        deviceType: 'desktop'
+        deviceType: 'desktop',
       },
       queue: '',
       locale: {
         timezone: 'asia/karachi',
         language: 'english',
-        country: 'pakistan'
+        country: 'pakistan',
       },
       formData: this.getFormDataByPreChatForm(preChatFormData),
-    }
+    };
   }
 
   getFormDataByPreChatForm(preChatFormData: any[]): any {
@@ -302,7 +336,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   closeWrapper() {
-    console.log("wrapper closed");
+    console.log('wrapper closed');
     this.additionalPanel = false;
   }
 
@@ -344,7 +378,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       case 'error':
         this.preChatFormScreen = false;
         this.widgetChatScreen = false;
-        this.chatEndScreen = false
+        this.chatEndScreen = false;
         this.chatError = true;
         this.isIconWidget = true;
         break;
@@ -389,12 +423,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         switch (event.type) {
           case 'SOCKET_CONNECTED':
             if (this.eventTriggerType === 'startChat') {
-              this.chatPayLoad = { type: "CHAT_REQUESTED", data: this.customerData };
+              this.chatPayLoad = {
+                type: 'CHAT_REQUESTED',
+                data: this.customerData,
+              };
               this.sdk.sendChatRequest(this.chatPayLoad);
               console.log('New Chat Start Request Sent');
             } else if (this.eventTriggerType === '') {
               console.log('Chat Resume Request Sent');
-              this.sdk.onChatResumed(this.customerData.serviceIdentifier, this.customerData.channelCustomerIdentifier);
+              this.sdk.onChatResumed(
+                this.customerData.serviceIdentifier,
+                this.customerData.channelCustomerIdentifier,
+              );
             }
             this.changeScreen('chat');
             console.log('event response:', this.customerData);
@@ -403,7 +443,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.isChatActive = true;
             console.log('event response:', event.data);
             this.conversationId = event.data.header.conversationId;
-            localStorage.setItem('conversationId', event.data.header.conversationId);
+            localStorage.setItem(
+              'conversationId',
+              event.data.header.conversationId,
+            );
             break;
           case 'MESSAGE_RECEIVED':
             console.log('event response:', event.data);
@@ -412,7 +455,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
           case 'SOCKET_DISCONNECTED':
             console.log('event response:', event.data);
-            localStorage.removeItem("user");
+            localStorage.removeItem('user');
             break;
           case 'CONNECT_ERROR':
             this.changeScreen('error');
@@ -436,30 +479,34 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
       }
     } catch (error) {
-      console.error('Error on establishing connection: ', error)
+      console.error('Error on establishing connection: ', error);
     }
   }
 
   handleCimMessage(cimMessage: any) {
     if (
-      cimMessage.body.type.toLowerCase() == "deliverynotification" &&
+      cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
       cimMessage.header.sender &&
-      (cimMessage.header.sender.type.toLowerCase() == "agent" || cimMessage.header.sender.type.toLowerCase() == "bot")
+      (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
+        cimMessage.header.sender.type.toLowerCase() == 'bot')
     ) {
-      this.updateStatusOfCustomerMessage(cimMessage.body.messageId, cimMessage.body.status.toLowerCase());
+      this.updateStatusOfCustomerMessage(
+        cimMessage.body.messageId,
+        cimMessage.body.status.toLowerCase(),
+      );
     } else if (
-      cimMessage.body.type.toLowerCase() == "notification" &&
-      cimMessage.body.notificationType.toLowerCase() == "typing_started"
+      cimMessage.body.type.toLowerCase() == 'notification' &&
+      cimMessage.body.notificationType.toLowerCase() == 'typing_started'
     ) {
-      if (cimMessage.header.sender.type.toLowerCase() == "agent") {
-        console.log("Event  received with data  ", cimMessage.body);
+      if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
+        console.log('Event  received with data  ', cimMessage.body);
 
         //if timer exist restart the timer
         if (!this.typingIndicatorTimer) {
-          console.log("timer started for indicator to show ", cimMessage.body);
+          console.log('timer started for indicator to show ', cimMessage.body);
 
           this.typingIndicatorTimer = setTimeout(() => {
-            console.log("timer ended for indicator to show ", cimMessage.body);
+            console.log('timer ended for indicator to show ', cimMessage.body);
             this.typingIndicatorTimer = null;
           }, 5000);
         } else {
@@ -471,8 +518,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     } else {
       if (
-        cimMessage.body.type.toLowerCase() != "notification" &&
-        cimMessage.header.sender.type.toLowerCase() == "agent"
+        cimMessage.body.type.toLowerCase() != 'notification' &&
+        cimMessage.header.sender.type.toLowerCase() == 'agent'
       ) {
         clearTimeout(this.typingIndicatorTimer);
         this.typingIndicatorTimer = null;
@@ -487,46 +534,70 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   updateStatusOfCustomerMessage(messageId: string, status: string) {
     // Implement your logic to update the message status
     let msgStatus;
-    if (status.toLowerCase() == "read") {
-      msgStatus = "seen";
+    if (status.toLowerCase() == 'read') {
+      msgStatus = 'seen';
       this.markMessageStatusToSeenOrSucceed(messageId, msgStatus);
-    } else if (status.toLowerCase() == "failed") {
-      msgStatus = "failed";
+    } else if (status.toLowerCase() == 'failed') {
+      msgStatus = 'failed';
       this.changeMessageStatusToFailed(messageId, msgStatus);
     }
   }
 
   markMessageStatusToSeenOrSucceed(msgId: any, msgStatus: string) {
     // find index of the message for the delivery notification
-    let index = this.cimMessage.findIndex((message: { id: any; }) => message.id == msgId);
+    let index = this.cimMessage.findIndex(
+      (message: { id: any }) => message.id == msgId,
+    );
     // mark all the previous messages as 'seen' or 'successed' before that message except failed messages
-    this.cimMessage.forEach((message: { header: { sender: { type: string; }; }; }, i: number) => {
-      if (i <= index && (message.header.sender.type.toLowerCase() == "customer" || message.header.sender.type.toLowerCase() == "connector")) {
-        if (!this.cimMessage[i]["sendStatus"] || (this.cimMessage[i]["sendStatus"] && this.cimMessage[i]["sendStatus"] != "failed")) {
-          this.cimMessage[i]["sendStatus"] = msgStatus;
+    this.cimMessage.forEach(
+      (message: { header: { sender: { type: string } } }, i: number) => {
+        if (
+          i <= index &&
+          (message.header.sender.type.toLowerCase() == 'customer' ||
+            message.header.sender.type.toLowerCase() == 'connector')
+        ) {
+          if (
+            !this.cimMessage[i]['sendStatus'] ||
+            (this.cimMessage[i]['sendStatus'] &&
+              this.cimMessage[i]['sendStatus'] != 'failed')
+          ) {
+            this.cimMessage[i]['sendStatus'] = msgStatus;
+          }
         }
-      }
-    });
+      },
+    );
   }
 
   changeMessageStatusToFailed(msgId: any, msgStatus: string) {
     // find index of the message for the notification
-    let index = this.cimMessage.findIndex((message: { id: any; }) => message.id == msgId);
+    let index = this.cimMessage.findIndex(
+      (message: { id: any }) => message.id == msgId,
+    );
 
     if (index != -1) {
-      if (this.cimMessage[index].header.sender.type.toLowerCase() == "customer") {
-        this.cimMessage[index]["sendStatus"] = msgStatus;
+      if (
+        this.cimMessage[index].header.sender.type.toLowerCase() == 'customer'
+      ) {
+        this.cimMessage[index]['sendStatus'] = msgStatus;
       }
     } else {
-      if (msgStatus.toLowerCase() == "failed") {
-        alert("unable to start chat");
+      if (msgStatus.toLowerCase() == 'failed') {
+        alert('unable to start chat');
       }
     }
   }
 
-  handleMessageReport(cimMessage: { header: { sender: { type: string; }; }; body: { type: string; }; id: any; }) {
-    if (document.hasFocus() && (cimMessage.header.sender.type.toLowerCase() == "agent" || cimMessage.header.sender.type.toLowerCase() == "bot")) {
-      if (cimMessage.body.type.toLowerCase() != "notification") {
+  handleMessageReport(cimMessage: {
+    header: { sender: { type: string } };
+    body: { type: string };
+    id: any;
+  }) {
+    if (
+      document.hasFocus() &&
+      (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
+        cimMessage.header.sender.type.toLowerCase() == 'bot')
+    ) {
+      if (cimMessage.body.type.toLowerCase() != 'notification') {
         this.constructAndPublishMessageSeenNotification(cimMessage.id);
       }
     }
@@ -535,9 +606,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   constructAndPublishMessageSeenNotification(msgId: any) {
     if (this.lastSeenMessageId != msgId) {
       let header = { replyToMessageId: null, intent: null };
-      let body = { markdownText: "", type: "DELIVERYNOTIFICATION", messageId: msgId, status: "READ", reasonCode: 200 };
+      let body = {
+        markdownText: '',
+        type: 'DELIVERYNOTIFICATION',
+        messageId: msgId,
+        status: 'READ',
+        reasonCode: 200,
+      };
 
-      this.sdk.sendChatMessage({ type: "DELIVERYNOTIFICATION", header: header, body: body, customer: this.customerData });
+      this.sdk.sendChatMessage({
+        type: 'DELIVERYNOTIFICATION',
+        header: header,
+        body: body,
+        customer: this.customerData,
+      });
       this.lastSeenMessageId = msgId;
     }
   }
@@ -546,37 +628,43 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     let latestMessage = this.cimMessage[this.cimMessage.length - 1];
     if (latestMessage) {
       // mark all the message Successed
-      this.markMessageStatusToSeenOrSucceed(latestMessage.id, "successed");
+      this.markMessageStatusToSeenOrSucceed(latestMessage.id, 'successed');
 
       // mark all the message to seen which are seen by agent or bot
       let latestReadNotificationMessage = this.getLatestDeliveryMessage();
       if (
         latestReadNotificationMessage &&
-        latestReadNotificationMessage.body.status.toLowerCase() == "read"
+        latestReadNotificationMessage.body.status.toLowerCase() == 'read'
       ) {
-        this.markMessageStatusToSeenOrSucceed(latestReadNotificationMessage.body.messageId, "seen");
+        this.markMessageStatusToSeenOrSucceed(
+          latestReadNotificationMessage.body.messageId,
+          'seen',
+        );
       }
     }
     // mark failed status
 
     this.cimMessage.forEach((message: any) => {
       if (
-        message.body.type.toLowerCase() == "deliverynotification" &&
-        message.body.status.toLowerCase() == "failed"
+        message.body.type.toLowerCase() == 'deliverynotification' &&
+        message.body.status.toLowerCase() == 'failed'
       ) {
-        this.changeMessageStatusToFailedInHistoryMessages(message.body.messageId);
+        this.changeMessageStatusToFailedInHistoryMessages(
+          message.body.messageId,
+        );
       }
     });
   }
 
   getLatestDeliveryMessage() {
-    for (let i = (this.cimMessage.length - 1); i >= 0; i--) {
+    for (let i = this.cimMessage.length - 1; i >= 0; i--) {
       const message = this.cimMessage[i];
       if (
         message &&
-        message.body.type.toLowerCase() == "deliverynotification" &&
+        message.body.type.toLowerCase() == 'deliverynotification' &&
         message.header.sender &&
-        (message.header.sender.type.toLowerCase() == "agent" || message.header.sender.type.toLowerCase() == "bot")
+        (message.header.sender.type.toLowerCase() == 'agent' ||
+          message.header.sender.type.toLowerCase() == 'bot')
       ) {
         return message;
       }
@@ -585,18 +673,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   changeMessageStatusToFailedInHistoryMessages(msgId: any) {
     // find index of the message for the notification
-    let index = this.cimMessage.findIndex((message: { id: any; }) => message.id == msgId);
+    let index = this.cimMessage.findIndex(
+      (message: { id: any }) => message.id == msgId,
+    );
 
     if (index != -1) {
-      if (this.cimMessage[index].header.sender.type.toLowerCase() == "customer") {
-        this.cimMessage[index]["sendStatus"] = "failed";
+      if (
+        this.cimMessage[index].header.sender.type.toLowerCase() == 'customer'
+      ) {
+        this.cimMessage[index]['sendStatus'] = 'failed';
       }
     }
   }
 
   textChanged() {
     this.messageElement.nativeElement.focus();
-    const el: any = document.getElementById("messageTextarea");
+    const el: any = document.getElementById('messageTextarea');
     this.text = el.value;
     this.scrollCon = this.elementView.nativeElement.scrollHeight;
     this.scrollContainer = this.scrollContainer.nativeElement.scrollHeight;
@@ -608,18 +700,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     if (this.imageUrls.length > 0) {
       this.fileLoading = true;
-      let additionalText = "";
-      if (this.text.trim() !== "") {
+      let additionalText = '';
+      if (this.text.trim() !== '') {
         additionalText = this.text.trim();
         this.clearMessageData();
       }
       this.uploadFile(this.selectedFile, additionalText);
     } else {
-
-      if (this.text.trim() !== "") {
+      if (this.text.trim() !== '') {
         console.log('Customer message: ', this.text.trim());
 
-        this.constructCimMessage("PLAIN", this.text.trim(), null, null);
+        this.constructCimMessage('PLAIN', this.text.trim(), null, null);
         this.clearMessageData();
       }
     }
@@ -628,14 +719,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   scrollToBottom(): void {
     setTimeout(() => {
       try {
-        this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
-      } catch (err) { }
+        this.scrollContainer.nativeElement.scrollTop =
+          this.scrollContainer.nativeElement.scrollHeight;
+      } catch (err) {}
     }, 350);
   }
 
   clearMessageData() {
     this.composer_input_disabled = false;
-    this.text = "";
+    this.text = '';
     this.scrollToBottom();
     this.scrollCon = 45;
   }
@@ -649,76 +741,85 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     fileName?: string,
     fileSize?: number,
     additionalText?: string,
-    fileType?: string
+    fileType?: string,
   ) {
     let header = {
       replyToMessageId: null as null | string,
       intent: null as null | string,
       sender: {
-        id: "460df46c-adf9-11ed-afa1-0242ac120002",
-        type: "CUSTOMER",
-        senderName: "JANE DOE",
+        id: '460df46c-adf9-11ed-afa1-0242ac120002',
+        type: 'CUSTOMER',
+        senderName: 'JANE DOE',
         additionalDetail: null,
       },
     };
-    let body: { markdownText: string; type: string; caption?: string; additionalDetails?: any; attachment?: any } = {
-      markdownText: "",
-      type: "",
+    let body: {
+      markdownText: string;
+      type: string;
+      caption?: string;
+      additionalDetails?: any;
+      attachment?: any;
+    } = {
+      markdownText: '',
+      type: '',
     };
 
-    if (msgType.toLowerCase() == "plain") {
+    if (msgType.toLowerCase() == 'plain') {
       header.replyToMessageId = replyToMessageId ? replyToMessageId : null;
       header.intent = intent !== null ? intent : null;
-      body.type = "PLAIN";
+      body.type = 'PLAIN';
       body.markdownText = text!.trim();
-    } else if (msgType.toLowerCase() == "application" || msgType.toLowerCase() == "text") {
-      body.type = "FILE";
-      body.markdownText = additionalText || "";
-      body["caption"] = ""; // Here is the 'caption' property
-      body["additionalDetails"] = { fileName: fileName };
-      body["attachment"] = {
+    } else if (
+      msgType.toLowerCase() == 'application' ||
+      msgType.toLowerCase() == 'text'
+    ) {
+      body.type = 'FILE';
+      body.markdownText = additionalText || '';
+      body['caption'] = ''; // Here is the 'caption' property
+      body['additionalDetails'] = { fileName: fileName };
+      body['attachment'] = {
         mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
-        type: fileMimeType || "",
+        type: fileMimeType || '',
         size: fileSize || 0,
-        extType: fileType || "",
-        mimeType: fileMimeType || "",
+        extType: fileType || '',
+        mimeType: fileMimeType || '',
       };
-    } else if (msgType.toLowerCase() == "image") {
-      body.type = "IMAGE";
-      body.markdownText = additionalText || "";
-      body["caption"] = fileName;
-      body["additionalDetails"] = {};
-      body["attachment"] = {
+    } else if (msgType.toLowerCase() == 'image') {
+      body.type = 'IMAGE';
+      body.markdownText = additionalText || '';
+      body['caption'] = fileName;
+      body['additionalDetails'] = {};
+      body['attachment'] = {
         mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
         type: fileMimeType,
         size: fileSize,
-        thumbnail: ""
+        thumbnail: '',
       };
-    } else if (msgType.toLowerCase() == "video") {
-      body.type = "VIDEO";
-      body.markdownText = additionalText || "";
-      body["caption"] = fileName;
-      body["additionalDetails"] = {};
-      body["attachment"] = {
+    } else if (msgType.toLowerCase() == 'video') {
+      body.type = 'VIDEO';
+      body.markdownText = additionalText || '';
+      body['caption'] = fileName;
+      body['additionalDetails'] = {};
+      body['attachment'] = {
         mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
         type: fileMimeType,
         size: fileSize,
-        thumbnail: ""
+        thumbnail: '',
       };
-    } else if (msgType.toLowerCase() == "audio") {
-      body.type = "AUDIO";
-      body.markdownText = additionalText || "";
-      body["caption"] = fileName;
-      body["additionalDetails"] = {};
-      body["attachment"] = {
+    } else if (msgType.toLowerCase() == 'audio') {
+      body.type = 'AUDIO';
+      body.markdownText = additionalText || '';
+      body['caption'] = fileName;
+      body['additionalDetails'] = {};
+      body['attachment'] = {
         mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
         type: fileMimeType,
         size: fileSize,
-        thumbnail: ""
+        thumbnail: '',
       };
     } else {
       console.log('Unable to process the file');
-      this.snackBar.open("unable to process the file", "err");
+      this.snackBar.open('unable to process the file', 'err');
       return;
     }
 
@@ -747,12 +848,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       for (let i = 0; i < filesAmount.length; i++) {
         const reader = new FileReader();
         reader.onload = (event: any) => {
-          console.log(this.imageUrls, "urlssssssss");
+          console.log(this.imageUrls, 'urlssssssss');
           this.imageUrls.push({
-            filesPath: this.sanitizer.bypassSecurityTrustUrl(event.target.result),
+            filesPath: this.sanitizer.bypassSecurityTrustUrl(
+              event.target.result,
+            ),
             fileType: event.target.result.split(':')[1].split('/')[0],
-            fileExt: event.target.result.split(':')[1].split('/')[1].split(';')[0],
-            fileName: filesAmount[i].name
+            fileExt: event.target.result
+              .split(':')[1]
+              .split('/')[1]
+              .split(';')[0],
+            fileName: filesAmount[i].name,
           });
         };
         reader.readAsDataURL(filesAmount[i]);
@@ -761,45 +867,71 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   uploadFile(files: any, additionalText: string) {
-    let availableExtensions = ["txt", "png", "jpg", "jpeg", "pdf", "ppt", "pptx", "xlsx", "xls", "doc", "docx", "rtf", "mp3", "mp4", "webp"];
+    let availableExtensions = [
+      'txt',
+      'png',
+      'jpg',
+      'jpeg',
+      'pdf',
+      'ppt',
+      'pptx',
+      'xlsx',
+      'xls',
+      'doc',
+      'docx',
+      'rtf',
+      'mp3',
+      'mp4',
+      'webp',
+    ];
     let ln = files.length;
     if (ln > 0) {
       for (var i = 0; i < ln; i++) {
         const fileSize = files[i].size;
-        const fileMimeType = files[i].name.split(".").pop();
+        const fileMimeType = files[i].name.split('.').pop();
 
         if (fileSize <= 5000000) {
           if (availableExtensions.includes(fileMimeType.toLowerCase())) {
             let fd = new FormData();
-            fd.append("file", files[i]);
-            fd.append("conversationId", `${Math.floor(Math.random() * 90000) + 10000}`);
-            console.log("ready to Upload File", fileSize, fileMimeType);
+            fd.append('file', files[i]);
+            fd.append(
+              'conversationId',
+              `${Math.floor(Math.random() * 90000) + 10000}`,
+            );
+            console.log('ready to Upload File', fileSize, fileMimeType);
 
-            this.sdk.moveToFileServer(fd, (res: { type: string; name: string; size: any; }) => {
-              this.constructCimMessage(
-                res.type.split('/')[0],
-                '',
-                null,
-                null,
-                res.type,
-                res.name,
-                res.size,
-                additionalText,
-                res.name.split('.').pop()
-              );
-            });
+            this.sdk.moveToFileServer(
+              fd,
+              (res: { type: string; name: string; size: any }) => {
+                this.constructCimMessage(
+                  res.type.split('/')[0],
+                  '',
+                  null,
+                  null,
+                  res.type,
+                  res.name,
+                  res.size,
+                  additionalText,
+                  res.name.split('.').pop(),
+                );
+              },
+            );
           } else {
-            console.log(files[i].name + " File size should be less than 5MB");
-            this.snackBar.open(files[i].name + " unsupported type", "err", {
-              panelClass: "custom-snackbar"
+            console.log(files[i].name + ' File size should be less than 5MB');
+            this.snackBar.open(files[i].name + ' unsupported type', 'err', {
+              panelClass: 'custom-snackbar',
             });
             this.removeUploadFile();
           }
         } else {
-          console.log(files[i].name + " File size should be less than 5MB");
-          this.snackBar.open(files[i].name + " File size should be less than 5MB", "err", {
-            panelClass: "custom-snackbar"
-          });
+          console.log(files[i].name + ' File size should be less than 5MB');
+          this.snackBar.open(
+            files[i].name + ' File size should be less than 5MB',
+            'err',
+            {
+              panelClass: 'custom-snackbar',
+            },
+          );
           this.removeUploadFile();
         }
       }
@@ -811,22 +943,30 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.selectedFile = null as any;
   }
 
-  sendButtonMessage(data: { title: string; payload: any; }, replyToMessageId: any) {
-    if (data.title.trim() !== "") {
-      this.constructCimMessage("PLAIN", data.title.trim(), data.payload, replyToMessageId);
+  sendButtonMessage(
+    data: { title: string; payload: any },
+    replyToMessageId: any,
+  ) {
+    if (data.title.trim() !== '') {
+      this.constructCimMessage(
+        'PLAIN',
+        data.title.trim(),
+        data.payload,
+        replyToMessageId,
+      );
     }
   }
 
   endChat(): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent);
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.cimMessage = [];
         this.isChatActive = false;
         this.changeScreen('end');
         this.sdk.handleChatEnd(this.customerData);
-        this.clearMessageData()
+        this.clearMessageData();
       }
     });
   }
@@ -837,23 +977,30 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (userData !== null) {
       let parsedUserData = JSON.parse(userData);
       this.customerData = parsedUserData.data;
-      console.log("Checking data ", parsedUserData.data.channelCustomerIdentifier, parsedUserData.data.serviceIdentifier);
-      this.sdk.makeConnection(parsedUserData.data.serviceIdentifier, parsedUserData.data.channelCustomerIdentifier);
+      console.log(
+        'Checking data ',
+        parsedUserData.data.channelCustomerIdentifier,
+        parsedUserData.data.serviceIdentifier,
+      );
+      this.sdk.makeConnection(
+        parsedUserData.data.serviceIdentifier,
+        parsedUserData.data.channelCustomerIdentifier,
+      );
     }
   }
   onTyping() {
     this.isTyping = this.text.trim().length > 0;
   }
   //on every key press
-  onKeyPress(event: { key: string; }) {
+  onKeyPress(event: { key: string }) {
     //not to sent typing started event on enter key
-    if (event.key !== "Enter") {
+    if (event.key !== 'Enter') {
       this.sendTypingStartedEvent();
     }
   }
 
   //when enter key is pressed
-  onEnterKey(event: { preventDefault: () => void; }) {
+  onEnterKey(event: { preventDefault: () => void }) {
     if (!this.isMobile) {
       event.preventDefault();
     }
@@ -868,9 +1015,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     //if timer is true not to send the event
     if (!this.sendTypingStartedEventTimer) {
       let header = { replyToMessageId: null, intent: null };
-      let body = { markdownText: "", type: "NOTIFICATION", notificationType: "TYPING_STARTED" };
+      let body = {
+        markdownText: '',
+        type: 'NOTIFICATION',
+        notificationType: 'TYPING_STARTED',
+      };
 
-      this.sdk.sendChatMessage({ type: "NOTIFICATION", header: header, body: body, customer: this.customerData });
+      this.sdk.sendChatMessage({
+        type: 'NOTIFICATION',
+        header: header,
+        body: body,
+        customer: this.customerData,
+      });
       this.sendTypingStartedEventTimer = setTimeout(() => {
         this.sendTypingStartedEventTimer = null;
       }, 3000);
@@ -880,7 +1036,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   onTextAreaFocus() {
     let latestAgentMessage = this.getLatestAgentMessage();
 
-    if (latestAgentMessage && latestAgentMessage.body.type != "notification") {
+    if (latestAgentMessage && latestAgentMessage.body.type != 'notification') {
       this.constructAndPublishMessageSeenNotification(latestAgentMessage.id);
     }
   }
@@ -888,29 +1044,35 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getLatestAgentMessage() {
     for (let index = this.cimMessage.length - 1; index >= 0; index--) {
       const message = this.cimMessage[index];
-      if (message.header.sender.type.toLowerCase() == "agent") {
+      if (message.header.sender.type.toLowerCase() == 'agent') {
         return message;
       }
     }
   }
 
   chatTranscript() {
-    if (localStorage.getItem("conversationId") !== "") {
+    if (localStorage.getItem('conversationId') !== '') {
       window.open(
-        `${this.__appConfig.appConfig.TRANSCRIPT_URL}/?ccmUrl=${this.__appConfig.appConfig.CCM_URL}&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier}&conversationId=${localStorage.getItem("conversationId")}&browserLang=${this.browserLang}`,
-        "_blank"
+        `${this.__appConfig.appConfig.TRANSCRIPT_URL}/?ccmUrl=${
+          this.__appConfig.appConfig.CCM_URL
+        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${
+          this.serviceIdentifier
+        }&conversationId=${localStorage.getItem(
+          'conversationId',
+        )}&browserLang=${this.browserLang}`,
+        '_blank',
       );
-      localStorage.removeItem("conversationId");
+      localStorage.removeItem('conversationId');
     }
   }
 
   loadBrowserLanguage() {
     this.browserLang = navigator.language;
-    console.log("Browser language is :" + this.browserLang);
+    console.log('Browser language is :' + this.browserLang);
     this.selectedLanguage = this.browserLang;
 
-    if (this.selectedLanguage == "ar") {
-      this.textDirection = "right-direction";
+    if (this.selectedLanguage == 'ar') {
+      this.textDirection = 'right-direction';
     }
   }
 
@@ -936,14 +1098,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.counterVar = setInterval(() => {
       const now = new Date().getTime();
       const distance = now - countDownDate;
-      const minutes = ("0" + Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).slice(-2);
-      const seconds = ("0" + Math.floor((distance % (1000 * 60)) / 1000)).slice(-2);
+      const minutes = (
+        '0' + Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+      ).slice(-2);
+      const seconds = ('0' + Math.floor((distance % (1000 * 60)) / 1000)).slice(
+        -2,
+      );
       this.callTime = `${minutes}:${seconds}`;
     }, 1000);
   }
 
   endCountdown(): void {
-    this.callTime = "00:00";
+    this.callTime = '00:00';
     clearInterval(this.counterVar);
   }
 
@@ -953,12 +1119,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       case 'registered':
         console.log('customer_data', this.customerData);
         let userData = {
-          'phone': this.customerData.formData.attributes.phone,
-          'name': this.customerData.formData.attributes.name,
-          'email': this.customerData.formData.attributes.email,
+          phone: this.customerData.formData.attributes.phone,
+          name: this.customerData.formData.attributes.name,
+          email: this.customerData.formData.attributes.email,
           // 'message': 'hello world'
-        }
-        this.sdk.sendCallRequest('audio', 'remoteAudio', '', userData)
+        };
+        this.sdk.sendCallRequest('audio', 'remoteAudio', '', userData);
         break;
       case 'unregistered':
         console.log('unregistered');
@@ -967,7 +1133,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         console.log('registrationFailed');
         break;
       case 'get_dynamic_ext':
-        console.log("get dynamic ext");
+        console.log('get dynamic ext');
         break;
       case 'Channel Creating':
         console.log('Channel Creating');
@@ -980,7 +1146,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         console.log('session-progress ->' + data.response);
         break;
       case 'session-rejected':
-        console.log('session-rejected->' + data.response + '------' + data.cause);
+        console.log(
+          'session-rejected->' + data.response + '------' + data.cause,
+        );
         break;
       case 'session-failed':
         console.log('session-failed ->');
@@ -1012,5 +1180,4 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   callEnd() {
     this.sdk.handleCallEnd();
   }
-
 }

@@ -11,7 +11,8 @@ document.head.appendChild(socketIOScript);
 
 // Load SIP.js script
 const sipScript = document.createElement('script');
-sipScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/sip.js/0.15.11/sip-0.15.11.min.js';
+sipScript.src =
+  'https://cdnjs.cloudflare.com/ajax/libs/sip.js/0.15.11/sip-0.15.11.min.js';
 document.head.appendChild(sipScript);
 
 // Load the SDK script
@@ -22,20 +23,20 @@ document.head.appendChild(sdkScript);
 // Set up loading completion
 let scriptCounter = 0;
 const scriptsToLoad = [socketIOScript, sipScript, sdkScript];
-scriptsToLoad.forEach(script => {
+scriptsToLoad.forEach((script) => {
   script.onload = () => {
     scriptCounter++;
     if (scriptCounter === scriptsToLoad.length) {
       // All scripts are loaded, proceed with application bootstrap
-      platformBrowserDynamic().bootstrapModule(AppModule)
-        .catch(err => console.error(err));
+      platformBrowserDynamic()
+        .bootstrapModule(AppModule)
+        .catch((err) => console.error(err));
     }
   };
   script.onerror = () => {
     console.error('Failed to load script:', script.src);
   };
 });
-
 
 if (environment.production) {
   enableProdMode();

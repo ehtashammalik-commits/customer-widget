@@ -1,11 +1,23 @@
 import { Injectable, OnInit } from '@angular/core';
-import { ConfigService } from "../services/config.service";
+import { ConfigService } from '../services/config.service';
 import { Observable, Subject } from 'rxjs';
 
-declare var widgetConfigs: any, getPreChatForm: any, establishConnection: any, chatRequest: any, sendMessage: any, uploadToFileEngine: any, chatEnd: any, resumeChat: any, webhookNotifications: any, dialCall: any, sendInvite: any, closeSession: any, audioControl: any;
+declare var widgetConfigs: any,
+  getPreChatForm: any,
+  establishConnection: any,
+  chatRequest: any,
+  sendMessage: any,
+  uploadToFileEngine: any,
+  chatEnd: any,
+  resumeChat: any,
+  webhookNotifications: any,
+  dialCall: any,
+  sendInvite: any,
+  closeSession: any,
+  audioControl: any;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SdkService implements OnInit {
   private sdkLoaded: boolean = false;
@@ -14,16 +26,20 @@ export class SdkService implements OnInit {
   serviceIdentifier: any;
 
   private widgetConfigsSubject: Subject<any> = new Subject<any>();
-  public widgetConfigs$: Observable<any> = this.widgetConfigsSubject.asObservable();
+  public widgetConfigs$: Observable<any> =
+    this.widgetConfigsSubject.asObservable();
 
   private preChatFormSubject: Subject<any> = new Subject<any>();
-  public renderPreChatForm$: Observable<any> = this.preChatFormSubject.asObservable();
+  public renderPreChatForm$: Observable<any> =
+    this.preChatFormSubject.asObservable();
 
   private establishConnectionSubject: Subject<any> = new Subject<any>();
-  public connectionResponse$: Observable<any> = this.establishConnectionSubject.asObservable();
+  public connectionResponse$: Observable<any> =
+    this.establishConnectionSubject.asObservable();
 
   private onChatResumedSubject: Subject<any> = new Subject<any>();
-  public onChatResumedResponse$: Observable<any> = this.onChatResumedSubject.asObservable();
+  public onChatResumedResponse$: Observable<any> =
+    this.onChatResumedSubject.asObservable();
 
   private onCallSubject: Subject<any> = new Subject<any>();
   public onCallResponse$: Observable<any> = this.onCallSubject.asObservable();
@@ -32,13 +48,17 @@ export class SdkService implements OnInit {
     this.ConfigData = this._ConfigService.appConfig;
     this.loadSdk();
   }
-  ngOnInit(): void { }
+  ngOnInit(): void {}
 
   receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
     this.widgetIdentifier = widgetIdentifier;
     this.serviceIdentifier = serviceIdentifier;
     this.loadWidget(this.ConfigData.CCM_URL, this.widgetIdentifier);
-    console.log('Received params in sdk service:', this.widgetIdentifier, this.serviceIdentifier);
+    console.log(
+      'Received params in sdk service:',
+      this.widgetIdentifier,
+      this.serviceIdentifier,
+    );
   }
 
   loadSdk(): Promise<void> {
@@ -71,9 +91,14 @@ export class SdkService implements OnInit {
       return;
     }
 
-    establishConnection(this.ConfigData.SOCKET_URL, serviceIdentifier, channelCustomerIdentifier, (res: any) => {
-      this.establishConnectionSubject.next(res);
-    });
+    establishConnection(
+      this.ConfigData.SOCKET_URL,
+      serviceIdentifier,
+      channelCustomerIdentifier,
+      (res: any) => {
+        this.establishConnectionSubject.next(res);
+      },
+    );
   }
 
   onChatResumed(serviceIdentifier: any, channelCustomerIdentifier: any) {
@@ -87,11 +112,11 @@ export class SdkService implements OnInit {
     console.log('Chat Payload:', payload);
     chatRequest(payload);
     let notificationPayload = {
-      "name": payload.data.formData.attributes.first_name,
-      "email": payload.data.formData.attributes.business_email,
-      "phone": payload.data.formData.attributes.phone,
-      "type": payload.data.formData.attributes.customer_type,
-    }
+      name: payload.data.formData.attributes.first_name,
+      email: payload.data.formData.attributes.business_email,
+      phone: payload.data.formData.attributes.phone,
+      type: payload.data.formData.attributes.customer_type,
+    };
     webhookNotifications(this.ConfigData.WEBHOOK_URL, notificationPayload);
   }
   sendChatMessage(payload: any) {
@@ -100,9 +125,13 @@ export class SdkService implements OnInit {
   }
 
   moveToFileServer(filePayload: any, callback: any) {
-    uploadToFileEngine(this.ConfigData.FILE_SERVER_URL, filePayload, (res: { type: string; name: string; size: any; }) => {
-      callback(res)
-    });
+    uploadToFileEngine(
+      this.ConfigData.FILE_SERVER_URL,
+      filePayload,
+      (res: { type: string; name: string; size: any }) => {
+        callback(res);
+      },
+    );
   }
 
   handleChatEnd(customerPayload: any) {
@@ -115,10 +144,21 @@ export class SdkService implements OnInit {
     });
   }
 
-  sendCallRequest(type: string, remoteElementId: string, localElementId: string, customerData: any) {
-    sendInvite(type, remoteElementId, localElementId, customerData, (res: any) => {
-      this.onCallSubject.next(res);
-    })
+  sendCallRequest(
+    type: string,
+    remoteElementId: string,
+    localElementId: string,
+    customerData: any,
+  ) {
+    sendInvite(
+      type,
+      remoteElementId,
+      localElementId,
+      customerData,
+      (res: any) => {
+        this.onCallSubject.next(res);
+      },
+    );
   }
 
   handleCallEnd() {

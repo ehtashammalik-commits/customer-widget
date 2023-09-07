@@ -2,13 +2,10 @@ import { Injectable } from '@angular/core';
 // import { SdkService } from "../services/sdk.service";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DeliveryNotificationService {
-
-  constructor(
-    // public sdk: SdkService,
-  ) { }
+  constructor() {} // public sdk: SdkService,
   // private typingIndicatorTimer: any;
   // private lastSeenMessageId: any = null;
 

@@ -14,7 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import {MatDialogModule} from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 
 import { AppComponent } from './app.component';
@@ -22,7 +22,6 @@ import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { AppRoutingModule, routingComponents } from './app-routing.module';
 import { ConfigService } from './services/config.service';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
-
 
 export function initializeApp1(appConfigService: ConfigService) {
   return (): Promise<any> => {
@@ -32,11 +31,7 @@ export function initializeApp1(appConfigService: ConfigService) {
 }
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    routingComponents,
-    ConfirmDialogComponent,
-  ],
+  declarations: [AppComponent, routingComponents, ConfirmDialogComponent],
   imports: [
     BrowserModule,
     HttpClientModule,
@@ -59,16 +54,17 @@ export function initializeApp1(appConfigService: ConfigService) {
   providers: [
     {
       provide: LocationStrategy,
-      useClass: HashLocationStrategy
+      useClass: HashLocationStrategy,
     },
     ConfigService,
     {
       provide: APP_INITIALIZER,
-      useFactory: (_appConfigService: ConfigService) => () => _appConfigService.loadConfig(),
+      useFactory: (_appConfigService: ConfigService) => () =>
+        _appConfigService.loadConfig(),
       deps: [ConfigService],
       multi: true,
     },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
