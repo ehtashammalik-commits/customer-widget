@@ -2,7 +2,7 @@ FROM gitlab.expertflow.com:9242/general/nginx:1.23.1-alpine-3.16-mcb-154
 
 WORKDIR /usr/share/nginx/html
 
-COPY dist/* .
+COPY dist/ .
 RUN ls -lah /usr/share/nginx/html/customer-gadget
 COPY config.json.template .
 COPY docker-entrypoint.sh .
