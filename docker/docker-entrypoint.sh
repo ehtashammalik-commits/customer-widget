@@ -7,7 +7,7 @@ envsubst < config.json.template > customer-gadget/assets/config/config.json
 
 echo "Printing config.json"
 
-cat dist/customer-gadget/assets/config/config.json
+cat customer-gadget/assets/config/config.json
 
 echo "=========================="
 echo "Starting Customer Gadget"
