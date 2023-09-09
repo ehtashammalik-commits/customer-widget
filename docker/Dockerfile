@@ -4,7 +4,7 @@ WORKDIR /usr/share/nginx/html
 
 COPY dist/ .
 RUN ls -lah
-RUN ls -lah customer-gadget/
+RUN ls -lah customer-widget/
 COPY config.json.template .
 COPY docker-entrypoint.sh .
 RUN chmod a+x docker-entrypoint.sh
