@@ -1,6 +1,6 @@
 FROM gitlab.expertflow.com:9242/general/nginx:1.23.1-alpine-3.16-mcb-154
 
-WORKDIR /usr/share/nginx/html/customer-widget
+WORKDIR /usr/share/nginx/html
 
 COPY dist/ .
 RUN ls -lah

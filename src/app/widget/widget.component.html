@@ -231,7 +231,7 @@
                       <a *ngIf="message.body.type=='FILE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
                         <span class="file-name"
                           innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName) : (message.body.additionalDetails.fileName)}}"></span>
-                        <img class="file-type-message" src="assets/images/file-type.svg"
+                        <img class="file-type-message" src="customer-widget/assets/images/file-type.svg"
                           alt="{{message.body.additionalDetails.fileName}}" />
                         <span class="file-ext-main">{{message.body.attachment.mimeType.split('/')[1] ==
                           'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
