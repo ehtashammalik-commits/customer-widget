@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 
 @Injectable()
 export class ConfigService {
-  configUrl = '../../assets/config/config.json';
+  configUrl = '../../customer-widget/assets/config/config.json';
   public appConfig: any;
   constructor(private _httpClient: HttpClient) {}
 
