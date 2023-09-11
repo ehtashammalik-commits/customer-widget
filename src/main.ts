@@ -17,7 +17,7 @@ document.head.appendChild(sipScript);
 
 // Load the SDK script
 const sdkScript = document.createElement('script');
-sdkScript.src = 'customer-widget/assets/customer-sdk/sdk.js';
+sdkScript.src = 'assets/customer-sdk/sdk.js';
 document.head.appendChild(sdkScript);
 
 // Set up loading completion

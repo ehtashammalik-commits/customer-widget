@@ -231,7 +231,7 @@
                       <a *ngIf="message.body.type=='FILE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
                         <span class="file-name"
                           innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName) : (message.body.additionalDetails.fileName)}}"></span>
-                        <img class="file-type-message" src="customer-widget/assets/images/file-type.svg"
+                        <img class="file-type-message" src="assets/images/file-type.svg"
                           alt="{{message.body.additionalDetails.fileName}}" />
                         <span class="file-ext-main">{{message.body.attachment.mimeType.split('/')[1] ==
                           'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
@@ -249,7 +249,7 @@
                   *ngIf="message.header.sender.type == 'AGENT' || message.header.sender.type == 'BOT'">
                   <div [ngClass]="(message.header.sender.type == 'AGENT') ? 'agent-img' : 'bot-img'">
                     <img
-                      src="../../customer-widget/assets/images/{{(message.header.sender.type == 'AGENT') ? 'user.png' : 'robot-dark.svg'}}"
+                      src="../../assets/images/{{(message.header.sender.type == 'AGENT') ? 'user.png' : 'robot-dark.svg'}}"
                       alt="avatar">
                   </div>
                   <div class="agent-message">
@@ -324,7 +324,7 @@
                       <a *ngIf="message.body.type=='FILE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
                         <span class="file-name"
                           innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName) : (message.body.additionalDetails.fileName)}}"></span>
-                        <img class="file-type-message" src="customer-widget/assets/images/file-type.svg"
+                        <img class="file-type-message" src="assets/images/file-type.svg"
                           alt="{{message.body.additionalDetails.fileName}}" />
                         <span class="file-ext-main">{{message.body.attachment.mimeType.split('/')[1] ==
                           'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
@@ -350,7 +350,7 @@
               <!-- Preview for Image & Docx File -->
               <div *ngIf="file.fileType != 'video' && file.fileType != 'audio'">
                 <img *ngIf="file.filesPath"
-                  [attr.src]="file.fileType == 'image' ? file.filesPath : 'customer-widget/assets/images/file-type.svg'" />
+                  [attr.src]="file.fileType == 'image' ? file.filesPath : 'assets/images/file-type.svg'" />
                 <span>{{file.fileName}}</span>
                 <span *ngIf="file.fileType !== 'image'" class="file-type">
                   <!-- {{file.fileExt}} -->
@@ -408,7 +408,7 @@
         <ng-container *ngIf="activeAudioView">
           <div class="widget-audio-section">
             <div class="audio-agent">
-              <img src="../../customer-widget/assets/images/dummy-user.svg" alt="agent call icon">
+              <img src="../../assets/images/dummy-user.svg" alt="agent call icon">
             </div>
             <div class="agent-detail">
               <p class="name">Expertflow Agent</p>
@@ -460,7 +460,7 @@
         <p>Initiating Voice Call</p>
         <div class="audio-agent">
           <div class="loader"></div>
-          <img src="../../customer-widget/assets/images/dummy-user.svg" alt="agent call icon">
+          <img src="../../assets/images/dummy-user.svg" alt="agent call icon">
           <!-- <span class="material-symbols-outlined">videocam</span> -->
         </div>
         <div class="agent-detail">
@@ -595,9 +595,9 @@
 <!-- Sound Notification Starts-->
 <div id="notificationSound">
   <audio controls id="soundNotif" [muted]="false" [hidden]="true">
-    <source src="customer-widget/assets/sounds/beep.ogg" type="audio/ogg">
-    <source src="customer-widget/assets/sounds/beep.mp3" type="audio/mpeg">
-    <source src="customer-widget/assets/sounds/beep.wav" type="audio/wav">
+    <source src="assets/sounds/beep.ogg" type="audio/ogg">
+    <source src="assets/sounds/beep.mp3" type="audio/mpeg">
+    <source src="assets/sounds/beep.wav" type="audio/wav">
   </audio>
 </div>
 <!-- Sound Notification Ends-->
