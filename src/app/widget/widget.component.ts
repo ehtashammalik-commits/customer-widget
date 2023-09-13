@@ -5,9 +5,9 @@ import {
   ElementRef,
   ViewChild,
   Input,
-  ChangeDetectorRef,
+  ChangeDetectorRef
 } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { SdkService } from '../services/sdk.service';
 import { ConfigService } from '../services/config.service';
 import { browserNotificationService } from '../services/browser-notification.service';
@@ -19,6 +19,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ActivatedRoute } from '@angular/router';
+import { TooltipPosition } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-widget',
@@ -43,6 +44,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private scrollContainer!: ElementRef;
   @Input() conversation: any;
   scrollTop = 0;
+  fontSize = new FormControl("12");
   public scrollCon: any;
   customerIdentifier: any;
 
@@ -76,6 +78,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isCallMute = false;
   isCallOnHold = false;
 
+  isMax = false;
+  fontDropDown = false;
+  positionOptions: TooltipPosition[] = ['after', 'before', 'above', 'below', 'left', 'right'];
+  matToolTipPosition = this.positionOptions[0];
   // Widget Configuration
   title = '';
   subtitle = '';
@@ -128,7 +134,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     public dialog: MatDialog,
     private browserNotificationService: browserNotificationService,
     private deliveryNotificationService: DeliveryNotificationService,
-  ) {}
+  ) { }
 
   ngAfterViewInit(): void {
     this.customerChatResumed();
@@ -141,6 +147,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+
     this.route.queryParams.subscribe((params) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
@@ -216,6 +223,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     this.loadBrowserLanguage();
+    this.setFontFromLocalStorage();
   }
 
   async passUrlParamsToServices() {
@@ -338,18 +346,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   closeWrapper() {
     console.log('wrapper closed');
     this.additionalPanel = false;
+    sessionStorage.setItem('wrapper-hide', 'true');
   }
 
   changeScreen(screen: any) {
     console.log('Change Screen:', screen);
     switch (screen) {
       case 'widget':
-        this.additionalPanel = true;
+        if (sessionStorage.getItem('wrapper-hide') === 'true') {
+          this.additionalPanel = false;
+        } else {
+          this.additionalPanel = true;
+        }
         this.preChatFormScreen = false;
         this.widgetChatScreen = false;
         this.isIconWidget = true;
         this.chatError = false;
         this.chatEndScreen = false;
+        this.isMax = false;
         break;
       case 'chat':
         this.additionalPanel = false;
@@ -358,6 +372,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isIconWidget = true;
         this.chatError = false;
         this.chatEndScreen = false;
+        this.isMax = true;
         this.changeView('chat');
         break;
       case 'form':
@@ -367,6 +382,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.widgetChatScreen = false;
         this.chatError = false;
         this.chatEndScreen = false;
+        this.isMax = true;
         break;
       case 'end':
         this.preChatFormScreen = false;
@@ -374,6 +390,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatEndScreen = true;
         this.chatError = false;
         this.isIconWidget = true;
+        this.isMax = true;
         break;
       case 'error':
         this.preChatFormScreen = false;
@@ -381,6 +398,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatEndScreen = false;
         this.chatError = true;
         this.isIconWidget = true;
+        this.isMax = true;
         break;
     }
   }
@@ -721,7 +739,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       try {
         this.scrollContainer.nativeElement.scrollTop =
           this.scrollContainer.nativeElement.scrollHeight;
-      } catch (err) {}
+      } catch (err) { }
     }, 350);
   }
 
@@ -962,6 +980,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        if (this.isCallActive) {
+          this.callEnd();
+        }
         this.cimMessage = [];
         this.isChatActive = false;
         this.changeScreen('end');
@@ -1053,10 +1074,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   chatTranscript() {
     if (localStorage.getItem('conversationId') !== '') {
       window.open(
-        `${this.__appConfig.appConfig.TRANSCRIPT_URL}/?ccmUrl=${
-          this.__appConfig.appConfig.CCM_URL
-        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${
-          this.serviceIdentifier
+        `${this.__appConfig.appConfig.TRANSCRIPT_URL}/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
+        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier
         }&conversationId=${localStorage.getItem(
           'conversationId',
         )}&browserLang=${this.browserLang}`,
@@ -1179,5 +1198,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   callEnd() {
     this.sdk.handleCallEnd();
+  }
+
+  changeFont() {
+    console.log('font dropdown clicked');
+    this.fontDropDown = !this.fontDropDown; // Toggle the fontDropDown variable
+  }
+  setFontSize(e:any){
+    console.log("Set fontsize", e);
+    try {
+      localStorage.setItem("fontSize", e);
+      this.changeFont();
+      this.setFontFromLocalStorage();
+    } catch (error) { }
+  }
+
+  private setFontFromLocalStorage() {
+    try {
+      if (localStorage.getItem("fontSize") !== null) {
+        this.fontSize.setValue(localStorage.getItem("fontSize"));
+      }
+    } catch (error) { }
   }
 }

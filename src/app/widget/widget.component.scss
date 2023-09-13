@@ -68,7 +68,7 @@ $text-color: #464646;
 .widget-wrapper {
   background: #eff2f7;
   border-radius: 10px;
-  box-shadow: 45px 55px 100px #efefef;
+  // box-shadow: 45px 55px 100px #efefef;
   transition: all 0.3s;
   max-width: 300px;
   position: absolute;
@@ -76,8 +76,8 @@ $text-color: #464646;
   width: 300px;
   height: 200px;
   border: none;
-  right: 10px;
-  bottom: 80px;
+  right: 15px;
+  bottom: 92px;
 }
 
 .widget-wrapper-header {
@@ -1579,6 +1579,56 @@ div#myDropdown.widget-show {
   animation: spin 2s linear infinite;
   position: absolute;
   z-index: 1;
+}
+
+.font-dropdown-container {
+  position: absolute;
+  right: 0px;
+  top: 30px;
+
+  .font-dropdown-icon {
+    position: relative;
+    width: 24px;
+    height: auto;
+    border: 1px solid #EFF2F7;
+    color: var(--main-color);
+    background: rgb(255, 255, 255);
+    // font-size: 15px;
+    text-align: center;
+    padding: 4px 0px;
+    margin: 0px 5px 0px 5px;
+    display: block;
+  }
+
+  .font-dropdown-icon-top {
+    font-size: 12px;
+    font-weight: bold;
+    border-top-right-radius: 7px;
+    border-top-left-radius: 7px;
+  }
+
+  .font-dropdown-icon-middle {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .font-dropdown-icon-bottom {
+    font-size: 18px;
+    font-weight: bold;
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+  }
+
+  .active {
+    background: #eff2f7;
+  }
+}
+
+::ng-deep .mat-tooltip {
+  font-size: 12px !important;
+  padding: 5px !important;
+  position: relative;
+  left: 20px !important;
 }
 
 /* Safari */
