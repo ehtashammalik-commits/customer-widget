@@ -129,8 +129,7 @@
             </div>
           </ng-container>
           <span class=" widget-navbar-divider">|</span>
-          <span class="widget-navbar-icon btnThree material-symbols-outlined disable-icon" *ngIf="enableWebRtc"
-          matTooltip="Video Call" [matTooltipPosition]="matToolTipPosition!">
+          <span class="widget-navbar-icon btnThree material-symbols-outlined disable-icon" *ngIf="enableWebRtc">
             videocam
           </span>
           <span class="widget-navbar-icon btnFour material-symbols-outlined" (click)="changeView('audio')"
@@ -555,7 +554,7 @@
           <div class="widget-error-button">
             <!-- <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number"
               *ngIf="enableWebRtc"> -->
-            <input id="formTrigger" type="submit" class="widget-error-trigger" value="Send me transcript"
+            <input id="formTrigger" type="submit" class="widget-error-trigger" value="Download Transcript"
               *ngIf="enableDownloadTranscript" (click)="chatTranscript()">
           </div>
         </div>
