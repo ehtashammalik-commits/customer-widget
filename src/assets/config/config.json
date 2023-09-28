@@ -1,10 +1,10 @@
 {
-    "SOCKET_URL": "https://cim.expertflow.com/web-channel-manager",
-    "FILE_SERVER_URL": "https://cim.expertflow.com/file-engine",
-    "BOT_FRAMEWORK_URL": "https://cim.expertflow.com/bot-framework",
-    "CCM_URL" : "https://cim.expertflow.com/ccm",
-    "TRANSCRIPT_URL": "https://cim.expertflow.com/web-widget/chat-transcript",
-    "CONVERSATIONAL_URL" : "https://cim.expertflow.com/conversation-manager/customer-topics",
-    "FORM_URL" : "https://cim.expertflow.com/unified-admin",
+    "SOCKET_URL": "https://cim-dev.expertflow.com/web-channel-manager",
+    "FILE_SERVER_URL": "https://cim-dev.expertflow.com/file-engine",
+    "BOT_FRAMEWORK_URL": "https://cim-dev.expertflow.com/bot-framework",
+    "CCM_URL" : "https://cim-dev.expertflow.com/ccm",
+    "TRANSCRIPT_URL": "https://cim-dev.expertflow.com/web-widget/chat-transcript",
+    "CONVERSATIONAL_URL" : "https://cim-dev.expertflow.com/conversation-manager/customer-topics",
+    "FORM_URL" : "https://cim-dev.expertflow.com/unified-admin",
     "WEBHOOK_URL" : "https://chat.googleapis.com/v1/spaces/AAAAcqK1bnk/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=fIoc7oZJdT9NjDQgjlrXH1snbl2WxhsjTVTlWr9cTes%3D"
 }
