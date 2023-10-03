@@ -33,7 +33,8 @@
         <div class="widget-form-header widget-color" (click)="changeScreen('widget')">
           <h5 id="headerHeading">{{title}}</h5>
           <span class="widget-header-icon">
-            <span class="topbar-icon material-symbols-outlined" matTooltip="Minimize" [matTooltipPosition]="matToolTipPosition!">minimize</span>
+            <span class="topbar-icon material-symbols-outlined" matTooltip="Minimize"
+              [matTooltipPosition]="matToolTipPosition!">minimize</span>
           </span>
         </div>
         <div class="widget-form-content">
@@ -94,35 +95,42 @@
             </span>
           </div> -->
           <div class="widget-header-icon iconTwo" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="Minimize" [matTooltipPosition]="matToolTipPosition!">
+            <span class="material-symbols-outlined minimize" matTooltip="Minimize"
+              [matTooltipPosition]="matToolTipPosition!">
               minimize
             </span>
           </div>
           <div class="widget-header-icon iconOne" mat-raised-button (click)="endChat()">
-            <span class="material-symbols-outlined close-icon" matTooltip="End Conversation" [matTooltipPosition]="matToolTipPosition!">
+            <span class="material-symbols-outlined close-icon" matTooltip="End Conversation"
+              [matTooltipPosition]="matToolTipPosition!">
               close
             </span>
           </div>
         </div>
         <!-- Widget Chat Control Toolbar -->
         <div class="widget-chat-navbar">
-          <span class="widget-navbar-icon btnOne material-symbols-outlined" matTooltip="More Options" [matTooltipPosition]="matToolTipPosition!">
+          <span class="widget-navbar-icon btnOne material-symbols-outlined" matTooltip="More Options"
+            [matTooltipPosition]="matToolTipPosition!">
             more_vert
           </span>
-          <span class="material-symbols-outlined btnTwo widget-navbar-icon" (click)="changeFont()" matTooltip="Change Font Size" [matTooltipPosition]="matToolTipPosition!">
+          <span class="material-symbols-outlined btnTwo widget-navbar-icon" (click)="changeFont()"
+            matTooltip="Change Font Size" [matTooltipPosition]="matToolTipPosition!">
             text_fields
           </span>
           <ng-container *ngIf="fontDropDown">
             <div class="font-dropdown-container">
-              <span class="material-symbols-outlined btnTwo font-dropdown-icon font-dropdown-icon-top" matTooltip="12px" [matTooltipPosition]="matToolTipPosition!"
-                [ngClass]="{'active' : fontSize.value == '12'}" (click)="setFontSize('12')">
+              <span class="material-symbols-outlined btnTwo font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
+                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{'active' : fontSize.value == '12'}"
+                (click)="setFontSize('12')">
                 text_fields
               </span>
-              <span class="material-symbols-outlined btnTwo font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px" [matTooltipPosition]="matToolTipPosition!"
+              <span class="material-symbols-outlined btnTwo font-dropdown-icon font-dropdown-icon-middle"
+                matTooltip="14px" [matTooltipPosition]="matToolTipPosition!"
                 [ngClass]="{'active' : fontSize.value == '14'}" (click)="setFontSize('14')">
                 text_fields
               </span>
-              <span class="material-symbols-outlined btnTwo font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px" [matTooltipPosition]="matToolTipPosition!"
+              <span class="material-symbols-outlined btnTwo font-dropdown-icon font-dropdown-icon-bottom"
+                matTooltip="16px" [matTooltipPosition]="matToolTipPosition!"
                 [ngClass]="{'active' : fontSize.value == '16'}" (click)="setFontSize('16')">
                 text_fields
               </span>
@@ -260,9 +268,13 @@
                           [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}"></span>
                         <img class="file-type-message" src="assets/images/file-type.svg"
                           alt="{{message.body.additionalDetails.fileName}}" />
-                        <span class="file-ext-main">{{message.body.attachment.mimeType.split('/')[1] ==
+                        <span class="file-ext-main">
+                          {{message.body.attachment.mimeType.split('/')[1] ==
                           'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
-                          message.body.attachment.mimeType.split('/')[1]}}</span>
+                          (message.body.attachment.mimeType.split('/')[1] ===
+                          'vnd.openxmlformats-officedocument.presentationml.presentation' ? 'PPTX' :
+                          message.body.attachment.mimeType.split('/')[1])}}
+                        </span>
                       </a>
                     </div>
                     <span class="time">{{message.header.timestamp | date:'h:mm a'}}</span>
@@ -387,9 +399,9 @@
                   [attr.src]="file.fileType == 'image' ? file.filesPath : 'assets/images/file-type.svg'" />
                 <span>{{file.fileName}}</span>
                 <span *ngIf="file.fileType !== 'image'" class="file-type">
-                  <!-- {{file.fileExt}} -->
-                  {{file.fileExt == 'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
-                  file.fileExt}}
+                  {{ file.fileExt === 'vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
+                  (file.fileExt === 'vnd.openxmlformats-officedocument.presentationml.presentation' ? 'PPTX' :
+                  file.fileExt) }}
                 </span>
               </div>
               <!-- Preview for Video File -->
@@ -425,11 +437,12 @@
               [ngClass]="{'error-border': text.length == messageLimit}"></textarea>
             <div id="file-btn" *ngIf="enableFileTransfer && text.length < 1 && imageUrls?.length == 0">
               <label for="file-upload">
-                <span class="material-symbols-outlined file-btn" matTooltip="File Transfer" [matTooltipPosition]="matToolTipPosition!">
+                <span class="material-symbols-outlined file-btn" matTooltip="File Transfer"
+                  [matTooltipPosition]="matToolTipPosition!">
                   attach_file
                 </span>
               </label>
-              <input accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp"
+              <input accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp,.pptx,.ppt"
                 id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
             </div>
             <span class="material-symbols-outlined send-btn" *ngIf="isTyping" (click)="onSendMessage()">
@@ -531,7 +544,8 @@
             </span>
           </div> -->
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="Minimize" [matTooltipPosition]="matToolTipPosition!">
+            <span class="material-symbols-outlined minimize" matTooltip="Minimize"
+              [matTooltipPosition]="matToolTipPosition!">
               minimize
             </span>
           </div>
@@ -578,7 +592,8 @@
             </span>
           </div> -->
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="Minimize" [matTooltipPosition]="matToolTipPosition!">
+            <span class="material-symbols-outlined minimize" matTooltip="Minimize"
+              [matTooltipPosition]="matToolTipPosition!">
               minimize
             </span>
           </div>

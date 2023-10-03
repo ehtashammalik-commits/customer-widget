@@ -474,6 +474,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'SOCKET_DISCONNECTED':
             console.log('event response:', event.data);
             localStorage.removeItem('user');
+            this.clearSession();
             break;
           case 'CONNECT_ERROR':
             this.changeScreen('error');
@@ -980,14 +981,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        if (this.isCallActive) {
-          this.callEnd();
-        }
-        this.cimMessage = [];
-        this.isChatActive = false;
-        this.changeScreen('end');
-        this.sdk.handleChatEnd(this.customerData);
-        this.clearMessageData();
+        this.clearSession();
       }
     });
   }
@@ -1204,7 +1198,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('font dropdown clicked');
     this.fontDropDown = !this.fontDropDown; // Toggle the fontDropDown variable
   }
-  setFontSize(e:any){
+  setFontSize(e: any) {
     console.log("Set fontsize", e);
     try {
       localStorage.setItem("fontSize", e);
@@ -1219,5 +1213,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.fontSize.setValue(localStorage.getItem("fontSize"));
       }
     } catch (error) { }
+  }
+
+  clearSession(){
+    if (this.isCallActive) {
+      this.callEnd();
+    }
+    this.cimMessage = [];
+    this.isChatActive = false;
+    this.changeScreen('end');
+    this.sdk.handleChatEnd(this.customerData);
+    this.clearMessageData();
   }
 }
