@@ -3,11 +3,11 @@ set -e
 
 echo "loading"
 # envsubst '${DB_URL},${}'< ormconfig.json > ormconfig.json
-envsubst < config.json.template > customer-widget/assets/config/config.json
+envsubst < config.json.template > /usr/share/nginx/html/assets/config.json
 
 echo "Printing config.json"
 
-cat customer-widget/assets/config/config.json
+cat /usr/share/nginx/html/assets/config.json
 
 echo "=========================="
 echo "Starting Customer widget"
