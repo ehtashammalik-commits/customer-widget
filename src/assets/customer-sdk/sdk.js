@@ -330,6 +330,42 @@ async function getConversationData(url, conversationId) {
   const data = await response.json();
   return data;
 }
+
+/**
+ * Callback Request To ECM
+ * @param {*} payload
+ * @param {*} url
+ */
+function callbackRequest(url, payload, callback) {
+  try {
+
+    // Make an API Call
+    fetch(`${url}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Handle the API response here
+        console.log("API response:", data);
+        // callbackSuccess();
+        callback(data);
+        // return data;
+      })
+      .catch(error => {
+        // Handle any errors that occur during the API call
+        console.error("API Call Error", error);
+        callback(error);
+      })
+  } catch (error) {
+    console.error('API Function Error', error);
+    callback(error);
+  }
+}
+
 /**
  * Webhook Notifications Functions
  * @param {*} data
