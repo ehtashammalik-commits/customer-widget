@@ -190,7 +190,7 @@
           </ng-container>
           <span class=" widget-navbar-divider">|</span>
           <span class="widget-navbar-icon btnThree material-symbols-outlined" matTooltip="Request Callback"
-          [ngClass]="{'focus-icon' : isChatActive === true && activeCallbackView === true , 'away-chat-icon' : isChatActive === true  && activeCallbackView === false }"
+            [ngClass]="{'focus-icon' : isChatActive === true && activeCallbackView === true , 'away-chat-icon' : isChatActive === true  && activeCallbackView === false }"
             (click)="changeView('callback')" *ngIf="enabledCallback" [matTooltipPosition]="matToolTipPosition!">
             perm_phone_msg
           </span>
@@ -596,17 +596,23 @@
         <ng-container *ngIf="activeCallbackResponseView">
           <div class="widget-callback-response-content">
             <div class="response-icon">
-              <span class="material-symbols-outlined response-emoji">
-                check_circle
+              <span class="material-symbols-outlined response-emoji"
+                innerHTML="{{ callbackResponseStatus === 'ok' ? 'check_circle' : callbackResponseStatus === 'conflict' ? 'error' : 'sentiment_dissatisfied' }}">
               </span>
-              <span>Success!</span>
+              <span
+                innerHTML="{{ callbackResponseStatus === 'ok' ? 'Success!' : callbackResponseStatus === 'conflict' ? 'Conflict!' : 'Sorry!' }}"></span>
             </div>
             <div class="response-message">
-              <h4 class="">Your request for setting up a callback was submitted successfully.
+              <h4
+                innerHTML="{{ callbackResponseStatus === 'ok' ?
+              'Your request for setting up a callback was submitted successfully.' : callbackResponseStatus === 'conflict' ?
+              'Your Callback Request has already been scheduled, Please Wait!!!' :
+              'We are currently encountering some technical problems with our server. Your request for setting up a callback could not be submitted.' }}">
               </h4>
-              <p>You will receive a callback on the contact number provided. For additional queries, you can reach out
-                to
-                us through our live chat.</p>
+              <p innerHTML="{{ callbackResponseStatus === 'ok' ?
+              'You will receive a callback on the contact number provided. For additional queries, you can reach out to us through our live chat.' : callbackResponseStatus === 'conflict' ?
+              'Your Callback has already been scheduled, agent will get back to you. For additional queries, you can reach out to us through our live chat.' :
+              'Please try again in a few minutes or consider reaching out to us through our live chat.' }}"></p>
             </div>
 
             <div class="widget-response-button">
@@ -713,21 +719,28 @@
         </div>
         <div class="widget-error-content">
           <div class="error-icon">
-            <span class="material-symbols-outlined error-emoji">
-              check_circle
+            <span class="material-symbols-outlined error-emoji"
+              innerHTML="{{ callbackResponseStatus === 'ok' ? 'check_circle' : callbackResponseStatus === 'conflict' ? 'error' : 'sentiment_dissatisfied' }}">
             </span>
-            <span>Success!</span>
+            <span
+              innerHTML="{{ callbackResponseStatus === 'ok' ? 'Success!' : callbackResponseStatus === 'conflict' ? 'Conflict!' : 'Sorry!' }}"></span>
           </div>
           <div class="error-message">
-            <h4 class="">Your request for setting up a callback was submitted successfully.
+            <h4
+              innerHTML="{{ callbackResponseStatus === 'ok' ?
+              'Your request for setting up a callback was submitted successfully.' : callbackResponseStatus === 'conflict' ?
+              'Your Callback Request has already been scheduled, Please Wait!!!' :
+              'We are currently encountering some technical problems with our server. Your request for setting up a callback could not be submitted.' }}">
             </h4>
-            <p>You will receive a callback on the contact number provided. For additional queries, you can reach out to
-              us through our live chat.</p>
+            <p innerHTML="{{ callbackResponseStatus === 'ok' ?
+              'You will receive a callback on the contact number provided. For additional queries, you can reach out to us through our live chat.' : callbackResponseStatus === 'conflict' ?
+              'Your Callback has already been scheduled, agent will get back to you. For additional queries, you can reach out to us through our live chat.' :
+              'Please try again in a few minutes or consider reaching out to us through our live chat.' }}"></p>
           </div>
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Start a conversation">
+            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Start a conversation" (click)="changeScreen('chatForm')">
           </div>
         </div>
       </div>

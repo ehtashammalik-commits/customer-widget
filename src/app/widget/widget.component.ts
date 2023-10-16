@@ -71,6 +71,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   callPopUpView = false;
   activeCallbackView = false;
   activeCallbackResponseView = false;
+  callbackResponseStatus = '';
 
   customerData: any;
   chatPayLoad: any;
@@ -219,7 +220,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.onCallbackRequestSubject = this.sdk.onCallbackRequestResponse$.subscribe((data) => {
       console.log('callback request response events => ', data);
-      this.handleCallbackRequestApiResponse(data);
+
+      if (data && data.status && data.status.name) {
+        this.callbackResponseStatus = data.status.name.toLowerCase();
+      } else {
+        this.callbackResponseStatus = 'error';
+        console.error('Something Went Wrong Please check logs');
+      }
       this.callbackLoader = false;
       this.isChatActive ? this.changeView('callbackResponse') : this.changeScreen('callbackResponse');
     });
@@ -1329,20 +1336,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.clearMessageData();
   }
 
-  handleCallbackRequestApiResponse(data: any) {
-    if (data && data.status && data.status.name) {
-      if (data.status.name.toLowerCase() === 'conflict') {
-        // duplicateCallback();
-        // this.changeScreen('callbackResponse');
-        console.log("Callback already scheduled");
-      } else if (data.status.name.toLowerCase() === 'ok') {
-        // this.changeScreen('callbackResponse');
-      } else {
-        console.error('Error Callback Response: ');
-        // errorCallback();
-      }
-    } else {
-      console.error('Something Went Wrong Please check logs');
-    }
-  }
+  // handleCallbackRequestApiResponse(data: any) {
+  //   if (data && data.status && data.status.name) {
+  //     this.callbackResponseStatus = data.status.name.toLowerCase();
+  //     if (data.status.name.toLowerCase() === 'conflict') {
+
+  //       // duplicateCallback();
+  //       // this.changeScreen('callbackResponse');
+  //       console.log("Callback already scheduled");
+  //     } else if (data.status.name.toLowerCase() === 'ok') {
+
+  //       // this.changeScreen('callbackResponse');
+  //     } else {
+  //       console.error('Error Callback Response: ');
+  //       // errorCallback();
+  //     }
+  //   } else {
+  //     console.error('Something Went Wrong Please check logs');
+  //   }
+  // }
 }
