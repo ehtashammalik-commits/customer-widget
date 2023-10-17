@@ -29,7 +29,7 @@ RUN rm -rf /usr/share/apk
 RUN rm -rf /var/lib/apk
 
 #HEALTHCHECK --interval=1m30s --timeout=3s --retries=10 \
-	CMD curl -f -k http://localhost:8080 || exit 1
+	#CMD curl -f -k http://localhost:8080 || exit 1
 
 #USER 1001060000
 #EXPOSE 8080
