@@ -33,7 +33,7 @@ RUN rm -rf /var/lib/apk
 
 #USER 1001060000
 #EXPOSE 8080
-#EXPOSE 80
-#EXPOSE 443
+EXPOSE 80
+EXPOSE 443
 
 ENTRYPOINT ["sh","./docker-entrypoint.sh" ]
