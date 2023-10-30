@@ -1301,6 +1301,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   callEnd() {
+    this.endCountdown();
     this.sdk.handleCallEnd();
   }
 
