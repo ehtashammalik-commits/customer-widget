@@ -217,6 +217,40 @@ function chatRequest(data) {
     throw error;
   }
 }
+
+/**
+ * Chat Request Function with customer data
+ * @param {*} data
+ */
+function voiceRequest(data) {
+  try {
+    if (data) {
+      let additionalAttributesData = [];
+      let webChannelDataObj = {
+        key: 'WebChannelData',
+        type: 'WebChannelData',
+        value: {
+          browserDeviceInfo: data.data.browserDeviceInfo,
+          queue: data.data.queue,
+          locale: data.data.locale,
+          formData: data.data.formData
+        }
+      };
+      additionalAttributesData.push(webChannelDataObj);
+      let obj = {
+        channelCustomerIdentifier: data.data.channelCustomerIdentifier,
+        serviceIdentifier: data.data.serviceIdentifier,
+        additionalAttributes: additionalAttributesData
+      };
+      // webhookNotifications(data.data.formData);
+      this.socket.emit('VOICE_REQUESTED', obj);
+      console.log(`SEND VOICE_REQUESTED DATA:`, obj);
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
 /**
  * Send Message Socket Event with Message Payload in parameter
  * @param {*} data
@@ -320,6 +354,66 @@ async function setConversationData(url, conversationId, data) {
   return response;
 }
 /**
+ * Set Conversation Data Api By Customer Channel Identifier
+ */
+async function setConversationDataByCustomerIdentifier(url, channelIdentifier, data, callback) {
+  try {
+    const response = await fetch(`${url}/${channelIdentifier}/conversation-data-by-identifier`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (response.status === 403) {
+      console.error('Forbidden: The server returned a 403 Forbidden response.');
+      callback(response);
+    }
+
+    if (!response.ok) {
+      console.error('Network response was not ok');
+      callback(response);
+    }
+
+    const result = await response.json();
+    console.log('Success:', result);
+    callback(result);
+  } catch (error) {
+    console.error('Error:', error);
+    callback(error); // Re-throw the error for the caller to handle
+  }
+}
+
+/**
+* Get Conversation Data Api By Customer Identifier
+*/
+async function getConversationDataByCustomerIdentifier(url, channelIdentifier, callback) {
+  try {
+    const response = await fetch(`${url}/get/${channelIdentifier}`, {
+      method: 'GET', // Specify the HTTP method as GET
+      headers: {
+        'Content-Type': 'application/json' // Set appropriate headers if needed
+      }
+    });
+
+    if (response.status === 403) {
+      console.error('Forbidden: The server returned a 403 Forbidden response.');
+      callback(response);
+    } else if (!response.ok) {
+      console.error(`Failed to fetch data from ${url}/get/${channelIdentifier}: ${response.status} ${response.statusText}`);
+      callback(response);
+    } else {
+      const data = await response.json();
+      callback(data);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    callback(error); // Re-throw the error for the caller to handle
+  }
+}
+
+/**
 * Get Conversation Data Api
 */
 async function getConversationData(url, conversationId) {
@@ -330,6 +424,42 @@ async function getConversationData(url, conversationId) {
   const data = await response.json();
   return data;
 }
+
+/**
+ * Callback Request To ECM
+ * @param {*} payload
+ * @param {*} url
+ */
+function callbackRequest(url, payload, callback) {
+  try {
+
+    // Make an API Call
+    fetch(`${url}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Handle the API response here
+        console.log("API response:", data);
+        // callbackSuccess();
+        callback(data);
+        // return data;
+      })
+      .catch(error => {
+        // Handle any errors that occur during the API call
+        console.error("API Call Error", error);
+        callback(error);
+      })
+  } catch (error) {
+    console.error('API Function Error', error);
+    callback(error);
+  }
+}
+
 /**
  * Webhook Notifications Functions
  * @param {*} data
