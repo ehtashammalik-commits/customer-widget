@@ -3,9 +3,8 @@ version: '3'
 services:
   node-app:
     container_name: customer-widget
-    image: gitlab.expertflow.com:9242/cim/unified-agent:CIM-469-0
+    image: gitlab.expertflow.com:9242/efpublic/customer-widget/build:4.3-SR1_f-CIM-11597-5c820d9579ec4078e3766fa956bf7d19ca0b97a1
     env_file:
       - ./environment_variables.env
     ports:
-      - 4500:80
-
+      - 4200:80
