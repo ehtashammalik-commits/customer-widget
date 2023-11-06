@@ -1,15 +1,13 @@
 var wssServerIp;
-var wssServerPort;
+var uriServerIp;
 var diallingURI;
 var sipExtension;
 var extensionPassword;
 var IP;
-var wssPort;
+// var wssPort;
 var dialerURI;
 var sipPassword;
 var enableLogs;
-var chatWebhook;
-var preChatForm;
 
 var session;
 var mediaElement;
@@ -55,21 +53,18 @@ function widgetConfigs(ccmUrl, widgetIdentifier, callback) {
   fetch(`${ccmUrl}/widget-configs/${widgetIdentifier}`)
     .then(response => response.json())
     .then((data) => {
+      console.log('widget configs:', data);
       callback(data);
-      wssServerIp = data.webRtc.wssServerIp;
-      wssServerPort = data.webRtc.wssServerPort;
+      wssServerIp = data.webRtc.wssFs;
+      uriServerIp = data.webRtc.uriFs;
       diallingURI = data.webRtc.diallingUri;
       sipExtension = data.webRtc.sipExtension;
       extensionPassword = data.webRtc.extensionPassword;
       enable_sip_logs = data.webRtc.enabledSipLogs;
       enableLogs = enable_sip_logs;
-      IP = wssServerIp;
-      wssPort = wssServerPort;
-      dialerURI = 'sip:' + diallingURI + '@' + wssServerIp;
+      IP = uriServerIp;
+      dialerURI = 'sip:' + diallingURI + '@' + uriServerIp;
       sipPassword = extensionPassword;
-
-      chatWebhook = data.webhook_url;
-      preChatForm = data.form;
     });
 }
 /**
@@ -147,7 +142,7 @@ function eventListeners(callback) {
   this.socket.on('connect', () => {
     if (this.socket.id != undefined) {
       console.log(`you are connected with socket:`, this.socket);
-      let error = localStorage.getItem("error");
+      let error = localStorage.getItem("widget-error");
       if (error) {
         console.log(`${error}`);
         resumeChat({
@@ -172,7 +167,7 @@ function eventListeners(callback) {
   });
   this.socket.on('connect_error', (error) => {
     console.log(`unable to establish connection with the server: `, error.message);
-    localStorage.setItem("error", "1");
+    localStorage.setItem("widget-error", "1");
     callback({ type: "CONNECT_ERROR", data: error });
   });
   this.socket.on('CHAT_ENDED', (data) => {
@@ -209,7 +204,6 @@ function chatRequest(data) {
         serviceIdentifier: data.data.serviceIdentifier,
         additionalAttributes: additionalAttributesData
       };
-      // webhookNotifications(data.data.formData);
       this.socket.emit('CHAT_REQUESTED', obj);
       console.log(`SEND CHAT_REQUESTED DATA:`, obj);
     }
@@ -242,7 +236,6 @@ function voiceRequest(data) {
         serviceIdentifier: data.data.serviceIdentifier,
         additionalAttributes: additionalAttributesData
       };
-      // webhookNotifications(data.data.formData);
       this.socket.emit('VOICE_REQUESTED', obj);
       console.log(`SEND VOICE_REQUESTED DATA:`, obj);
     }
@@ -445,9 +438,7 @@ function callbackRequest(url, payload, callback) {
       .then(data => {
         // Handle the API response here
         console.log("API response:", data);
-        // callbackSuccess();
         callback(data);
-        // return data;
       })
       .catch(error => {
         // Handle any errors that occur during the API call
@@ -466,7 +457,7 @@ function callbackRequest(url, payload, callback) {
  */
 function webhookNotifications(url, data) {
   let notifications = {};
-  notifications['text'] = `${data.type} ${data.name}, ${data.email}, ${data.phone} started a chat`
+  notifications['text'] = `${data}`
   fetch(`${url}`, {
     method: 'POST',
     body: JSON.stringify(notifications),
@@ -491,8 +482,8 @@ function dialCall(eventsCallback) {
     ext = extension;
     console.log(wssServerIp, 'ip at call time');
     userAgent = new SIP.UA({
-      uri: extension + '@' + wssServerIp,
-      transportOptions: { wsServers: 'wss://' + wssServerIp + ':' + wssServerPort, traceSip: true },
+      uri: extension + '@' + uriServerIp,
+      transportOptions: { wsServers: wssServerIp, traceSip: true },
       authorizationUser: extension,
       password: extensionPassword,
       log: {
@@ -602,7 +593,7 @@ const sendInvite = (mediaType, videoName, videoLocal, userData, eventsCallback) 
         }
       }
     }
-    session = userAgent.invite('sip:' + diallingURI + '@' + wssServerIp, {
+    session = userAgent.invite('sip:' + diallingURI + '@' + uriServerIp, {
       sessionDescriptionHandlerOptions: {
         constraints: mediaConstraints
       }

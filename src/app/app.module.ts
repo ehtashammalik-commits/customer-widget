@@ -24,9 +24,14 @@ import { ConfigService } from './services/config.service';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 
 export function initializeApp1(appConfigService: ConfigService) {
-  return (): Promise<any> => {
-    appConfigService.loadConfig();
-    return Promise.resolve();
+  return async () => {
+    console.log('Initializing App');
+    try {
+      const config = await appConfigService.loadConfig();
+      console.log('Config loaded:', config);
+    } catch (error) {
+      console.error('Error loading config:', error);
+    }
   };
 }
 

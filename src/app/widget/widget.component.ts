@@ -29,6 +29,7 @@ import { TooltipPosition } from '@angular/material/tooltip';
 export class WidgetComponent implements OnInit, AfterViewInit {
   private widgetConfigsSubscription: Subscription = new Subscription();
   private preChatFormSubscription: Subscription = new Subscription();
+  private callbackFormSubscription: Subscription = new Subscription();
   private establishConnectionSubject: Subscription = new Subscription();
   private onChatResumedSubject: Subscription = new Subscription();
   private onCallSubject: Subscription = new Subscription();
@@ -109,10 +110,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isTyping: boolean = true;
 
   @Input() formData!: any[];
+  @Input() callbackFormData!: any[];
   preChatFormGroup!: FormGroup;
   callbackFormGroup!: FormGroup;
   callbackLoader = false;
-  enabledCallback: Boolean = true;
+  callbackConfig: any;
+  enabledCallback: Boolean = false;
+  standaloneCallback: Boolean = false;
+
+  enabledWebhook: Boolean = false;
+  webhookUrl: any;
 
   isMobile = false;
 
@@ -171,8 +178,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.serviceIdentifier,
         this.widgetIdentifier,
       );
-      // this.customerIdentifier = this.channelCustomerIdentifier;
-
       // Pass parameters to service after you have received them.
       this.passUrlParamsToServices();
     });
@@ -185,9 +190,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.setWidgetConfigs(configs);
         this.loadBrowserLanguage();
         console.log('Widget configurations:', configs);
-        if (configs.form !== '') {
-          this.sdk.renderPreChatForm(configs.form);
-        }
+        if (this.enabledCallback) this.sdk.renderCallbackForm(this.callbackConfig.callBackForm);
+        if (configs.form !== '') this.sdk.renderPreChatForm(this.preChatFormId);
       },
     );
 
@@ -195,6 +199,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (formData) => {
         this.formData = formData.attributes;
         this.createFormControls();
+        console.log('Widget configurations:', formData.attributes);
+      },
+    );
+
+    this.callbackFormSubscription = this.sdk.renderCallbackForm$.subscribe(
+      (formData) => {
+        this.callbackFormData = formData.attributes;
         this.createCallbackFormControls();
         console.log('Widget configurations:', formData.attributes);
       },
@@ -271,7 +282,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private createCallbackFormControls(): void {
-    for (const attribute of this.formData) {
+    for (const attribute of this.callbackFormData) {
       const validators = attribute.isRequired ? [Validators.required] : [];
       this.callbackFormGroup.addControl(
         attribute.key,
@@ -292,6 +303,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.preChatFormId = configs.form;
     this.webRTCConfig = configs.webRtc;
     this.enableWebRtc = configs.webRtc.enableWebRtc;
+
+    this.callbackConfig = configs.callback;
+    this.enabledCallback = configs.callback.enableCallback;
+    this.standaloneCallback = configs.callback.standaloneCallback;
+
+    this.webhookUrl = configs.webhook.webhookUrl;
+    this.enabledWebhook = configs.webhook.enableWebhook;
   }
 
   private markFormGroupTouched(formGroup: FormGroup) {
@@ -324,7 +342,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       let callbackData = this.callbackFormGroup.value;
       console.log('Callback Data:', callbackData);
       this.callbackLoader = true;
-      this.sdk.sendCallbackRequest(callbackData)
+      this.sdk.sendCallbackRequest(this.callbackConfig, callbackData)
     } catch {
       alert('Error while submitting the form');
     }
@@ -556,6 +574,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
                 data: this.customerData,
               };
               this.sdk.sendChatRequest(this.chatPayLoad);
+              if (this.enabledWebhook) this.sdk.sendWebhookNotification(this.webhookUrl, this.chatPayLoad);
               console.log('New Chat Start Request Sent');
             } else if (this.eventTriggerType === '') {
               console.log('Chat Resume Request Sent');

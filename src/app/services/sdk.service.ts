@@ -17,6 +17,13 @@ declare var widgetConfigs: any,
   audioControl: any,
   callbackRequest: any;
 
+type formAttributeMappings = {
+  name: string[];
+  phone: string[];
+  email: string[];
+  identifier: string[];
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -33,6 +40,10 @@ export class SdkService implements OnInit {
   private preChatFormSubject: Subject<any> = new Subject<any>();
   public renderPreChatForm$: Observable<any> =
     this.preChatFormSubject.asObservable();
+
+  private callbackFormSubject: Subject<any> = new Subject<any>();
+  public renderCallbackForm$: Observable<any> =
+    this.callbackFormSubject.asObservable();
 
   private establishConnectionSubject: Subject<any> = new Subject<any>();
   public connectionResponse$: Observable<any> =
@@ -89,6 +100,12 @@ export class SdkService implements OnInit {
     });
   }
 
+  renderCallbackForm(form_id: any) {
+    getPreChatForm(this.ConfigData.FORM_URL, form_id, (res: any) => {
+      this.callbackFormSubject.next(res);
+    });
+  }
+
   makeConnection(serviceIdentifier: any, channelCustomerIdentifier: any) {
     if (!this.sdkLoaded) {
       console.error('SDK script is not loaded yet');
@@ -115,30 +132,53 @@ export class SdkService implements OnInit {
   sendChatRequest(payload: any) {
     console.log('Chat Payload:', payload);
     chatRequest(payload);
-    let notificationPayload = {
-      name: payload.data.formData.attributes.first_name,
-      email: payload.data.formData.attributes.business_email,
-      phone: payload.data.formData.attributes.phone_number,
-      type: payload.data.formData.attributes.customer_type,
-    };
-    webhookNotifications(this.ConfigData.WEBHOOK_URL, notificationPayload);
   }
 
-  sendCallbackRequest(formData: any) {
-    let ecm_url = this.ConfigData.ECM_URL;
+  createStandardFormObj(inputObject: Record<string, string>): Record<string, string> {
+    const resultObject: Record<string, string> = {
+      name: '',
+      email: '',
+      phone: '',
+      identifier: '',
+    };
+    const attributeMappings: formAttributeMappings = {
+      name: ["first_name", "full_name", "name"],
+      phone: ["phone", "phone_number", "mobile", "business_number"],
+      email: ["email", "business_email", "personal_email", "email_address"],
+      identifier: ["customer_channel_identifier"],
+    } as formAttributeMappings;
+    for (const key in inputObject) {
+      for (const attribute in attributeMappings) {
+        if (attributeMappings[attribute as keyof formAttributeMappings].includes(key) && inputObject[key] !== '') {
+          resultObject[attribute] = inputObject[key];
+        }
+      }
+    }
+    return resultObject;
+  }
+
+  sendWebhookNotification(webhook_url: any, payload: any) {
+    let formObj = this.createStandardFormObj(payload.data.formData.attributes);
+    const message = `${formObj['name']} having email: ${formObj['email']} phone: ${formObj['phone']} with Identifier: ${formObj['identifier']} started a chat`;
+
+    webhookNotifications(webhook_url, message);
+  }
+
+  sendCallbackRequest(configs: any, formData: any) {
+    let formObj = this.createStandardFormObj(formData);
+    console.log('callback standard form obj:', formObj);
     let payload = {
-      campaignId: this.ConfigData.CAMPAIGN_ID,
-      phone1: formData.phone_number,
-      businessParam1: formData.first_name,
-      businessParam2: formData.business_email,
-      businessParam3: formData.customer_channel_identifier,
+      campaignId: configs.campaignId,
+      phone1: formObj['phone'],
+      businessParam1: formObj['name'],
+      businessParam2: formObj['email'],
+      businessParam3: formObj['identifier'],
       businessParam4: this.getCurrentDate(),
-      duplicateCallbacks: this.ConfigData.ALLOW_DUPLICATE
+      duplicateCallbacks: configs.allowDuplicate
     };
 
     console.log("send callback request: ", payload);
-    callbackRequest(ecm_url, payload, (res: any) => {
-      // console.log("Callback request response: ", res);
+    callbackRequest(configs.callbackUrl, payload, (res: any) => {
       this.onCallbackRequestSubject.next(res);
     })
 

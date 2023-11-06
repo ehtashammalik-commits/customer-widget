@@ -42,7 +42,7 @@
           <p>Please fill out the form below to setup a callback request.</p>
           <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
             <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
-            <div class="widget-form-group" *ngFor="let attribute of formData">
+            <div class="widget-form-group" *ngFor="let attribute of callbackFormData">
               <div [ngSwitch]="attribute.attributeType"
                 [style.display]="attribute.key === 'customer_channel_identifier' ? 'none' : 'block'">
                 <ng-container *ngSwitchCase="'INPUT'">
@@ -161,51 +161,66 @@
         </div>
         <!-- Widget Chat Control Toolbar -->
         <div class="widget-chat-navbar">
-          <span class="widget-navbar-icon btnOne material-symbols-outlined" matTooltip="More Options"
+          <!-- <span class="widget-navbar-icon btnOne material-symbols-outlined" matTooltip="More Options"
             [matTooltipPosition]="matToolTipPosition!">
             more_vert
-          </span>
-          <span class="material-symbols-outlined btnTwo widget-navbar-icon" (click)="changeFont()"
-            matTooltip="Change Font Size" [matTooltipPosition]="matToolTipPosition!">
+          </span> -->
+          <span class="material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
+            [ngClass]="{'btnOne' :enableFontResize === true}" matTooltip="Change Font Size"
+            [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
             text_fields
           </span>
           <ng-container *ngIf="fontDropDown">
             <div class="font-dropdown-container">
-              <span class="material-symbols-outlined btnTwo font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
+              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
                 [matTooltipPosition]="matToolTipPosition!" [ngClass]="{'active' : fontSize.value == '12'}"
-                (click)="setFontSize('12')">
+                (click)="setFontSize('12')" [ngClass]="{'btnOne' :enableFontResize === true}">
                 text_fields
               </span>
-              <span class="material-symbols-outlined btnTwo font-dropdown-icon font-dropdown-icon-middle"
-                matTooltip="14px" [matTooltipPosition]="matToolTipPosition!"
-                [ngClass]="{'active' : fontSize.value == '14'}" (click)="setFontSize('14')">
+              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px"
+                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{'active' : fontSize.value == '14'}"
+                (click)="setFontSize('14')" [ngClass]="{'btnOne' :enableFontResize === true}">
                 text_fields
               </span>
-              <span class="material-symbols-outlined btnTwo font-dropdown-icon font-dropdown-icon-bottom"
-                matTooltip="16px" [matTooltipPosition]="matToolTipPosition!"
-                [ngClass]="{'active' : fontSize.value == '16'}" (click)="setFontSize('16')">
+              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px"
+                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{'active' : fontSize.value == '16'}"
+                (click)="setFontSize('16')" [ngClass]="{'btnOne' :enableFontResize === true}">
                 text_fields
               </span>
             </div>
           </ng-container>
-          <span class=" widget-navbar-divider">|</span>
-          <span class="widget-navbar-icon btnThree material-symbols-outlined" matTooltip="Request Callback"
-            [ngClass]="{'focus-icon' : isChatActive === true && activeCallbackView === true , 'away-chat-icon' : isChatActive === true  && activeCallbackView === false }"
+          <span class="widget-navbar-divider">|</span>
+          <span class="widget-navbar-icon material-symbols-outlined" matTooltip="Request Callback" [ngClass]="{
+              'btnTwo' :enableFontResize === true,
+              'btnOne' :enableFontResize === false,
+              'focus-icon' : (isChatActive === true && activeCallbackView === true),
+              'away-chat-icon' : (isChatActive === true  && activeCallbackView === false) }"
             (click)="changeView('callback')" *ngIf="enabledCallback" [matTooltipPosition]="matToolTipPosition!">
             perm_phone_msg
           </span>
-          <span class="widget-navbar-icon material-symbols-outlined disable-icon" *ngIf="enableWebRtc"
-            [ngClass]="{'btnFour' :enabledCallback === true, 'btnThree' :enabledCallback === false }">
+          <span class="widget-navbar-icon material-symbols-outlined disable-icon" *ngIf="enableWebRtc" [ngClass]="{
+              'btnOne' :(enabledCallback === false && enableFontResize === false),
+              'btnThree' :(enabledCallback === true && enableFontResize === true),
+              'btnTwo' :(enabledCallback === false || enableFontResize === false)}">
             videocam
           </span>
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('audio')"
-            [ngClass]="{'btnFive' :enabledCallback === true, 'btnFour' :enabledCallback === false, 'focus-icon' : isCallActive === true && activeAudioView === true , 'away-call-icon' : isCallActive === true  && activeAudioView === false }"
-            *ngIf="enableWebRtc" matTooltip="Audio Call" [matTooltipPosition]="matToolTipPosition!">
+          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('audio')" [ngClass]="{
+              'btnTwo' :(enabledCallback === false && enableFontResize === false),
+              'btnFour' :(enabledCallback === true && enableFontResize === true),
+              'btnThree' :(enabledCallback === false || enableFontResize === false),
+              'focus-icon' : (isCallActive === true && activeAudioView === true) ,
+              'away-call-icon' : (isCallActive === true  && activeAudioView === false) }" *ngIf="enableWebRtc"
+            matTooltip="Audio Call" [matTooltipPosition]="matToolTipPosition!">
             call
           </span>
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')"
-            [ngClass]="{'btnSix' :(enableWebRtc === true && enabledCallback === true), 'btnThree' : (enableWebRtc === false && enabledCallback === false), 'btnFour' : (enableWebRtc === false && enabledCallback === true) , 'btnFive' : (enableWebRtc === true && enabledCallback === false) , 'focus-icon' : isChatActive === true && activeChatView === true , 'away-chat-icon' : isChatActive === true  && activeChatView === false }"
-            matTooltip="Web Chat" [matTooltipPosition]="matToolTipPosition!">
+          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')" [ngClass]="{
+              'btnOne' :(enabledCallback === false && enableFontResize === false && enableWebRtc === false),
+              'btnFive' :(enabledCallback === true && enableFontResize === true && enableWebRtc === true),
+              'btnThree' :((enabledCallback === true && enableFontResize === true) || enableWebRtc === true),
+              'btnFour' :((enabledCallback === true || enableFontResize === true) && enableWebRtc === true),
+              'focus-icon' : (isChatActive === true && activeChatView === true),
+              'away-chat-icon' : (isChatActive === true  && activeChatView === false)}" matTooltip="Web Chat"
+            [matTooltipPosition]="matToolTipPosition!">
             forum
           </span>
         </div>
@@ -259,9 +274,9 @@
                     <div class="header">
                       <span class="name"
                         [ngStyle]="{'font-size':fontSize.value == '14' ? '11px' : fontSize.value == '16' ? '13px': '9px'}">YOU</span>
-                      <span class="material-symbols-outlined delivery-checks"
-                        [ngClass]="{'delivered' : message.sendStatus == 'successed' , 'failed' : message.sendStatus == 'failed', 'seen' : message.sendStatus == 'seen'}">
-                        done_all
+                      <span class="material-symbols-outlined message-option" matTooltip="Reply"
+                        [matTooltipPosition]="matToolTipPosition!">
+                        more_vert
                       </span>
                     </div>
 
@@ -336,10 +351,10 @@
                       </a>
                     </div>
                     <span class="time">{{message.header.timestamp | date:'h:mm a'}}</span>
-                    <!-- <span class="material-symbols-outlined delivery-checks"
-  [ngClass]="{'delivered' : message.sendStatus == 'successed' , 'failed' : message.sendStatus == 'failed', 'seen' : message.sendStatus == 'seen'}">
-  done_all
-</span> -->
+                    <span class="material-symbols-outlined delivery-checks"
+                      [ngClass]="{'delivered' : message.sendStatus == 'successed' , 'failed' : message.sendStatus == 'failed', 'seen' : message.sendStatus == 'seen'}">
+                      done_all
+                    </span>
                   </div>
                 </div>
                 <div class="widget-chat-message-agent"
@@ -350,8 +365,15 @@
                       alt="avatar">
                   </div>
                   <div class="agent-message">
-                    <span class="name" *ngIf="message.header.sender.type == 'AGENT'"
-                      [ngStyle]="{'font-size':fontSize.value == '14' ? '11px' : fontSize.value == '16' ? '13px': '9px'}">{{message.header.sender.senderName.toUpperCase()}}</span>
+                    <div class="header">
+                      <span class="name" *ngIf="message.header.sender.type == 'AGENT'"
+                        [ngStyle]="{'font-size':fontSize.value == '14' ? '11px' : fontSize.value == '16' ? '13px': '9px'}">{{message.header.sender.senderName.toUpperCase()}}</span>
+                      <span class="material-symbols-outlined message-option" matTooltip="Reply"
+                        [matTooltipPosition]="matToolTipPosition!">
+                        more_vert
+                      </span>
+                    </div>
+
                     <!-- <span class="message">Hello! I need general info regarding your upcoming products line.</span> -->
                     <span class="message" *ngIf="message.body.type=='PLAIN'"
                       innerHTML="{{enableDynamicLink ? (message.body.markdownText) : (message.body.markdownText)}}"
@@ -484,7 +506,7 @@
           <!-- Widget Message Composer -->
           <div class="maxLimitError" *ngIf="text.length == messageLimit"><span>Max Limit Reached</span></div>
           <div class="widget-composer">
-            <span class="material-symbols-outlined emoji-btn">
+            <span class="material-symbols-outlined emoji-btn" *ngIf="enableEmoji">
               add_reaction
             </span>
             <textarea class="widget-chat-composer" data-emoji-picker="true" matInput id="messageTextarea"
@@ -492,7 +514,7 @@
               placeholder="Type Message Here ..." #message maxlength="{{messageLimit}}" [(ngModel)]="text"
               (change)="textChanged()" (focus)="onTextAreaFocus();" (keyup)="onKeyPress($event)"
               (keyup.enter)="isMobile ? '' : onSendMessage()" (keyup.enter)="onEnterKey($event)"
-              [ngClass]="{'error-border': text.length == messageLimit}"></textarea>
+              [ngClass]="{'error-border': text.length == messageLimit,'resize-left' :enableEmoji === false,'resize-right' :enableFileTransfer === false}"></textarea>
             <div id="file-btn" *ngIf="enableFileTransfer && text.length < 1 && imageUrls?.length == 0">
               <label for="file-upload">
                 <span class="material-symbols-outlined file-btn" matTooltip="File Transfer"
@@ -562,7 +584,7 @@
             <p>Please fill out the form below to setup a callback request.</p>
             <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
               <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
-              <div class="widget-form-group" *ngFor="let attribute of formData">
+              <div class="widget-form-group" *ngFor="let attribute of callbackFormData">
                 <div [ngSwitch]="attribute.attributeType"
                   [style.display]="attribute.key === 'customer_channel_identifier' ? 'none' : 'block'">
                   <ng-container *ngSwitchCase="'INPUT'">
@@ -740,7 +762,8 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Start a conversation" (click)="changeScreen('chatForm')">
+            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Start a conversation"
+              (click)="changeScreen('chatForm')">
           </div>
         </div>
       </div>
@@ -802,7 +825,7 @@
 
   <ng-container *ngIf="isIconWidget">
     <!-- Callback Icon -->
-    <div class="widget-icon widget-icon-callback">
+    <div class="widget-icon widget-icon-callback" *ngIf="standaloneCallback">
 
       <div class="widget-icon-content" *ngIf="isCallbackMax">
         <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"

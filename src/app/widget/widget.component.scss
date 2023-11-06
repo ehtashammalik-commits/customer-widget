@@ -621,6 +621,10 @@ button.close-widget-wrapper {
   color: #EFF2F7;
 }
 
+.divider-space {
+  right: 40px !important;
+}
+
 .btnOne {
   right: 5px;
 }
@@ -747,10 +751,18 @@ button.close-widget-wrapper {
       max-width: 225px;
     }
 
+    .message-option {
+      position: absolute;
+      top: 3px;
+      right: 0px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
     .delivery-checks {
       position: absolute;
-      top: 0px;
-      right: 2px;
+      bottom: -15px;
+      right: 0px;
       font-size: 20px;
 
       &.delivered {
@@ -815,8 +827,14 @@ button.close-widget-wrapper {
     border-color: #F2F2F2;
     background: #F2F2F2;
     border-radius: 0px 3px 3px 10px;
-    padding: 5px 5px 5px 10px;
+    // padding: 5px 5px 5px 10px;
+    padding: 0px 10px;
     word-break: break-word;
+
+    .header {
+      display: inline-flex;
+      justify-content: space-between;
+    }
 
     .name {
       font-family: "Roboto";
@@ -838,6 +856,14 @@ button.close-widget-wrapper {
       color: #000000;
       width: auto;
       max-width: 215px;
+    }
+
+    .message-option {
+      position: relative;
+      top: 0px;
+      font-size: 14px;
+      right: -10px;
+      cursor: pointer;
     }
   }
 
@@ -882,7 +908,7 @@ button.close-widget-wrapper {
     font-weight: normal;
     font-style: normal;
     color: #777777;
-    bottom: -5px;
+    bottom: 0px;
     max-width: inherit;
     left: 0px;
     min-width: inherit;
@@ -1556,6 +1582,14 @@ mat-spinner {
     background: #DA3030 !important;
   }
 
+}
+
+.resize-left {
+  padding-left: 10px !important;
+}
+
+.resize-right {
+  padding-right: 15px !important;
 }
 
 .error-border {
