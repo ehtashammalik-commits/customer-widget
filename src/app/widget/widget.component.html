@@ -17,8 +17,60 @@
       </div>
       <div class="widget-wrapper-content">
         <p>Ask us a question, our support team is pleased to help you.</p>
-        <button class="widget-color" (click)="changeScreen((isChatActive == true) ? 'chat' : 'form')">Connect with
+        <button class="widget-color" (click)="changeScreen((isChatActive == true) ? 'chat' : 'chatForm')">Connect with
           us</button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!------------------------>
+  <!-- /Callback Form HTML /->
+  <!- ------------------- -->
+
+  <ng-container *ngIf="callbackFormScreen">
+    <div class="widget-form-area">
+      <div class="widget-form">
+        <div class="widget-form-header widget-color" (click)="changeScreen('widget')">
+          <h5 id="headerHeading">{{title}}</h5>
+          <span class="widget-header-icon">
+            <span class="topbar-icon material-symbols-outlined" matTooltip="Minimize"
+              [matTooltipPosition]="matToolTipPosition!">minimize</span>
+          </span>
+        </div>
+        <div class="widget-form-content">
+          <h4 class="callback-title">Request Callback</h4>
+          <p>Please fill out the form below to setup a callback request.</p>
+          <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
+            <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
+            <div class="widget-form-group" *ngFor="let attribute of formData">
+              <div [ngSwitch]="attribute.attributeType"
+                [style.display]="attribute.key === 'customer_channel_identifier' ? 'none' : 'block'">
+                <ng-container *ngSwitchCase="'INPUT'">
+                  <label>
+                    <span id="{{attribute.key}}">{{attribute.label}}</span>
+                    <span class="widget-required" *ngIf="attribute?.isRequired === true">*</span>
+                  </label>
+                  <input matInput type="text" [formControlName]="attribute.key" [placeholder]="attribute.helpText"
+                    class="widget-form-control" autocomplete="off" [required]="attribute?.isRequired"
+                    [ngModel]="attribute.key === 'customer_channel_identifier' ? customerIdentifier : ''" />
+                </ng-container>
+                <ng-container *ngSwitchCase="'OPTIONS'">
+                  <label>{{ attribute.categoryOptions.categories[0].categoryName }}</label>
+                  <div *ngFor="let option of attribute.categoryOptions.categories[0].values">
+                    <input class="radio-btn" type="radio" [id]="option" [name]="attribute.key"
+                      [formControlName]="attribute.key" [value]="option" />
+                    <label [for]="option">{{ option }}</label>
+                  </div>
+                </ng-container>
+                <div class="clearfix"></div>
+                <div class="widget-form-button">
+                  <button id="formTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
+                    class="widget-btn widget-form-trigger widget-color">Request Callback</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </ng-container>
@@ -137,16 +189,22 @@
             </div>
           </ng-container>
           <span class=" widget-navbar-divider">|</span>
-          <span class="widget-navbar-icon btnThree material-symbols-outlined disable-icon" *ngIf="enableWebRtc">
+          <span class="widget-navbar-icon btnThree material-symbols-outlined" matTooltip="Request Callback"
+            [ngClass]="{'focus-icon' : isChatActive === true && activeCallbackView === true , 'away-chat-icon' : isChatActive === true  && activeCallbackView === false }"
+            (click)="changeView('callback')" *ngIf="enabledCallback" [matTooltipPosition]="matToolTipPosition!">
+            perm_phone_msg
+          </span>
+          <span class="widget-navbar-icon material-symbols-outlined disable-icon" *ngIf="enableWebRtc"
+            [ngClass]="{'btnFour' :enabledCallback === true, 'btnThree' :enabledCallback === false }">
             videocam
           </span>
-          <span class="widget-navbar-icon btnFour material-symbols-outlined" (click)="changeView('audio')"
-            [ngClass]="{'focus-icon' : isCallActive === true && activeAudioView === true , 'away-call-icon' : isCallActive === true  && activeAudioView === false }"
+          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('audio')"
+            [ngClass]="{'btnFive' :enabledCallback === true, 'btnFour' :enabledCallback === false, 'focus-icon' : isCallActive === true && activeAudioView === true , 'away-call-icon' : isCallActive === true  && activeAudioView === false }"
             *ngIf="enableWebRtc" matTooltip="Audio Call" [matTooltipPosition]="matToolTipPosition!">
             call
           </span>
           <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')"
-            [ngClass]="{'btnFive' :enableWebRtc === true, 'btnThree' :enableWebRtc === false , 'focus-icon' : isChatActive === true && activeChatView === true , 'away-chat-icon' : isChatActive === true  && activeChatView === false }"
+            [ngClass]="{'btnSix' :(enableWebRtc === true && enabledCallback === true), 'btnThree' : (enableWebRtc === false && enabledCallback === false), 'btnFour' : (enableWebRtc === false && enabledCallback === true) , 'btnFive' : (enableWebRtc === true && enabledCallback === false) , 'focus-icon' : isChatActive === true && activeChatView === true , 'away-chat-icon' : isChatActive === true  && activeChatView === false }"
             matTooltip="Web Chat" [matTooltipPosition]="matToolTipPosition!">
             forum
           </span>
@@ -497,6 +555,72 @@
             </div>
           </div>
         </ng-container>
+        <!-- Callback View Screen -->
+        <ng-container *ngIf="activeCallbackView">
+          <div class="widget-callback-form-content">
+            <h4 class="callback-title">Request Callback</h4>
+            <p>Please fill out the form below to setup a callback request.</p>
+            <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
+              <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
+              <div class="widget-form-group" *ngFor="let attribute of formData">
+                <div [ngSwitch]="attribute.attributeType"
+                  [style.display]="attribute.key === 'customer_channel_identifier' ? 'none' : 'block'">
+                  <ng-container *ngSwitchCase="'INPUT'">
+                    <label>
+                      <span id="{{attribute.key}}">{{attribute.label}}</span>
+                      <span class="widget-required" *ngIf="attribute?.isRequired === true">*</span>
+                    </label>
+                    <input matInput type="text" [formControlName]="attribute.key" [placeholder]="attribute.helpText"
+                      class="widget-form-control" autocomplete="off" [required]="attribute?.isRequired"
+                      [ngModel]="attribute.key === 'customer_channel_identifier' ? customerIdentifier : ''" />
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'OPTIONS'">
+                    <label>{{ attribute.categoryOptions.categories[0].categoryName }}</label>
+                    <div *ngFor="let option of attribute.categoryOptions.categories[0].values">
+                      <input class="radio-btn" type="radio" [id]="option" [name]="attribute.key"
+                        [formControlName]="attribute.key" [value]="option" />
+                      <label [for]="option">{{ option }}</label>
+                    </div>
+                  </ng-container>
+                  <div class="clearfix"></div>
+                  <div class="widget-form-button">
+                    <button id="formTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
+                      class="widget-btn widget-form-trigger widget-color">Request Callback</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </ng-container>
+        <!-- Callback Response View Screen -->
+        <ng-container *ngIf="activeCallbackResponseView">
+          <div class="widget-callback-response-content">
+            <div class="response-icon">
+              <span class="material-symbols-outlined response-emoji"
+                innerHTML="{{ callbackResponseStatus === 'ok' ? 'check_circle' : callbackResponseStatus === 'conflict' ? 'error' : 'sentiment_dissatisfied' }}">
+              </span>
+              <span
+                innerHTML="{{ callbackResponseStatus === 'ok' ? 'Success!' : callbackResponseStatus === 'conflict' ? 'Conflict!' : 'Sorry!' }}"></span>
+            </div>
+            <div class="response-message">
+              <h4
+                innerHTML="{{ callbackResponseStatus === 'ok' ?
+              'Your request for setting up a callback was submitted successfully.' : callbackResponseStatus === 'conflict' ?
+              'Your Callback Request has already been scheduled, Please Wait!!!' :
+              'We are currently encountering some technical problems with our server. Your request for setting up a callback could not be submitted.' }}">
+              </h4>
+              <p innerHTML="{{ callbackResponseStatus === 'ok' ?
+              'You will receive a callback on the contact number provided. For additional queries, you can reach out to us through our live chat.' : callbackResponseStatus === 'conflict' ?
+              'Your Callback has already been scheduled, agent will get back to you. For additional queries, you can reach out to us through our live chat.' :
+              'Please try again in a few minutes or consider reaching out to us through our live chat.' }}"></p>
+            </div>
+
+            <div class="widget-response-button">
+              <input class="widget-response-trigger call-btn" (click)="changeView('chat')"
+                value="Return to conversation">
+            </div>
+          </div>
+        </ng-container>
       </div>
     </div>
   </ng-container>
@@ -576,6 +700,53 @@
     </div>
   </ng-container>
 
+  <!---------------------------------------->
+  <!---- /Callback Response Screen HTML ---->
+  <!---------------------------------------->
+
+  <ng-container *ngIf="callbackResponseScreen">
+    <!-- Error screen -->
+    <div class="widget-form-area">
+      <div class="widget-form">
+        <div class="widget-chat-header widget-color">
+          <h5 id="title">{{title}}</h5>
+          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
+            <span class="material-symbols-outlined minimize" matTooltip="Minimize"
+              [matTooltipPosition]="matToolTipPosition!">
+              minimize
+            </span>
+          </div>
+        </div>
+        <div class="widget-error-content">
+          <div class="error-icon">
+            <span class="material-symbols-outlined error-emoji"
+              innerHTML="{{ callbackResponseStatus === 'ok' ? 'check_circle' : callbackResponseStatus === 'conflict' ? 'error' : 'sentiment_dissatisfied' }}">
+            </span>
+            <span
+              innerHTML="{{ callbackResponseStatus === 'ok' ? 'Success!' : callbackResponseStatus === 'conflict' ? 'Conflict!' : 'Sorry!' }}"></span>
+          </div>
+          <div class="error-message">
+            <h4
+              innerHTML="{{ callbackResponseStatus === 'ok' ?
+              'Your request for setting up a callback was submitted successfully.' : callbackResponseStatus === 'conflict' ?
+              'Your Callback Request has already been scheduled, Please Wait!!!' :
+              'We are currently encountering some technical problems with our server. Your request for setting up a callback could not be submitted.' }}">
+            </h4>
+            <p innerHTML="{{ callbackResponseStatus === 'ok' ?
+              'You will receive a callback on the contact number provided. For additional queries, you can reach out to us through our live chat.' : callbackResponseStatus === 'conflict' ?
+              'Your Callback has already been scheduled, agent will get back to you. For additional queries, you can reach out to us through our live chat.' :
+              'Please try again in a few minutes or consider reaching out to us through our live chat.' }}"></p>
+          </div>
+        </div>
+        <div class="widget-composer">
+          <div class="widget-error-button">
+            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Start a conversation" (click)="changeScreen('chatForm')">
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
   <!------------------------>
   <!-- /Chat Error HTML ---->
   <!------------------------>
@@ -630,9 +801,10 @@
   <!---------------------->
 
   <ng-container *ngIf="isIconWidget">
-    <div class="widget-loading widget-dropdown widget-bar-view" id="dropdownTrigger">
+    <!-- Callback Icon -->
+    <div class="widget-icon widget-icon-callback">
 
-      <div id="myDropdown" class="widget-bar-content" *ngIf="isMax">
+      <div class="widget-icon-content" *ngIf="isCallbackMax">
         <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
           (click)="changeScreen('widget')">
           <span class="chat-icon material-symbols-outlined">
@@ -641,9 +813,31 @@
         </button>
       </div>
 
-      <div id="myDropdown" class="widget-bar-content" *ngIf="!isMax">
+      <div class="widget-icon-content" *ngIf="!isCallbackMax">
         <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="changeScreen((isChatActive == true) ? 'chat' : 'form')">
+          (click)="changeScreen('callbackForm')">
+          <span class="chat-icon material-symbols-outlined">
+            perm_phone_msg
+          </span>
+        </button>
+      </div>
+
+    </div>
+    <!-- Chat Widget Icon -->
+    <div class="widget-icon widget-icon-chat">
+
+      <div class="widget-icon-content" *ngIf="isChatMax">
+        <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
+          (click)="changeScreen('widget')">
+          <span class="chat-icon material-symbols-outlined">
+            close
+          </span>
+        </button>
+      </div>
+
+      <div class="widget-icon-content" *ngIf="!isChatMax">
+        <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
+          (click)="changeScreen((isChatActive == true) ? 'chat' : 'chatForm')">
           <span class="chat-icon material-symbols-outlined">
             sms
           </span>

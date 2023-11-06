@@ -14,7 +14,8 @@ declare var widgetConfigs: any,
   dialCall: any,
   sendInvite: any,
   closeSession: any,
-  audioControl: any;
+  audioControl: any,
+  callbackRequest: any;
 
 @Injectable({
   providedIn: 'root',
@@ -44,11 +45,14 @@ export class SdkService implements OnInit {
   private onCallSubject: Subject<any> = new Subject<any>();
   public onCallResponse$: Observable<any> = this.onCallSubject.asObservable();
 
+  private onCallbackRequestSubject: Subject<any> = new Subject<any>();
+  public onCallbackRequestResponse$: Observable<any> = this.onCallbackRequestSubject.asObservable();
+
   constructor(private _ConfigService: ConfigService) {
     this.ConfigData = this._ConfigService.appConfig;
     this.loadSdk();
   }
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
     this.widgetIdentifier = widgetIdentifier;
@@ -114,11 +118,44 @@ export class SdkService implements OnInit {
     let notificationPayload = {
       name: payload.data.formData.attributes.first_name,
       email: payload.data.formData.attributes.business_email,
-      phone: payload.data.formData.attributes.phone,
+      phone: payload.data.formData.attributes.phone_number,
       type: payload.data.formData.attributes.customer_type,
     };
     webhookNotifications(this.ConfigData.WEBHOOK_URL, notificationPayload);
   }
+
+  sendCallbackRequest(formData: any) {
+    let ecm_url = this.ConfigData.ECM_URL;
+    let payload = {
+      campaignId: this.ConfigData.CAMPAIGN_ID,
+      phone1: formData.phone_number,
+      businessParam1: formData.first_name,
+      businessParam2: formData.business_email,
+      businessParam3: formData.customer_channel_identifier,
+      businessParam4: this.getCurrentDate(),
+      duplicateCallbacks: this.ConfigData.ALLOW_DUPLICATE
+    };
+
+    console.log("send callback request: ", payload);
+    callbackRequest(ecm_url, payload, (res: any) => {
+      // console.log("Callback request response: ", res);
+      this.onCallbackRequestSubject.next(res);
+    })
+
+  }
+
+  getCurrentDate() {
+    var currentDate = new Date();
+    // Get the current year, month, and day
+    var year = currentDate.getFullYear();
+    var month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+    var day = String(currentDate.getDate()).padStart(2, "0");
+
+    // Combine the year, month, and day with hyphens using template literals
+    var formattedDate = `${year}-${month}-${day}`;
+    return formattedDate;
+  }
+
   sendChatMessage(payload: any) {
     console.log('Customer Message Payload:', payload);
     sendMessage(payload);

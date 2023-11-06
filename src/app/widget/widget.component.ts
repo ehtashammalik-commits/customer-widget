@@ -32,6 +32,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private establishConnectionSubject: Subscription = new Subscription();
   private onChatResumedSubject: Subscription = new Subscription();
   private onCallSubject: Subscription = new Subscription();
+  private onCallbackRequestSubject: Subscription = new Subscription();
   @ViewChild('autosize')
   autosize!: CdkTextareaAutosize;
   @ViewChild('myFileInput')
@@ -59,12 +60,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   chatError = false;
   chatEndScreen = false;
 
+  callbackFormScreen = false;
+  callbackResponseScreen = false;
+
   // Main Screen Views
   activeChatView = false;
   activeAudioView = false;
   activeVideoView = false;
 
   callPopUpView = false;
+  activeCallbackView = false;
+  activeCallbackResponseView = false;
+  callbackResponseStatus = '';
 
   customerData: any;
   chatPayLoad: any;
@@ -78,7 +85,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isCallMute = false;
   isCallOnHold = false;
 
-  isMax = false;
+  isChatMax = false;
+  isCallbackMax = false;
+
   fontDropDown = false;
   positionOptions: TooltipPosition[] = ['after', 'before', 'above', 'below', 'left', 'right'];
   matToolTipPosition = this.positionOptions[0];
@@ -101,6 +110,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   @Input() formData!: any[];
   preChatFormGroup!: FormGroup;
+  callbackFormGroup!: FormGroup;
+  callbackLoader = false;
+  enabledCallback: Boolean = true;
 
   isMobile = false;
 
@@ -166,6 +178,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     });
 
     this.preChatFormGroup = this.fb.group({});
+    this.callbackFormGroup = this.fb.group({});
 
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe(
       (configs) => {
@@ -182,6 +195,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (formData) => {
         this.formData = formData.attributes;
         this.createFormControls();
+        this.createCallbackFormControls();
         console.log('Widget configurations:', formData.attributes);
       },
     );
@@ -202,6 +216,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.onCallSubject = this.sdk.onCallResponse$.subscribe((data) => {
       console.log('call response events => ', data);
       this.processCallResponses(data);
+    });
+
+    this.onCallbackRequestSubject = this.sdk.onCallbackRequestResponse$.subscribe((data) => {
+      console.log('callback request response events => ', data);
+
+      if (data && data.status && data.status.name) {
+        this.callbackResponseStatus = data.status.name.toLowerCase();
+      } else {
+        this.callbackResponseStatus = 'error';
+        console.error('Something Went Wrong Please check logs');
+      }
+      this.callbackLoader = false;
+      this.isChatActive ? this.changeView('callbackResponse') : this.changeScreen('callbackResponse');
     });
 
     this.establishConnectionSubject = this.sdk.connectionResponse$.subscribe(
@@ -243,6 +270,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+  private createCallbackFormControls(): void {
+    for (const attribute of this.formData) {
+      const validators = attribute.isRequired ? [Validators.required] : [];
+      this.callbackFormGroup.addControl(
+        attribute.key,
+        this.fb.control('', validators),
+      );
+    }
+  }
+
   setWidgetConfigs(configs: any) {
     this.title = configs.title;
     this.subtitle = configs.subTitle;
@@ -278,6 +315,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       // Proceed with form submission
       console.log(this.preChatFormGroup.value);
     } catch (error) {
+      alert('Error while submitting the form');
+    }
+  }
+
+  onCallbackFormSubmit(): void {
+    try {
+      let callbackData = this.callbackFormGroup.value;
+      console.log('Callback Data:', callbackData);
+      this.callbackLoader = true;
+      this.sdk.sendCallbackRequest(callbackData)
+    } catch {
       alert('Error while submitting the form');
     }
   }
@@ -359,46 +407,85 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.additionalPanel = true;
         }
         this.preChatFormScreen = false;
+        this.callbackFormScreen = false;
+        this.callbackResponseScreen = false;
         this.widgetChatScreen = false;
         this.isIconWidget = true;
         this.chatError = false;
         this.chatEndScreen = false;
-        this.isMax = false;
+        this.isChatMax = false;
+        this.isCallbackMax = false;
         break;
       case 'chat':
         this.additionalPanel = false;
         this.preChatFormScreen = false;
+        this.callbackFormScreen = false;
+        this.callbackResponseScreen = false;
         this.widgetChatScreen = true;
         this.isIconWidget = true;
         this.chatError = false;
         this.chatEndScreen = false;
-        this.isMax = true;
+        this.isChatMax = true;
+        this.isCallbackMax = false;
         this.changeView('chat');
         break;
-      case 'form':
+      case 'chatForm':
         this.preChatFormScreen = true;
+        this.callbackFormScreen = false;
+        this.callbackResponseScreen = false;
         this.additionalPanel = false;
         this.isIconWidget = true;
         this.widgetChatScreen = false;
         this.chatError = false;
         this.chatEndScreen = false;
-        this.isMax = true;
+        this.isChatMax = true;
+        this.isCallbackMax = false;
+        break;
+      case 'callbackForm':
+        this.preChatFormScreen = false;
+        this.callbackFormScreen = true;
+        this.callbackResponseScreen = false;
+        this.additionalPanel = false;
+        this.isIconWidget = true;
+        this.widgetChatScreen = false;
+        this.chatError = false;
+        this.chatEndScreen = false;
+        this.isChatMax = false;
+        this.isCallbackMax = true;
+        break;
+      case 'callbackResponse':
+        this.additionalPanel = false;
+        this.preChatFormScreen = false;
+        this.callbackResponseScreen = true;
+        this.widgetChatScreen = false;
+        this.isIconWidget = true;
+        this.chatError = false;
+        this.chatEndScreen = false;
+        this.isChatMax = false;
+        this.isCallbackMax = true;
+        // this.changeView('chat');
         break;
       case 'end':
         this.preChatFormScreen = false;
+        this.callbackFormScreen = false;
+        this.callbackResponseScreen = false;
         this.widgetChatScreen = false;
         this.chatEndScreen = true;
         this.chatError = false;
         this.isIconWidget = true;
-        this.isMax = true;
+        this.isChatMax = true;
+        this.isCallbackMax = false;
         break;
       case 'error':
         this.preChatFormScreen = false;
+        this.callbackFormScreen = false;
+        this.callbackResponseScreen = false;
         this.widgetChatScreen = false;
         this.chatEndScreen = false;
         this.chatError = true;
         this.isIconWidget = true;
-        this.isMax = true;
+        this.isChatMax = true;
+        this.isCallbackMax = false;
         break;
     }
   }
@@ -411,6 +498,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.activeAudioView = false;
         this.activeVideoView = false;
         this.callPopUpView = false;
+        this.activeCallbackView = false;
+        this.activeCallbackResponseView = false;
+        break;
+      case 'callback':
+        this.activeChatView = false;
+        this.activeAudioView = false;
+        this.activeVideoView = false;
+        this.callPopUpView = false;
+        this.activeCallbackView = true;
+        this.activeCallbackResponseView = false;
+        break;
+      case 'callbackResponse':
+        this.activeChatView = false;
+        this.activeAudioView = false;
+        this.activeVideoView = false;
+        this.callPopUpView = false;
+        this.activeCallbackView = false;
+        this.activeCallbackResponseView = true;
         break;
       case 'audio':
         if (this.isCallActive) {
@@ -418,20 +523,25 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeAudioView = true;
           this.activeVideoView = false;
           this.callPopUpView = false;
+          this.activeCallbackView = false;
+          this.activeCallbackResponseView = false;
           this.startCountdown();
         } else {
           this.callPopUpView = true;
           this.activeChatView = true;
           this.activeAudioView = false;
           this.activeVideoView = false;
+          this.activeCallbackView = false;
+          this.activeCallbackResponseView = false;
           this.initiateVoiceCall(view);
         }
-
         break;
       case 'video':
         this.activeChatView = false;
         this.activeAudioView = false;
         this.activeVideoView = true;
+        this.activeCallbackView = false;
+        this.activeCallbackResponseView = false;
         break;
     }
   }
@@ -1191,6 +1301,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   callEnd() {
+    this.endCountdown();
     this.sdk.handleCallEnd();
   }
 
@@ -1215,7 +1326,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     } catch (error) { }
   }
 
-  clearSession(){
+  clearSession() {
     if (this.isCallActive) {
       this.callEnd();
     }
@@ -1225,4 +1336,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.sdk.handleChatEnd(this.customerData);
     this.clearMessageData();
   }
+
+  // handleCallbackRequestApiResponse(data: any) {
+  //   if (data && data.status && data.status.name) {
+  //     this.callbackResponseStatus = data.status.name.toLowerCase();
+  //     if (data.status.name.toLowerCase() === 'conflict') {
+
+  //       // duplicateCallback();
+  //       // this.changeScreen('callbackResponse');
+  //       console.log("Callback already scheduled");
+  //     } else if (data.status.name.toLowerCase() === 'ok') {
+
+  //       // this.changeScreen('callbackResponse');
+  //     } else {
+  //       console.error('Error Callback Response: ');
+  //       // errorCallback();
+  //     }
+  //   } else {
+  //     console.error('Something Went Wrong Please check logs');
+  //   }
+  // }
 }
