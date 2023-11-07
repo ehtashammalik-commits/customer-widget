@@ -369,7 +369,7 @@
                       <span class="name" *ngIf="message.header.sender.type == 'AGENT'"
                         [ngStyle]="{'font-size':fontSize.value == '14' ? '11px' : fontSize.value == '16' ? '13px': '9px'}">{{message.header.sender.senderName.toUpperCase()}}</span>
                       <span class="material-symbols-outlined message-option" matTooltip="Reply"
-                        [matTooltipPosition]="matToolTipPosition!">
+                        [matTooltipPosition]="matToolTipPosition!" *ngIf="message.header.sender.type == 'AGENT'">
                         more_vert
                       </span>
                     </div>

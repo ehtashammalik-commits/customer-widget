@@ -1197,7 +1197,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   chatTranscript() {
     if (localStorage.getItem('conversationId') !== '') {
       window.open(
-        `${this.__appConfig.appConfig.TRANSCRIPT_URL}/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
+        `widget-assets/chat-transcript/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
         }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier
         }&conversationId=${localStorage.getItem(
           'conversationId',
