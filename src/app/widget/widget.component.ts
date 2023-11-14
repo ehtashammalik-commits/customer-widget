@@ -543,7 +543,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.callPopUpView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
-          this.startCountdown();
+          // this.startCountdown();
         } else {
           this.callPopUpView = true;
           this.activeChatView = true;
@@ -753,7 +753,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   constructAndPublishMessageSeenNotification(msgId: any) {
     if (this.lastSeenMessageId != msgId) {
-      let header = { replyToMessageId: null, intent: null };
+      let header = { originalMessageId: null, intent: null };
       let body = {
         markdownText: '',
         type: 'DELIVERYNOTIFICATION',
@@ -884,7 +884,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     msgType: string,
     text?: string,
     intent: null | string = null,
-    replyToMessageId: null | string = null,
+    originalMessageId: null | string = null,
     fileMimeType?: string,
     fileName?: string,
     fileSize?: number,
@@ -892,7 +892,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     fileType?: string,
   ) {
     let header = {
-      replyToMessageId: null as null | string,
+      originalMessageId: null as null | string,
       intent: null as null | string,
       sender: {
         id: '460df46c-adf9-11ed-afa1-0242ac120002',
@@ -913,7 +913,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     };
 
     if (msgType.toLowerCase() == 'plain') {
-      header.replyToMessageId = replyToMessageId ? replyToMessageId : null;
+      header.originalMessageId = originalMessageId ? originalMessageId : null;
       header.intent = intent !== null ? intent : null;
       body.type = 'PLAIN';
       body.markdownText = text!.trim();
@@ -1093,14 +1093,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   sendButtonMessage(
     data: { title: string; payload: any },
-    replyToMessageId: any,
+    originalMessageId: any,
   ) {
     if (data.title.trim() !== '') {
       this.constructCimMessage(
         'PLAIN',
         data.title.trim(),
         data.payload,
-        replyToMessageId,
+        originalMessageId,
       );
     }
   }
@@ -1158,7 +1158,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   sendTypingStartedEvent() {
     //if timer is true not to send the event
     if (!this.sendTypingStartedEventTimer) {
-      let header = { replyToMessageId: null, intent: null };
+      let header = { originalMessageId: null, intent: null };
       let body = {
         markdownText: '',
         type: 'NOTIFICATION',
@@ -1231,6 +1231,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   initiateVoiceCall(callType: any) {
+    this.startCountdown();
     this.sdk.handleCallStart();
     this.isCallActive = true;
   }

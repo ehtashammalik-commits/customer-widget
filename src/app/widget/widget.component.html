@@ -231,28 +231,22 @@
               <!-- <div class="widget-chat-alert">
                 <span>Please wait we are finding an agent for you</span>
               </div> -->
-              <div class="widget-chat-notification-area">
-                <div class="widget-chat-notification"
-                  *ngIf="message.body.type == 'NOTIFICATION' && ((message.body.notificationType == 'NO_AGENT_AVAILABLE') || (message.body.notificationType == 'TASK_ENQUEUED' && message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER') || message.body.notificationType == 'AGENT_SUBSCRIBED' || message.body.notificationType == 'AGENT_UNSUBSCRIBED' || message.body.notificationType == 'PARTICIPANT_ROLE_CHANGED')">
+              <div class="widget-chat-notification-area"
+                *ngIf="message.body.type == 'NOTIFICATION' && ((message.body.notificationType == 'NO_AGENT_AVAILABLE') || (message.body.notificationType == 'TASK_ENQUEUED' && message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER') || message.body.notificationType == 'AGENT_SUBSCRIBED' || message.body.notificationType == 'AGENT_UNSUBSCRIBED' || message.body.notificationType == 'PARTICIPANT_ROLE_CHANGED')">
+                <div class="widget-chat-notification">
                   <span
                     *ngIf="message.body.notificationType=='AGENT_SUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY'"
-                    innerHTML="{{enableDynamicLink ?
-(message.body.notificationData.data.agentParticipant.participant.keycloakUser.username) :
-(message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} joined the chat">
+                    innerHTML="{{enableDynamicLink ? (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username) : (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} joined the chat">
                   </span>
 
                   <span
                     *ngIf="message.body.notificationType=='PARTICIPANT_ROLE_CHANGED' && message.body.notificationData.data.conversationParticipant.role == 'PRIMARY'"
-                    innerHTML="{{enableDynamicLink ?
-(message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username) :
-(message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} joined the chat">
+                    innerHTML="{{enableDynamicLink ? (message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username) : (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} joined the chat">
                   </span>
 
                   <span
                     *ngIf="message.body.notificationType=='AGENT_UNSUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY'"
-                    innerHTML="{{enableDynamicLink ?
-(message.body.notificationData.data.agentParticipant.participant.keycloakUser.username) :
-(message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} left the chat">
+                    innerHTML="{{enableDynamicLink ? (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username) : (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} left the chat">
                   </span>
 
                   <span *ngIf="message.body.notificationType == 'NO_AGENT_AVAILABLE' "
