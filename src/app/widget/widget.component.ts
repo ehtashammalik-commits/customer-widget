@@ -302,14 +302,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.enableFontResize = configs.enableFontResize;
     this.preChatFormId = configs.form;
     this.webRTCConfig = configs.webRtc;
-    this.enableWebRtc = configs.webRtc.enableWebRtc;
-
+    if (this.webRTCConfig !== null) {
+      this.enableWebRtc = configs.webRtc.enableWebRtc;
+    }
     this.callbackConfig = configs.callback;
-    this.enabledCallback = configs.callback.enableCallback;
-    this.standaloneCallback = configs.callback.standaloneCallback;
-
-    this.webhookUrl = configs.webhook.webhookUrl;
-    this.enabledWebhook = configs.webhook.enableWebhook;
+    if (this.callbackConfig !== null) {
+      this.enabledCallback = configs.callback.enableCallback;
+      this.standaloneCallback = configs.callback.standaloneCallback;
+    }
+    if (configs.webhook !== null) {
+      this.webhookUrl = configs.webhook.webhookUrl;
+      this.enabledWebhook = configs.webhook.enableWebhook;
+    }
   }
 
   private markFormGroupTouched(formGroup: FormGroup) {
@@ -883,8 +887,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   constructCimMessage(
     msgType: string,
     text?: string,
-    intent: null | string = null,
-    originalMessageId: null | string = null,
+    intent?: null | string,
+    originalMessageId?: null | string,
     fileMimeType?: string,
     fileName?: string,
     fileSize?: number,
@@ -914,7 +918,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     if (msgType.toLowerCase() == 'plain') {
       header.originalMessageId = originalMessageId ? originalMessageId : null;
-      header.intent = intent !== null ? intent : null;
+      header.intent = intent ? intent : null;
       body.type = 'PLAIN';
       body.markdownText = text!.trim();
     } else if (
@@ -1099,8 +1103,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.constructCimMessage(
         'PLAIN',
         data.title.trim(),
-        data.payload,
+        'REPLY_TO',
         originalMessageId,
+        data.payload
       );
     }
   }

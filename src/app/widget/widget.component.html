@@ -215,6 +215,7 @@
           </span>
           <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')" [ngClass]="{
               'btnOne' :(enabledCallback === false && enableFontResize === false && enableWebRtc === false),
+              'btnTwo' :(enabledCallback === false && enableFontResize === true && enableWebRtc === false),
               'btnFive' :(enabledCallback === true && enableFontResize === true && enableWebRtc === true),
               'btnThree' :((enabledCallback === true && enableFontResize === true) || enableWebRtc === true),
               'btnFour' :((enabledCallback === true || enableFontResize === true) && enableWebRtc === true),
@@ -231,8 +232,11 @@
               <!-- <div class="widget-chat-alert">
                 <span>Please wait we are finding an agent for you</span>
               </div> -->
-              <div class="widget-chat-notification-area"
-                *ngIf="message.body.type == 'NOTIFICATION' && ((message.body.notificationType == 'NO_AGENT_AVAILABLE') || (message.body.notificationType == 'TASK_ENQUEUED' && message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER') || message.body.notificationType == 'AGENT_SUBSCRIBED' || message.body.notificationType == 'AGENT_UNSUBSCRIBED' || message.body.notificationType == 'PARTICIPANT_ROLE_CHANGED')">
+              <div class="widget-chat-notification-area" *ngIf="message.body.type == 'NOTIFICATION' && ((message.body.notificationType == 'NO_AGENT_AVAILABLE') ||
+                  (message.body.notificationType == 'TASK_ENQUEUED' && message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER') ||
+                  message.body.notificationType == 'AGENT_SUBSCRIBED' ||
+                  (message.body.notificationType == 'AGENT_UNSUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY') ||
+                  message.body.notificationType == 'PARTICIPANT_ROLE_CHANGED')">
                 <div class="widget-chat-notification">
                   <span
                     *ngIf="message.body.notificationType=='AGENT_SUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY'"
@@ -242,6 +246,11 @@
                   <span
                     *ngIf="message.body.notificationType=='PARTICIPANT_ROLE_CHANGED' && message.body.notificationData.data.conversationParticipant.role == 'PRIMARY'"
                     innerHTML="{{enableDynamicLink ? (message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username) : (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} joined the chat">
+                  </span>
+
+                  <span
+                    *ngIf="message.body.notificationType=='PARTICIPANT_ROLE_CHANGED' && message.body.notificationData.data.conversationParticipant.role == 'WRAP_UP'"
+                    innerHTML="{{enableDynamicLink ? (message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username) : (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username)}} has left the chat">
                   </span>
 
                   <span
@@ -819,7 +828,7 @@
 
   <ng-container *ngIf="isIconWidget">
     <!-- Callback Icon -->
-    <div class="widget-icon widget-icon-callback" *ngIf="standaloneCallback">
+    <div class="widget-icon widget-icon-callback" *ngIf="standaloneCallback && enabledCallback">
 
       <div class="widget-icon-content" *ngIf="isCallbackMax">
         <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
