@@ -1,8 +1,8 @@
 {
-  "SOCKET_URL": "https://cim-dev.expertflow.com/web-channel-manager",
-  "FILE_SERVER_URL": "https://cim-dev.expertflow.com/file-engine",
-  "BOT_FRAMEWORK_URL": "https://cim-dev.expertflow.com/bot-framework",
-  "CCM_URL": "https://cim-dev.expertflow.com/ccm",
-  "CONVERSATIONAL_URL": "https://cim-dev.expertflow.com/conversation-manager/customer-topics",
-  "FORM_URL": "https://cim-dev.expertflow.com/unified-admin"
+  "SOCKET_URL": "http://localhost:7000",
+  "FILE_SERVER_URL": "https://cim-dev3.expertflow.com/file-engine",
+  "BOT_FRAMEWORK_URL": "https://cim-dev3.expertflow.com/bot-framework",
+  "CCM_URL": "https://cim-dev3.expertflow.com/ccm",
+  "CONVERSATIONAL_URL": "https://cim-dev3.expertflow.com/conversation-manager/customer-topics",
+  "FORM_URL": "https://cim-dev3.expertflow.com/unified-admin"
 }

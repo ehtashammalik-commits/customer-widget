@@ -898,6 +898,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     let header = {
       originalMessageId: null as null | string,
       intent: null as null | string,
+      entities: null as null | string,
       sender: {
         id: '460df46c-adf9-11ed-afa1-0242ac120002',
         type: 'CUSTOMER',
@@ -917,8 +918,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     };
 
     if (msgType.toLowerCase() == 'plain') {
+      let transformedIntent = this.transformPayload(intent);
       header.originalMessageId = originalMessageId ? originalMessageId : null;
-      header.intent = intent ? intent : null;
+      header.intent = transformedIntent.intent ? transformedIntent.intent : null;
+      if (transformedIntent.entities) {
+        header.entities = transformedIntent.entities;
+      }
       body.type = 'PLAIN';
       body.markdownText = text!.trim();
     } else if (
@@ -1381,4 +1386,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   //     console.error('Something Went Wrong Please check logs');
   //   }
   // }
+
+  transformPayload(input: any) {
+    // Remove the first '/'
+    if (input) {
+      const trimmedInput = input.replace(/^\//, '');
+      // Check if the input contains a JSON-like string
+      const entitiesMatch = trimmedInput.match(/\{.*\}/);
+      const entities = entitiesMatch ? JSON.parse(entitiesMatch[0]) : null;
+      // Remove the JSON-like string from the trimmed input
+      const intent = entitiesMatch ? trimmedInput.replace(entitiesMatch[0], '') : trimmedInput;
+      return { intent, entities };
+    }
+    return { intent: null, entities: null }
+  }
 }
