@@ -28,6 +28,14 @@ $text-color: #464646;
   border-radius: 5px;
 }
 
+.widget-form-content:hover::-webkit-scrollbar-thumb {
+  background: var(--main-color);
+}
+
+.widget-form-content:not(:hover)::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
 .widget-chat-content:hover::-webkit-scrollbar-thumb {
   background: var(--main-color);
 }
@@ -354,15 +362,18 @@ button.close-widget-wrapper {
 
 .widget-form-area form {
   margin: 0;
-  height: 100%;
+  height: auto;
 }
 
 .widget-form-content {
   padding: 10px;
   background-color: $white-color;
   border-radius: 10px;
-  position: relative;
-  top: -15px;
+  position: absolute;
+  top: 34px;
+  overflow-y: scroll;
+  max-height: 440px;
+  height: auto;
 }
 
 
@@ -461,7 +472,7 @@ button.close-widget-wrapper {
 }
 
 .widget-form-button {
-  position: fixed;
+  position: absolute;
   bottom: 20px;
   width: 100%;
   left: 0px;
@@ -564,13 +575,12 @@ button.close-widget-wrapper {
   border-radius: 10px 10px 0px 0px;
   border-bottom: 1px solid #eff2f7;
   cursor: pointer;
-  position: fixed;
-  right: 5px;
-  background-color: $white-color;
+  position: absolute;
+  background-color: rgb(255, 255, 255);
   z-index: 999999;
-  top: 40px;
+  top: 32px;
   height: 36px;
-  width: inherit;
+  width: 100%;
 }
 
 .widget-navbar-icon {
@@ -924,9 +934,10 @@ button.close-widget-wrapper {
 /*/------------------/*/
 .widget-composer {
   display: flex;
-  position: fixed;
-  bottom: 15px;
+  position: absolute;
+  bottom: 10px;
   width: inherit;
+  left: 5px;
 
   .emoji-btn {
     position: absolute;
@@ -1003,8 +1014,8 @@ button.close-widget-wrapper {
 }
 
 .widget-error-button {
-  position: fixed;
-  bottom: 20px;
+  position: inherit;
+  bottom: 0px;
   width: 100%;
   left: 0px;
 

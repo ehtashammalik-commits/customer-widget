@@ -75,6 +75,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   callbackResponseStatus = '';
 
   customerData: any;
+  preChatFormData: any;
   chatPayLoad: any;
   public cimMessage: any[] = [];
   typingIndicatorTimer: any = null;
@@ -328,9 +329,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   onFormSubmit(): void {
     try {
-      let preChatData = this.preChatFormGroup.value;
-      if (preChatData.customer_channel_identifier && this.serviceIdentifier) {
-        let eventPayload = this.getEventPayload(preChatData);
+      // let preChatData = this.preChatFormGroup.value;
+      this.preChatFormData = this.preChatFormGroup.value;
+      if (this.preChatFormData.customer_channel_identifier && this.serviceIdentifier) {
+        let eventPayload = this.getEventPayload(this.preChatFormData);
         console.log('Event Payload: ==>', eventPayload);
         this.setUserData(eventPayload, 'startChat');
       }
@@ -388,16 +390,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       serviceIdentifier: this.serviceIdentifier,
       channelCustomerIdentifier: preChatFormData.customer_channel_identifier,
       browserDeviceInfo: {
-        browserId: '123456',
-        browserIdExpiryTime: '9999',
-        browserName: 'chrome',
-        deviceType: 'desktop',
+        browserId: null,
+        browserIdExpiryTime: null,
+        browserName: null,
+        deviceType: null,
       },
       queue: '',
       locale: {
-        timezone: 'asia/karachi',
-        language: 'english',
-        country: 'pakistan',
+        timezone: null,
+        language: null,
+        country: null,
       },
       formData: this.getFormDataByPreChatForm(preChatFormData),
     };
@@ -598,6 +600,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               'conversationId',
               event.data.header.conversationId,
             );
+            this.sdk.setConversationDataAgainstCustomerIdentifier(this.customerData.channelCustomerIdentifier, this.preChatFormData);
             break;
           case 'MESSAGE_RECEIVED':
             console.log('event response:', event.data);

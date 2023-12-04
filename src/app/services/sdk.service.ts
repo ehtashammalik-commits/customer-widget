@@ -5,6 +5,7 @@ import { Observable, Subject } from 'rxjs';
 declare var widgetConfigs: any,
   getPreChatForm: any,
   establishConnection: any,
+  setConversationDataByCustomerIdentifier: any,
   chatRequest: any,
   sendMessage: any,
   uploadToFileEngine: any,
@@ -119,6 +120,14 @@ export class SdkService implements OnInit {
       (res: any) => {
         this.establishConnectionSubject.next(res);
       },
+    );
+  }
+
+  setConversationDataAgainstCustomerIdentifier(customerChannelIdentifier: any, preChatFormData: any) {
+    setConversationDataByCustomerIdentifier(
+      this.ConfigData.CONVERSATIONAL_URL, customerChannelIdentifier, preChatFormData, (res: any) => {
+        console.log('Set ConversationData Request', res);
+      }
     );
   }
 
