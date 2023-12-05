@@ -17,6 +17,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 
+import { NgxLinkifyjsModule } from "ngx-linkifyjs";
+import { tagFormatPipe } from './tagFormat.pipe';
 import { AppComponent } from './app.component';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { AppRoutingModule, routingComponents } from './app-routing.module';
@@ -36,8 +38,12 @@ export function initializeApp1(appConfigService: ConfigService) {
 }
 
 @NgModule({
-  declarations: [AppComponent, routingComponents, ConfirmDialogComponent],
+  declarations: [AppComponent, routingComponents, ConfirmDialogComponent, tagFormatPipe],
   imports: [
+    NgxLinkifyjsModule.forRoot({
+      enableHash: false,
+      enableMention: true
+    }),
     BrowserModule,
     HttpClientModule,
     AppRoutingModule,

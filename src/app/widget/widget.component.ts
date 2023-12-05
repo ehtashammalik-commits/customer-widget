@@ -99,7 +99,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   theme = '';
   enableFileTransfer = false;
   enableDownloadTranscript = false;
-  enableDynamicLink = true;
+  enableDynamicLink = false;
   enableEmoji = false;
   enableFontResize = false;
   preChatFormId = '';
@@ -1369,26 +1369,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.sdk.handleChatEnd(this.customerData);
     this.clearMessageData();
   }
-
-  // handleCallbackRequestApiResponse(data: any) {
-  //   if (data && data.status && data.status.name) {
-  //     this.callbackResponseStatus = data.status.name.toLowerCase();
-  //     if (data.status.name.toLowerCase() === 'conflict') {
-
-  //       // duplicateCallback();
-  //       // this.changeScreen('callbackResponse');
-  //       console.log("Callback already scheduled");
-  //     } else if (data.status.name.toLowerCase() === 'ok') {
-
-  //       // this.changeScreen('callbackResponse');
-  //     } else {
-  //       console.error('Error Callback Response: ');
-  //       // errorCallback();
-  //     }
-  //   } else {
-  //     console.error('Something Went Wrong Please check logs');
-  //   }
-  // }
 
   transformPayload(input: any) {
     // Remove the first '/'
