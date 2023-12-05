@@ -1111,9 +1111,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.constructCimMessage(
         'PLAIN',
         data.title.trim(),
-        'REPLY_TO',
-        originalMessageId,
-        data.payload
+        data.payload,
+        originalMessageId
       );
     }
   }
