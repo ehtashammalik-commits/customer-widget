@@ -6,7 +6,7 @@ include:
   - project: 'cim/ci-templates'
     ref: 'main'
     file:
-    
+
       - trivy.yaml
       - grype.yaml
       - trivy-merge.yaml
@@ -33,7 +33,7 @@ node-test:
   when: on_success
   image: node:18.14.1-alpine3.17
   script:
-    - npm install
+    - npm install --legacy-peer-deps
     - npm run coverage
   only:
    refs:
@@ -139,19 +139,19 @@ sonarqube-test:
     paths:
       - .sonar/cache
   script:
-     
 
-     - ls -lah coverage 
+
+     - ls -lah coverage
      - sonar-scanner -X
         -Dsonar.projectKey=${CI_PROJECT_NAME}
         -Dsonar.projectName=${CI_PROJECT_NAME}
         -Dsonar.sources="."
         -Dsonar.exclusions="node_modules/**"
         -Dsonar.javascript.lcov.reportPaths="coverage/lcov.info"
-        -Dsonar.tests="src/" 
+        -Dsonar.tests="src/"
         -Dsonar.test.inclusions="**/*.spec.js,**/*.test.js"
         -Dsonar.qualitygate.wait=true
-        -Dsonar.language=js 
+        -Dsonar.language=js
         -Dsonar.sourceEncoding=UTF-8
         -Dsonar.exclusions="test/*.spec.js,node_modules/**"
         -Dsonar.coverage.exclusions=test/*.spec.js,test/*.mock.js,node_modules/*,coverage/lcov-report/*
