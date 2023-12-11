@@ -92,7 +92,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   fontDropDown = false;
   positionOptions: TooltipPosition[] = ['after', 'before', 'above', 'below', 'left', 'right'];
-  matToolTipPosition = this.positionOptions[0];
+  matToolTipPosition = this.positionOptions[4];
   // Widget Configuration
   title = '';
   subtitle = '';
