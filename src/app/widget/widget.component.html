@@ -364,7 +364,7 @@
                   *ngIf="message.header.sender.type == 'AGENT' || message.header.sender.type == 'BOT'">
                   <div [ngClass]="(message.header.sender.type == 'AGENT') ? 'agent-img' : 'bot-img'">
                     <img
-                      src="../../widget-assets/images/{{(message.header.sender.type == 'AGENT') ? 'user.png' : 'bot-ptcl.svg'}}"
+                      src="../../widget-assets/images/{{(message.header.sender.type == 'AGENT') ? 'user.png' : 'robot-dark.svg'}}"
                       alt="avatar">
                   </div>
                   <div class="agent-message">
@@ -385,10 +385,10 @@
                     <!-- Message Type Button -->
                     <div class="structured-message-area" [ngClass]="{'custom-theme': theme !== ''}"
                       *ngIf="message.body.type=='BUTTON'">
-                      <!-- <span class="structured-btn-heading"
-                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.header.text) : (message.body.additionalDetails.interactive.header.text)}}"
+                      <span class="structured-btn-heading"
+                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.header.text | linkify) : (message.body.additionalDetails.interactive.header.text | tagFormat)}}"
                         [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
-                      </span> -->
+                      </span>
                       <span class="message"
                         innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.body.text | linkify) : (message.body.additionalDetails.interactive.body.text | tagFormat)}}"
                         [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">

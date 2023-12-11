@@ -331,7 +331,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     try {
       // let preChatData = this.preChatFormGroup.value;
       this.preChatFormData = this.preChatFormGroup.value;
-      this.preChatFormData.customer_channel_identifier = this.preChatFormData.phone ? this.preChatFormData.phone : null;
+      // this.preChatFormData.customer_channel_identifier = this.preChatFormData.phone ? this.preChatFormData.phone : null;
       if (this.preChatFormData.customer_channel_identifier && this.serviceIdentifier) {
         let eventPayload = this.getEventPayload(this.preChatFormData);
         console.log('Event Payload: ==>', eventPayload);
