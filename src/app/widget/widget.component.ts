@@ -1405,6 +1405,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   clearSession() {
+    this.preChatFormLoader = false;
     if (this.isCallActive) {
       this.callEnd();
     }
