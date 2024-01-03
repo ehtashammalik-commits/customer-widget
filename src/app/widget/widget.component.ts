@@ -114,7 +114,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   @Input() callbackFormData!: any[];
   preChatFormGroup!: FormGroup;
   callbackFormGroup!: FormGroup;
-  // preChatFormLoader = false;
+  preChatFormLoader = false;
   callbackLoader = false;
   callbackConfig: any;
   enabledCallback: Boolean = false;
@@ -173,7 +173,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
       this.widgetIdentifier = params['widgetIdentifier'];
-
+      if (this.serviceIdentifier == undefined || this.serviceIdentifier == '') {
+        alert("Error: Please check with Administrator. Service identifier is missing!!!");
+      }
+      if (this.widgetIdentifier == undefined || this.widgetIdentifier == '') {
+        alert("Error: Please check with Administrator. Widget identifier is missing!!!");
+      }
+      if (this.__appConfig.appConfig.CHANNEL_IDENTIFIER === 'channel_customer_identifier') {
+        if (this.customerIdentifier == undefined || this.customerIdentifier == '' || this.customerIdentifier == null) {
+          alert("Warning: 'channelCustomerIdentifier' parameter is missing in the url, Required for Customer Identification!!!");
+        }
+      }
       console.log(
         'parameters from iframe url',
         this.customerIdentifier,
@@ -331,17 +341,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   onFormSubmit(): void {
     try {
       if (this.preChatFormGroup.valid) {
-        // this.preChatFormLoader = true;
-        // let preChatData = this.preChatFormGroup.value;
+        this.preChatFormLoader = true;
         this.preChatFormData = this.preChatFormGroup.value;
-        // this.preChatFormData.customer_channel_identifier = this.preChatFormData.phone ? this.preChatFormData.phone : null;
         if (this.serviceIdentifier !== '' && this.serviceIdentifier !== null && this.serviceIdentifier !== undefined) {
           let eventPayload = this.getEventPayload(this.preChatFormData);
           console.log('Event Payload: ==>', eventPayload);
           // If Error is false than proceed with the start Chat and user data setting
           if (!eventPayload.error) { this.setUserData(eventPayload.data, 'startChat'); }
         } else {
-          // this.preChatFormLoader = false;
+          this.preChatFormLoader = false;
           alert("Please Check with Administrator. Your service identifier is missing!");
         }
       } else {
@@ -369,7 +377,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.customerData.serviceIdentifier == '' ||
       this.customerData.browserDeviceInfo.deviceType == ''
     ) {
-      // this.preChatFormLoader = false;
+      this.preChatFormLoader = false;
       let Response = {
         type: 'ERROR',
         data: {
@@ -412,7 +420,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getEventPayload(preChatFormData: any) {
     const channelIdentifierData = this.checkFieldValue(preChatFormData, this.__appConfig.appConfig.CHANNEL_IDENTIFIER);
     if (channelIdentifierData.error) {
-      // this.preChatFormLoader = false;
+      this.preChatFormLoader = false;
       alert(channelIdentifierData.data);
       return channelIdentifierData;
     } else {
@@ -475,6 +483,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isCallbackMax = false;
         break;
       case 'chat':
+        // this.preChatFormLoader = true;
         this.additionalPanel = false;
         this.preChatFormScreen = false;
         this.callbackFormScreen = false;
@@ -558,6 +567,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
+        // this.preChatFormLoader = false;
         break;
       case 'callback':
         this.activeChatView = false;
@@ -608,6 +618,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (event.id !== undefined || event.id !== '' || event.id !== null) {
         switch (event.type) {
           case 'SOCKET_CONNECTED':
+            // this.preChatFormLoader = true;
             if (this.eventTriggerType === 'startChat') {
               this.chatPayLoad = {
                 type: 'CHAT_REQUESTED',
@@ -628,7 +639,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
           case 'CHANNEL_SESSION_STARTED':
             this.isChatActive = true;
-            // this.preChatFormLoader = false;
+            this.preChatFormLoader = false;
             console.log('event response:', event.data);
             this.conversationId = event.data.header.conversationId;
             localStorage.setItem(

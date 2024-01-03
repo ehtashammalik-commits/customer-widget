@@ -1,5 +1,5 @@
 <div class="top-wrapper" [ngClass]="{'right-direction': selectedLanguage == 'ar', 'mobile-view': isMobile}">
-
+  <mat-spinner [diameter]="50" color="primary" *ngIf="preChatFormLoader"></mat-spinner>
   <!--------------------------->
   <!-- /Addition Panel HTML/ -->
   <!--------------------------->
@@ -44,7 +44,7 @@
             <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
             <div class="widget-form-group" *ngFor="let attribute of callbackFormData">
               <div [ngSwitch]="attribute.attributeType"
-                [style.display]="attribute.key === 'customer_channel_identifier' ? 'none' : 'block'">
+                [style.display]="attribute.key === 'channel_customer_identifier' ? 'none' : 'block'">
                 <ng-container *ngSwitchCase="'INPUT'">
                   <label>
                     <span id="{{attribute.key}}">{{attribute.label}}</span>
@@ -52,7 +52,7 @@
                   </label>
                   <input matInput type="text" [formControlName]="attribute.key" [placeholder]="attribute.helpText"
                     class="widget-form-control" autocomplete="off" [required]="attribute?.isRequired"
-                    [ngModel]="attribute.key === 'customer_channel_identifier' ? customerIdentifier : ''" />
+                    [ngModel]="attribute.key === 'channel_customer_identifier' ? customerIdentifier : ''" />
                 </ng-container>
                 <ng-container *ngSwitchCase="'OPTIONS'">
                   <label>{{ attribute.categoryOptions.categories[0].categoryName }}</label>
@@ -101,7 +101,7 @@
             <p>Please fill out the form below to start chatting with an agent now!</p>
             <div class="widget-form-group" *ngFor="let attribute of formData">
               <div [ngSwitch]="attribute.attributeType"
-                [style.display]="attribute.key === 'customer_channel_identifier' ? 'none' : 'block'">
+                [style.display]="attribute.key === 'channel_customer_identifier' ? 'none' : 'block'">
                 <ng-container *ngSwitchCase="'INPUT'">
                   <label>
                     <span id="{{attribute.key}}">{{attribute.label}}</span>
@@ -110,7 +110,7 @@
                   <input matInput id="{{attribute.key}}" type="text" [formControlName]="attribute.key"
                     [placeholder]="attribute.helpText" class="widget-form-control" autocomplete="off"
                     [required]="attribute?.isRequired"
-                    [ngModel]="attribute.key === 'customer_channel_identifier' ? customerIdentifier : ''" />
+                    [ngModel]="attribute.key === 'channel_customer_identifier' ? customerIdentifier : ''" />
                 </ng-container>
                 <ng-container *ngSwitchCase="'OPTIONS'">
                   <label>{{ attribute.categoryOptions.categories[0].categoryName }}</label>
@@ -603,7 +603,7 @@
               <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
               <div class="widget-form-group" *ngFor="let attribute of callbackFormData">
                 <div [ngSwitch]="attribute.attributeType"
-                  [style.display]="attribute.key === 'customer_channel_identifier' ? 'none' : 'block'">
+                  [style.display]="attribute.key === 'channel_customer_identifier' ? 'none' : 'block'">
                   <ng-container *ngSwitchCase="'INPUT'">
                     <label>
                       <span id="{{attribute.key}}">{{attribute.label}}</span>
@@ -611,7 +611,7 @@
                     </label>
                     <input matInput type="text" [formControlName]="attribute.key" [placeholder]="attribute.helpText"
                       class="widget-form-control" autocomplete="off" [required]="attribute?.isRequired"
-                      [ngModel]="attribute.key === 'customer_channel_identifier' ? customerIdentifier : ''" />
+                      [ngModel]="attribute.key === 'channel_customer_identifier' ? customerIdentifier : ''" />
                   </ng-container>
                   <ng-container *ngSwitchCase="'OPTIONS'">
                     <label>{{ attribute.categoryOptions.categories[0].categoryName }}</label>

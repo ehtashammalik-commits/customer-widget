@@ -1,18 +1,18 @@
 const params = new URLSearchParams(window.location.search);
 
 const ccm_url = decodeURIComponent(params.get('ccmUrl'));
-const customer_channel_identifier = decodeURIComponent(params.get('customerIdentifier'));
+const channel_customer_identifier = decodeURIComponent(params.get('customerIdentifier'));
 const service_identifier = decodeURIComponent(params.get('serviceIdentifier'));
 const clickState = decodeURIComponent(params.get('state'));
 const conversation_id = decodeURIComponent(params.get('conversationId'));
 const browserLang = decodeURIComponent(params.get('browserLang'));
 
-console.log("configurations :", ccm_url, conversation_id, clickState, browserLang, service_identifier, customer_channel_identifier);
+console.log("configurations :", ccm_url, conversation_id, clickState, browserLang, service_identifier, channel_customer_identifier);
 var messages = [];
 
 // Chat API Call
 const request = new XMLHttpRequest();
-request.open("GET", `${ccm_url}/message/?customerChannelIdentifier=${customer_channel_identifier}&serviceIdentifier=${service_identifier}&conversationId=${conversation_id}`);
+request.open("GET", `${ccm_url}/message/?customerChannelIdentifier=${channel_customer_identifier}&serviceIdentifier=${service_identifier}&conversationId=${conversation_id}`);
 request.send();
 request.onload = () => {
   if (request.status === 200) {

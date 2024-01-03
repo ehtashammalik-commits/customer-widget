@@ -154,7 +154,7 @@ export class SdkService implements OnInit {
       name: ["first_name", "full_name", "name"],
       phone: ["phone", "phone_number", "mobile", "business_number"],
       email: ["email", "business_email", "personal_email", "email_address"],
-      identifier: ["customer_channel_identifier"],
+      identifier: ["channel_customer_identifier"],
     } as formAttributeMappings;
     for (const key in inputObject) {
       for (const attribute in attributeMappings) {
