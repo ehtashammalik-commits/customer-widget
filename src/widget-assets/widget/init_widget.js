@@ -5,9 +5,7 @@ function getCookieValue(cookieName) {
   const cookies = document.cookie.split('; ');
   for (const cookie of cookies) {
     const [name, value] = cookie.split('=');
-    if (name === cookieName) {
-      return decodeURIComponent(value);
-    }
+    if (name === cookieName) { return decodeURIComponent(value); }
   }
   return null;
 }
@@ -22,21 +20,10 @@ for (const cookieName of priorityCookies) {
   }
 }
 
-if (!selectedCookie) {
-  selectedCookie = { name: 'generated_uuid', value: generateRandomUUID() };
-}
+if (!selectedCookie) { selectedCookie = { name: 'generated_uuid', value: getCurrentDateTime() }; }
 
 const channelCustomerIdentifier = encodeURIComponent(selectedCookie.value);
-
-function generateRandomUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
-
-console.log(__cim);
+function getCurrentDateTime() { return new Date().getTime(); }
 
 const params = new URLSearchParams();
 params.append('widgetIdentifier', encodeURIComponent(widgetIdentifier));
@@ -44,7 +31,6 @@ params.append('serviceIdentifier', encodeURIComponent(serviceIdentifier));
 params.append('channelCustomerIdentifier', channelCustomerIdentifier);
 
 const URL = `${customerWidgetUrl}/#/widget?${params.toString()}`;
-console.log('web widget iframe URL:', URL);
 
 var parentSection = document.createElement('div');
 parentSection.setAttribute('id', 'init_widget_main');

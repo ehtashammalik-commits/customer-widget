@@ -114,6 +114,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   @Input() callbackFormData!: any[];
   preChatFormGroup!: FormGroup;
   callbackFormGroup!: FormGroup;
+  // preChatFormLoader = false;
   callbackLoader = false;
   callbackConfig: any;
   enabledCallback: Boolean = false;
@@ -329,19 +330,25 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   onFormSubmit(): void {
     try {
-      // let preChatData = this.preChatFormGroup.value;
-      this.preChatFormData = this.preChatFormGroup.value;
-      // this.preChatFormData.customer_channel_identifier = this.preChatFormData.phone ? this.preChatFormData.phone : null;
-      if (this.preChatFormData.customer_channel_identifier && this.serviceIdentifier) {
-        let eventPayload = this.getEventPayload(this.preChatFormData);
-        console.log('Event Payload: ==>', eventPayload);
-        this.setUserData(eventPayload, 'startChat');
+      if (this.preChatFormGroup.valid) {
+        // this.preChatFormLoader = true;
+        // let preChatData = this.preChatFormGroup.value;
+        this.preChatFormData = this.preChatFormGroup.value;
+        // this.preChatFormData.customer_channel_identifier = this.preChatFormData.phone ? this.preChatFormData.phone : null;
+        if (this.serviceIdentifier !== '' && this.serviceIdentifier !== null && this.serviceIdentifier !== undefined) {
+          let eventPayload = this.getEventPayload(this.preChatFormData);
+          console.log('Event Payload: ==>', eventPayload);
+          // If Error is false than proceed with the start Chat and user data setting
+          if (!eventPayload.error) { this.setUserData(eventPayload.data, 'startChat'); }
+        } else {
+          // this.preChatFormLoader = false;
+          alert("Please Check with Administrator. Your service identifier is missing!");
+        }
+      } else {
+        // Mark all controls as touched to trigger validation errors
+        this.markFormGroupTouched(this.preChatFormGroup);
       }
-      // Proceed with form submission
-      console.log(this.preChatFormGroup.value);
-    } catch (error) {
-      alert('Error while submitting the form');
-    }
+    } catch (error) { alert('Error while submitting the form'); }
   }
 
   onCallbackFormSubmit(): void {
@@ -362,6 +369,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.customerData.serviceIdentifier == '' ||
       this.customerData.browserDeviceInfo.deviceType == ''
     ) {
+      // this.preChatFormLoader = false;
       let Response = {
         type: 'ERROR',
         data: {
@@ -386,24 +394,49 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+  checkFieldValue(data: { [x: string]: any; hasOwnProperty: (arg0: any) => any; }, field: any) {
+    if (data.hasOwnProperty(field)) {
+      const value = data[field];
+      // Check if the value is not null, empty, or undefined
+      if (value !== null && value !== undefined && value !== '') {
+        return { error: false, data: value };
+      } else {
+        const err = `This Field "${field}" is required.`;
+        return { error: true, data: err }
+      }
+    } else {
+      const err = `Error: The field "${field}" does not exist in the pre-chat form.`;
+      return { error: true, data: err }
+    }
+  }
   getEventPayload(preChatFormData: any) {
-    return {
-      serviceIdentifier: this.serviceIdentifier,
-      channelCustomerIdentifier: preChatFormData.customer_channel_identifier,
-      browserDeviceInfo: {
-        browserId: null,
-        browserIdExpiryTime: null,
-        browserName: null,
-        deviceType: null,
-      },
-      queue: '',
-      locale: {
-        timezone: null,
-        language: null,
-        country: null,
-      },
-      formData: this.getFormDataByPreChatForm(preChatFormData),
-    };
+    const channelIdentifierData = this.checkFieldValue(preChatFormData, this.__appConfig.appConfig.CHANNEL_IDENTIFIER);
+    if (channelIdentifierData.error) {
+      // this.preChatFormLoader = false;
+      alert(channelIdentifierData.data);
+      return channelIdentifierData;
+    } else {
+      return {
+        error: false,
+        data: {
+          serviceIdentifier: this.serviceIdentifier,
+          channelCustomerIdentifier: channelIdentifierData.data,
+          browserDeviceInfo: {
+            browserId: null,
+            browserIdExpiryTime: null,
+            browserName: null,
+            deviceType: null,
+          },
+          queue: '',
+          locale: {
+            timezone: null,
+            language: null,
+            country: null,
+          },
+          formData: this.getFormDataByPreChatForm(preChatFormData),
+        }
+      };
+    }
   }
 
   getFormDataByPreChatForm(preChatFormData: any[]): any {
@@ -595,6 +628,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
           case 'CHANNEL_SESSION_STARTED':
             this.isChatActive = true;
+            // this.preChatFormLoader = false;
             console.log('event response:', event.data);
             this.conversationId = event.data.header.conversationId;
             localStorage.setItem(

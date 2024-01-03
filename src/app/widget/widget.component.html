@@ -63,11 +63,17 @@
                   </div>
                 </ng-container>
                 <div class="clearfix"></div>
-                <div class="widget-form-button">
-                  <button id="formTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
-                    class="widget-btn widget-form-trigger widget-color">Request Callback</button>
-                </div>
+
               </div>
+              <!-- Display validation error if there is one -->
+              <div
+                *ngIf="preChatFormGroup.get(attribute.key) && preChatFormGroup.get(attribute.key)!.hasError('required') && preChatFormGroup.get(attribute.key)!.touched">
+                <span class="field-error">{{attribute.label}} field is required</span>
+              </div>
+            </div>
+            <div class="widget-form-button">
+              <button id="formTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
+                class="widget-btn widget-form-trigger widget-color">Request Callback</button>
             </div>
           </form>
         </div>
@@ -90,6 +96,7 @@
           </span>
         </div>
         <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
+          <!-- <mat-spinner [diameter]="50" color="primary" *ngIf="preChatFormLoader"></mat-spinner> -->
           <div class="widget-form-content">
             <p>Please fill out the form below to start chatting with an agent now!</p>
             <div class="widget-form-group" *ngFor="let attribute of formData">
@@ -100,8 +107,9 @@
                     <span id="{{attribute.key}}">{{attribute.label}}</span>
                     <span class="widget-required" *ngIf="attribute?.isRequired === true">*</span>
                   </label>
-                  <input matInput type="text" [formControlName]="attribute.key" [placeholder]="attribute.helpText"
-                    class="widget-form-control" autocomplete="off" [required]="attribute?.isRequired"
+                  <input matInput id="{{attribute.key}}" type="text" [formControlName]="attribute.key"
+                    [placeholder]="attribute.helpText" class="widget-form-control" autocomplete="off"
+                    [required]="attribute?.isRequired"
                     [ngModel]="attribute.key === 'customer_channel_identifier' ? customerIdentifier : ''" />
                 </ng-container>
                 <ng-container *ngSwitchCase="'OPTIONS'">
@@ -118,6 +126,11 @@
                   <label><span id="enabled_transcript"> I would like to receive future promotions, offers, and communication.</span></label>
                 </div> -->
                 <div class="clearfix"></div>
+              </div>
+              <!-- Display validation error if there is one -->
+              <div
+                *ngIf="preChatFormGroup.get(attribute.key) && preChatFormGroup.get(attribute.key)!.hasError('required') && preChatFormGroup.get(attribute.key)!.touched">
+                <span class="field-error">{{attribute.label}} field is required</span>
               </div>
             </div>
           </div>
@@ -226,6 +239,7 @@
           </span>
         </div>
         <ng-container *ngIf="activeChatView">
+          <!-- <mat-spinner [diameter]="50" color="primary" *ngIf="preChatFormLoader"></mat-spinner> -->
           <!-- Widget Chat Content -->
           <div class="widget-chat-content" #scrollMe>
             <div *ngFor="let message of cimMessage">
@@ -283,7 +297,7 @@
                       </span>
                     </div>
 
-                    <span class="message" *ngIf="message.body.type=='PLAIN'"
+                    <span class="message msg-1" *ngIf="message.body.type=='PLAIN'"
                       innerHTML="{{enableDynamicLink ? (message.body.markdownText | linkify) : (message.body.markdownText | tagFormat)}}"
                       [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
                     </span>
@@ -291,7 +305,7 @@
                     <div *ngFor="let contact of message.body.contacts">
                       <div *ngIf="message.body.type=='CONTACT'" class="file-message">
                         <span class="message"
-                          innerHTML="{{enableDynamicLink ? (contact.name.formattedName | linkify) : (contact.name.formattedName | tagFormat)}}"
+                          innerHTML="{{enableDynamicLink ? (contact.name.formattedName | linkify | tagFormat) : (contact.name.formattedName | tagFormat)}}"
                           [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
                         </span>
                         <a href="https://api.whatsapp.com/send?phone={{contact.phones[0].phone}}&text=Hello%2C%20I%20want%20more%20info%20about%20the%20product."
@@ -303,7 +317,7 @@
                     <!-- Message Type Location -->
                     <div *ngIf="message.body.type=='LOCATION'" class="file-message">
                       <span class="message"
-                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.name | linkify) : (message.body.additionalDetails.name | tagFormat)}}"
+                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.name | linkify | tagFormat) : (message.body.additionalDetails.name | tagFormat)}}"
                         [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
                       </span>
                       <a href="http://maps.google.com/?q={{message.body.location.latitude}},{{message.body.location.longitude}}"
@@ -316,7 +330,7 @@
                       *ngIf="message.body.type=='IMAGE' || message.body.type=='FILE' || message.body.type=='VIDEO' || message.body.type=='URL' ||  message.body.type=='AUDIO'"
                       class="file-message">
                       <span class="message"
-                        innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText : '' | linkify) : (message.body.markdownText ? message.body.markdownText : '' | tagFormat)}}"
+                        innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText : '' | linkify | tagFormat) : (message.body.markdownText ? message.body.markdownText : '' | tagFormat)}}"
                         [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
                       </span>
                       <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
@@ -340,7 +354,7 @@
                       </a>
                       <a *ngIf="message.body.type=='FILE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
                         <span class="file-name"
-                          innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName | linkify) : (message.body.additionalDetails.fileName | tagFormat)}}"
+                          innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName | linkify | tagFormat) : (message.body.additionalDetails.fileName | tagFormat)}}"
                           [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}"></span>
                         <img class="file-type-message" src="widget-assets/images/file-type.svg"
                           alt="{{message.body.additionalDetails.fileName}}" />
@@ -386,11 +400,11 @@
                     <div class="structured-message-area" [ngClass]="{'custom-theme': theme !== ''}"
                       *ngIf="message.body.type=='BUTTON'">
                       <span class="structured-btn-heading"
-                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.header.text | linkify) : (message.body.additionalDetails.interactive.header.text | tagFormat)}}"
+                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.header.text | linkify | tagFormat) : (message.body.additionalDetails.interactive.header.text | tagFormat)}}"
                         [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
                       </span>
                       <span class="message"
-                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.body.text | linkify) : (message.body.additionalDetails.interactive.body.text | tagFormat)}}"
+                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.interactive.body.text | linkify | tagFormat) : (message.body.additionalDetails.interactive.body.text | tagFormat)}}"
                         [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
                       </span>
                       <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
@@ -402,7 +416,7 @@
                     <div *ngFor="let contact of message.body.contacts">
                       <div *ngIf="message.body.type=='CONTACT'" class="file-message">
                         <span class="message"
-                          innerHTML="{{enableDynamicLink ? (contact.name.formattedName | linkify) : (contact.name.formattedName | tagFormat)}}"
+                          innerHTML="{{enableDynamicLink ? (contact.name.formattedName | linkify | tagFormat) : (contact.name.formattedName | tagFormat)}}"
                           [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
                         </span>
                         <a href="https://api.whatsapp.com/send?phone={{contact.phones[0].phone}}&text=Hello%2C%20I%20want%20more%20info%20about%20the%20product."
@@ -414,7 +428,7 @@
                     <!-- Message Type Location -->
                     <div *ngIf="message.body.type=='LOCATION'" class="file-message">
                       <span class="message"
-                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.name | linkify) : (message.body.additionalDetails.name | tagFormat)}}"
+                        innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.name | linkify | tagFormat) : (message.body.additionalDetails.name | tagFormat)}}"
                         [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
                       </span>
                       <a href="http://maps.google.com/?q={{message.body.location.latitude}},{{message.body.location.longitude}}"
@@ -427,7 +441,7 @@
                       *ngIf="message.body.type=='IMAGE' || message.body.type=='FILE' || message.body.type=='VIDEO' || message.body.type=='URL' ||  message.body.type=='AUDIO'"
                       class="file-message">
                       <span class="message"
-                        innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText :'' | linkify) : (message.body.markdownText ? message.body.markdownText : '' | tagFormat)}}"
+                        innerHTML="{{enableDynamicLink ? (message.body.markdownText ? message.body.markdownText :'' | linkify | tagFormat) : (message.body.markdownText ? message.body.markdownText : '' | tagFormat)}}"
                         [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
                       </span>
                       <a *ngIf="message.body.type=='IMAGE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
@@ -451,7 +465,7 @@
                       </a>
                       <a *ngIf="message.body.type=='FILE'" href="{{message.body.attachment.mediaUrl}}" target="_blank">
                         <span class="file-name"
-                          innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName | linkify) : (message.body.additionalDetails.fileName | tagFormat)}}"
+                          innerHTML="{{enableDynamicLink ? (message.body.additionalDetails.fileName | linkify | tagFormat) : (message.body.additionalDetails.fileName | tagFormat)}}"
                           [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}"></span>
                         <img class="file-type-message" src="widget-assets/images/file-type.svg"
                           alt="{{message.body.additionalDetails.fileName}}" />
@@ -608,11 +622,16 @@
                     </div>
                   </ng-container>
                   <div class="clearfix"></div>
-                  <div class="widget-form-button">
-                    <button id="formTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
-                      class="widget-btn widget-form-trigger widget-color">Request Callback</button>
-                  </div>
                 </div>
+                <!-- Display validation error if there is one -->
+                <div
+                  *ngIf="preChatFormGroup.get(attribute.key) && preChatFormGroup.get(attribute.key)!.hasError('required') && preChatFormGroup.get(attribute.key)!.touched">
+                  <span class="field-error">{{attribute.label}} field is required</span>
+                </div>
+              </div>
+              <div class="widget-form-button">
+                <button id="formTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
+                  class="widget-btn widget-form-trigger widget-color">Request Callback</button>
               </div>
             </form>
           </div>
