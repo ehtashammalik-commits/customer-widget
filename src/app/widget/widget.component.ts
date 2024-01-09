@@ -1414,6 +1414,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.changeScreen('end');
     this.sdk.handleChatEnd(this.customerData);
     this.clearMessageData();
+    this.fileLoading = false;
+    this.imageUrls = [];
+    this.selectedFile = null as any;
   }
 
   transformPayload(input: any) {

@@ -249,7 +249,7 @@
               <div class="widget-chat-notification-area" *ngIf="message.body.type == 'NOTIFICATION' && ((message.body.notificationType == 'NO_AGENT_AVAILABLE') ||
                   (message.body.notificationType == 'TASK_ENQUEUED' && message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER') ||
                   message.body.notificationType == 'AGENT_SUBSCRIBED' ||
-                  (message.body.notificationType == 'AGENT_UNSUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY') ||
+                  (message.body.notificationType == 'AGENT_UNSUBSCRIBED' && message.body.notificationData.data.agentParticipant.role === 'PRIMARY') ||
                   message.body.notificationType == 'PARTICIPANT_ROLE_CHANGED')">
                 <div class="widget-chat-notification">
                   <span
@@ -259,12 +259,12 @@
 
                   <span
                     *ngIf="message.body.notificationType=='PARTICIPANT_ROLE_CHANGED' && message.body.notificationData.data.conversationParticipant.role == 'PRIMARY'"
-                    innerHTML="{{enableDynamicLink ? (message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username | linkify | tagFormat) : (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username | tagFormat)}} joined the chat">
+                    innerHTML="{{enableDynamicLink ? (message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username | linkify | tagFormat) : (message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username | tagFormat)}} joined the chat">
                   </span>
 
                   <span
                     *ngIf="message.body.notificationType=='PARTICIPANT_ROLE_CHANGED' && message.body.notificationData.data.conversationParticipant.role == 'WRAP_UP'"
-                    innerHTML="{{enableDynamicLink ? (message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username | linkify | tagFormat) : (message.body.notificationData.data.agentParticipant.participant.keycloakUser.username | tagFormat)}} has left the chat">
+                    innerHTML="{{enableDynamicLink ? (message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username | linkify | tagFormat) : (message.body.notificationData.data.conversationParticipant.participant.keycloakUser.username | tagFormat)}} has left the chat">
                   </span>
 
                   <span
@@ -291,10 +291,10 @@
                     <div class="header">
                       <span class="name"
                         [ngStyle]="{'font-size':fontSize.value == '14' ? '11px' : fontSize.value == '16' ? '13px': '9px'}">YOU</span>
-                      <span class="material-symbols-outlined message-option" matTooltip="Reply"
+                      <!-- <span class="material-symbols-outlined message-option" matTooltip="Reply"
                         [matTooltipPosition]="matToolTipPosition!">
                         more_vert
-                      </span>
+                      </span> -->
                     </div>
 
                     <span class="message msg-1" *ngIf="message.body.type=='PLAIN'"
@@ -385,10 +385,10 @@
                     <div class="header">
                       <span class="name" *ngIf="message.header.sender.type == 'AGENT'"
                         [ngStyle]="{'font-size':fontSize.value == '14' ? '11px' : fontSize.value == '16' ? '13px': '9px'}">{{message.header.sender.senderName.toUpperCase()}}</span>
-                      <span class="material-symbols-outlined message-option" matTooltip="Reply"
+                      <!-- <span class="material-symbols-outlined message-option" matTooltip="Reply"
                         [matTooltipPosition]="matToolTipPosition!" *ngIf="message.header.sender.type == 'AGENT'">
                         more_vert
-                      </span>
+                      </span> -->
                     </div>
 
                     <!-- <span class="message">Hello! I need general info regarding your upcoming products line.</span> -->
