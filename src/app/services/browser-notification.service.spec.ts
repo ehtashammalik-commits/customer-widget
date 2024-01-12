@@ -1,7 +1,7 @@
-import { browserNotificationService } from './browser-notification.service';
+import { BrowserNotificationService } from './browser-notification.service';
 
 describe('browserNotificationService', () => {
-  let service: browserNotificationService;
+  let service: BrowserNotificationService;
 
   describe('Test Check', () => {
     it('test check', () => {
