@@ -108,12 +108,15 @@
                     <span class="widget-required" *ngIf="attribute?.isRequired === true">*</span>
                   </label>
                   <input matInput id="{{attribute.key}}" type="text" [formControlName]="attribute.key"
-                    [placeholder]="attribute.helpText" class="widget-form-control" autocomplete="off"
+                    [placeholder]="attribute.helpText" class="widget-form-control" autocomplete="on"
                     [required]="attribute?.isRequired"
                     [ngModel]="attribute.key === 'channel_customer_identifier' ? customerIdentifier : ''" />
                 </ng-container>
                 <ng-container *ngSwitchCase="'OPTIONS'">
-                  <label>{{ attribute.categoryOptions.categories[0].categoryName }}</label>
+                  <label>
+                    <span id="{{attribute.key}}">{{ attribute.categoryOptions.categories[0].categoryName }}</span>
+                    <span class="widget-required" *ngIf="attribute?.isRequired === true">*</span>
+                  </label>
                   <div *ngFor="let option of attribute.categoryOptions.categories[0].values">
                     <input class="radio-btn" type="radio" [id]="option" [name]="attribute.key"
                       [formControlName]="attribute.key" [value]="option" />
@@ -135,8 +138,9 @@
             </div>
           </div>
           <div class="widget-form-button">
-            <button id="formTrigger" type="submit" [disabled]="preChatFormGroup.invalid"
-              class="widget-btn widget-form-trigger widget-color">Start Chat</button>
+            <button id="formTrigger" type="submit" [ngClass]="{'disable-btn': preChatFormGroup.invalid}"
+              [disabled]="preChatFormGroup.invalid" class="widget-btn widget-form-trigger widget-color">Start
+              Chat</button>
           </div>
         </form>
       </div>
@@ -298,7 +302,7 @@
                     </div>
 
                     <span class="message msg-1" *ngIf="message.body.type=='PLAIN'"
-                      innerHTML="{{enableDynamicLink ? (message.body.markdownText | linkify) : (message.body.markdownText | tagFormat)}}"
+                      innerHTML="{{enableDynamicLink ? (message.body.markdownText | linkify | tagFormat) : (message.body.markdownText | tagFormat)}}"
                       [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
                     </span>
                     <!-- Message Type Contact -->
@@ -393,7 +397,7 @@
 
                     <!-- <span class="message">Hello! I need general info regarding your upcoming products line.</span> -->
                     <span class="message" *ngIf="message.body.type=='PLAIN'"
-                      innerHTML="{{enableDynamicLink ? (message.body.markdownText | linkify) : (message.body.markdownText | tagFormat)}}"
+                      innerHTML="{{enableDynamicLink ? (message.body.markdownText | linkify | tagFormat) : (message.body.markdownText | tagFormat)}}"
                       [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
                     </span>
                     <!-- Message Type Button -->
@@ -850,7 +854,7 @@
     <div class="widget-icon widget-icon-callback" *ngIf="standaloneCallback && enabledCallback">
 
       <div class="widget-icon-content" *ngIf="isCallbackMax">
-        <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
+        <button id="chatIconBtn" title="Callback Widget" class="widget-bar-trigger widget-chat-trigger widget-color"
           (click)="changeScreen('widget')">
           <span class="chat-icon material-symbols-outlined">
             close
@@ -859,7 +863,7 @@
       </div>
 
       <div class="widget-icon-content" *ngIf="!isCallbackMax">
-        <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
+        <button id="chatIconBtn" title="Callback" class="widget-bar-trigger widget-chat-trigger widget-color"
           (click)="changeScreen('callbackForm')">
           <span class="chat-icon material-symbols-outlined">
             perm_phone_msg

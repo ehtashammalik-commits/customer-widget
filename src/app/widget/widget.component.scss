@@ -48,6 +48,13 @@ $text-color: #464646;
   background: var(--main-color);
 }
 
+.disable-btn {
+  opacity: 0.5;
+  /* Adjust opacity or apply other styling as needed */
+  cursor: not-allowed;
+  /* Add any other styling you want to apply when the button is disabled */
+}
+
 /*/---------------/*/
 /*/ Widget Color /*/
 /*/-------------/*/
@@ -384,8 +391,6 @@ button.close-widget-wrapper {
   height: auto;
 }
 
-
-
 .widget-form-content p {
   font-family: "Roboto";
   font-size: 13px;
@@ -458,6 +463,11 @@ button.close-widget-wrapper {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+}
+
+.widget-btn:focus .widget-btn:hover {
+  border: 1px solid $text-color;
+  opacity: 0.9;
 }
 
 .widget-form-group .widget-form-control:focus {

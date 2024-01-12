@@ -10,7 +10,7 @@ import {
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { SdkService } from '../services/sdk.service';
 import { ConfigService } from '../services/config.service';
-import { browserNotificationService } from '../services/browser-notification.service';
+import { BrowserNotificationService } from '../services/browser-notification.service';
 import { DeliveryNotificationService } from '../services/delivery-notification.service';
 import { Subscription } from 'rxjs';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -153,7 +153,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private sanitizer: DomSanitizer,
     private snackBar: MatSnackBar,
     public dialog: MatDialog,
-    private browserNotificationService: browserNotificationService,
+    private browserNotificationService: BrowserNotificationService,
     private deliveryNotificationService: DeliveryNotificationService,
   ) { }
 
@@ -184,12 +184,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           alert("Warning: 'channelCustomerIdentifier' parameter is missing in the url, Required for Customer Identification!!!");
         }
       }
-      console.log(
-        'parameters from iframe url',
-        this.customerIdentifier,
-        this.serviceIdentifier,
-        this.widgetIdentifier,
-      );
       // Pass parameters to service after you have received them.
       this.passUrlParamsToServices();
     });
@@ -231,6 +225,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.cimMessage = data.data;
           this.isChatActive = true;
           this.processSeenMessages();
+        } else if (data.isChatAvailable == false) {
+          localStorage.removeItem('widget-error');
+          this.changeScreen('end');
         }
         this.scrollToBottom();
       },
@@ -483,7 +480,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isCallbackMax = false;
         break;
       case 'chat':
-        // this.preChatFormLoader = true;
         this.additionalPanel = false;
         this.preChatFormScreen = false;
         this.callbackFormScreen = false;
@@ -530,7 +526,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatEndScreen = false;
         this.isChatMax = false;
         this.isCallbackMax = true;
-        // this.changeView('chat');
         break;
       case 'end':
         this.preChatFormScreen = false;
@@ -567,7 +562,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
-        // this.preChatFormLoader = false;
         break;
       case 'callback':
         this.activeChatView = false;
@@ -593,7 +587,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.callPopUpView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
-          // this.startCountdown();
         } else {
           this.callPopUpView = true;
           this.activeChatView = true;
@@ -617,8 +610,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     try {
       if (event.id !== undefined || event.id !== '' || event.id !== null) {
         switch (event.type) {
+          case 'SOCKET_RECONNECTED':
+            console.log('[SOCKET_RECONNECTED] ==> Chat Resume Request Sent: ', event.data);
+            this.sdk.onChatResumed(
+              event.data.serviceIdentifier,
+              event.data.channelCustomerIdentifier,
+            );
+            let error = localStorage.removeItem("widget-error");
+            this.changeScreen('chat');
+            console.log('[SOCKET_RECONNECTED] ==> Chat Resume event response:', this.customerData);
+            break;
           case 'SOCKET_CONNECTED':
-            // this.preChatFormLoader = true;
+            console.log('[SOCKET_CONNECTED] ==> New Connection Request Response:', event.data);
             if (this.eventTriggerType === 'startChat') {
               this.chatPayLoad = {
                 type: 'CHAT_REQUESTED',
@@ -628,14 +631,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               if (this.enabledWebhook) this.sdk.sendWebhookNotification(this.webhookUrl, this.chatPayLoad);
               console.log('New Chat Start Request Sent');
             } else if (this.eventTriggerType === '') {
-              console.log('Chat Resume Request Sent');
+              console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
               this.sdk.onChatResumed(
                 this.customerData.serviceIdentifier,
                 this.customerData.channelCustomerIdentifier,
               );
             }
             this.changeScreen('chat');
-            console.log('event response:', this.customerData);
             break;
           case 'CHANNEL_SESSION_STARTED':
             this.isChatActive = true;
@@ -1188,6 +1190,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.serviceIdentifier,
         parsedUserData.data.channelCustomerIdentifier,
       );
+    } else {
+      localStorage.removeItem('widget-error');
+      this.changeScreen('widget');
     }
   }
   onTyping() {

@@ -53,7 +53,7 @@ function widgetConfigs(ccmUrl, widgetIdentifier, callback) {
   fetch(`${ccmUrl}/widget-configs/${widgetIdentifier}`)
     .then(response => response.json())
     .then((data) => {
-      console.log('widget configs:', data);
+      // console.log('widget configs:', data);
       callback(data);
       wssServerIp = data.webRtc.wssFs;
       uriServerIp = data.webRtc.uriFs;
@@ -103,12 +103,14 @@ function formValidation(formUrl, callback) {
  */
 function establishConnection(socket_url, serviceIdentifier, channelCustomerIdentifier, callback) {
   try {
-    // console.log("Socket ", this.socket);
-    // console.log("Socket connected ", this.socket.connected);
-    // console.log("this.config.SocketUrl ", socket_url);
-    if (this.socket === undefined || !this.socket.connected) {
+    if (this.socket !== undefined && this.socket.connected) {
+      console.log('Resuming Existing Connection');
+      eventListeners((data) => {
+        callback(data);
+      });
+    } else {
       if (socket_url !== '') {
-        console.log("going new connection");
+        console.log('Starting New Connection');
         let origin = new URL(socket_url).origin;
         let path = new URL(socket_url).pathname;
         this.socket = io(origin, {
@@ -144,13 +146,10 @@ function eventListeners(callback) {
       console.log(`you are connected with socket:`, this.socket);
       let error = localStorage.getItem("widget-error");
       if (error) {
-        console.log(`${error}`);
-        resumeChat({
-          serviceIdentifier: this.socket.auth.serviceIdentifier,
-          channelCustomerIdentifier: this.socket.auth.channelCustomerIdentifier
-        });
+        callback({ type: "SOCKET_RECONNECTED", data: this.socket });
+      } else {
+        callback({ type: "SOCKET_CONNECTED", data: this.socket });
       }
-      callback({ type: "SOCKET_CONNECTED", data: this.socket });
     }
   });
   this.socket.on('CHANNEL_SESSION_STARTED', (data) => {
