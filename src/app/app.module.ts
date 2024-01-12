@@ -24,6 +24,7 @@ import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { AppRoutingModule, routingComponents } from './app-routing.module';
 import { ConfigService } from './services/config.service';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
+import { getMediaFromTask } from "./getMediaFromTask.pipe";
 
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
@@ -38,7 +39,7 @@ export function initializeApp1(appConfigService: ConfigService) {
 }
 
 @NgModule({
-  declarations: [AppComponent, routingComponents, ConfirmDialogComponent, tagFormatPipe],
+  declarations: [AppComponent, routingComponents, ConfirmDialogComponent, tagFormatPipe, getMediaFromTask],
   imports: [
     NgxLinkifyjsModule.forRoot({
       enableHash: false,
@@ -61,6 +62,9 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatSnackBarModule,
     MatDialogModule,
     MatChipsModule,
+  ],
+  exports: [
+    getMediaFromTask
   ],
   providers: [
     {

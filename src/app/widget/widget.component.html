@@ -250,8 +250,8 @@
               <!-- <div class="widget-chat-alert">
                 <span>Please wait we are finding an agent for you</span>
               </div> -->
-              <div class="widget-chat-notification-area" *ngIf="message.body.type == 'NOTIFICATION' && ((message.body.notificationType == 'NO_AGENT_AVAILABLE') ||
-                  (message.body.notificationType == 'TASK_ENQUEUED' && message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER') ||
+              <div class="widget-chat-notification-area" *ngIf="message.body.type == 'NOTIFICATION' && (message.body.notificationType == 'TASK_STATE_CHANGE' || message.body.notificationType == 'NO_AGENT_AVAILABLE' ||
+                  (message.body.notificationType == 'TASK_ENQUEUED' && ((message.body.notificationData.data.task | getMediaFromTask:'direction') == 'DIRECT_TRANSFER'))  ||
                   message.body.notificationType == 'AGENT_SUBSCRIBED' ||
                   (message.body.notificationType == 'AGENT_UNSUBSCRIBED' && message.body.notificationData.data.agentParticipant.role === 'PRIMARY') ||
                   message.body.notificationType == 'PARTICIPANT_ROLE_CHANGED')">
@@ -279,10 +279,16 @@
                   <span *ngIf="message.body.notificationType == 'NO_AGENT_AVAILABLE' "
                     innerHTML="{{enableDynamicLink ? 'No agents are available at the moment' : 'No agents are available at the moment'}}">
                   </span>
-
-                  <div *ngIf="message.body.notificationType == 'TASK_ENQUEUED'">
-                    <span *ngIf="message.body.notificationData.data.task.type.direction == 'DIRECT_TRANSFER'"
-                      innerHTML="Your request is being transferred to '{{message.body.notificationData.data.queue.name}}' queue, please wait!">
+                  <div
+                    *ngIf="message.body.notificationType == 'TASK_ENQUEUED' && ((message.body.notificationData.data.task | getMediaFromTask:'direction') == 'DIRECT_TRANSFER')">
+                    <span
+                      innerHTML="Your request is being transferred to '{{ message.body.notificationData.data.task | getMediaFromTask:'queueName'}}' queue, please wait!">
+                    </span>
+                  </div>
+                  <div
+                    *ngIf="message.body.notificationType == 'TASK_STATE_CHANGE' && ((message.body.notificationData.data.task | getMediaFromTask:'direction') == 'DIRECT_TRANSFER')">
+                    <span
+                      innerHTML="Your request is being transferred to '{{ message.body.notificationData.data.task | getMediaFromTask:'queueName'}}' queue, please wait!">
                     </span>
                   </div>
                 </div>

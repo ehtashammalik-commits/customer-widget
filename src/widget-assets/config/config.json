@@ -5,5 +5,5 @@
   "CCM_URL": "https://cim-dev3.expertflow.com/ccm",
   "CONVERSATIONAL_URL": "https://cim-dev3.expertflow.com/conversation-manager/customer-topics",
   "FORM_URL": "https://cim-dev3.expertflow.com/unified-admin",
-  "CHANNEL_IDENTIFIER" : "phone"
+  "CHANNEL_IDENTIFIER": "phone"
 }
