@@ -418,6 +418,38 @@ async function getConversationData(url, conversationId) {
 }
 
 /**
+ * IP Data Request
+ *
+ */
+
+function getBrowserInfo(apiKey, callback) {
+  // const apiKey = '5c8c5a26decc9b30da07abf360b73256faa5b00c59b32689c9860a84';
+  try {
+    fetch(`https://api.ipdata.co?api-key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    }).then(response => response.json())
+      .then(data => {
+        // Handle the API response here
+        console.log("ipData API response:", data);
+        callback(data);
+      })
+      .catch(error => {
+        // Handle any errors that occur during the API call
+        console.error("ipData API Call Error", error);
+        callback(error);
+      })
+
+  } catch (error) {
+    console.error('API Function Error', error);
+    callback(error);
+  }
+}
+
+/**
  * Callback Request To ECM
  * @param {*} payload
  * @param {*} url

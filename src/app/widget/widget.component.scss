@@ -697,21 +697,22 @@ button.close-widget-wrapper {
   position: relative;
   width: auto;
   height: auto;
+  display: grid;
+  justify-content: center;
 }
 
 .widget-chat-notification {
-  width: 150px;
+  width: 200px;
+  min-width: 150px;
+  max-width: 250px;
   text-align: center;
   border: 1px solid #eff2f7;
   border-radius: 25px;
   background: $white-color;
   margin-bottom: 10px;
-  display: flex;
   height: auto;
-  justify-content: center;
-  position: relative;
+  position: inherit;
   top: 20px;
-  left: 28%;
 }
 
 .widget-chat-notification span {
