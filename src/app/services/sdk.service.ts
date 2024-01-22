@@ -16,7 +16,8 @@ declare var widgetConfigs: any,
   sendInvite: any,
   closeSession: any,
   audioControl: any,
-  callbackRequest: any;
+  callbackRequest: any,
+  getBrowserInfo: any;
 
 type formAttributeMappings = {
   name: string[];
@@ -171,6 +172,13 @@ export class SdkService implements OnInit {
     const message = `${formObj['name']} having email: ${formObj['email']} phone: ${formObj['phone']} with Identifier: ${formObj['identifier']} started a chat`;
 
     webhookNotifications(webhook_url, message);
+  }
+
+  fetchBrowserData(apiKey: any, callback: any) {
+    getBrowserInfo(apiKey, (res: any) => {
+        console.log('browser info in sdk.service:', res);
+        callback(res);
+    })
   }
 
   sendCallbackRequest(configs: any, formData: any) {

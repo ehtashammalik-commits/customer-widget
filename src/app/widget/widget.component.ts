@@ -342,6 +342,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.preChatFormData = this.preChatFormGroup.value;
         if (this.serviceIdentifier !== '' && this.serviceIdentifier !== null && this.serviceIdentifier !== undefined) {
           let eventPayload = this.getEventPayload(this.preChatFormData);
+          // this.sdk.fetchBrowserData('5c8c5a26decc9b30da07abf360b73256faa5b00c59b32689c9860a84', (res: any) => {
+          //   console.log(res, 'Browser Information is:');
+          // });
           console.log('Event Payload: ==>', eventPayload);
           // If Error is false than proceed with the start Chat and user data setting
           if (!eventPayload.error) { this.setUserData(eventPayload.data, 'startChat'); }
@@ -449,9 +452,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       id: Math.random(),
       formId: this.preChatFormId,
       filledBy: 'web-widget',
-      attributes: preChatFormData,
+      attributes: this.convertJsonToArray(preChatFormData),
       createdOn: new Date(),
     };
+  }
+
+  convertJsonToArray(jsonObject: any): any {
+    return Object.entries(jsonObject).map(([key, value]) => ({
+      value: value,
+      key: key,
+      type: typeof value === "string" ? "string" : typeof value
+    }));
   }
 
   closeWrapper() {
