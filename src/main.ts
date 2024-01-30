@@ -12,7 +12,7 @@ document.head.appendChild(socketIOScript);
 // Load SIP.js script
 const sipScript = document.createElement('script');
 sipScript.src =
-  'https://cdnjs.cloudflare.com/ajax/libs/sip.js/0.15.11/sip-0.15.11.min.js';
+  'widget-assets/customer-sdk/sip-0.21.2.min.js';
 document.head.appendChild(sipScript);
 
 // Load the SDK script

@@ -16,6 +16,8 @@ declare var widgetConfigs: any,
   sendInvite: any,
   closeSession: any,
   audioControl: any,
+  videoControl: any,
+  postMessages: any,
   callbackRequest: any,
   getBrowserInfo: any;
 
@@ -55,8 +57,8 @@ export class SdkService implements OnInit {
   public onChatResumedResponse$: Observable<any> =
     this.onChatResumedSubject.asObservable();
 
-  private onCallSubject: Subject<any> = new Subject<any>();
-  public onCallResponse$: Observable<any> = this.onCallSubject.asObservable();
+  private onWebRtcCallSubject: Subject<any> = new Subject<any>();
+  public onWebRtcCallResponse$: Observable<any> = this.onWebRtcCallSubject.asObservable();
 
   private onCallbackRequestSubject: Subject<any> = new Subject<any>();
   public onCallbackRequestResponse$: Observable<any> = this.onCallbackRequestSubject.asObservable();
@@ -176,8 +178,8 @@ export class SdkService implements OnInit {
 
   fetchBrowserData(apiKey: any, callback: any) {
     getBrowserInfo(apiKey, (res: any) => {
-        console.log('browser info in sdk.service:', res);
-        callback(res);
+      console.log('browser info in sdk.service:', res);
+      callback(res);
     })
   }
 
@@ -232,10 +234,37 @@ export class SdkService implements OnInit {
     chatEnd(customerPayload);
   }
 
-  handleCallStart() {
-    dialCall((res: any) => {
-      this.onCallSubject.next(res);
-    });
+  loginSipWebRtc(webRtc: any) {
+
+    const login = {
+      action: "login",
+      parameter: {
+        loginId: webRtc.sipExtension,
+        password: webRtc.extensionPassword,
+        extension: webRtc.sipExtension,
+        clientCallbackFunction: (res: any) => {
+          this.onWebRtcCallSubject.next(res);
+        }
+      }
+    }
+    // console.log('Login Payload: ===>', login);
+    postMessages(login);
+  }
+
+  handleCallStart(callPayload: any) {
+
+    const dialCall = {
+      action: 'makeCall',
+      parameter: {
+        callType: callPayload.type,
+        Destination_Number: callPayload.sipConfigs.diallingUri,
+        calledNumber: callPayload.sipConfigs.diallingUri,
+        clientCallbackFunction: (res: any) => {
+          this.onWebRtcCallSubject.next(res);
+        }
+      }
+    }
+    postMessages(dialCall);
   }
 
   sendCallRequest(
@@ -250,20 +279,83 @@ export class SdkService implements OnInit {
       localElementId,
       customerData,
       (res: any) => {
-        this.onCallSubject.next(res);
+        let dialPayload = {
+          callType: type,
+          data: res
+        };
+        console.log('Call Invite Response ==>', dialPayload);
+        this.onWebRtcCallSubject.next(dialPayload);
       },
     );
   }
 
-  handleCallEnd() {
-    console.log('handle end call in sdk service');
-    closeSession((res: any) => {
-      this.onCallSubject.next(res);
+  handleCallEnd(sessionDialogId: any) {
+    console.log('handle end call in sdk service: ===> ', sessionDialogId);
+    const endCall = {
+      action: 'releaseCall',
+      parameter: {
+        dialogId: sessionDialogId,
+        clientCallbackFunction: (res: any) => {
+          this.onWebRtcCallSubject.next(res);
+        }
+      }
+    }
+    postMessages(endCall);
+  }
+
+  handleCallMic(action: any, sessionDialogId: any) {
+    console.log('handle mic mute/unmute in sdk service', action, sessionDialogId);
+    const micPayload = {
+      action: action,
+      parameter: {
+        dialogId: sessionDialogId,
+        clientCallbackFunction: (res: any) => {
+          this.onWebRtcCallSubject.next(res);
+        }
+      }
+    }
+    postMessages(micPayload);
+  }
+
+
+  handleCallHoldState(action: any, sessionDialogId: any) {
+    console.log('handle mic mute/unmute in sdk service', action, sessionDialogId);
+    const callStatePayload = {
+      action: action,
+      parameter: {
+        dialogId: sessionDialogId,
+        clientCallbackFunction: (res: any) => {
+          this.onWebRtcCallSubject.next(res);
+        }
+      }
+    }
+    postMessages(callStatePayload);
+  }
+
+
+  holdcall() {
+    postMessages({
+      "action": "holdCall",
+      "parameter":
+      {
+        "dialogId": 'dialogid1',
+        "clientCallbackFunction": 'eventCallback'
+      }
+    });
+  }
+  unholdcall() {
+    postMessages({
+      "action": "retrieveCall",
+      "parameter":
+      {
+        "dialogId": 'dialogid1',
+        "clientCallbackFunction": 'eventCallback'
+      }
     });
   }
 
-  handleCallMic() {
-    console.log('handle mic mute/unmute in sdk service');
-    audioControl();
+  handleCallVideo() {
+    console.log('handle video show/hide in sdk service');
+    videoControl();
   }
 }

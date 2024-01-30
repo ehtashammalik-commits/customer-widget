@@ -32,7 +32,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private callbackFormSubscription: Subscription = new Subscription();
   private establishConnectionSubject: Subscription = new Subscription();
   private onChatResumedSubject: Subscription = new Subscription();
-  private onCallSubject: Subscription = new Subscription();
+  private onWebRtcCallSubject: Subscription = new Subscription();
   private onCallbackRequestSubject: Subscription = new Subscription();
   @ViewChild('autosize')
   autosize!: CdkTextareaAutosize;
@@ -45,6 +45,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   @ViewChild('scrollMe')
   private scrollContainer!: ElementRef;
   @Input() conversation: any;
+
+  @ViewChild('remoteVideo') remoteVideo!: ElementRef;
+  @ViewChild('localVideo') myVideoLocal!: ElementRef;
+
   scrollTop = 0;
   fontSize = new FormControl("12");
   public scrollCon: any;
@@ -82,9 +86,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   lastSeenMessageId: any = null;
   conversationId = '';
   isChatActive = false;
-  isCallActive = false;
+  isAudioCallActive = false;
+  isVideoCallActive = false;
   eventTriggerType = '';
   isCallMute = false;
+  isVideoHide = false;
   isCallOnHold = false;
 
   isChatMax = false;
@@ -142,6 +148,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // Audio Screen Variables
   counterVar: any;
   callTime: string = '00:00';
+  callText: string = '';
+  maintainDialog: any;
+  dialogId: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -233,9 +242,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       },
     );
 
-    this.onCallSubject = this.sdk.onCallResponse$.subscribe((data) => {
-      console.log('call response events => ', data);
-      this.processCallResponses(data);
+    this.onWebRtcCallSubject = this.sdk.onWebRtcCallResponse$.subscribe((data) => {
+      this.handleDialogStates(data);
     });
 
     this.onCallbackRequestSubject = this.sdk.onCallbackRequestResponse$.subscribe((data) => {
@@ -313,6 +321,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.webRTCConfig = configs.webRtc;
     if (this.webRTCConfig !== null) {
       this.enableWebRtc = configs.webRtc.enableWebRtc;
+      console.log('webRTC Configs: ', this.webRTCConfig.diallingUri);
+      if (this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
     }
     this.callbackConfig = configs.callback;
     if (this.callbackConfig !== null) {
@@ -591,7 +601,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.activeCallbackResponseView = true;
         break;
       case 'audio':
-        if (this.isCallActive) {
+        if (this.isAudioCallActive) {
           this.activeChatView = false;
           this.activeAudioView = true;
           this.activeVideoView = false;
@@ -605,15 +615,31 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeVideoView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
-          this.initiateVoiceCall(view);
+          this.initiateWebRtcCall(view);
         }
         break;
       case 'video':
-        this.activeChatView = false;
-        this.activeAudioView = false;
-        this.activeVideoView = true;
-        this.activeCallbackView = false;
-        this.activeCallbackResponseView = false;
+        if (this.isVideoCallActive) {
+          this.activeChatView = false;
+          this.activeAudioView = false;
+          this.activeVideoView = true;
+          this.callPopUpView = false;
+          this.activeCallbackView = false;
+          this.activeCallbackResponseView = false;
+        } else {
+          this.activeVideoView = true;
+          this.callPopUpView = true;
+          this.activeChatView = false;
+          this.activeAudioView = false;
+          this.activeCallbackView = false;
+          this.activeCallbackResponseView = false;
+          this.initiateWebRtcCall(view);
+        }
+        // this.activeChatView = false;
+        // this.activeAudioView = false;
+        // this.activeVideoView = true;
+        // this.activeCallbackView = false;
+        // this.activeCallbackResponseView = false;
         break;
     }
   }
@@ -1296,18 +1322,36 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   toggleCallMic() {
     this.isCallMute = !this.isCallMute; // Use assignment operator and logical NOT operator
     console.log(this.isCallMute);
-    this.sdk.handleCallMic();
+    const action = (this.isCallMute) ? 'mute_call' : 'unmute_call';
+    this.sdk.handleCallMic(action, this.dialogId);
+  }
+
+  toggleCallVideo() {
+    this.isVideoHide = !this.isVideoHide;
+    console.log(this.isVideoHide);
+    this.sdk.handleCallVideo();
   }
 
   toggleCallHold() {
     this.isCallOnHold = !this.isCallOnHold; // Use assignment operator and logical NOT operator
     console.log(this.isCallOnHold);
+    const action = (this.isCallOnHold) ? 'holdCall' : 'retrieveCall';
+    this.sdk.handleCallHoldState(action, this.dialogId);
   }
 
-  initiateVoiceCall(callType: any) {
+  initiateWebRtcCall(callType: any) {
+    this.callText = callType;
     this.startCountdown();
-    this.sdk.handleCallStart();
-    this.isCallActive = true;
+
+    this.sdk.handleCallStart({
+      type: callType,
+      sipConfigs: this.webRTCConfig
+    });
+    if (callType === 'video') {
+      this.isVideoCallActive = true;
+    } else {
+      this.isAudioCallActive = true;
+    }
   }
 
   startCountdown(): void {
@@ -1330,9 +1374,91 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     clearInterval(this.counterVar);
   }
 
+  handleDialogStates(data: any): void {
+    console.log('[handleDialogStates] received dialog: ===> ', data);
+
+    if (data.event === 'agentInfo') {
+      console.log('[handleDialogStates] Inside Agent Info Event: ===> ', data.response);
+      if (data.response.state === 'LOGIN') {
+        console.log('[handleDialogStates] SIP Connection Established with: ===> ', data.response.extension);
+      } else {
+        console.log('[handleDialogStates] SIP Connection Failed with: ===> ', data.response.extension);
+      }
+    }
+    if (data.event === 'outboundDialing') {
+      console.log('[handleDialogStates] Inside Outbound Dialing Event: ===> ', data.response);
+      if (data.response.dialog === null) {
+        this.maintainDialog = null;
+        this.dialogId = null;
+      } else {
+        switch (data.response.dialog.state) {
+          case 'INITIATING':
+            console.log('[outboundDialing] INITIATING CALL DIALOG Event: ===> ', data.response.dialog);
+            this.maintainDialog = data.response.dialog;
+            this.dialogId = data.response.dialog.id;
+            break;
+          case 'INITIATED':
+            console.log('[outboundDialing] INITIATED CALL DIALOG Event: ===> ', data.response.dialog);
+            this.maintainDialog = data.response.dialog;
+            this.dialogId = data.response.dialog.id;
+            break;
+        }
+      }
+    }
+    // outboundDialing
+    if (data.event === 'dialogState') {
+      if (data.response.dialog === null) {
+        this.maintainDialog = null;
+        this.dialogId = null;
+      } else {
+        switch (data.response.dialog.state) {
+          case 'INITIATING':
+            console.log('[dialogState] INITIATING CALL DIALOG: ===> ', data.response.dialog);
+            this.maintainDialog = data.response.dialog;
+            this.dialogId = data.response.dialog.id;
+            break;
+          case 'INITIATED':
+            console.log('[dialogState] INITIATED CALL DIALOG: ===> ', data.response.dialog);
+            this.maintainDialog = data.response.dialog;
+            this.dialogId = data.response.dialog.id;
+            break;
+          case 'ALERTING':
+            console.log('[dialogState] ALERTING CALL DIALOG: ===> ', data.response.dialog);
+            this.maintainDialog = data.response.dialog;
+            this.dialogId = data.response.dialog.id;
+            break;
+          case 'ACTIVE':
+            console.log('[dialogState] ACTIVE CALL DIALOG: ===> ', data.response.dialog);
+            this.maintainDialog = data.response.dialog;
+            this.dialogId = data.response.dialog.id;
+            this.changeView('video');
+            break;
+          case 'FAILED':
+            console.log('[dialogState] FAILED CALL DIALOG: ===> ', data.response.dialog);
+            break;
+          case 'DROPPED':
+            console.log('[dialogState] DROPPED CALL DIALOG: ===> ', data.response.dialog);
+            this.isAudioCallActive = false;
+            this.isVideoCallActive = false;
+            this.endCountdown();
+            this.changeView('chat');
+            break;
+        }
+      }
+    }
+
+    if (data.event === 'Error') {
+      switch (data.response.type) {
+        case 'generalError':
+          console.log('[Error] Call terminated by customer: ===>', `Error Type: ${data.response.type} with description: ${data.response.description}`)
+          break;
+      }
+    }
+  }
+
   processCallResponses(data: any): void {
-    console.log('sip.js events => ', JSON.stringify(data.event));
-    switch (data.event) {
+    console.log('sip.js events ==> ', JSON.stringify(data.data.event));
+    switch (data.data.event) {
       case 'registered':
         console.log('customer_data', this.customerData);
         let userData = {
@@ -1341,7 +1467,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           email: this.customerData.formData.attributes.email,
           // 'message': 'hello world'
         };
-        this.sdk.sendCallRequest('audio', 'remoteAudio', '', userData);
+        if (data.callType === 'video') {
+          console.log('going with video ==>');
+          this.sdk.sendCallRequest('video', 'remoteVideo', 'myVideoLocal', userData);
+          // this.isVideoCallActive = true;
+        } else {
+          console.log('going with audio ==>');
+          this.sdk.sendCallRequest('audio', 'remoteAudio', '', userData);
+          // this.isAudioCallActive = true;
+        }
         break;
       case 'unregistered':
         console.log('unregistered');
@@ -1357,31 +1491,37 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         break;
       case 'session-accepted':
         console.log('session-accepted');
-        this.changeView('audio');
+        if (data.callType === 'video') {
+          this.changeView('video');
+        } else {
+          this.changeView('audio');
+        }
         break;
       case 'session-progress':
-        console.log('session-progress ->' + data.response);
+        console.log('session-progress ->' + data.data.response);
         break;
       case 'session-rejected':
         console.log(
-          'session-rejected->' + data.response + '------' + data.cause,
+          'session-rejected->' + data.data.response + '------' + data.data.cause,
         );
         break;
       case 'session-failed':
         console.log('session-failed ->');
         break;
       case 'session-terminated':
-        console.log('testing->' + data.response + '------' + data.cause);
-        this.isCallActive = false;
+        console.log('testing->' + data.data.response + '------' + data.data.cause);
+        this.isAudioCallActive = false;
+        this.isVideoCallActive = false;
         this.endCountdown();
         this.changeView('chat');
         break;
       case 'session-bye':
-        console.log('testing->' + data.response);
+        console.log('testing->' + data.data.response);
         break;
       case 'session-session_ended':
         console.log('session-session_ended ->');
-        this.isCallActive = false;
+        this.isAudioCallActive = false;
+        this.isVideoCallActive = false;
         this.endCountdown();
         this.changeView('chat');
         break;
@@ -1396,7 +1536,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   callEnd() {
     this.endCountdown();
-    this.sdk.handleCallEnd();
+    this.sdk.handleCallEnd(this.dialogId);
   }
 
   changeFont() {
@@ -1422,7 +1562,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   clearSession() {
     this.preChatFormLoader = false;
-    if (this.isCallActive) {
+    if (this.isAudioCallActive || this.isVideoCallActive) {
       this.callEnd();
     }
     this.cimMessage = [];
