@@ -1,10 +1,10 @@
 <div class="top-wrapper" [ngClass]="{'right-direction': selectedLanguage == 'ar', 'mobile-view': isMobile}">
   <mat-spinner [diameter]="50" color="primary" *ngIf="preChatFormLoader"></mat-spinner>
+
   <!--------------------------->
   <!-- /Addition Panel HTML/ -->
   <!--------------------------->
-
-  <ng-container *ngIf="additionalPanel">
+  <ng-container *ngIf="additionalPanel && !standaloneWebRtc">
     <div class="widget-wrapper">
       <div class="widget-wrapper-header widget-color">
         <button class="close-widget-wrapper" (click)="closeWrapper()">
@@ -23,10 +23,151 @@
     </div>
   </ng-container>
 
+  <!---------------------------------------->
+  <!-- /WebRtc Standalone Video Call HTML /->
+  <! --------------------------------------->
+  <ng-container *ngIf="webRtcVideoCallScreen">
+    <div class="widget-form-area">
+      <div class="widget-form">
+        <!-- Widget Chat Header -->
+        <div class="widget-chat-header widget-color">
+          <h5 id="title">{{title}}</h5>
+          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')" *ngIf="!isWebRtcVideoCallActive">
+            <span class="material-symbols-outlined minimize" matTooltip="Minimize"
+              [matTooltipPosition]="matToolTipPosition!">
+              minimize
+            </span>
+          </div>
+        </div>
+        <!-- Widget Chat Control Toolbar -->
+        <div class="widget-chat-navbar">
+          <span class="material-symbols-outlined widget-navbar-icon btnOne" *ngIf="enableWebRtc" [ngClass]="{
+              'focus-icon' : (isWebRtcVideoCallActive === true) ,
+              'away-call-icon' : (isWebRtcVideoCallActive === true)}" matTooltip="Video Call"
+            [matTooltipPosition]="matToolTipPosition!">
+            videocam
+          </span>
+        </div>
+        <ng-container *ngIf="!isWebRtcVideoCallActive">
+          <!-- Authentication Screen -->
+          <div class="widget-authentication-content">
+            <div class="widget-authentication-header">
+              <span class="material-symbols-outlined header-emoji"
+                [ngClass]="{'error-text' : showInvalidCodeError === true}"
+                innerHTML="{{showInvalidCodeError ? 'videocam' : 'videocam'}}">
+              </span>
+              <span
+                innerHTML="{{showInvalidCodeError ? (showAuthenticationResponseMessage !== '' ? showAuthenticationResponseMessage : 'Invalid Session Code!') : 'Video Request Initiated!'}}"
+                [ngClass]="{'error-text' : showInvalidCodeError === true}"></span>
+            </div>
+            <div class="widget-authentication-body">
+              <div class="widget-auth-text">
+                <p
+                  innerHTML="{{showInvalidCodeError ? 'You Entered an Invalid session code.' : 'Video request initiated by Adam Reeds.'}}">
+                </p>
+                <p
+                  innerHTML="{{showInvalidCodeError ? 'Please enter code again.' : 'To join video call, please enter session code below.'}}">
+                </p>
+              </div>
+              <div class="widget-auth-button">
+                <p>Session Code</p>
+                <input id="auth-token" type="text" [ngClass]="{'error-field' : showInvalidCodeError === true}"
+                  class="widget-auth-input call-btn" placeholder="Enter Code Here ..." [(ngModel)]="sessionCode">
+                <input id="auth-btn" type="submit" class="widget-auth-trigger call-btn" value="Join"
+                  (click)="authenticateToken()">
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <!-- Video Call Screen -->
+        <ng-container *ngIf="isWebRtcVideoCallActive">
+          <div class="widget-video-section">
+            <video autoplay="autoplay" class="remoteVideo" id="remoteVideo">
+              Your browser does not support HTML5 video.
+            </video>
+            <div class="localVideoView">
+              <span class="material-symbols-outlined localVideoIcon" [ngClass]="{'iconHide' : isVideoHide === true}"
+                innerHTML="{{isVideoHide ? 'videocam_off' : 'videocam'}}" (click)="toggleCallVideo()">
+              </span>
+            </div>
+            <video autoplay="autoplay" class="localVideo" id="localVideo"
+              innerHTML="{{isVideoHide ? 'videocam_off' : 'videocam'}}">
+              Your browser does not support HTML5 video.
+            </video>
+
+            <div class=" agent-detail">
+              <p class="name">{{agentName}}</p>
+              <p class="timer">{{callTime}}</p>
+            </div>
+            <div class="widget-composer">
+              <div class="widget-call-controls">
+                <div class="control-btn disable-icon-callControl">
+                  <span class="material-symbols-outlined">
+                    present_to_all
+                  </span>
+                </div>
+                <div class="control-btn" [ngClass]="{'end-call' : isVideoHide === true}">
+                  <span class="material-symbols-outlined" innerHTML="{{isVideoHide ? 'videocam_off' : 'videocam'}}"
+                    (click)="toggleCallVideo()">
+                  </span>
+                </div>
+                <div class="control-btn" [ngClass]="{'end-call' : isCallMute === true}">
+                  <span class="material-symbols-outlined" innerHTML="{{isCallMute ? 'mic_off' : 'mic'}}"
+                    (click)="toggleCallMic()">
+                  </span>
+                </div>
+                <div class="control-btn" [ngClass]="{'end-call' : isCallOnHold === true}">
+                  <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'resume' : 'pause'}}"
+                    (click)="toggleCallHold()">
+                  </span>
+                </div>
+                <div class="control-btn">
+                  <span class="material-symbols-outlined disable-icon-callControl">
+                    more_horiz
+                  </span>
+                </div>
+                <div class="control-btn end-call" (click)="callEnd()">
+                  <span class="material-symbols-outlined">
+                    call_end
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </ng-container>
+
+  <!--------------------------------------------->
+  <!------ /Call Popup for Audio/Video Call ----->
+  <!--------------------------------------------->
+  <ng-container *ngIf="callPopUpView">
+    <div class="widget-call-area">
+      <div class="call-popup">
+        <p><span innerHTML="Initiating {{callText}} call"></span></p>
+        <div class="audio-agent">
+          <div class="loader"></div>
+          <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon">
+          <!-- <span class="material-symbols-outlined">videocam</span> -->
+        </div>
+        <div class="agent-detail">
+          <p class="name">{{agentName}}</p>
+        </div>
+        <div class="end-call-btn" (click)="callEnd()">
+          <div class="end-call-btn-sm">
+            <span class="material-symbols-outlined">
+              call_end
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
   <!------------------------>
   <!-- /Callback Form HTML /->
   <!- ------------------- -->
-
   <ng-container *ngIf="callbackFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
@@ -84,7 +225,6 @@
   <!------------------------>
   <!-- /PreChat Form HTML /->
   <!- ------------------- -->
-
   <ng-container *ngIf="preChatFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
@@ -150,7 +290,6 @@
   <!------------------------>
   <!-- /Active Chat HTML/ -->
   <!------------------------>
-
   <ng-container *ngIf="widgetChatScreen">
     <!-- Active chat screen -->
     <div class="widget-form-area">
@@ -591,7 +730,7 @@
                   </span>
                 </div>
                 <div class="control-btn disable-icon-callControl">
-                  <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'play_arrow' : 'pause'}}">
+                  <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'resume' : 'pause'}}">
                   </span>
                 </div>
                 <div class="control-btn">
@@ -647,7 +786,7 @@
                   </span>
                 </div>
                 <div class="control-btn" [ngClass]="{'end-call' : isCallOnHold === true}">
-                  <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'play_arrow' : 'pause'}}"
+                  <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'resume' : 'pause'}}"
                     (click)="toggleCallHold()">
                   </span>
                 </div>
@@ -741,47 +880,14 @@
   </ng-container>
 
   <!------------------------>
-  <!------ /Call Popup ----->
-  <!------------------------>
-
-  <ng-container *ngIf="callPopUpView">
-    <div class="widget-call-area">
-      <div class="call-popup">
-        <p><span innerHTML="Initiating {{callText}} Call"></span></p>
-        <div class="audio-agent">
-          <div class="loader"></div>
-          <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon">
-          <!-- <span class="material-symbols-outlined">videocam</span> -->
-        </div>
-        <div class="agent-detail">
-          <p class="name">Expertflow Agent</p>
-        </div>
-        <div class="end-call-btn" (click)="callEnd()">
-          <div class="end-call-btn-sm">
-            <span class="material-symbols-outlined">
-              call_end
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </ng-container>
-
-  <!------------------------>
   <!---- /Chat End HTML ---->
   <!------------------------>
-
   <ng-container *ngIf="chatEndScreen">
     <!-- Error screen -->
     <div class="widget-form-area">
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{title}}</h5>
-          <!-- <div class="widget-header-icon iconTwo">
-            <span class="material-symbols-outlined">
-              pan_zoom
-            </span>
-          </div> -->
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize" matTooltip="Minimize"
               [matTooltipPosition]="matToolTipPosition!">
@@ -794,21 +900,16 @@
             <span class="material-symbols-outlined error-emoji">
               sentiment_satisfied
             </span>
-            <span>Thank You!</span>
+            <span innerHTML="{{standaloneWebRtc === true ? 'Thanks for calling us!' : 'Thank you!'}}"></span>
           </div>
           <div class="error-message">
-            <p>It was our pleasure assisting you with your query.
-            </p>
-            <!-- <p><b>However, you can view your chat session.</b></p>
-            <p>We will get back to you as soon as issue is resolved.</p> -->
+            <p>It was our pleasure assisting you with your query.</p>
           </div>
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <!-- <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number"
-              *ngIf="enableWebRtc"> -->
             <input id="formTrigger" type="submit" class="widget-error-trigger" value="Download Transcript"
-              *ngIf="enableDownloadTranscript" (click)="chatTranscript()">
+              *ngIf="enableDownloadTranscript && !standaloneWebRtc" (click)="chatTranscript()">
           </div>
         </div>
       </div>
@@ -818,7 +919,6 @@
   <!---------------------------------------->
   <!---- /Callback Response Screen HTML ---->
   <!---------------------------------------->
-
   <ng-container *ngIf="callbackResponseScreen">
     <!-- Error screen -->
     <div class="widget-form-area">
@@ -866,7 +966,6 @@
   <!------------------------>
   <!-- /Chat Error HTML ---->
   <!------------------------>
-
   <ng-container *ngIf="chatError">
     <!-- Error screen -->
     <div class="widget-form-area">
@@ -918,7 +1017,7 @@
 
   <ng-container *ngIf="isIconWidget">
     <!-- Callback Icon -->
-    <div class="widget-icon widget-icon-callback" *ngIf="standaloneCallback && enabledCallback">
+    <div class="widget-icon widget-icon-callback" *ngIf="standaloneCallback && enabledCallback && !standaloneWebRtc">
 
       <div class="widget-icon-content" *ngIf="isCallbackMax">
         <button id="chatIconBtn" title="Callback Widget" class="widget-bar-trigger widget-chat-trigger widget-color"
@@ -939,8 +1038,31 @@
       </div>
 
     </div>
+
+    <div class="widget-icon widget-icon-chat" *ngIf="standaloneWebRtc">
+
+      <div class="widget-icon-content" *ngIf="isWebRtcMax && !isWebRtcVideoCallActive">
+        <button id="chatIconBtn" title="Callback Widget" class="widget-bar-trigger widget-chat-trigger widget-color"
+          (click)="changeScreen('widget')">
+          <span class="chat-icon material-symbols-outlined">
+            close
+          </span>
+        </button>
+      </div>
+
+      <div class="widget-icon-content" *ngIf="!isWebRtcMax || isWebRtcVideoCallActive">
+        <button id="chatIconBtn" title="Video Call" class="widget-bar-trigger widget-chat-trigger widget-color"
+          (click)="changeScreen((chatEndScreen == true) ? 'widget' : 'webRtcScreen')">
+          <span class="chat-icon material-symbols-outlined">
+            video_call
+          </span>
+        </button>
+      </div>
+
+    </div>
+
     <!-- Chat Widget Icon -->
-    <div class="widget-icon widget-icon-chat">
+    <div class="widget-icon widget-icon-chat" *ngIf="!standaloneWebRtc">
 
       <div class="widget-icon-content" *ngIf="isChatMax">
         <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"

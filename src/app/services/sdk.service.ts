@@ -12,13 +12,11 @@ declare var widgetConfigs: any,
   chatEnd: any,
   resumeChat: any,
   webhookNotifications: any,
-  dialCall: any,
   sendInvite: any,
-  closeSession: any,
-  audioControl: any,
   videoControl: any,
   postMessages: any,
   callbackRequest: any,
+  authenticateRequest: any,
   getBrowserInfo: any;
 
 type formAttributeMappings = {
@@ -230,9 +228,26 @@ export class SdkService implements OnInit {
     );
   }
 
+  authenticateRoomId(authPayload: { roomId: string | null, secureToken: string | null }, callback: any) {
+    authenticateRequest(
+      this.ConfigData.AUTHENTICATOR_URL,
+      authPayload,
+      (res: any) => {
+        callback(res);
+      },
+    );
+  }
+
   handleChatEnd(customerPayload: any) {
     chatEnd(customerPayload);
   }
+
+  /* ---------------- */
+  /**
+   *  WEB RTC CALL FUNCTIONS
+   * @param webRtc
+   */
+  /* ---------------- */
 
   loginSipWebRtc(webRtc: any) {
 
@@ -242,51 +257,29 @@ export class SdkService implements OnInit {
         loginId: webRtc.sipExtension,
         password: webRtc.extensionPassword,
         extension: webRtc.sipExtension,
+        sipConfig: webRtc,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
         }
       }
     }
-    // console.log('Login Payload: ===>', login);
     postMessages(login);
   }
 
   handleCallStart(callPayload: any) {
-
     const dialCall = {
       action: 'makeCall',
       parameter: {
         callType: callPayload.type,
-        Destination_Number: callPayload.sipConfigs.diallingUri,
-        calledNumber: callPayload.sipConfigs.diallingUri,
+        Destination_Number: callPayload.authConfigs.agentExtension,
+        calledNumber: callPayload.authConfigs.agentExtension,
+        authData: callPayload.authConfigs,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
         }
       }
     }
     postMessages(dialCall);
-  }
-
-  sendCallRequest(
-    type: string,
-    remoteElementId: string,
-    localElementId: string,
-    customerData: any,
-  ) {
-    sendInvite(
-      type,
-      remoteElementId,
-      localElementId,
-      customerData,
-      (res: any) => {
-        let dialPayload = {
-          callType: type,
-          data: res
-        };
-        console.log('Call Invite Response ==>', dialPayload);
-        this.onWebRtcCallSubject.next(dialPayload);
-      },
-    );
   }
 
   handleCallEnd(sessionDialogId: any) {
@@ -330,28 +323,6 @@ export class SdkService implements OnInit {
       }
     }
     postMessages(callStatePayload);
-  }
-
-
-  holdcall() {
-    postMessages({
-      "action": "holdCall",
-      "parameter":
-      {
-        "dialogId": 'dialogid1',
-        "clientCallbackFunction": 'eventCallback'
-      }
-    });
-  }
-  unholdcall() {
-    postMessages({
-      "action": "retrieveCall",
-      "parameter":
-      {
-        "dialogId": 'dialogid1',
-        "clientCallbackFunction": 'eventCallback'
-      }
-    });
   }
 
   handleCallVideo() {

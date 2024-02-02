@@ -52,31 +52,47 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   scrollTop = 0;
   fontSize = new FormControl("12");
   public scrollCon: any;
-  customerIdentifier: any;
-
-  widgetIdentifier: any;
-  serviceIdentifier: any;
+  webRtcSecureLink: string | null = null; // variable to store secure link got from URL params
+  customerIdentifier: any; // variable to store customer channel identifier got from URL params
+  widgetIdentifier: string | null = null;;  // variable to store widget identifier got from URL params
+  serviceIdentifier: any; // variable to store service identifier got from URL params
 
   sendTypingStartedEventTimer: any = null;
-  additionalPanel = false;
-  isIconWidget = true;
-  preChatFormScreen = false;
-  widgetChatScreen = false;
-  chatError = false;
-  chatEndScreen = false;
+  eventTriggerType = '';
 
-  callbackFormScreen = false;
-  callbackResponseScreen = false;
+  additionalPanel = false; // If true will show Popup Panel on top of widget icon
+  isIconWidget = true;   // If true will show widget icon
+  preChatFormScreen = false; // If true will show pre chat form screen
+  widgetChatScreen = false;  // If true will show widget Chat screen
+  chatError = false; // If true will show error in case of chat failure.
+  chatEndScreen = false; //If true will show chat End Screen at the end of Chat
+
+  callbackFormScreen = false; // If true will show callback form screen to schedule callback
+  callbackResponseScreen = false;  // If true will show Callback Response screen after receiving response from server
+
+  // if true will enable standalone webRTC video call feature
+  webRtcVideoCallScreen: boolean = false;
+  // Authentication Token to be used for authenticating the user in case of secure token based webRTC calls.
+  sessionCode: string = '';
+  // If this flag is set as 'true', then it means that our Session code is invalid
+  showInvalidCodeError: boolean = false;
+  showAuthenticationResponseMessage: string = '';
+  setAuthorizedResponse: any;
+  // If this flag is set as 'true' then it means that our Standalone WebRTC Video Call is Active
+  // we need not to display anything else apart from the Video Streams
+  isWebRtcVideoCallActive: boolean = false;
+
+  // This Popup Screen will only be visible when every any webRTC Call is initiated and call is not connected end-to-end
+  callPopUpView = false;
 
   // Main Screen Views
+  // function changeView()
+  // (this variables will help us to navigate between views while having active chat session)
   activeChatView = false;
   activeAudioView = false;
   activeVideoView = false;
-
-  callPopUpView = false;
   activeCallbackView = false;
   activeCallbackResponseView = false;
-  callbackResponseStatus = '';
 
   customerData: any;
   preChatFormData: any;
@@ -85,20 +101,44 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   typingIndicatorTimer: any = null;
   lastSeenMessageId: any = null;
   conversationId = '';
+
+  // If this flag is 'true' than that's mean Chat is Active
   isChatActive = false;
+  // If this flag is 'true' than that's mean Audio Call is Active (In Side Chat Screen)
   isAudioCallActive = false;
+  // If this flag is 'true' than that's mean Video Call is Active (In Side Chat Screen)
   isVideoCallActive = false;
-  eventTriggerType = '';
+
+  // Variables for Call Controls
   isCallMute = false;
   isVideoHide = false;
   isCallOnHold = false;
 
+  // Audio Screen Variables
+  counterVar: any; // will be used in count down timer
+  agentName: string = 'Expertflow Agent'; // Agent Name during Active call will be pushed in this variable to show on the screen
+  callTime: string = '00:00'; //Default value on the timer is set and updated will be added in it
+  callText: string = ''; // this variable will contains the value of which type call is initiated ('audio' / 'video')
+  maintainDialog: any; // this variable will maintain the dialog payload during video / audio calls.
+  dialogId: any; // this variable will maintain the active call dialog ID
+
+  // Variables to check which widget is maximized , so that appropriate icon can be shown
   isChatMax = false;
   isCallbackMax = false;
+  isWebRtcMax = false;
+
+  enabledCallback: boolean = false; // If true than show callback button in toolbar
+  callbackResponseStatus = ''; // Callback Response Status Text to show on the Callback response Screen
+  enabledWebhook: boolean = false; //If true than show webhook is enabled in the widget and will push notification to defined webhook
+
+  standaloneCallback: boolean = false;  //If true than it will enable standalone callback
+  standaloneWebRtc: boolean = false;  //If true than it will enable standalone webRtc Video Call and hide Chat Features
 
   fontDropDown = false;
   positionOptions: TooltipPosition[] = ['after', 'before', 'above', 'below', 'left', 'right'];
   matToolTipPosition = this.positionOptions[4];
+  isMobile = false;
+
   // Widget Configuration
   title = '';
   subtitle = '';
@@ -109,7 +149,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   enableEmoji = false;
   enableFontResize = false;
   preChatFormId = '';
-  enableWebRtc: Boolean = false;
+  enableWebRtc: boolean = false;
   webRTCConfig: any;
   messageLimit: number = 300; // Set the desired maximum length
   text: string = '';
@@ -123,34 +163,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   preChatFormLoader = false;
   callbackLoader = false;
   callbackConfig: any;
-  enabledCallback: Boolean = false;
-  standaloneCallback: Boolean = false;
 
-  enabledWebhook: Boolean = false;
   webhookUrl: any;
 
-  isMobile = false;
-
+  // Upload File Variables
   imageUrls: {
     filesPath: SafeUrl;
     fileType: string;
     fileExt: string;
     fileName: string;
   }[] = [];
+
   fileLoading = false;
   selectedFile!: File;
 
+  // Variables for handling chat messages language and text directions
   selectedLanguage: any;
   browserLang: any;
-
   textDirection = '';
-
-  // Audio Screen Variables
-  counterVar: any;
-  callTime: string = '00:00';
-  callText: string = '';
-  maintainDialog: any;
-  dialogId: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -167,7 +197,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngAfterViewInit(): void {
-    this.customerChatResumed();
+
+    // Load the standalone webRtc Authentication screen or the active chat screen depending on whether the user is coming from secure link or not.
+    if (this.standaloneWebRtc) {
+      this.changeScreen('webRtcScreen');
+      console.log('Secure Link webRtc View');
+    } else {
+      this.customerChatResumed();
+      console.log('Not Secure Chat View');
+    }
+    // Set the Customer widget Theme Color based on Configurations coming from unified admin's web widget settings
     setTimeout(() => {
       (this.el.nativeElement as HTMLElement).style.setProperty(
         '--main-color',
@@ -182,15 +221,34 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
       this.widgetIdentifier = params['widgetIdentifier'];
-      if (this.serviceIdentifier == undefined || this.serviceIdentifier == '') {
-        alert("Error: Please check with Administrator. Service identifier is missing!!!");
+
+      // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
+      const rawEncryptedKey = params['encryptedKey'] ? params['encryptedKey'] : null;
+      if (rawEncryptedKey !== null) {
+        // Directly replace spaces with '+' if you're sure there should be no spaces
+        this.webRtcSecureLink = rawEncryptedKey.replace(/ /g, '+');
+      } else {
+        this.webRtcSecureLink = null;
       }
-      if (this.widgetIdentifier == undefined || this.widgetIdentifier == '') {
-        alert("Error: Please check with Administrator. Widget identifier is missing!!!");
-      }
-      if (this.__appConfig.appConfig.CHANNEL_IDENTIFIER === 'channel_customer_identifier') {
-        if (this.customerIdentifier == undefined || this.customerIdentifier == '' || this.customerIdentifier == null) {
-          alert("Warning: 'channelCustomerIdentifier' parameter is missing in the url, Required for Customer Identification!!!");
+
+      if (this.webRtcSecureLink != undefined && this.webRtcSecureLink != '') {
+        this.standaloneWebRtc = true;
+        if (this.widgetIdentifier == undefined || this.widgetIdentifier == '') {
+          alert("Error: Please check with Administrator. Widget identifier is missing!!!");
+        }
+        console.log('Secure Link:', this.webRtcSecureLink, this.widgetIdentifier);
+      } else {
+        this.standaloneWebRtc = false;
+        if (this.serviceIdentifier == undefined || this.serviceIdentifier == '') {
+          alert("Error: Please check with Administrator. Service identifier is missing!!!");
+        }
+        if (this.widgetIdentifier == undefined || this.widgetIdentifier == '') {
+          alert("Error: Please check with Administrator. Widget identifier is missing!!!");
+        }
+        if (this.__appConfig.appConfig.CHANNEL_IDENTIFIER === 'channel_customer_identifier') {
+          if (this.customerIdentifier == undefined || this.customerIdentifier == '' || this.customerIdentifier == null) {
+            alert("Warning: 'channelCustomerIdentifier' parameter is missing in the url, Required for Customer Identification!!!");
+          }
         }
       }
       // Pass parameters to service after you have received them.
@@ -269,14 +327,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       },
     );
 
-    // Load the pre-chat form or the active chat screen depending on whether the user is already authenticated or not.
-    const userAuthenticated = false; // Replace with your own authentication logic
-    if (userAuthenticated) {
-      this.changeScreen('chat');
-    } else {
-      this.changeScreen('widget');
-    }
-
     this.loadBrowserLanguage();
     this.setFontFromLocalStorage();
   }
@@ -352,9 +402,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.preChatFormData = this.preChatFormGroup.value;
         if (this.serviceIdentifier !== '' && this.serviceIdentifier !== null && this.serviceIdentifier !== undefined) {
           let eventPayload = this.getEventPayload(this.preChatFormData);
-          // this.sdk.fetchBrowserData('5c8c5a26decc9b30da07abf360b73256faa5b00c59b32689c9860a84', (res: any) => {
-          //   console.log(res, 'Browser Information is:');
-          // });
           console.log('Event Payload: ==>', eventPayload);
           // If Error is false than proceed with the start Chat and user data setting
           if (!eventPayload.error) { this.setUserData(eventPayload.data, 'startChat'); }
@@ -492,6 +539,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         this.preChatFormScreen = false;
         this.callbackFormScreen = false;
+        this.webRtcVideoCallScreen = false;
         this.callbackResponseScreen = false;
         this.widgetChatScreen = false;
         this.isIconWidget = true;
@@ -499,11 +547,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatEndScreen = false;
         this.isChatMax = false;
         this.isCallbackMax = false;
+        this.isWebRtcMax = false;
         break;
       case 'chat':
         this.additionalPanel = false;
         this.preChatFormScreen = false;
         this.callbackFormScreen = false;
+        this.webRtcVideoCallScreen = false;
         this.callbackResponseScreen = false;
         this.widgetChatScreen = true;
         this.isIconWidget = true;
@@ -511,11 +561,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatEndScreen = false;
         this.isChatMax = true;
         this.isCallbackMax = false;
+        this.isWebRtcMax = false;
         this.changeView('chat');
         break;
       case 'chatForm':
         this.preChatFormScreen = true;
         this.callbackFormScreen = false;
+        this.webRtcVideoCallScreen = false;
         this.callbackResponseScreen = false;
         this.additionalPanel = false;
         this.isIconWidget = true;
@@ -524,10 +576,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatEndScreen = false;
         this.isChatMax = true;
         this.isCallbackMax = false;
+        this.isWebRtcMax = false;
+        break;
+      case 'webRtcScreen':
+        this.webRtcVideoCallScreen = true;
+        this.isWebRtcMax = true;
+        this.preChatFormScreen = false;
+        this.callbackFormScreen = false;
+        this.callbackResponseScreen = false;
+        this.additionalPanel = false;
+        this.isIconWidget = true;
+        this.widgetChatScreen = false;
+        this.chatError = false;
+        this.chatEndScreen = false;
+        this.isChatMax = false;
+        this.isCallbackMax = false;
         break;
       case 'callbackForm':
         this.preChatFormScreen = false;
         this.callbackFormScreen = true;
+        this.webRtcVideoCallScreen = false;
         this.callbackResponseScreen = false;
         this.additionalPanel = false;
         this.isIconWidget = true;
@@ -536,6 +604,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatEndScreen = false;
         this.isChatMax = false;
         this.isCallbackMax = true;
+        this.isWebRtcMax = false;
         break;
       case 'callbackResponse':
         this.additionalPanel = false;
@@ -547,10 +616,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatEndScreen = false;
         this.isChatMax = false;
         this.isCallbackMax = true;
+        this.isWebRtcMax = false;
         break;
       case 'end':
         this.preChatFormScreen = false;
         this.callbackFormScreen = false;
+        this.webRtcVideoCallScreen = false;
         this.callbackResponseScreen = false;
         this.widgetChatScreen = false;
         this.chatEndScreen = true;
@@ -558,10 +629,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isIconWidget = true;
         this.isChatMax = true;
         this.isCallbackMax = false;
+        this.isWebRtcMax = false;
         break;
       case 'error':
         this.preChatFormScreen = false;
         this.callbackFormScreen = false;
+        this.webRtcVideoCallScreen = false;
         this.callbackResponseScreen = false;
         this.widgetChatScreen = false;
         this.chatEndScreen = false;
@@ -569,6 +642,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isIconWidget = true;
         this.isChatMax = true;
         this.isCallbackMax = false;
+        this.isWebRtcMax = false;
         break;
     }
   }
@@ -635,11 +709,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeCallbackResponseView = false;
           this.initiateWebRtcCall(view);
         }
-        // this.activeChatView = false;
-        // this.activeAudioView = false;
-        // this.activeVideoView = true;
-        // this.activeCallbackView = false;
-        // this.activeCallbackResponseView = false;
+        break;
+      case 'standaloneVideo':
+        if (this.isWebRtcVideoCallActive) {
+          this.isWebRtcVideoCallActive = true;
+          this.callPopUpView = false;
+        } else {
+          this.callPopUpView = true;
+          this.isWebRtcVideoCallActive = false;
+          this.initiateWebRtcCall('video');
+        }
         break;
     }
   }
@@ -1345,12 +1424,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.sdk.handleCallStart({
       type: callType,
-      sipConfigs: this.webRTCConfig
+      authConfigs: this.setAuthorizedResponse
     });
-    if (callType === 'video') {
-      this.isVideoCallActive = true;
+    if (this.standaloneWebRtc) {
+      this.isWebRtcVideoCallActive = true;
     } else {
-      this.isAudioCallActive = true;
+      if (callType === 'video') {
+        this.isVideoCallActive = true;
+      } else {
+        this.isAudioCallActive = true;
+      }
     }
   }
 
@@ -1431,17 +1514,37 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             console.log('[dialogState] ACTIVE CALL DIALOG: ===> ', data.response.dialog);
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
-            this.changeView('video');
+            if (this.standaloneWebRtc) {
+              this.changeView('standaloneVideo');
+            } else {
+              this.changeView('video');
+            }
             break;
           case 'FAILED':
             console.log('[dialogState] FAILED CALL DIALOG: ===> ', data.response.dialog);
+            if (this.standaloneWebRtc) {
+              this.endCountdown();
+              this.changeScreen('error');
+            } else {
+              this.isAudioCallActive = false;
+              this.isVideoCallActive = false;
+              this.endCountdown();
+              this.changeView('chat');
+            }
             break;
           case 'DROPPED':
             console.log('[dialogState] DROPPED CALL DIALOG: ===> ', data.response.dialog);
-            this.isAudioCallActive = false;
-            this.isVideoCallActive = false;
-            this.endCountdown();
-            this.changeView('chat');
+            if (this.standaloneWebRtc) {
+              this.callPopUpView = false;
+              this.isWebRtcVideoCallActive = false;
+              this.endCountdown();
+              this.changeScreen('end');
+            } else {
+              this.isAudioCallActive = false;
+              this.isVideoCallActive = false;
+              this.endCountdown();
+              this.changeView('chat');
+            }
             break;
         }
       }
@@ -1453,84 +1556,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log('[Error] Call terminated by customer: ===>', `Error Type: ${data.response.type} with description: ${data.response.description}`)
           break;
       }
-    }
-  }
-
-  processCallResponses(data: any): void {
-    console.log('sip.js events ==> ', JSON.stringify(data.data.event));
-    switch (data.data.event) {
-      case 'registered':
-        console.log('customer_data', this.customerData);
-        let userData = {
-          phone: this.customerData.formData.attributes.phone,
-          name: this.customerData.formData.attributes.name,
-          email: this.customerData.formData.attributes.email,
-          // 'message': 'hello world'
-        };
-        if (data.callType === 'video') {
-          console.log('going with video ==>');
-          this.sdk.sendCallRequest('video', 'remoteVideo', 'myVideoLocal', userData);
-          // this.isVideoCallActive = true;
-        } else {
-          console.log('going with audio ==>');
-          this.sdk.sendCallRequest('audio', 'remoteAudio', '', userData);
-          // this.isAudioCallActive = true;
-        }
-        break;
-      case 'unregistered':
-        console.log('unregistered');
-        break;
-      case 'registrationFailed':
-        console.log('registrationFailed');
-        break;
-      case 'get_dynamic_ext':
-        console.log('get dynamic ext');
-        break;
-      case 'Channel Creating':
-        console.log('Channel Creating');
-        break;
-      case 'session-accepted':
-        console.log('session-accepted');
-        if (data.callType === 'video') {
-          this.changeView('video');
-        } else {
-          this.changeView('audio');
-        }
-        break;
-      case 'session-progress':
-        console.log('session-progress ->' + data.data.response);
-        break;
-      case 'session-rejected':
-        console.log(
-          'session-rejected->' + data.data.response + '------' + data.data.cause,
-        );
-        break;
-      case 'session-failed':
-        console.log('session-failed ->');
-        break;
-      case 'session-terminated':
-        console.log('testing->' + data.data.response + '------' + data.data.cause);
-        this.isAudioCallActive = false;
-        this.isVideoCallActive = false;
-        this.endCountdown();
-        this.changeView('chat');
-        break;
-      case 'session-bye':
-        console.log('testing->' + data.data.response);
-        break;
-      case 'session-session_ended':
-        console.log('session-session_ended ->');
-        this.isAudioCallActive = false;
-        this.isVideoCallActive = false;
-        this.endCountdown();
-        this.changeView('chat');
-        break;
-      case 'session-SessionDescriptionHandler-Media acquire start':
-        console.log('session-SessionDescriptionHandler-Media acquire start ->');
-        break;
-      case 'session-SessionDescriptionHandler-Media acquire end':
-        console.log('session-SessionDescriptionHandler-Media acquire end ->');
-        break;
     }
   }
 
@@ -1587,5 +1612,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       return { intent, entities };
     }
     return { intent: null, entities: null }
+  }
+
+  authenticateToken(): void {
+    const roomId = this.webRtcSecureLink;
+    const secureToken = this.sessionCode;
+    this.sdk.authenticateRoomId({ roomId, secureToken }, (res: any) => {
+      if (res.error) {
+        console.log('Authentication Response not okay: ', res);
+        this.showAuthenticationResponseMessage = res.data.message ? res.data.message : res.message;
+        this.showInvalidCodeError = true;
+      } else {
+        console.log('Authentication response success:', res);
+        this.agentName = res.data.agentName;
+        this.showAuthenticationResponseMessage = res.message;
+        this.showInvalidCodeError = false;
+        this.setAuthorizedResponse = res.data;
+        setTimeout(() => { this.changeView('standaloneVideo'); }, 1000);
+      }
+    })
   }
 }
