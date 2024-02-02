@@ -116,13 +116,18 @@
                     (click)="toggleCallMic()">
                   </span>
                 </div>
-                <div class="control-btn" [ngClass]="{'end-call' : isCallOnHold === true}">
+                <div class="control-btn disable-icon-callControl">
+                  <span class="material-symbols-outlined">
+                    pause
+                  </span>
+                </div>
+                <!-- <div class="control-btn disable-icon-callControl" [ngClass]="{'end-call' : isCallOnHold === true}">
                   <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'resume' : 'pause'}}"
                     (click)="toggleCallHold()">
                   </span>
-                </div>
-                <div class="control-btn">
-                  <span class="material-symbols-outlined disable-icon-callControl">
+                </div> -->
+                <div class="control-btn disable-icon-callControl">
+                  <span class="material-symbols-outlined">
                     more_horiz
                   </span>
                 </div>
