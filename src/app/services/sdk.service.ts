@@ -271,8 +271,8 @@ export class SdkService implements OnInit {
       action: 'makeCall',
       parameter: {
         callType: callPayload.type,
-        Destination_Number: callPayload.authConfigs.agentExtension,
-        calledNumber: callPayload.authConfigs.agentExtension,
+        Destination_Number: callPayload.authConfigs.diallingUri,
+        calledNumber: callPayload.authConfigs.diallingUri,
         authData: callPayload.authConfigs,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);

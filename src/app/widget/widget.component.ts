@@ -1625,11 +1625,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       } else {
         console.log('Authentication response success:', res);
         this.agentName = res.data.agentName;
+
+        // Append diallingUri key to res.data object
+        res.data.diallingUri = this.webRTCConfig.diallingUri;
+
         this.showAuthenticationResponseMessage = res.message;
         this.showInvalidCodeError = false;
-        this.setAuthorizedResponse = res.data;
+        this.setAuthorizedResponse = res.data; // Now includes diallingUri
+        console.log('<===>Auth Data:', this.setAuthorizedResponse);
         setTimeout(() => { this.changeView('standaloneVideo'); }, 1000);
       }
-    })
+    });
   }
+
 }
