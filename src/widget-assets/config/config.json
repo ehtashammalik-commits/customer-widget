@@ -6,5 +6,7 @@
   "CONVERSATIONAL_URL": "https://cim.expertflow.com/conversation-manager/customer-topics",
   "FORM_URL": "https://cim.expertflow.com/unified-admin",
   "AUTHENTICATOR_URL": "https://fnbdemo.expertflow.com/secure-link",
-  "CHANNEL_IDENTIFIER": "phone"
+  "CHANNEL_IDENTIFIER": "phone",
+  "ENABLE_LOGO": false,
+  "ADDITIONAL_PANEL": true
 }

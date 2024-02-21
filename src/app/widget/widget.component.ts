@@ -181,6 +181,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   selectedLanguage: any;
   browserLang: any;
   textDirection = '';
+  logoEnabled: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -194,7 +195,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     public dialog: MatDialog,
     private browserNotificationService: BrowserNotificationService,
     private deliveryNotificationService: DeliveryNotificationService,
-  ) { }
+  ) {
+    this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
+    this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
+  }
 
   ngAfterViewInit(): void {
 
@@ -474,6 +478,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       return { error: true, data: err }
     }
   }
+
   getEventPayload(preChatFormData: any) {
     const channelIdentifierData = this.checkFieldValue(preChatFormData, this.__appConfig.appConfig.CHANNEL_IDENTIFIER);
     if (channelIdentifierData.error) {
@@ -532,7 +537,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('Change Screen:', screen);
     switch (screen) {
       case 'widget':
-        if (sessionStorage.getItem('wrapper-hide') === 'true') {
+        if (sessionStorage.getItem('wrapper-hide') === 'true' || this.__appConfig.appConfig.ADDITIONAL_PANEL  !== true) {
           this.additionalPanel = false;
         } else {
           this.additionalPanel = true;
@@ -722,6 +727,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         break;
     }
   }
+
   eventListener(event: any) {
     try {
       if (event.id !== undefined || event.id !== '' || event.id !== null) {
@@ -1311,9 +1317,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.changeScreen('widget');
     }
   }
+
   onTyping() {
     this.isTyping = this.text.trim().length > 0;
   }
+
   //on every key press
   onKeyPress(event: { key: string }) {
     //not to sent typing started event on enter key

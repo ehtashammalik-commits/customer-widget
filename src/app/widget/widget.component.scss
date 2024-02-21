@@ -223,18 +223,23 @@ button.close-widget-wrapper {
   display: block;
 }
 
-// .widget-icon-content {
-// display: block;
-// height: 70px;
-// top: -35px;
-// overflow: hidden;
-// }
+.custom-logo {
+  position: inherit;
+  top: -10px;
+  right: 10px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
 
-// .widget-icon-content.widget-show {
-//   display: block !important;
-//   height: 120px;
-//   top: -112px;
-// }
+.custom-form-logo {
+  position: relative;
+  top: -5px;
+  left: 5px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
 
 .widget-bar-trigger {
   width: 100%;
@@ -455,7 +460,6 @@ button.close-widget-wrapper {
   line-height: 34px;
   border: 0;
   border-radius: 7px;
-  // box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
   display: block;
   margin: 0 auto;
   cursor: pointer;
@@ -604,7 +608,6 @@ button.close-widget-wrapper {
     font-size: 14px;
     font-weight: 600;
     position: inherit;
-    // color: var(--main-color);
     color: $dark-color;
     top: 10%;
 
@@ -968,7 +971,6 @@ button.close-widget-wrapper {
     border-color: #F2F2F2;
     background: #F2F2F2;
     border-radius: 0px 3px 3px 10px;
-    // padding: 5px 5px 5px 10px;
     padding: 0px 10px;
     word-break: break-word;
 
@@ -1035,6 +1037,10 @@ button.close-widget-wrapper {
     left: 5px;
     width: 35px;
 
+    .custom-img {
+      border-radius: 50%;
+    }
+
     img {
       margin-left: 0px;
       margin-top: 0px;
@@ -1060,15 +1066,10 @@ button.close-widget-wrapper {
   }
 }
 
-/*/
-        --------------------
-        /*/
-/*/
-        Style for chat area
-        /*/
-/*/
-        ------------------
-        /*/
+/*/--------------------/*/
+/*/Style for chat area/*/
+/*/------------------/*/
+
 .widget-composer {
   display: flex;
   position: absolute;
@@ -1091,9 +1092,6 @@ button.close-widget-wrapper {
     border-radius: 10px;
     border: none;
     height: 40px;
-    // min-height: 40px;
-    // max-height: 160px;
-    // height: 120px;
     padding: 10px 30px 10px 30px;
     outline: none;
     width: 95%;
@@ -1125,7 +1123,6 @@ button.close-widget-wrapper {
   opacity: 0.75;
   color: var(--main-color);
   top: 20%;
-  // text-align: center;
 
   .error-emoji {
     font-size: 100px;
@@ -1345,9 +1342,7 @@ mat-spinner {
 
 // Button Messages
 .structured-message-area.custom-theme mat-chip.mat-chip {
-  // color: var(--main-color);
   color: #000000;
-  // background: transparent;
   background: #bfcadb;
   border: 1px solid #bfcadb;
   border-radius: 3px;
@@ -1369,7 +1364,6 @@ mat-spinner {
 
   mat-chip {
     background: transparent;
-    // background: #bfcadb !important;
     font-size: 12px;
     font-weight: normal;
     cursor: pointer;
@@ -1706,7 +1700,6 @@ mat-spinner {
   height: 85.5%;
   border-radius: 10px;
   background: #4e4e4e;
-  // opacity: 0.8;
 
   .remoteVideo {
     position: inherit;
@@ -1727,10 +1720,6 @@ mat-spinner {
       position: inherit;
       top: 22px;
       right: 10px;
-      // border: 1px solid #4e4e4e;
-      // border-radius: 25px;
-      // background: #4e4e4e;
-      // color: black;
       font-size: 25px;
       padding: 8px;
     }
@@ -1762,7 +1751,6 @@ mat-spinner {
     color: #ffffff;
 
     .name {
-      // text-align: center;
       font-family: "Roboto";
       font-size: 14px;
       font-weight: 500;
@@ -1772,7 +1760,6 @@ mat-spinner {
       font-family: "Roboto";
       font-size: 12px;
       font-weight: normal;
-      // text-align: center;
     }
 
     .timer {
@@ -1780,7 +1767,6 @@ mat-spinner {
       font-size: 12px;
       font-weight: 500;
       font-style: normal;
-      // text-align: center;
     }
   }
 }
@@ -1813,7 +1799,6 @@ mat-spinner {
       top: 5px;
       left: 5px;
     }
-
   }
 
   .end-call {
@@ -1868,7 +1853,6 @@ mat-spinner {
     border: 1px solid #EFF2F7;
     color: var(--main-color);
     background: rgb(255, 255, 255);
-    // font-size: 15px;
     text-align: center;
     padding: 4px 0px;
     margin: 0px 5px 0px 5px;
@@ -1902,8 +1886,6 @@ mat-spinner {
 ::ng-deep .mat-tooltip {
   font-size: 10px !important;
   padding: 2px !important;
-  // position: relative;
-  // right: 20px !important;
 }
 
 /* Safari */
@@ -2026,37 +2008,3 @@ mat-spinner {
     }
   }
 }
-
-
-
-// Video COntrols
-
-// #videoTags {
-//   position: absolute;
-//   top: 38%;
-//   right: 1.4%;
-//   display: none;
-// }
-
-// .remoteVideo {
-//   position: inherit;
-//   width: 318px;
-//   height: 480px;
-//   /* top: 38%; */
-//   right: 0%;
-//   border: 1px solid;
-//   background: black;
-//   border-radius: 8px;
-//   opacity: 0.8;
-// }
-
-// .localVideo {
-//   position: inherit;
-//   width: 125px;
-//   height: 75px;
-//   top: 10px;
-//   right: 10px;
-//   background: black;
-//   border-radius: 8px;
-//   opacity: 0.8;
-// }

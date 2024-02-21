@@ -121,11 +121,6 @@
                     pause
                   </span>
                 </div>
-                <!-- <div class="control-btn disable-icon-callControl" [ngClass]="{'end-call' : isCallOnHold === true}">
-                  <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'resume' : 'pause'}}"
-                    (click)="toggleCallHold()">
-                  </span>
-                </div> -->
                 <div class="control-btn disable-icon-callControl">
                   <span class="material-symbols-outlined">
                     more_horiz
@@ -154,7 +149,6 @@
         <div class="audio-agent">
           <div class="loader"></div>
           <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon">
-          <!-- <span class="material-symbols-outlined">videocam</span> -->
         </div>
         <div class="agent-detail">
           <p class="name">{{agentName}}</p>
@@ -170,9 +164,9 @@
     </div>
   </ng-container>
 
-  <!------------------------>
+  <!------------------------->
   <!-- /Callback Form HTML /->
-  <!- ------------------- -->
+  <!- ----------------------->
   <ng-container *ngIf="callbackFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
@@ -188,6 +182,9 @@
           <p>Please fill out the form below to setup a callback request.</p>
           <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
             <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
+            <!-- Custom Widget logo -->
+            <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg" alt="Live Chat"
+              *ngIf="logoEnabled">
             <div class="widget-form-group" *ngFor="let attribute of callbackFormData">
               <div [ngSwitch]="attribute.attributeType"
                 [style.display]="attribute.key === 'channel_customer_identifier' ? 'none' : 'block'">
@@ -209,7 +206,6 @@
                   </div>
                 </ng-container>
                 <div class="clearfix"></div>
-
               </div>
               <!-- Display validation error if there is one -->
               <div
@@ -241,9 +237,11 @@
           </span>
         </div>
         <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
-          <!-- <mat-spinner [diameter]="50" color="primary" *ngIf="preChatFormLoader"></mat-spinner> -->
           <div class="widget-form-content">
             <p>Please fill out the form below to start chatting with an agent now!</p>
+            <!-- Custom Widget logo -->
+            <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg" alt="Live Chat"
+              *ngIf="logoEnabled">
             <div class="widget-form-group" *ngFor="let attribute of formData">
               <div [ngSwitch]="attribute.attributeType"
                 [style.display]="attribute.key === 'channel_customer_identifier' ? 'none' : 'block'">
@@ -268,11 +266,6 @@
                     <label [for]="option">{{ option }}</label>
                   </div>
                 </ng-container>
-                <!-- <div class="transcript-checkbox" *ngIf="enableDownloadTranscript">
-                  <input class="check-box widget-form-control" type="checkbox" id="enabled_transcript"
-                    formControlName="enabled_transcript">
-                  <label><span id="enabled_transcript"> I would like to receive future promotions, offers, and communication.</span></label>
-                </div> -->
                 <div class="clearfix"></div>
               </div>
               <!-- Display validation error if there is one -->
@@ -302,11 +295,6 @@
         <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{title}}</h5>
-          <!-- <div class="widget-header-icon iconThree">
-            <span class="material-symbols-outlined">
-              pan_zoom
-            </span>
-          </div> -->
           <div class="widget-header-icon iconTwo" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize" matTooltip="Minimize"
               [matTooltipPosition]="matToolTipPosition!">
@@ -322,10 +310,6 @@
         </div>
         <!-- Widget Chat Control Toolbar -->
         <div class="widget-chat-navbar">
-          <!-- <span class="widget-navbar-icon btnOne material-symbols-outlined" matTooltip="More Options"
-            [matTooltipPosition]="matToolTipPosition!">
-            more_vert
-          </span> -->
           <span class="material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
             [ngClass]="{'btnOne' :enableFontResize === true}" matTooltip="Change Font Size"
             [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
@@ -391,13 +375,9 @@
           </span>
         </div>
         <ng-container *ngIf="activeChatView">
-          <!-- <mat-spinner [diameter]="50" color="primary" *ngIf="preChatFormLoader"></mat-spinner> -->
           <!-- Widget Chat Content -->
           <div class="widget-chat-content" #scrollMe>
             <div *ngFor="let message of cimMessage">
-              <!-- <div class="widget-chat-alert">
-                <span>Please wait we are finding an agent for you</span>
-              </div> -->
               <div class="widget-chat-notification-area" *ngIf="message.body.type == 'NOTIFICATION' && (message.body.notificationType == 'TASK_STATE_CHANGE' || message.body.notificationType == 'NO_AGENT_AVAILABLE' ||
                   (message.body.notificationType == 'TASK_ENQUEUED' && ((message.body.notificationData.data.task | getMediaFromTask:'direction') == 'DIRECT_TRANSFER'))  ||
                   message.body.notificationType == 'AGENT_SUBSCRIBED' ||
@@ -449,10 +429,6 @@
                     <div class="header">
                       <span class="name"
                         [ngStyle]="{'font-size':fontSize.value == '14' ? '11px' : fontSize.value == '16' ? '13px': '9px'}">YOU</span>
-                      <!-- <span class="material-symbols-outlined message-option" matTooltip="Reply"
-                        [matTooltipPosition]="matToolTipPosition!">
-                        more_vert
-                      </span> -->
                     </div>
 
                     <span class="message msg-1" *ngIf="message.body.type=='PLAIN'"
@@ -535,21 +511,16 @@
                 <div class="widget-chat-message-agent"
                   *ngIf="message.header.sender.type == 'AGENT' || message.header.sender.type == 'BOT'">
                   <div [ngClass]="(message.header.sender.type == 'AGENT') ? 'agent-img' : 'bot-img'">
-                    <img
-                      src="../../widget-assets/images/{{(message.header.sender.type == 'AGENT') ? 'user.png' : 'robot-dark.svg'}}"
+                    <img [ngClass]="(logoEnabled === true) ? 'custom-img' : ''"
+                      src="../../widget-assets/images/{{(message.header.sender.type == 'AGENT') ? 'user.png' : (logoEnabled === true) ? 'custom-logo.svg':'robot-dark.svg'}}"
                       alt="avatar">
                   </div>
                   <div class="agent-message">
                     <div class="header">
                       <span class="name" *ngIf="message.header.sender.type == 'AGENT'"
                         [ngStyle]="{'font-size':fontSize.value == '14' ? '11px' : fontSize.value == '16' ? '13px': '9px'}">{{message.header.sender.senderName.toUpperCase()}}</span>
-                      <!-- <span class="material-symbols-outlined message-option" matTooltip="Reply"
-                        [matTooltipPosition]="matToolTipPosition!" *ngIf="message.header.sender.type == 'AGENT'">
-                        more_vert
-                      </span> -->
                     </div>
 
-                    <!-- <span class="message">Hello! I need general info regarding your upcoming products line.</span> -->
                     <span class="message" *ngIf="message.body.type=='PLAIN'"
                       innerHTML="{{enableDynamicLink ? (message.body.markdownText | linkify | tagFormat) : (message.body.markdownText | tagFormat)}}"
                       [ngStyle]="{'font-size':fontSize.value+'px', 'line-height':fontSize.value == '14' ? '20px' : fontSize.value == '16' ? '24px': '18px'}">
@@ -977,11 +948,6 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{title}}</h5>
-          <!-- <div class="widget-header-icon iconTwo">
-            <span class="material-symbols-outlined">
-              pan_zoom
-            </span>
-          </div> -->
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize" matTooltip="Minimize"
               [matTooltipPosition]="matToolTipPosition!">
@@ -1019,7 +985,6 @@
   <!---------------------->
   <!-- /Chat Icon HTML/ -->
   <!---------------------->
-
   <ng-container *ngIf="isIconWidget">
     <!-- Callback Icon -->
     <div class="widget-icon widget-icon-callback" *ngIf="standaloneCallback && enabledCallback && !standaloneWebRtc">
@@ -1049,18 +1014,22 @@
       <div class="widget-icon-content" *ngIf="isWebRtcMax && !isWebRtcVideoCallActive">
         <button id="chatIconBtn" title="Callback Widget" class="widget-bar-trigger widget-chat-trigger widget-color"
           (click)="changeScreen('widget')">
-          <span class="chat-icon material-symbols-outlined">
+          <span class="chat-icon material-symbols-outlined" *ngIf="!logoEnabled">
             close
           </span>
+          <!-- Custom Widget logo -->
+          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="Live Chat" *ngIf="logoEnabled">
         </button>
       </div>
 
       <div class="widget-icon-content" *ngIf="!isWebRtcMax || isWebRtcVideoCallActive">
         <button id="chatIconBtn" title="Video Call" class="widget-bar-trigger widget-chat-trigger widget-color"
           (click)="changeScreen((chatEndScreen == true) ? 'widget' : 'webRtcScreen')">
-          <span class="chat-icon material-symbols-outlined">
+          <span class="chat-icon material-symbols-outlined" *ngIf="!logoEnabled">
             video_call
           </span>
+          <!-- Custom Widget logo -->
+          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="Live Chat" *ngIf="logoEnabled">
         </button>
       </div>
 
@@ -1081,9 +1050,11 @@
       <div class="widget-icon-content" *ngIf="!isChatMax">
         <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
           (click)="changeScreen((isChatActive == true) ? 'chat' : 'chatForm')">
-          <span class="chat-icon material-symbols-outlined">
+          <span class="chat-icon material-symbols-outlined" *ngIf="!logoEnabled">
             sms
           </span>
+          <!-- Custom Widget logo -->
+          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="Live Chat" *ngIf="logoEnabled">
         </button>
       </div>
 

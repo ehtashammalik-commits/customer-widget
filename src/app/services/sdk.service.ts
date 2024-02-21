@@ -12,7 +12,6 @@ declare var widgetConfigs: any,
   chatEnd: any,
   resumeChat: any,
   webhookNotifications: any,
-  sendInvite: any,
   videoControl: any,
   postMessages: any,
   callbackRequest: any,
@@ -29,6 +28,7 @@ type formAttributeMappings = {
 @Injectable({
   providedIn: 'root',
 })
+
 export class SdkService implements OnInit {
   private sdkLoaded: boolean = false;
   ConfigData: any;
@@ -65,6 +65,7 @@ export class SdkService implements OnInit {
     this.ConfigData = this._ConfigService.appConfig;
     this.loadSdk();
   }
+
   ngOnInit(): void { }
 
   receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
@@ -242,12 +243,10 @@ export class SdkService implements OnInit {
     chatEnd(customerPayload);
   }
 
-  /* ---------------- */
-  /**
+  /**************************
    *  WEB RTC CALL FUNCTIONS
    * @param webRtc
-   */
-  /* ---------------- */
+   *************************/
 
   loginSipWebRtc(webRtc: any) {
 
@@ -309,7 +308,6 @@ export class SdkService implements OnInit {
     }
     postMessages(micPayload);
   }
-
 
   handleCallHoldState(action: any, sessionDialogId: any) {
     console.log('handle mic mute/unmute in sdk service', action, sessionDialogId);
