@@ -382,7 +382,9 @@ button.close-widget-wrapper {
 
 .widget-form-area form {
   margin: 0;
-  height: auto;
+  // height: auto;
+  height: 100%;
+  overflow-y: scroll;
 }
 
 .widget-form-content {
@@ -494,10 +496,14 @@ button.close-widget-wrapper {
 }
 
 .widget-form-button {
-  position: absolute;
-  bottom: 20px;
-  width: 100%;
-  left: 0px;
+  // position: absolute;
+  // bottom: 20px;
+  // width: 100%;
+  // left: 0px;
+    button {
+    width: 100% !important;
+  }
+
 }
 
 .transcript-checkbox {
