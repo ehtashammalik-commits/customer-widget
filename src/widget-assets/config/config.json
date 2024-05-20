@@ -6,7 +6,7 @@
   "CONVERSATIONAL_URL": "https://cx-frontend.expertflow.com/conversation-manager/customer-topics",
   "FORM_URL": "https://cx-frontend.expertflow.com/unified-admin",
   "AUTHENTICATOR_URL": "https://cx-frontend.expertflow.com/secure-link",
-  "CHANNEL_IDENTIFIER": "phone_no",
+  "CHANNEL_IDENTIFIER": "phone",
   "ENABLE_LOGO": false,
   "ADDITIONAL_PANEL": true
 }

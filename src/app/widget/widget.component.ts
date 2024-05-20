@@ -231,7 +231,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
+    this.route.queryParams.subscribe((params: { [x: string]: any; }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
       this.widgetIdentifier = params['widgetIdentifier'];
@@ -297,7 +297,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.callbackFormGroup = this.fb.group({});
 
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe(
-      (configs) => {
+      (configs: { form: string; }) => {
         this.setWidgetConfigs(configs);
         this.loadBrowserLanguage();
         console.log('Widget configurations:', configs);
@@ -316,221 +316,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // );
 
     this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
-      (formData) => {
-        // debugger;
-        // const data = [
-        //   {
-        //     attributeWeightage: 0,
-        //     _id: '662753573d8e490032dd17fb',
-        //     attributeType: 'OPTIONS',
-        //     helpText: '',
-        //     isRequired: true,
-        //     key: 'select_one_',
-        //     label: 'select one ',
-        //     valueType: 'dropdown',
-        //     attributeAttachment: '',
-        //     attributeOptions: {
-        //       enableCategory: false,
-        //       enableEmoji: false,
-        //       reverseOrder: false,
-        //       isMultipleChoice: false,
-        //       attributeData: [
-        //         {
-        //           label: '',
-        //           values: [
-        //             {
-        //               label: '1',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //             {
-        //               label: '2',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //             {
-        //               label: '3',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //             {
-        //               label: '4',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //           ],
-        //         },
-        //       ],
-        //     },
-        //   },
-        //   {
-        //     attributeWeightage: 0,
-        //     _id: '662753573d8e490032dd17fc',
-        //     attributeType: 'OPTIONS',
-        //     helpText: '',
-        //     isRequired: true,
-        //     key: 'select_one_mcq_',
-        //     label: 'select one mcq ',
-        //     valueType: 'mcq',
-        //     attributeAttachment: '',
-        //     attributeOptions: {
-        //       enableCategory: true,
-        //       enableEmoji: false,
-        //       reverseOrder: false,
-        //       isMultipleChoice: false,
-        //       attributeData: [
-        //         {
-        //           label: 'mcq',
-        //           values: [
-        //             {
-        //               label: 'one',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //             {
-        //               label: 'two',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //             {
-        //               label: 'three',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //             {
-        //               label: 'four ',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //           ],
-        //         },
-        //       ],
-        //     },
-        //   },
-        //   {
-        //     attributeWeightage: 0,
-        //     _id: '662753573d8e490032dd17fd',
-        //     attributeType: 'OPTIONS',
-        //     helpText: '',
-        //     isRequired: true,
-        //     key: 'gender',
-        //     label: 'gender',
-        //     valueType: 'checkbox',
-        //     attributeAttachment: '',
-        //     attributeOptions: {
-        //       enableCategory: true,
-        //       enableEmoji: false,
-        //       reverseOrder: false,
-        //       isMultipleChoice: true,
-        //       attributeData: [
-        //         {
-        //           label: 'checkbox',
-        //           values: [
-        //             {
-        //               label: 'male',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //             {
-        //               label: 'female',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //           ],
-        //         },
-        //         {
-        //           label: 'behaviour',
-        //           values: [
-        //             {
-        //               label: 'good',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //             {
-        //               label: 'bad',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //           ],
-        //         },
-        //         {
-        //           label: 'character',
-        //           values: [
-        //             {
-        //               label: 'average',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //             {
-        //               label: 'worst',
-        //               value: null,
-        //               emoji: null,
-        //               optionWeightage: null,
-        //             },
-        //           ],
-        //         },
-        //       ],
-        //     },
-        //   },
-        //   {
-        //     attributeWeightage: 0,
-        //     _id: '662753573d8e490032dd17fe',
-        //     attributeType: 'INPUT',
-        //     helpText: '',
-        //     isRequired: true,
-        //     key: 'enter_your_email',
-        //     label: 'enter your email',
-        //     valueType: 'email',
-        //     attributeAttachment: '',
-        //   },
-        //   {
-        //     attributeWeightage: 0,
-        //     _id: '662753573d8e490032dd17ff',
-        //     attributeType: 'INPUT',
-        //     helpText: '',
-        //     isRequired: true,
-        //     key: 'enter_your_phone_no_',
-        //     label: 'enter your phone no ',
-        //     valueType: 'phoneNumber',
-        //     attributeAttachment: '',
-        //   },
-        //   {
-        //     attributeWeightage: 0,
-        //     _id: '662753573d8e490032dd1800',
-        //     attributeType: 'INPUT',
-        //     helpText: '',
-        //     isRequired: true,
-        //     key: 'how_is_our_agent',
-        //     label: 'how is our agent',
-        //     valueType: 'shortAnswer',
-        //     attributeAttachment: '',
-        //   },
-        // ];
-
+      (formData: { sections: { attributes: any[]; }[]; }) => {
         this.formData = formData.sections[0].attributes.filter((item: any) => {
        return   item.valueType != 'checkbox';
         });
-        debugger;
-
         console.log('Widget configurations:', formData.sections);
         this.createFormControls();
       },
     );
     this.callbackFormSubscription = this.sdk.renderCallbackForm$.subscribe(
-      (formData) => {
+      (formData: { attributes: any[]; }) => {
         this.callbackFormData = formData.attributes;
         this.createCallbackFormControls();
         console.log('Widget configurations:', formData.attributes);
@@ -538,7 +333,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
 
     this.onChatResumedSubject = this.sdk.onChatResumedResponse$.subscribe(
-      (data) => {
+      (data: { isChatAvailable: boolean; data: any[]; }) => {
         if (data.isChatAvailable == true) {
           this.changeScreen('chat');
           console.log('on Chat Resumed Response:', data);
@@ -554,13 +349,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
 
     this.onWebRtcCallSubject = this.sdk.onWebRtcCallResponse$.subscribe(
-      (data) => {
+      (data: any) => {
         this.handleDialogStates(data);
       },
     );
 
     this.onCallbackRequestSubject =
-      this.sdk.onCallbackRequestResponse$.subscribe((data) => {
+      this.sdk.onCallbackRequestResponse$.subscribe((data: { status: { name: string; }; }) => {
         console.log('callback request response events => ', data);
 
         if (data && data.status && data.status.name) {
@@ -576,7 +371,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       });
 
     this.establishConnectionSubject = this.sdk.connectionResponse$.subscribe(
-      (response) => {
+      (response: any) => {
         console.log('Connection Response:', response);
         if (response) {
           this.eventListener(response);
@@ -1595,7 +1390,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   endChat(): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent);
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
         this.clearSession();
       }

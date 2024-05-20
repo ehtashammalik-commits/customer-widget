@@ -388,14 +388,14 @@ button.close-widget-wrapper {
 }
 
 .widget-form-content {
-  padding: 10px;
   background-color: $white-color;
   border-radius: 10px;
   position: absolute;
   top: 34px;
   overflow-y: scroll;
-  max-height: 520px;
   height: 100%;
+  padding: 10px 5px 5px 10px;
+  max-height: 450px;
 }
 
 .widget-form-content p {
@@ -496,14 +496,13 @@ button.close-widget-wrapper {
 }
 
 .widget-form-button {
-  // position: absolute;
-  // bottom: 20px;
-  // width: 100%;
-  // left: 0px;
-    button {
-    width: 100% !important;
-  }
-
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  left: 0px;
+  //   button {
+  //   width: 100% !important;
+  // }
 }
 
 .transcript-checkbox {
@@ -1338,11 +1337,11 @@ mat-spinner {
   outline: none;
 }
 
-#file-btn > label {
+#file-btn>label {
   margin-bottom: 0 !important;
 }
 
-#file-btn > input {
+#file-btn>input {
   display: none;
 }
 
@@ -1447,6 +1446,7 @@ mat-spinner {
 
 // Language Direction Right
 .right-direction {
+
   input,
   textarea,
   a,
@@ -1927,6 +1927,7 @@ mat-spinner {
   background-color: rgb(255, 255, 255);
   border-radius: 10px;
   margin-top: 20px;
+
   // position: relative;
   // top: 20px;
   p {
