@@ -3,6 +3,7 @@ import {
   Component,
   OnInit,
   ElementRef,
+  Renderer2,
   ViewChild,
   Input,
   ChangeDetectorRef,
@@ -51,8 +52,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private scrollContainer!: ElementRef;
   @Input() conversation: any;
 
-  @ViewChild('remoteVideo') remoteVideo!: ElementRef;
-  @ViewChild('localVideo') myVideoLocal!: ElementRef;
+  @ViewChild('remoteVideo', { static: false }) remoteVideo!: ElementRef;
+  @ViewChild('localVideo', { static: false }) localVideo!: ElementRef;
 
   scrollTop = 0;
   fontSize = new FormControl('12');
@@ -96,6 +97,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   activeChatView = false;
   activeAudioView = false;
   activeVideoView = false;
+  activeScreenShareView = false;
   activeCallbackView = false;
   activeCallbackResponseView = false;
 
@@ -113,6 +115,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isAudioCallActive = false;
   // If this flag is 'true' than that's mean Video Call is Active (In Side Chat Screen)
   isVideoCallActive = false;
+  // If this flag is 'true' than that's mean ScreenShare Call is Active (In Side Chat Screen)
+  isScreenShareActive = false;
 
   // Variables for Call Controls
   isCallMute = false;
@@ -201,6 +205,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     public sdk: SdkService,
     public __appConfig: ConfigService,
     private el: ElementRef,
+    private renderer: Renderer2,
     private cdRef: ChangeDetectorRef,
     private sanitizer: DomSanitizer,
     private snackBar: MatSnackBar,
@@ -318,7 +323,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
       (formData: { sections: { attributes: any[]; }[]; }) => {
         this.formData = formData.sections[0].attributes.filter((item: any) => {
-       return   item.valueType != 'checkbox';
+          return item.valueType != 'checkbox';
         });
         console.log('Widget configurations:', formData.sections);
         this.createFormControls();
@@ -438,7 +443,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.webRTCConfig = configs.webRtc;
     if (this.webRTCConfig !== null) {
       this.enableWebRtc = configs.webRtc.enableWebRtc;
-      console.log('webRTC Configs: ', this.webRTCConfig.diallingUri);
+      console.log('List of webRTC Configs: ', this.webRTCConfig);
       if (this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
     }
     this.callbackConfig = configs.callback;
@@ -455,7 +460,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private markFormGroupTouched(formGroup: FormGroup) {
     Object.values(formGroup.controls).forEach((control) => {
       control.markAsTouched();
-
       if (control instanceof FormGroup) {
         this.markFormGroupTouched(control);
       }
@@ -741,6 +745,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.activeChatView = true;
         this.activeAudioView = false;
         this.activeVideoView = false;
+        this.activeScreenShareView = false;
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
@@ -749,6 +754,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.activeChatView = false;
         this.activeAudioView = false;
         this.activeVideoView = false;
+        this.activeScreenShareView = false;
         this.callPopUpView = false;
         this.activeCallbackView = true;
         this.activeCallbackResponseView = false;
@@ -757,6 +763,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.activeChatView = false;
         this.activeAudioView = false;
         this.activeVideoView = false;
+        this.activeScreenShareView = false;
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = true;
@@ -766,6 +773,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeChatView = false;
           this.activeAudioView = true;
           this.activeVideoView = false;
+          this.activeScreenShareView = false;
           this.callPopUpView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
@@ -774,6 +782,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeChatView = true;
           this.activeAudioView = false;
           this.activeVideoView = false;
+          this.activeScreenShareView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
           this.initiateWebRtcCall(view);
@@ -784,14 +793,36 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeChatView = false;
           this.activeAudioView = false;
           this.activeVideoView = true;
+          this.activeScreenShareView = false;
           this.callPopUpView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
         } else {
+          this.callPopUpView = true;
           this.activeVideoView = true;
+          this.activeChatView = false;
+          this.activeAudioView = false;
+          this.activeScreenShareView = false;
+          this.activeCallbackView = false;
+          this.activeCallbackResponseView = false;
+          this.initiateWebRtcCall(view);
+        }
+        break;
+      case 'screenshare':
+        if (this.isScreenShareActive) {
+          this.activeChatView = false;
+          this.activeAudioView = false;
+          this.activeVideoView = false;
+          this.activeScreenShareView = true;
+          this.callPopUpView = false;
+          this.activeCallbackView = false;
+          this.activeCallbackResponseView = false;
+        } else {
           this.callPopUpView = true;
           this.activeChatView = false;
           this.activeAudioView = false;
+          this.activeVideoView = false;
+          this.activeScreenShareView = true;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
           this.initiateWebRtcCall(view);
@@ -1144,7 +1175,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       try {
         this.scrollContainer.nativeElement.scrollTop =
           this.scrollContainer.nativeElement.scrollHeight;
-      } catch (err) {}
+      } catch (err) { }
     }, 350);
   }
 
@@ -1484,10 +1515,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   chatTranscript() {
     if (localStorage.getItem('conversationId') !== '') {
       window.open(
-        `widget-assets/chat-transcript/?ccmUrl=${
-          this.__appConfig.appConfig.CCM_URL
-        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${
-          this.serviceIdentifier
+        `widget-assets/chat-transcript/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
+        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier
         }&conversationId=${localStorage.getItem(
           'conversationId',
         )}&browserLang=${this.browserLang}`,
@@ -1532,18 +1561,25 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.callText = callType;
     this.startCountdown();
 
-    this.sdk.handleCallStart({
-      type: callType,
-      authConfigs: this.setAuthorizedResponse,
-    });
     if (this.standaloneWebRtc) {
+      console.log('standalone webrtc call <==');
+      this.sdk.handleCallStart({
+        type: callType,
+        authConfigs: this.setAuthorizedResponse,
+      });
       this.isWebRtcVideoCallActive = true;
     } else {
       if (callType === 'video') {
         this.isVideoCallActive = true;
+      } else if (callType === 'screenshare') {
+        this.isScreenShareActive = true;
       } else {
         this.isAudioCallActive = true;
       }
+      this.sdk.handleCallStart({
+        type: callType,
+        authConfigs: this.webRTCConfig,
+      });
     }
   }
 
@@ -1602,6 +1638,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               '[outboundDialing] INITIATING CALL DIALOG Event: ===> ',
               data.response.dialog,
             );
+            // this.callPopUpView = true;
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
@@ -1628,6 +1665,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               '[dialogState] INITIATING CALL DIALOG: ===> ',
               data.response.dialog,
             );
+            // this.callPopUpView = true;
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
@@ -1652,12 +1690,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               '[dialogState] ACTIVE CALL DIALOG: ===> ',
               data.response.dialog,
             );
+            // this.callPopUpView = false;
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             if (this.standaloneWebRtc) {
               this.changeView('standaloneVideo');
-            } else {
+            } else if (this.isAudioCallActive) {
+              this.changeView('audio');
+            } else if (this.isVideoCallActive) {
               this.changeView('video');
+            } else if (this.isScreenShareActive) {
+              this.changeView('screenshare');
             }
             break;
           case 'FAILED':
@@ -1671,6 +1714,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             } else {
               this.isAudioCallActive = false;
               this.isVideoCallActive = false;
+              this.isScreenShareActive = false;
               this.endCountdown();
               this.changeView('chat');
             }
@@ -1686,8 +1730,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               this.endCountdown();
               this.changeScreen('end');
             } else {
+              this.callPopUpView = false;
               this.isAudioCallActive = false;
               this.isVideoCallActive = false;
+              this.isScreenShareActive = false;
               this.endCountdown();
               this.changeView('chat');
             }
@@ -1717,13 +1763,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('font dropdown clicked');
     this.fontDropDown = !this.fontDropDown; // Toggle the fontDropDown variable
   }
+  
   setFontSize(e: any) {
     console.log('Set fontsize', e);
     try {
       localStorage.setItem('fontSize', e);
       this.changeFont();
       this.setFontFromLocalStorage();
-    } catch (error) {}
+    } catch (error) { }
   }
 
   private setFontFromLocalStorage() {
@@ -1731,12 +1778,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (localStorage.getItem('fontSize') !== null) {
         this.fontSize.setValue(localStorage.getItem('fontSize'));
       }
-    } catch (error) {}
+    } catch (error) { }
   }
 
   clearSession() {
     this.preChatFormLoader = false;
-    if (this.isAudioCallActive || this.isVideoCallActive) {
+    if (this.isAudioCallActive || this.isVideoCallActive || this.isScreenShareActive) {
       this.callEnd();
     }
     this.cimMessage = [];
