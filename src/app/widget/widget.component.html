@@ -142,7 +142,7 @@
   <!--------------------------------------------->
   <!------ /Call Popup for Audio/Video Call ----->
   <!--------------------------------------------->
-  <ng-container *ngIf="callPopUpView">
+  <!-- <ng-container *ngIf="callPopUpView">
     <div class="widget-call-area">
       <div class="call-popup">
         <p><span innerHTML="Initiating {{callText}} call"></span></p>
@@ -162,7 +162,7 @@
         </div>
       </div>
     </div>
-  </ng-container>
+  </ng-container> -->
 
   <!------------------------->
   <!-- /Callback Form HTML /->
@@ -343,8 +343,18 @@
             (click)="changeView('callback')" *ngIf="enabledCallback" [matTooltipPosition]="matToolTipPosition!">
             perm_phone_msg
           </span>
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('video')" *ngIf="enableWebRtc"
-            [ngClass]="{
+          <span class="widget-navbar-icon material-symbols-outlined btnFive"
+            (click)="(activeScreenShareView || activeAudioView || activeVideoView) ? convertCallView('screenshare') : changeView('screenshare')"
+            *ngIf="enableWebRtc" [ngClass]="{
+            'focus-icon':
+              isScreenShareActive === true && activeVideoView === true,
+            'away-call-icon':
+            isScreenShareActive === true && activeVideoView === false
+          }" matTooltip="Screen Share" [matTooltipPosition]="matToolTipPosition!">
+            present_to_all
+          </span>
+          <span class="widget-navbar-icon material-symbols-outlined"
+            (click)="(activeScreenShareView || activeAudioView || activeVideoView) ? convertCallView('video') : changeView('video')" *ngIf="enableWebRtc" [ngClass]="{
               'btnOne' :(enabledCallback === false && enableFontResize === false),
               'btnThree' :(enabledCallback === true && enableFontResize === true),
               'btnTwo' :(enabledCallback === false || enableFontResize === false),
@@ -353,7 +363,8 @@
             [matTooltipPosition]="matToolTipPosition!">
             videocam
           </span>
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('audio')" [ngClass]="{
+          <span class="widget-navbar-icon material-symbols-outlined"
+            (click)="(activeScreenShareView || activeAudioView || activeVideoView) ? convertCallView('audio') : changeView('audio')" [ngClass]="{
               'btnTwo' :(enabledCallback === false && enableFontResize === false),
               'btnFour' :(enabledCallback === true && enableFontResize === true),
               'btnThree' :(enabledCallback === false || enableFontResize === false),
@@ -374,11 +385,14 @@
             forum
           </span>
         </div>
+        
+        
         <ng-container *ngIf="activeChatView">
           <!-- Widget Chat Content -->
           <div class="widget-chat-content" #scrollMe>
             <div *ngFor="let message of cimMessage">
-              <div class="widget-chat-notification-area" *ngIf="message.body.type == 'NOTIFICATION' && (message.body.notificationType == 'TASK_STATE_CHANGE' || message.body.notificationType == 'NO_AGENT_AVAILABLE' ||
+              <div class="widget-chat-notification-area"
+                *ngIf="message.body.type == 'NOTIFICATION' && (message.body.notificationType == 'TASK_STATE_CHANGE' || message.body.notificationType == 'NO_AGENT_AVAILABLE' ||
                   (message.body.notificationType == 'TASK_ENQUEUED' && ((message.body.notificationData.data.task | getMediaFromTask:'direction') == 'DIRECT_TRANSFER'))  ||
                   (message.body.notificationType == 'AGENT_SUBSCRIBED' && message.body.notificationData.data.agentParticipant.role == 'PRIMARY') ||
                   (message.body.notificationType == 'AGENT_UNSUBSCRIBED' && message.body.notificationData.data.agentParticipant.role === 'PRIMARY') ||
@@ -677,109 +691,67 @@
           </div>
 
         </ng-container>
-        <!-- Call View Screen -->
-        <ng-container *ngIf="activeAudioView">
-          <div class="widget-audio-section">
-            <div class="audio-agent">
-              <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon">
+        
+        <ng-container *ngIf="activeAudioView || activeVideoView || activeScreenShareView">
+          <div class="widget-section"
+            [ngClass]="{'widget-audio-section': activeAudioView, 'widget-video-section': (activeVideoView || activeScreenShareView)}">
+            <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
+            <video #localVideo id="localVideo" autoplay playsinline muted class="localVideo"></video>
+
+            <div class="audio-agent" *ngIf="activeAudioView">
+              <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon" />
             </div>
+
+            <div class="localVideoView" *ngIf="activeVideoView">
+              <span class="material-symbols-outlined localVideoIcon" [ngClass]="{ iconHide: isVideoHide }"
+                [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="toggleCallVideo()">
+              </span>
+            </div>
+
             <div class="agent-detail">
               <p class="name">Expertflow Agent</p>
-              <p id='call_status' class="text">Call in Progress</p>
-              <p class="timer">{{callTime}}</p>
+              <p id="call_status" class="text">Call in Progress</p>
+              <p class="timer">{{ callTime }}</p>
             </div>
+
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div class="control-btn disable-icon-callControl">
+                <div class="control-btn">
                   <span class="material-symbols-outlined">
                     present_to_all
                   </span>
                 </div>
-                <div class="control-btn disable-icon-callControl">
+                <!-- <div class="control-btn">
                   <span class="material-symbols-outlined">
                     videocam
                   </span>
+                </div> -->
+                <div class="control-btn" [ngClass]="{ 'end-call': isVideoHide }">
+                  <span class="material-symbols-outlined" [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'"
+                    (click)="activeVideoView ? toggleCallVideo() : convertCallRequest('video')">
+                  </span>
                 </div>
-                <div class="control-btn" [ngClass]="{'end-call' : isCallMute === true}">
-                  <span class="material-symbols-outlined" innerHTML="{{isCallMute ? 'mic_off' : 'mic'}}"
+                <div class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
+                  <span class="material-symbols-outlined" [innerHTML]="isCallMute ? 'mic_off' : 'mic'"
                     (click)="toggleCallMic()">
                   </span>
                 </div>
-                <div class="control-btn disable-icon-callControl">
-                  <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'resume' : 'pause'}}">
-                  </span>
-                </div>
-                <div class="control-btn">
-                  <span class="material-symbols-outlined">
-                    more_horiz
-                  </span>
-                </div>
-                <div class="control-btn end-call" (click)="callEnd()">
-                  <span class="material-symbols-outlined">
-                    call_end
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </ng-container>
-        <!-- Call View Screen -->
-        <ng-container *ngIf="activeVideoView">
-          <div class="widget-video-section">
-            <video autoplay="autoplay" class="remoteVideo" id="remoteVideo">
-              Your browser does not support HTML5 video.
-            </video>
-            <div class="localVideoView">
-              <span class="material-symbols-outlined localVideoIcon" [ngClass]="{'iconHide' : isVideoHide === true}"
-                innerHTML="{{isVideoHide ? 'videocam_off' : 'videocam'}}" (click)="toggleCallVideo()">
-              </span>
-            </div>
-            <video autoplay="autoplay" class="localVideo" id="localVideo"
-              innerHTML="{{isVideoHide ? 'videocam_off' : 'videocam'}}">
-              Your browser does not support HTML5 video.
-            </video>
-
-            <div class=" agent-detail">
-              <p class="name">Expertflow Agent</p>
-              <p id='call_status' class="text">Call in Progress</p>
-              <p class="timer">{{callTime}}</p>
-            </div>
-            <div class="widget-composer">
-              <div class="widget-call-controls">
-                <div class="control-btn disable-icon-callControl">
-                  <span class="material-symbols-outlined">
-                    present_to_all
-                  </span>
-                </div>
-                <div class="control-btn" [ngClass]="{'end-call' : isVideoHide === true}">
-                  <span class="material-symbols-outlined" innerHTML="{{isVideoHide ? 'videocam_off' : 'videocam'}}"
-                    (click)="toggleCallVideo()">
-                  </span>
-                </div>
-                <div class="control-btn" [ngClass]="{'end-call' : isCallMute === true}">
-                  <span class="material-symbols-outlined" innerHTML="{{isCallMute ? 'mic_off' : 'mic'}}"
-                    (click)="toggleCallMic()">
-                  </span>
-                </div>
-                <div class="control-btn" [ngClass]="{'end-call' : isCallOnHold === true}">
-                  <span class="material-symbols-outlined" innerHTML="{{isCallOnHold ? 'resume' : 'pause'}}"
+                <div class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }">
+                  <span class="material-symbols-outlined" [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
                     (click)="toggleCallHold()">
                   </span>
                 </div>
                 <div class="control-btn">
-                  <span class="material-symbols-outlined">
-                    more_horiz
-                  </span>
+                  <span class="material-symbols-outlined"> more_horiz </span>
                 </div>
                 <div class="control-btn end-call" (click)="callEnd()">
-                  <span class="material-symbols-outlined">
-                    call_end
-                  </span>
+                  <span class="material-symbols-outlined"> call_end </span>
                 </div>
               </div>
             </div>
           </div>
         </ng-container>
+
         <!-- Callback View Screen -->
         <ng-container *ngIf="activeCallbackView">
           <div class="widget-callback-form-content">
@@ -981,6 +953,32 @@
       </div>
     </div>
   </ng-container>
+
+  <!--------------------------------------------->
+  <!------ /Call Popup for Audio/Video Call ----->
+  <!--------------------------------------------->
+  <ng-container *ngIf="callPopUpView">
+    <div class="widget-call-area">
+      <div class="call-popup">
+        <p><span innerHTML="Initiating {{callText}} call"></span></p>
+        <div class="audio-agent">
+          <div class="loader"></div>
+          <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon">
+        </div>
+        <div class="agent-detail">
+          <p class="name">{{agentName}}</p>
+        </div>
+        <div class="end-call-btn" (click)="callEnd()">
+          <div class="end-call-btn-sm">
+            <span class="material-symbols-outlined">
+              call_end
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
 
   <!---------------------->
   <!-- /Chat Icon HTML/ -->

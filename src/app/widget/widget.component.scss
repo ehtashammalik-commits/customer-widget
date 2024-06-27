@@ -1332,11 +1332,11 @@ mat-spinner {
   outline: none;
 }
 
-#file-btn > label {
+#file-btn>label {
   margin-bottom: 0 !important;
 }
 
-#file-btn > input {
+#file-btn>input {
   display: none;
 }
 
@@ -1441,6 +1441,7 @@ mat-spinner {
 
 // Language Direction Right
 .right-direction {
+
   input,
   textarea,
   a,
@@ -1654,9 +1655,10 @@ mat-spinner {
   }
 
   .agent-detail {
-    position: relative;
+    position: absolute;
     top: 40%;
-    right: 0px;
+    // right: 0px;
+    left: 27%;
     text-align: center;
     line-height: 10px;
     font-style: normal;
@@ -1704,9 +1706,9 @@ mat-spinner {
 
   .localVideoView {
     position: absolute;
-    right: 28px;
+    right: 16px;
     z-index: 9999999;
-    top: 5px;
+    top: 4px;
 
     .localVideoIcon {
       display: none;
@@ -1921,6 +1923,7 @@ mat-spinner {
   background-color: rgb(255, 255, 255);
   border-radius: 10px;
   margin-top: 20px;
+
   // position: relative;
   // top: 20px;
   p {

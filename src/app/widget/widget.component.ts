@@ -3,6 +3,7 @@ import {
   Component,
   OnInit,
   ElementRef,
+  Renderer2,
   ViewChild,
   Input,
   ChangeDetectorRef
@@ -46,8 +47,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private scrollContainer!: ElementRef;
   @Input() conversation: any;
 
-  @ViewChild('remoteVideo') remoteVideo!: ElementRef;
-  @ViewChild('localVideo') myVideoLocal!: ElementRef;
+  // @ViewChild('remoteVideo') remoteVideo!: ElementRef;
+  // @ViewChild('localVideo') myVideoLocal!: ElementRef;
+  @ViewChild('remoteVideo', { static: false }) remoteVideo!: ElementRef;
+  @ViewChild('localVideo', { static: false }) localVideo!: ElementRef;
 
   scrollTop = 0;
   fontSize = new FormControl("12");
@@ -91,6 +94,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   activeChatView = false;
   activeAudioView = false;
   activeVideoView = false;
+  activeScreenShareView = false;
   activeCallbackView = false;
   activeCallbackResponseView = false;
 
@@ -108,6 +112,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isAudioCallActive = false;
   // If this flag is 'true' than that's mean Video Call is Active (In Side Chat Screen)
   isVideoCallActive = false;
+  // If this flag is 'true' than that's mean ScreenShare Call is Active (In Side Chat Screen)
+  isScreenShareActive = false;
 
   // Variables for Call Controls
   isCallMute = false;
@@ -189,6 +195,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     public sdk: SdkService,
     public __appConfig: ConfigService,
     private el: ElementRef,
+    private renderer: Renderer2,
     private cdRef: ChangeDetectorRef,
     private sanitizer: DomSanitizer,
     private snackBar: MatSnackBar,
@@ -375,7 +382,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.webRTCConfig = configs.webRtc;
     if (this.webRTCConfig !== null) {
       this.enableWebRtc = configs.webRtc.enableWebRtc;
-      console.log('webRTC Configs: ', this.webRTCConfig.diallingUri);
+      console.log('List of webRTC Configs: ', this.webRTCConfig);
       if (this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
     }
     this.callbackConfig = configs.callback;
@@ -537,7 +544,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('Change Screen:', screen);
     switch (screen) {
       case 'widget':
-        if (sessionStorage.getItem('wrapper-hide') === 'true' || this.__appConfig.appConfig.ADDITIONAL_PANEL  !== true) {
+        if (
+          sessionStorage.getItem('wrapper-hide') === 'true' ||
+          this.__appConfig.appConfig.ADDITIONAL_PANEL !== true
+        ) {
           this.additionalPanel = false;
         } else {
           this.additionalPanel = true;
@@ -659,6 +669,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.activeChatView = true;
         this.activeAudioView = false;
         this.activeVideoView = false;
+        this.activeScreenShareView = false;
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
@@ -667,6 +678,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.activeChatView = false;
         this.activeAudioView = false;
         this.activeVideoView = false;
+        this.activeScreenShareView = false;
         this.callPopUpView = false;
         this.activeCallbackView = true;
         this.activeCallbackResponseView = false;
@@ -675,6 +687,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.activeChatView = false;
         this.activeAudioView = false;
         this.activeVideoView = false;
+        this.activeScreenShareView = false;
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = true;
@@ -684,6 +697,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeChatView = false;
           this.activeAudioView = true;
           this.activeVideoView = false;
+          this.activeScreenShareView = false;
           this.callPopUpView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
@@ -692,6 +706,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeChatView = true;
           this.activeAudioView = false;
           this.activeVideoView = false;
+          this.activeScreenShareView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
           this.initiateWebRtcCall(view);
@@ -702,14 +717,36 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeChatView = false;
           this.activeAudioView = false;
           this.activeVideoView = true;
+          this.activeScreenShareView = false;
           this.callPopUpView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
         } else {
+          this.callPopUpView = true;
           this.activeVideoView = true;
+          this.activeChatView = false;
+          this.activeAudioView = false;
+          this.activeScreenShareView = false;
+          this.activeCallbackView = false;
+          this.activeCallbackResponseView = false;
+          this.initiateWebRtcCall(view);
+        }
+        break;
+      case 'screenshare':
+        if (this.isScreenShareActive) {
+          this.activeChatView = false;
+          this.activeAudioView = false;
+          this.activeVideoView = false;
+          this.activeScreenShareView = true;
+          this.callPopUpView = false;
+          this.activeCallbackView = false;
+          this.activeCallbackResponseView = false;
+        } else {
           this.callPopUpView = true;
           this.activeChatView = false;
           this.activeAudioView = false;
+          this.activeVideoView = false;
+          this.activeScreenShareView = true;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
           this.initiateWebRtcCall(view);
@@ -725,6 +762,82 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.initiateWebRtcCall('video');
         }
         break;
+    }
+  }
+
+  convertCallView(view: any) {
+    console.log('Change Screen:', view);
+    switch (view) {
+      case 'audio':
+        // if (this.isAudioCallActive) {
+        //   this.activeChatView = false;
+        //   this.activeAudioView = true;
+        //   this.activeVideoView = false;
+        //   this.activeScreenShareView = false;
+        //   this.callPopUpView = false;
+        //   this.activeCallbackView = false;
+        //   this.activeCallbackResponseView = false;
+        // } else {
+        this.callPopUpView = true;
+        this.activeChatView = false;
+        this.activeAudioView = true;
+        this.activeVideoView = false;
+        this.activeScreenShareView = false;
+        this.activeCallbackView = false;
+        this.activeCallbackResponseView = false;
+        this.convertCallRequest(view);
+        // }
+        break;
+      case 'video':
+        // if (this.isVideoCallActive) {
+        //   this.activeChatView = false;
+        //   this.activeAudioView = false;
+        //   this.activeVideoView = true;
+        //   this.activeScreenShareView = false;
+        //   this.callPopUpView = false;
+        //   this.activeCallbackView = false;
+        //   this.activeCallbackResponseView = false;
+        // } else {
+        this.callPopUpView = true;
+        this.activeVideoView = true;
+        this.activeChatView = false;
+        this.activeAudioView = false;
+        this.activeScreenShareView = false;
+        this.activeCallbackView = false;
+        this.activeCallbackResponseView = false;
+        this.convertCallRequest(view);
+        // }
+        break;
+      case 'screenshare':
+        // if (this.isScreenShareActive) {
+        //   this.activeChatView = false;
+        //   this.activeAudioView = false;
+        //   this.activeVideoView = false;
+        //   this.activeScreenShareView = true;
+        //   this.callPopUpView = false;
+        //   this.activeCallbackView = false;
+        //   this.activeCallbackResponseView = false;
+        // } else {
+        this.callPopUpView = true;
+        this.activeChatView = false;
+        this.activeAudioView = false;
+        this.activeVideoView = false;
+        this.activeScreenShareView = true;
+        this.activeCallbackView = false;
+        this.activeCallbackResponseView = false;
+        this.convertCallRequest(view);
+        // }
+        break;
+      // case 'standaloneVideo':
+      //   if (this.isWebRtcVideoCallActive) {
+      //     this.isWebRtcVideoCallActive = true;
+      //     this.callPopUpView = false;
+      //   } else {
+      //     this.callPopUpView = true;
+      //     this.isWebRtcVideoCallActive = false;
+      //     this.initiateWebRtcCall('video');
+      //   }
+      //   break;
     }
   }
 
@@ -1413,10 +1526,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.sdk.handleCallMic(action, this.dialogId);
   }
 
+  convertCallRequest(view: any) {
+    this.callText = view;
+    console.log('convertCallRequest ==>', view);
+    if (view === 'video') {
+      this.isVideoCallActive = true;
+      this.sdk.convertCall('on', view, this.dialogId);
+    } else if (view === 'screenshare') {
+      this.isScreenShareActive = true;
+      this.sdk.convertCall('on', view, this.dialogId);
+    } else {
+      this.isAudioCallActive = true;
+      this.sdk.convertCall('off', 'video', this.dialogId);
+    }
+
+  }
+
   toggleCallVideo() {
     this.isVideoHide = !this.isVideoHide;
+    const cameraStatus = (this.isVideoHide ? 'off' : 'on')
     console.log(this.isVideoHide);
-    this.sdk.handleCallVideo();
+    this.sdk.convertCall(cameraStatus, 'video', this.dialogId);
   }
 
   toggleCallHold() {
@@ -1430,18 +1560,25 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.callText = callType;
     this.startCountdown();
 
-    this.sdk.handleCallStart({
-      type: callType,
-      authConfigs: this.setAuthorizedResponse
-    });
     if (this.standaloneWebRtc) {
+      console.log('standalone webrtc call <==');
+      this.sdk.handleCallStart({
+        type: callType,
+        authConfigs: this.setAuthorizedResponse,
+      });
       this.isWebRtcVideoCallActive = true;
     } else {
       if (callType === 'video') {
         this.isVideoCallActive = true;
+      } else if (callType === 'screenshare') {
+        this.isScreenShareActive = true;
       } else {
         this.isAudioCallActive = true;
       }
+      this.sdk.handleCallStart({
+        type: callType,
+        authConfigs: this.webRTCConfig,
+      });
     }
   }
 
@@ -1469,27 +1606,46 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('[handleDialogStates] received dialog: ===> ', data);
 
     if (data.event === 'agentInfo') {
-      console.log('[handleDialogStates] Inside Agent Info Event: ===> ', data.response);
+      console.log(
+        '[handleDialogStates] Inside Agent Info Event: ===> ',
+        data.response,
+      );
       if (data.response.state === 'LOGIN') {
-        console.log('[handleDialogStates] SIP Connection Established with: ===> ', data.response.extension);
+        console.log(
+          '[handleDialogStates] SIP Connection Established with: ===> ',
+          data.response.extension,
+        );
       } else {
-        console.log('[handleDialogStates] SIP Connection Failed with: ===> ', data.response.extension);
+        console.log(
+          '[handleDialogStates] SIP Connection Failed with: ===> ',
+          data.response.extension,
+        );
       }
     }
     if (data.event === 'outboundDialing') {
-      console.log('[handleDialogStates] Inside Outbound Dialing Event: ===> ', data.response);
+      console.log(
+        '[handleDialogStates] Inside Outbound Dialing Event: ===> ',
+        data.response,
+      );
       if (data.response.dialog === null) {
         this.maintainDialog = null;
         this.dialogId = null;
       } else {
         switch (data.response.dialog.state) {
           case 'INITIATING':
-            console.log('[outboundDialing] INITIATING CALL DIALOG Event: ===> ', data.response.dialog);
+            console.log(
+              '[outboundDialing] INITIATING CALL DIALOG Event: ===> ',
+              data.response.dialog,
+            );
+            // this.callPopUpView = true;
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
           case 'INITIATED':
-            console.log('[outboundDialing] INITIATED CALL DIALOG Event: ===> ', data.response.dialog);
+            console.log(
+              '[outboundDialing] INITIATED CALL DIALOG Event: ===> ',
+              data.response.dialog,
+            );
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
@@ -1504,52 +1660,79 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       } else {
         switch (data.response.dialog.state) {
           case 'INITIATING':
-            console.log('[dialogState] INITIATING CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] INITIATING CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
+            // this.callPopUpView = true;
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
           case 'INITIATED':
-            console.log('[dialogState] INITIATED CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] INITIATED CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
           case 'ALERTING':
-            console.log('[dialogState] ALERTING CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] ALERTING CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
           case 'ACTIVE':
-            console.log('[dialogState] ACTIVE CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] ACTIVE CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
+            // this.callPopUpView = false;
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             if (this.standaloneWebRtc) {
               this.changeView('standaloneVideo');
-            } else {
+            } else if (this.isAudioCallActive) {
+              this.changeView('audio');
+            } else if (this.isVideoCallActive) {
               this.changeView('video');
+            } else if (this.isScreenShareActive) {
+              this.changeView('screenshare');
             }
             break;
           case 'FAILED':
-            console.log('[dialogState] FAILED CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] FAILED CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
             if (this.standaloneWebRtc) {
               this.endCountdown();
               this.changeScreen('error');
             } else {
               this.isAudioCallActive = false;
               this.isVideoCallActive = false;
+              this.isScreenShareActive = false;
               this.endCountdown();
               this.changeView('chat');
             }
             break;
           case 'DROPPED':
-            console.log('[dialogState] DROPPED CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] DROPPED CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
             if (this.standaloneWebRtc) {
               this.callPopUpView = false;
               this.isWebRtcVideoCallActive = false;
               this.endCountdown();
               this.changeScreen('end');
             } else {
+              this.callPopUpView = false;
               this.isAudioCallActive = false;
               this.isVideoCallActive = false;
+              this.isScreenShareActive = false;
               this.endCountdown();
               this.changeView('chat');
             }
@@ -1558,10 +1741,36 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
 
+    if (data.event === 'mediaConversion') {
+      if (data.status === 'success') {
+        console.log(
+          '[mediaConversion] ACTIVE CALL mediaConversion: ===> ',
+          data.dialog.stream,
+        );
+        
+        // if (data.dialog.stream === 'audio') {
+        //   this.isVideoCallActive = false;
+        //   this.isScreenShareActive = false;
+        // } else 
+        this.changeView(data.dialog.stream);
+        if (data.dialog.stream === 'video') {
+          this.isAudioCallActive = false;
+          this.isScreenShareActive = false;
+        } else if (data.dialog.stream === 'screenshare') {
+          this.isAudioCallActive = false;
+          this.isVideoCallActive = false;
+        }
+       
+      }
+    }
+
     if (data.event === 'Error') {
       switch (data.response.type) {
         case 'generalError':
-          console.log('[Error] Call terminated by customer: ===>', `Error Type: ${data.response.type} with description: ${data.response.description}`)
+          console.log(
+            '[Error] Call terminated by customer: ===>',
+            `Error Type: ${data.response.type} with description: ${data.response.description}`,
+          );
           break;
       }
     }
