@@ -7,12 +7,11 @@ declare var widgetConfigs: any,
   establishConnection: any,
   setConversationDataByCustomerIdentifier: any,
   chatRequest: any,
-  sendMessage: any,
+  sendChatMessage: any,
   uploadToFileEngine: any,
   chatEnd: any,
   resumeChat: any,
   webhookNotifications: any,
-  videoControl: any,
   postMessages: any,
   callbackRequest: any,
   authenticateRequest: any,
@@ -216,7 +215,7 @@ export class SdkService implements OnInit {
 
   sendChatMessage(payload: any) {
     console.log('Customer Message Payload:', payload);
-    sendMessage(payload);
+    sendChatMessage(payload);
   }
 
   moveToFileServer(filePayload: any, callback: any) {
