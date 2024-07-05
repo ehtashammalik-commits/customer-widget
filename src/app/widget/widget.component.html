@@ -354,7 +354,8 @@
             present_to_all
           </span>
           <span class="widget-navbar-icon material-symbols-outlined"
-            (click)="(activeScreenShareView || activeAudioView || activeVideoView) ? convertCallView('video') : changeView('video')" *ngIf="enableWebRtc" [ngClass]="{
+            (click)="(activeScreenShareView || activeAudioView || activeVideoView) ? convertCallView('video') : changeView('video')"
+            *ngIf="enableWebRtc" [ngClass]="{
               'btnOne' :(enabledCallback === false && enableFontResize === false),
               'btnThree' :(enabledCallback === true && enableFontResize === true),
               'btnTwo' :(enabledCallback === false || enableFontResize === false),
@@ -364,7 +365,8 @@
             videocam
           </span>
           <span class="widget-navbar-icon material-symbols-outlined"
-            (click)="(activeScreenShareView || activeAudioView || activeVideoView) ? convertCallView('audio') : changeView('audio')" [ngClass]="{
+            (click)="(activeScreenShareView || activeAudioView || activeVideoView) ? convertCallView('audio') : changeView('audio')"
+            [ngClass]="{
               'btnTwo' :(enabledCallback === false && enableFontResize === false),
               'btnFour' :(enabledCallback === true && enableFontResize === true),
               'btnThree' :(enabledCallback === false || enableFontResize === false),
@@ -385,8 +387,8 @@
             forum
           </span>
         </div>
-        
-        
+
+
         <ng-container *ngIf="activeChatView">
           <!-- Widget Chat Content -->
           <div class="widget-chat-content" #scrollMe>
@@ -691,12 +693,14 @@
           </div>
 
         </ng-container>
-        
+
         <ng-container *ngIf="activeAudioView || activeVideoView || activeScreenShareView">
           <div class="widget-section"
             [ngClass]="{'widget-audio-section': activeAudioView, 'widget-video-section': (activeVideoView || activeScreenShareView)}">
+            <!-- <video *ngIf="remoteVideoActive" #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
+            <video *ngIf="localVideoActive" #localVideo id="localVideo" autoplay playsinline class="localVideo"></video> -->
             <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
-            <video #localVideo id="localVideo" autoplay playsinline muted class="localVideo"></video>
+            <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
 
             <div class="audio-agent" *ngIf="activeAudioView">
               <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon" />

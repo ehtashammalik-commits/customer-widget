@@ -3615,8 +3615,19 @@ function setupRemoteMedia(session, callback) {
   }
   remote_stream = remoteStream;
 
-  var remoteVideo = document.getElementById('remoteVideo');
-  if (remoteVideo) remoteVideo.srcObject = remoteStream;
+  setTimeout(() => {
+    if (document.getElementById('remoteVideo')) document.getElementById('remoteVideo').srcObject = remoteStream;
+
+    // var remoteVideo = document.getElementById('remoteVideo');
+    // if (remoteVideo) remoteVideo.srcObject = remoteStream;
+    console.log('<== remote Stream Audio Track:', remoteStream.getAudioTracks());
+    console.log('<== remote Video Tag:', document.getElementById('remoteVideo'));
+    console.log('<== remote Stream Video Track:', remoteStream.getVideoTracks());
+  }, 2000)
+
+
+  // var remoteVideo = document.getElementById('remoteVideo');
+  // if (remoteVideo) remoteVideo.srcObject = remoteStream;
 
 
   // session.sessionDescriptionHandler.peerConnection.getReceivers().forEach((receiver) => {
@@ -3652,9 +3663,30 @@ function setupRemoteMedia(session, callback) {
   else {
     localStream_1 = pc.getLocalStreams()[0];
   }
-  var localVideo = document.getElementById('localVideo');
-  if (localVideo) localVideo.srcObject = localStream_1;
-  local_stream = localStream_1;
+
+  setTimeout(() => {
+    var localVideo = document.getElementById('localVideo');
+    if (localVideo) localVideo.srcObject = localStream_1;
+
+    console.log('<== local Stream Audio Track:', localStream_1);
+    console.log('<== local Audio Tag:', document.getElementById('localVideo'));
+    console.log('<== local Stream Audio Track:', localStream_1.getAudioTracks());
+    local_stream = localStream_1;
+  }, 2000)
+
+
+  // setTimeout(() => {
+  //   if (document.getElementById('localVideo')) document.getElementById('localVideo').srcObject = localStream_1;
+
+  //   // var remoteVideo = document.getElementById('remoteVideo');
+  //   // if (remoteVideo) remoteVideo.srcObject = remoteStream;
+  //   console.log('<== local Stream Audio Track:', localStream_1);
+  //   console.log('<== local Video Tag:', document.getElementById('localVideo'));
+  //   console.log('<== local Stream Video Track:', localStream_1.getVideoTracks());
+  //   local_stream = localStream_1;
+  // }, 2000)
+
+
 }
 function registrationFailed(response) {
   //console.log('helo ',msg);

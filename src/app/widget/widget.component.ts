@@ -120,6 +120,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isVideoHide = false;
   isCallOnHold = false;
 
+  // remoteVideoActive = true;
+  // localVideoActive = true;
+
   // Audio Screen Variables
   counterVar: any; // will be used in count down timer
   agentName: string = 'Expertflow Agent'; // Agent Name during Active call will be pushed in this variable to show on the screen
@@ -1758,7 +1761,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         //   this.isVideoCallActive = false;
         //   this.isScreenShareActive = false;
         // } else 
-        this.changeView(data.dialog.stream);
+        // this.changeView(data.dialog.stream);
         if (data.dialog.stream === 'video') {
           this.isAudioCallActive = false;
           this.isScreenShareActive = false;
@@ -1766,7 +1769,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.isAudioCallActive = false;
           this.isVideoCallActive = false;
         }
-
+        if (data.dialog.eventRequest === 'remote' && data.dialog.streamStatus === 'off') {
+          // this.remoteVideoActive = false;
+          console.log('Remote Camera Off');
+        } else if(data.dialog.eventRequest === 'remote' && data.dialog.streamStatus === 'on') {
+          console.log('Remote Camera On');
+        }
       }
     }
 
