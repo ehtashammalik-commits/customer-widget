@@ -383,6 +383,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (this.webRTCConfig !== null) {
       this.enableWebRtc = configs.webRtc.enableWebRtc;
       console.log('List of webRTC Configs: ', this.webRTCConfig);
+      // Check if the input string contains a hyphen
+      if (this.webRTCConfig.sipExtension.includes('-')) {
+        let selectedSipExtension = this.pickSipExtension(this.webRTCConfig.sipExtension);
+        this.webRTCConfig.sipExtension = selectedSipExtension.toString();
+        console.log('sipExtension range: <==', selectedSipExtension, this.webRTCConfig);
+      }
       if (this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
     }
     this.callbackConfig = configs.callback;
@@ -1747,7 +1753,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           '[mediaConversion] ACTIVE CALL mediaConversion: ===> ',
           data.dialog.stream,
         );
-        
+
         // if (data.dialog.stream === 'audio') {
         //   this.isVideoCallActive = false;
         //   this.isScreenShareActive = false;
@@ -1760,7 +1766,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.isAudioCallActive = false;
           this.isVideoCallActive = false;
         }
-       
+
       }
     }
 
@@ -1853,6 +1859,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         setTimeout(() => { this.changeView('standaloneVideo'); }, 1000);
       }
     });
+  }
+
+  pickSipExtension(sipExtensions: any) {
+    const [startExt, endExt] = sipExtensions.split('-');
+    const minExt = parseInt(startExt, 10);
+    const maxExt = parseInt(endExt, 10);
+    return Math.floor(Math.random() * (maxExt - minExt)) + minExt;
   }
 
 }
