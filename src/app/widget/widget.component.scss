@@ -1332,11 +1332,11 @@ mat-spinner {
   outline: none;
 }
 
-#file-btn>label {
+#file-btn > label {
   margin-bottom: 0 !important;
 }
 
-#file-btn>input {
+#file-btn > input {
   display: none;
 }
 
@@ -1441,7 +1441,6 @@ mat-spinner {
 
 // Language Direction Right
 .right-direction {
-
   input,
   textarea,
   a,
@@ -2003,5 +2002,14 @@ mat-spinner {
     .call-btn {
       margin: 0 auto 10px !important;
     }
+  }
+}
+
+.control-navbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  span {
+    display: inline-block;
   }
 }

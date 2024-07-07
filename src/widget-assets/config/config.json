@@ -9,6 +9,6 @@
   "CHANNEL_IDENTIFIER": "phone",
   "ENABLE_LOGO": false,
   "ADDITIONAL_PANEL": true,
-  "AUDIO" : true,
-  "VIDEO" : false
+  "AUDIO": false,
+  "VIDEO": true
 }
