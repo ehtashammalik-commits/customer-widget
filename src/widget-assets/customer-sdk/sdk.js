@@ -3664,29 +3664,10 @@ function setupRemoteMedia(session, callback) {
     localStream_1 = pc.getLocalStreams()[0];
   }
 
-  setTimeout(() => {
-    var localVideo = document.getElementById('localVideo');
-    if (localVideo) localVideo.srcObject = localStream_1;
+  var localVideo = document.getElementById('localVideo');
+  if (localVideo) localVideo.srcObject = localStream_1;
 
-    console.log('<== local Stream Audio Track:', localStream_1);
-    console.log('<== local Audio Tag:', document.getElementById('localVideo'));
-    console.log('<== local Stream Audio Track:', localStream_1.getAudioTracks());
-    local_stream = localStream_1;
-  }, 2000)
-
-
-  // setTimeout(() => {
-  //   if (document.getElementById('localVideo')) document.getElementById('localVideo').srcObject = localStream_1;
-
-  //   // var remoteVideo = document.getElementById('remoteVideo');
-  //   // if (remoteVideo) remoteVideo.srcObject = remoteStream;
-  //   console.log('<== local Stream Audio Track:', localStream_1);
-  //   console.log('<== local Video Tag:', document.getElementById('localVideo'));
-  //   console.log('<== local Stream Video Track:', localStream_1.getVideoTracks());
-  //   local_stream = localStream_1;
-  // }, 2000)
-
-
+  local_stream = localStream_1;
 }
 function registrationFailed(response) {
   //console.log('helo ',msg);

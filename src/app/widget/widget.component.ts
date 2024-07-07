@@ -1622,9 +1622,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('convertCallRequest ==>', view);
     if (view === 'video') {
       this.isVideoCallActive = true;
+      // this.callPopUpView = false;
       this.sdk.convertCall('on', view, this.dialogId);
     } else if (view === 'screenshare') {
       this.isScreenShareActive = true;
+      // this.callPopUpView = false;
       this.sdk.convertCall('on', view, this.dialogId);
     } else {
       this.isAudioCallActive = true;
@@ -1846,9 +1848,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (data.dialog.stream === 'video') {
           this.isAudioCallActive = false;
           this.isScreenShareActive = false;
+          this.callPopUpView = false;
         } else if (data.dialog.stream === 'screenshare') {
           this.isAudioCallActive = false;
           this.isVideoCallActive = false;
+          this.callPopUpView = false;
         }
         if (
           data.dialog.eventRequest === 'remote' &&
