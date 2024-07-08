@@ -1602,7 +1602,11 @@
 
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div class="control-btn">
+                <div class="control-btn"
+                [ngClass]="{
+                  'disable-icon-callControl': !__appConfig.appConfig.VIDEO
+                }"
+                >
                   <span
                     class="material-symbols-outlined"
                     (click)="
@@ -1612,6 +1616,7 @@
                         ? convertCallView('screenshare')
                         : changeView('screenshare')
                     "
+         
                   >
                     present_to_all
                   </span>
@@ -1623,7 +1628,10 @@
                 </div> -->
                 <div
                   class="control-btn"
-                  [ngClass]="{ 'end-call': isVideoHide }"
+                  [ngClass]="{ 'end-call': isVideoHide ,
+                      'disable-icon-callControl': !__appConfig.appConfig.VIDEO
+                  
+                  }"
                 >
                   <span
                     class="material-symbols-outlined"
