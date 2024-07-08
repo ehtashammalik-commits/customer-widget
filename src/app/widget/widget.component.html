@@ -602,7 +602,7 @@
             matTooltip="Screen Share"
             [matTooltipPosition]="matToolTipPosition!"
             [ngStyle]="{
-              right: __appConfig.appConfig.VIDEO ? '105px' : ''
+              right: __appConfig.appConfig.VIDEO ? '70px' : ''
             }"
           >
             present_to_all
@@ -649,7 +649,7 @@
             matTooltip="Audio Call"
             [matTooltipPosition]="matToolTipPosition!"
             [ngStyle]="{
-              right: !__appConfig.appConfig.VIDEO ? '65px' : '104px'
+              right: !__appConfig.appConfig.VIDEO ? '37px' : '104px'
             }"
           >
             call
@@ -684,7 +684,11 @@
             [matTooltipPosition]="matToolTipPosition!"
             [ngStyle]="{
               right:
-                enableWebRtc && __appConfig.appConfig.VIDEO ? '72px' : '34px'
+                enableWebRtc && __appConfig.appConfig.VIDEO
+                  ? '100px'
+                  : !__appConfig.appConfig.VIDEO
+                  ? '66px'
+                  : '36px'
             }"
           >
             forum
@@ -1602,10 +1606,11 @@
 
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div class="control-btn"
-                [ngClass]="{
-                  'disable-icon-callControl': !__appConfig.appConfig.VIDEO
-                }"
+                <div
+                  class="control-btn"
+                  [ngClass]="{
+                    'disable-icon-callControl': !__appConfig.appConfig.VIDEO
+                  }"
                 >
                   <span
                     class="material-symbols-outlined"
@@ -1616,7 +1621,6 @@
                         ? convertCallView('screenshare')
                         : changeView('screenshare')
                     "
-         
                   >
                     present_to_all
                   </span>
@@ -1628,9 +1632,9 @@
                 </div> -->
                 <div
                   class="control-btn"
-                  [ngClass]="{ 'end-call': isVideoHide ,
-                      'disable-icon-callControl': !__appConfig.appConfig.VIDEO
-                  
+                  [ngClass]="{
+                    'end-call': isVideoHide,
+                    'disable-icon-callControl': !__appConfig.appConfig.VIDEO
                   }"
                 >
                   <span
