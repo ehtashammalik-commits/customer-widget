@@ -807,7 +807,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (this.isScreenShareActive) {
           this.activeChatView = false;
           this.activeAudioView = false;
-          this.activeVideoView = false;
+          this.activeVideoView = true;
           this.activeScreenShareView = true;
           this.callPopUpView = false;
           this.activeCallbackView = false;
@@ -1618,10 +1618,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   convertCallRequest(view: any) {
+    console.log('this function is called ', this.activeVideoView);
     this.callText = view;
     console.log('convertCallRequest ==>', view);
     if (view === 'video') {
       this.isVideoCallActive = true;
+      // this.activeVideoView = true;
       // this.callPopUpView = false;
       this.sdk.convertCall('on', view, this.dialogId);
     } else if (view === 'screenshare') {

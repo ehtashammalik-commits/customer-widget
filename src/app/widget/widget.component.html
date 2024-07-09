@@ -1609,7 +1609,9 @@
                 <div
                   class="control-btn"
                   [ngClass]="{
-                    'disable-icon-callControl': !__appConfig.appConfig.VIDEO
+                    'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
+
+                    'focus-icon-video ': isScreenShareActive === true
                   }"
                 >
                   <span
@@ -1634,14 +1636,15 @@
                   class="control-btn"
                   [ngClass]="{
                     'end-call': isVideoHide,
-                    'disable-icon-callControl': !__appConfig.appConfig.VIDEO
+                    'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
+                    'focus-icon-video ': isVideoCallActive === true
                   }"
                 >
                   <span
                     class="material-symbols-outlined"
                     [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'"
                     (click)="
-                      activeVideoView
+                      isVideoCallActive
                         ? toggleCallVideo()
                         : convertCallRequest('video')
                     "
@@ -1667,7 +1670,7 @@
                   >
                   </span>
                 </div>
-                <div class="control-btn">
+                <div class="control-btn disable-icon-callControl">
                   <span class="material-symbols-outlined"> more_horiz </span>
                 </div>
                 <div class="control-btn end-call" (click)="callEnd()">
