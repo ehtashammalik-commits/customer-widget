@@ -12,6 +12,7 @@ import { SdkService } from '../services/sdk.service';
 import { ConfigService } from '../services/config.service';
 import { BrowserNotificationService } from '../services/browser-notification.service';
 import { DeliveryNotificationService } from '../services/delivery-notification.service';
+import { PostMessageHandlerService } from '../post-message-handler.service';
 import { Subscription } from 'rxjs';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -183,6 +184,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   textDirection = '';
   logoEnabled: boolean = false;
 
+  browserInfoData: any;
+
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -195,6 +198,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     public dialog: MatDialog,
     private browserNotificationService: BrowserNotificationService,
     private deliveryNotificationService: DeliveryNotificationService,
+    private __postMessageHandlerService: PostMessageHandlerService,
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
@@ -330,6 +334,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
       },
     );
+
+    this.__postMessageHandlerService.browserInfoData$.subscribe(data => {
+      this.browserInfoData = data;
+      console.log('Browser Info Data in Component: ', this.browserInfoData);
+    });
 
     this.loadBrowserLanguage();
     this.setFontFromLocalStorage();
@@ -492,16 +501,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           serviceIdentifier: this.serviceIdentifier,
           channelCustomerIdentifier: channelIdentifierData.data,
           browserDeviceInfo: {
-            browserId: null,
+            browserId: this.browserInfoData?.systemInfo?.browserId ? this.browserInfoData.systemInfo.browserId : null,
             browserIdExpiryTime: null,
-            browserName: null,
-            deviceType: null,
+            browserName: this.browserInfoData?.systemInfo?.browserName ? this.browserInfoData.systemInfo.browserName : null,
+            deviceType: this.browserInfoData?.systemInfo?.deviceType ? this.browserInfoData.systemInfo.deviceType : null,
           },
           queue: '',
           locale: {
-            timezone: null,
-            language: null,
-            country: null,
+            timezone: this.browserInfoData?.geoLocationData?.time_zone?.name ? this.browserInfoData.geoLocationData.time_zone.name : null,
+            language: this.browserInfoData?.geoLocationData?.languages ? this.browserInfoData.geoLocationData.languages : null,
+            country: this.browserInfoData?.geoLocationData?.country_name ? this.browserInfoData.geoLocationData.country_name : null,
           },
           formData: this.getFormDataByPreChatForm(preChatFormData),
         }
@@ -537,7 +546,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('Change Screen:', screen);
     switch (screen) {
       case 'widget':
-        if (sessionStorage.getItem('wrapper-hide') === 'true' || this.__appConfig.appConfig.ADDITIONAL_PANEL  !== true) {
+        if (sessionStorage.getItem('wrapper-hide') === 'true' || this.__appConfig.appConfig.ADDITIONAL_PANEL !== true) {
           this.additionalPanel = false;
         } else {
           this.additionalPanel = true;

@@ -65,3 +65,24 @@ chatIframe.style.minWidth = '0px';
 chatIframe.style.background = 'transparent';
 document.body.appendChild(parentSection);
 parentSection.appendChild(chatIframe);
+
+function browserInfoDataToIframe() {
+  const data = __cim;
+  // console.log('__cim variable data response in init widget :', data);
+  chatIframe.contentWindow.postMessage({
+    type: 'browserInfoData',
+    data: data
+  }, getOrigin(customerWidgetUrl)); // Use getOrigin instead of URL constructor
+}
+
+// Send sessionStorage data once the iframe is loaded
+chatIframe.onload = function () {
+  browserInfoDataToIframe();
+};
+
+// Function to extract origin from URL
+function getOrigin(url) {
+  const link = document.createElement('a');
+  link.href = url;
+  return link.origin;
+}
