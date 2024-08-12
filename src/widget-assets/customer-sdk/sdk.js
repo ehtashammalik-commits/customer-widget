@@ -101,6 +101,17 @@ function eventListeners(callback) {
   });
   this.socket.on('CHANNEL_SESSION_STARTED', (data) => {
     console.log(`Channel Session Started Data: `, data);
+    const gtmObject = {
+      type: 'gtmDataLayer',
+      data: {
+        type: 'CHAT STARTED',
+        data: {
+          customerIdentifier: data.header.channelData.channelCustomerIdentifier,
+          serviceIdentifier: data.header.channelData.serviceIdentifier,
+        }
+      }
+    }
+    window.parent.postMessage(gtmObject, '*');
     callback({ type: "CHANNEL_SESSION_STARTED", data: data });
   });
   this.socket.on('MESSAGE_RECEIVED', (message) => {
@@ -109,6 +120,14 @@ function eventListeners(callback) {
   });
   this.socket.on('disconnect', (reason) => {
     console.error(`Connection lost with the server: `, reason);
+    // const gtmObject = {
+    //   type: 'gtmDataLayer',
+    //   data: {
+    //     type: 'CHAT ENDED',
+    //     data: reason
+    //   }
+    // }
+    // window.parent.postMessage(gtmObject, '*');
     callback({ type: "SOCKET_DISCONNECTED", data: reason });
   });
   this.socket.on('connect_error', (error) => {
@@ -150,6 +169,17 @@ function chatRequest(data) {
         serviceIdentifier: data.data.serviceIdentifier,
         additionalAttributes: additionalAttributesData
       };
+      const gtmObject = {
+        type: 'gtmDataLayer',
+        data: {
+          type: 'CHAT REQUESTED',
+          data: {
+            customerIdentifier: data.data.channelCustomerIdentifier,
+            serviceIdentifier: data.data.serviceIdentifier,
+          }
+        }
+      }
+      window.parent.postMessage(gtmObject, '*');
       this.socket.emit('CHAT_REQUESTED', obj);
       console.log(`SEND CHAT_REQUESTED DATA:`, obj);
     }
@@ -157,6 +187,7 @@ function chatRequest(data) {
     throw error;
   }
 }
+
 /**
  * Chat Request Function with customer data
  * @param {*} data
@@ -213,9 +244,23 @@ function chatEnd(data) {
  * @param {*} data
  */
 function resumeChat(data, callback) {
+  const gtmObject = {
+    type: 'gtmDataLayer',
+    data: {
+      type: 'CHAT RESUMED',
+      data: {
+        customerIdentifier: data.channelCustomerIdentifier,
+        serviceIdentifier: data.serviceIdentifier,
+      }
+    }
+  }
+  console.log(data, 'Resume Chat Before Emit Console.log');
   this.socket.emit("CHAT_RESUMED", data, (res) => {
     if (res) {
       console.log(res, 'resume chat response in sdk.');
+      if (res.isChatAvailable) {
+        window.parent.postMessage(gtmObject, '*');
+      }
       callback(res);
     }
   });

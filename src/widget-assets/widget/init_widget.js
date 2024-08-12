@@ -1,6 +1,6 @@
 const { customerWidgetUrl, serviceIdentifier, widgetIdentifier } = __cim;
 const priorityCookies = ['mtc_id', '_ga']; // Add any other cookies you want to prioritize
-
+window.dataLayer = window.dataLayer || [];
 function getCookieValue(cookieName) {
   const cookies = document.cookie.split('; ');
   for (const cookie of cookies) {
@@ -86,3 +86,15 @@ function getOrigin(url) {
   link.href = url;
   return link.origin;
 }
+
+window.addEventListener('message', (event) => {
+  console.log('Received Message for GTM Event <==', event);
+  if (event.data.type === 'gtmDataLayer') {
+    const dataLayerObj = {
+      event: event.data.type,
+      data: event.data.data
+    }
+    window.dataLayer.push(dataLayerObj);
+    console.log('Received Message for GTM', event.data.data);
+  }
+}, false);
