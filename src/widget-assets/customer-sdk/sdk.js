@@ -169,17 +169,17 @@ function chatRequest(data) {
         serviceIdentifier: data.data.serviceIdentifier,
         additionalAttributes: additionalAttributesData
       };
-      const gtmObject = {
-        type: 'gtmDataLayer',
-        data: {
-          type: 'CHAT REQUESTED',
-          data: {
-            customerIdentifier: data.data.channelCustomerIdentifier,
-            serviceIdentifier: data.data.serviceIdentifier,
-          }
-        }
-      }
-      window.parent.postMessage(gtmObject, '*');
+      // const gtmObject = {
+      //   type: 'gtmDataLayer',
+      //   data: {
+      //     type: 'CHAT REQUESTED',
+      //     data: {
+      //       customerIdentifier: data.data.channelCustomerIdentifier,
+      //       serviceIdentifier: data.data.serviceIdentifier,
+      //     }
+      //   }
+      // }
+      // window.parent.postMessage(gtmObject, '*');
       this.socket.emit('CHAT_REQUESTED', obj);
       console.log(`SEND CHAT_REQUESTED DATA:`, obj);
     }
@@ -247,7 +247,7 @@ function resumeChat(data, callback) {
   const gtmObject = {
     type: 'gtmDataLayer',
     data: {
-      type: 'CHAT RESUMED',
+      type: 'BROWSER NAVIGATED',
       data: {
         customerIdentifier: data.channelCustomerIdentifier,
         serviceIdentifier: data.serviceIdentifier,
