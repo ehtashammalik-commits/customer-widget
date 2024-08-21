@@ -879,7 +879,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (cimMessage.header.sender.type.toLowerCase() == "agent") {
         let fullName = this.getAgentDisplayName(cimMessage.header.sender.additionalDetail);
         if (!this.isUsernameEnabled) {
-          cimMessage.header.sender.senderName = fullName;  
+          cimMessage.header.sender.senderName = fullName;
         }
       }
 
@@ -897,6 +897,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         return `${firstName} ${lastName}`;
       } else if (firstName) {
         return `${firstName}`;
+      } else if (lastName) {
+        return `${lastName}`;
       } else {
         return 'Agent';
       }
