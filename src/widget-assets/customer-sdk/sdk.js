@@ -521,17 +521,53 @@ function callbackRequest(url, payload, callback) {
  * Webhook Notifications Functions
  * @param {*} data
  */
-function webhookNotifications(url, data) {
-  let notifications = {};
-  notifications['text'] = `${data}`
-  fetch(`${url}`, {
+
+function webhookNotifications(webhookUrl, additionalData, data) {
+  // Constructing the message dynamically based on the keys and values in the data object
+  let imageUrl = modifyUrlPath(additionalData.agent_url, additionalData.icon);
+
+  let formattedText = '';
+  for (const [key, value] of Object.entries(data)) {
+    formattedText += `${capitalizeFirstLetter(key)}: ${value ? value : 'N/A'}\n`;
+  }
+  let newAgentUrl = modifyUrlPath(additionalData.agent_url, '/unified-agent/');
+  formattedText += `To respond: <a href='${newAgentUrl}'>Click here</a>\n`;
+
+  let messageObj = {
+    "cards": [
+      {
+        "header": {
+          "title": `${data.first_name ? data.first_name : 'Customer'} started a new chat`,
+          "imageUrl": imageUrl,
+          "imageStyle": "IMAGE"
+        },
+        "sections": [
+          {
+            "widgets": [
+              {
+                "textParagraph": {
+                  "text": formattedText
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+  fetch(`${webhookUrl}`, {
     method: 'POST',
-    body: JSON.stringify(notifications),
+    body: JSON.stringify(messageObj), // Formatting as a JSON object for Google Workspace webhook
     headers: {
       "Content-Type": "application/json; charset=UTF-8"
     }
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    })
     .then((result) => {
       console.log('Success: ', result);
     })
@@ -539,6 +575,23 @@ function webhookNotifications(url, data) {
       console.error('Error: ', error);
     });
 }
+
+// Helper function to capitalize the first letter of each key
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1).replace(/_/g, ' ');
+}
+
+function modifyUrlPath(originalUrl, newPath) {
+  try {
+    const url = new URL(originalUrl);
+    url.pathname = newPath;
+    return url.toString();
+  } catch (error) {
+    console.error("Invalid URL:", error);
+    return null;
+  }
+}
+
 /**
  * Web Widget SDK Functions for Chat Ends
  */
