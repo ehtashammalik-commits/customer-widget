@@ -4,6 +4,7 @@ import { Observable, Subject } from 'rxjs';
 
 declare var widgetConfigs: any,
   getPreChatForm: any,
+  formValidation: any,
   establishConnection: any,
   setConversationDataByCustomerIdentifier: any,
   chatRequest: any,
@@ -43,9 +44,16 @@ export class SdkService implements OnInit {
   public renderPreChatForm$: Observable<any> =
     this.preChatFormSubject.asObservable();
 
+    private preChatFormValidationSubject: Subject<any> = new Subject<any>();
+    public validationsSubcription: Observable<any> =
+      this.preChatFormValidationSubject.asObservable();
+    
   private callbackFormSubject: Subject<any> = new Subject<any>();
   public renderCallbackForm$: Observable<any> =
     this.callbackFormSubject.asObservable();
+
+  private fileConformation:Subject<any>=new Subject<any>();
+  public fileConformation$: Observable<any> = this.fileConformation.asObservable();
 
   private establishConnectionSubject: Subject<any> = new Subject<any>();
   public connectionResponse$: Observable<any> =
@@ -66,7 +74,7 @@ export class SdkService implements OnInit {
     this.loadSdk();
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {this.getFormValidation() }
 
   receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
     this.widgetIdentifier = widgetIdentifier;
@@ -99,8 +107,17 @@ export class SdkService implements OnInit {
 
   renderPreChatForm(form_id: any) {
     getPreChatForm(this.ConfigData.FORM_URL, form_id, (res: any) => {
+      this.getFormValidation()
       this.preChatFormSubject.next(res);
     });
+  }
+
+  getFormValidation() {
+    formValidation(this.ConfigData.FORM_URL, (res: any) => {
+      
+      this.preChatFormValidationSubject.next(res);
+      console.log('=>>')
+    })
   }
 
   renderCallbackForm(form_id: any) {
@@ -206,7 +223,9 @@ export class SdkService implements OnInit {
 
   sendChatMessage(payload: any) {
     console.log('Customer Message Payload:', payload);
+    this.fileConformation.next(payload);
     sendMessage(payload);
+
   }
 
   moveToFileServer(filePayload: any, callback: any) {

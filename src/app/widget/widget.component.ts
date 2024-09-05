@@ -101,7 +101,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   activeScreenShareView = false;
   activeCallbackView = false;
   activeCallbackResponseView = false;
-
+  fileConfermation_responce: any;
   customerData: any;
   preChatFormData: any;
   chatPayLoad: any;
@@ -109,7 +109,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   typingIndicatorTimer: any = null;
   lastSeenMessageId: any = null;
   conversationId = '';
-
+  preChatFormValidations: any;
   // If this flag is 'true' than that's mean Chat is Active
   isChatActive = false;
   // If this flag is 'true' than that's mean Audio Call is Active (In Side Chat Screen)
@@ -123,7 +123,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isCallMute = false;
   isVideoHide = false;
   isCallOnHold = false;
-
+  //varibales for MAX MIN length of the attributes (short Answer)
+  short_ans_maxLength: number = 0;
+  short_ans_minLength: number = 0;
+  //(paragraph)
+  paragraph_maxLength: number = 0;
+  paragraph_minLength: number = 0;
   // Audio Screen Variables
   counterVar: any; // will be used in count down timer
   agentName: string = 'Expertflow Agent'; // Agent Name during Active call will be pushed in this variable to show on the screen
@@ -140,7 +145,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   enabledCallback: boolean = false; // If true than show callback button in toolbar
   callbackResponseStatus = ''; // Callback Response Status Text to show on the Callback response Screen
   enabledWebhook: boolean = false; //If true than show webhook is enabled in the widget and will push notification to defined webhook
-
+  file_attribute_key: any;
   standaloneCallback: boolean = false; //If true than it will enable standalone callback
   standaloneWebRtc: boolean = false; //If true than it will enable standalone webRtc Video Call and hide Chat Features
 
@@ -193,7 +198,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   fileLoading = false;
   selectedFile!: File;
-
+  fileUrl: string | null = null;
   // Variables for handling chat messages language and text directions
   selectedLanguage: any;
   browserLang: any;
@@ -240,7 +245,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe((params: { [x: string]: any; }) => {
+    this.sdk.validationsSubcription.subscribe((res) => {
+      this.preChatFormValidations = res;
+      console.log('===========>validations', this.preChatFormValidations);
+      this.createFormControls();
+    });
+    this.sdk.fileConformation$.subscribe((res) => {
+      console.log('File confirmation response:', res);
+      this.fileConfermation_responce = res;
+      this.after_upload_file(this.file_attribute_key, this.fileConfermation_responce)
+    });
+    this.route.queryParams.subscribe((params: { [x: string]: any }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
       this.widgetIdentifier = params['widgetIdentifier'];
@@ -306,7 +321,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.callbackFormGroup = this.fb.group({});
 
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe(
-      (configs: { form: string; }) => {
+      (configs: { form: string }) => {
         this.setWidgetConfigs(configs);
         this.loadBrowserLanguage();
         console.log('Widget configurations:', configs);
@@ -325,16 +340,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // );
 
     this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
-      (formData: { sections: { attributes: any[]; }[]; }) => {
+      (formData: { sections: { attributes: any[] }[] }) => {
         this.formData = formData.sections[0].attributes.filter((item: any) => {
           return item.valueType != 'checkbox';
         });
         console.log('Widget configurations:', formData.sections);
-        this.createFormControls();
+        console.log('regex:', this.preChatFormValidations);
+        // this.createFormControls();
       },
     );
     this.callbackFormSubscription = this.sdk.renderCallbackForm$.subscribe(
-      (formData: { attributes: any[]; }) => {
+      (formData: { attributes: any[] }) => {
         this.callbackFormData = formData.attributes;
         this.createCallbackFormControls();
         console.log('Widget configurations:', formData.attributes);
@@ -342,7 +358,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
 
     this.onChatResumedSubject = this.sdk.onChatResumedResponse$.subscribe(
-      (data: { isChatAvailable: boolean; data: any[]; }) => {
+      (data: { isChatAvailable: boolean; data: any[] }) => {
         if (data.isChatAvailable == true) {
           this.changeScreen('chat');
           console.log('on Chat Resumed Response:', data);
@@ -364,20 +380,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
 
     this.onCallbackRequestSubject =
-      this.sdk.onCallbackRequestResponse$.subscribe((data: { status: { name: string; }; }) => {
-        console.log('callback request response events => ', data);
+      this.sdk.onCallbackRequestResponse$.subscribe(
+        (data: { status: { name: string } }) => {
+          console.log('callback request response events => ', data);
 
-        if (data && data.status && data.status.name) {
-          this.callbackResponseStatus = data.status.name.toLowerCase();
-        } else {
-          this.callbackResponseStatus = 'error';
-          console.error('Something Went Wrong Please check logs');
-        }
-        this.callbackLoader = false;
-        this.isChatActive
-          ? this.changeView('callbackResponse')
-          : this.changeScreen('callbackResponse');
-      });
+          if (data && data.status && data.status.name) {
+            this.callbackResponseStatus = data.status.name.toLowerCase();
+          } else {
+            this.callbackResponseStatus = 'error';
+            console.error('Something Went Wrong Please check logs');
+          }
+          this.callbackLoader = false;
+          this.isChatActive
+            ? this.changeView('callbackResponse')
+            : this.changeScreen('callbackResponse');
+        },
+      );
 
     this.establishConnectionSubject = this.sdk.connectionResponse$.subscribe(
       (response: any) => {
@@ -389,7 +407,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       },
     );
 
-    this.__postMessageHandlerService.browserInfoData$.subscribe(data => {
+    this.__postMessageHandlerService.browserInfoData$.subscribe((data) => {
       this.browserInfoData = data;
       console.log('Browser Info Data in Component: ', this.browserInfoData);
     });
@@ -407,36 +425,163 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private createFormControls(): void {
     for (const attribute of this.formData) {
-      console.log('attribute is ' + attribute);
+
+
+      const matchingValidation = this.preChatFormValidations.find(
+        (validation: any) => {
+          return validation.type === attribute.valueType;
+        },
+      );
+
+
 
       const validators = attribute.isRequired ? [Validators.required] : [];
-      // if (attribute.attributeType == 'OPTIONS') {
-      //   console.log('option selection make ');
-      //   const options = attribute.attributeOptions[0].attributeData;
-      //   const newGroup = this.fb.group({});
-      //   options.forEach((element: any) => {
-      //     newGroup.addControl(element.label, this.fb.control('', validators));
-      //   });
-      //   this.preChatFormGroup.addControl(attribute.key, newGroup);
-      // } else {
+
       const controlName = attribute.key;
-      // const controlName =
-      //   attribute.valueType == 'phoneNumber' ? 'phone' : attribute.key;
+      if (matchingValidation && matchingValidation.regex) {
+        // Ensure regex is correctly formatted
+        if (matchingValidation.type === 'phoneNumber') {
+          const phoneNumberRegex = new RegExp(
+            '^(\\+\\d{1,3}[\\s-])?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,4}[\\s-]?\\d{1,9}$',
+          );
+          console.log('Adding regex validator:', matchingValidation.regex);
+          validators.push(Validators.pattern(phoneNumberRegex));
+        } else if (matchingValidation.type === 'boolean') {
+          validators.push(Validators.required);
+        } else if (matchingValidation.type === 'shortAnswer') {
+          const { minlength, maxlength } = this.extractMinMaxLength(
+            matchingValidation.regex,
+          );
+
+          this.short_ans_maxLength = maxlength;
+          this.short_ans_minLength = minlength;
+
+          // Apply minLength and maxLength validators correctly
+          validators.push(Validators.minLength(this.short_ans_minLength));
+          validators.push(Validators.maxLength(this.short_ans_maxLength));
+        } else if (matchingValidation.type === 'paragraph') {
+          const { minlength, maxlength } = this.extractMinMaxLength(
+            matchingValidation.regex,
+          );
+
+          this.paragraph_maxLength = maxlength;
+          this.paragraph_minLength = minlength;
+
+          validators.push(Validators.minLength(this.paragraph_minLength));
+          validators.push(Validators.maxLength(this.paragraph_maxLength));
+        } else if (matchingValidation.type === 'time') {
+          console.log('no regex for time');
+        } else if (matchingValidation.type === 'dateTime') {
+          console.log('no regex for datetime');
+        } else if (matchingValidation.type === 'file') {
+          this.file_attribute_key = attribute.key;
+          //no regex for file
+        } else {
+          const correctedRegex = new RegExp(matchingValidation.regex);
+
+          validators.push(Validators.pattern(correctedRegex));
+        }
+      }
+
       this.preChatFormGroup.addControl(
         controlName,
         this.fb.control('', validators),
       );
-      // }
     }
   }
+
   private createCallbackFormControls(): void {
     for (const attribute of this.callbackFormData) {
       const validators = attribute.isRequired ? [Validators.required] : [];
+      const matchingValidation = this.preChatFormValidations.find(
+        (validation: any) => {
+          return validation.type === attribute.valueType;
+        },
+      );
+
+
+
+      const controlName = attribute.key;
+      if (matchingValidation && matchingValidation.regex) {
+        // Ensure regex is correctly formatted
+        if (matchingValidation.type === 'phoneNumber') {
+          const phoneNumberRegex = new RegExp(
+            '^(\\+\\d{1,3}[\\s-])?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,4}[\\s-]?\\d{1,9}$',
+          );
+          console.log('Adding regex validator:', matchingValidation.regex);
+          validators.push(Validators.pattern(phoneNumberRegex));
+        } else if (matchingValidation.type === 'boolean') {
+          validators.push(Validators.required);
+        } else if (matchingValidation.type === 'shortAnswer') {
+          const { minlength, maxlength } = this.extractMinMaxLength(
+            matchingValidation.regex,
+          );
+
+          this.short_ans_maxLength = maxlength;
+          this.short_ans_minLength = minlength;
+
+
+          validators.push(Validators.minLength(this.short_ans_minLength));
+          validators.push(Validators.maxLength(this.short_ans_maxLength));
+        } else if (matchingValidation.type === 'paragraph') {
+          const { minlength, maxlength } = this.extractMinMaxLength(
+            matchingValidation.regex,
+          );
+
+          this.paragraph_maxLength = maxlength;
+          this.paragraph_minLength = minlength;
+
+          validators.push(Validators.minLength(this.paragraph_minLength));
+          validators.push(Validators.maxLength(this.paragraph_maxLength));
+        } else if (matchingValidation.type === 'time') {
+          console.log('no regex for time');
+        } else if (matchingValidation.type === 'dateTime') {
+          console.log('no regex for datetime');
+        } else {
+          const correctedRegex = new RegExp(matchingValidation.regex);
+
+          validators.push(Validators.pattern(correctedRegex));
+        }
+      }
+
       this.callbackFormGroup.addControl(
         attribute.key,
         this.fb.control('', validators),
       );
     }
+  }
+
+  isMaxLengthError(controlName: string, valueType: string): boolean {
+    // Check both form groups for the control
+    const controlPreChat = this.preChatFormGroup.get(controlName);
+    const controlCallback = this.callbackFormGroup.get(controlName);
+
+    // Determine which control to use, prioritizing preChatFormGroup
+    const control = controlPreChat || controlCallback;
+
+    if (control) {
+      // Determine max length based on control type
+      let maxLength: number | null = null;
+
+      if (valueType === 'shortAnswer') {
+        maxLength = this.short_ans_maxLength;
+      } else if (valueType === 'paragraph') {
+        maxLength = this.paragraph_maxLength;
+      }
+
+      // Ensure maxLength is set
+      if (maxLength !== null) {
+        // Ensure control value is a string and check length
+        const value = control.value as string;
+
+        // Check if the control value length exceeds the maximum length
+        return value.length == maxLength; // Ensure strict comparison to identify the issue
+      }
+    } else {
+      console.log('Control does not exist for name:', controlName);
+    }
+
+    return false;
   }
 
   setWidgetConfigs(configs: any) {
@@ -474,7 +619,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     });
   }
+  extractMinMaxLength(regex: string): { minlength: any; maxlength: any } {
+    // Match the pattern that includes min and max lengths
+    const match = regex.match(/\{(\d+),(\d+)\}\$/);
 
+    if (match) {
+      const minlength = parseInt(match[1], 10);
+      const maxlength = parseInt(match[2], 10);
+      return { minlength, maxlength };
+    } else {
+      return { minlength: null, maxlength: null }; // Return null if the pattern doesn't match
+    }
+  }
   onFormSubmit(): void {
     try {
       if (this.preChatFormGroup.valid) {
@@ -584,16 +740,28 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           serviceIdentifier: this.serviceIdentifier,
           channelCustomerIdentifier: channelIdentifierData.data,
           browserDeviceInfo: {
-            browserId: this.browserInfoData?.systemInfo?.browserId ? this.browserInfoData.systemInfo.browserId : null,
+            browserId: this.browserInfoData?.systemInfo?.browserId
+              ? this.browserInfoData.systemInfo.browserId
+              : null,
             browserIdExpiryTime: null,
-            browserName: this.browserInfoData?.systemInfo?.browserName ? this.browserInfoData.systemInfo.browserName : null,
-            deviceType: this.browserInfoData?.systemInfo?.deviceType ? this.browserInfoData.systemInfo.deviceType : null,
+            browserName: this.browserInfoData?.systemInfo?.browserName
+              ? this.browserInfoData.systemInfo.browserName
+              : null,
+            deviceType: this.browserInfoData?.systemInfo?.deviceType
+              ? this.browserInfoData.systemInfo.deviceType
+              : null,
           },
           queue: '',
           locale: {
-            timezone: this.browserInfoData?.geoLocationData?.time_zone?.name ? this.browserInfoData.geoLocationData.time_zone.name : null,
-            language: this.browserInfoData?.geoLocationData?.languages ? this.browserInfoData.geoLocationData.languages : null,
-            country: this.browserInfoData?.geoLocationData?.country_name ? this.browserInfoData.geoLocationData.country_name : null,
+            timezone: this.browserInfoData?.geoLocationData?.time_zone?.name
+              ? this.browserInfoData.geoLocationData.time_zone.name
+              : null,
+            language: this.browserInfoData?.geoLocationData?.languages
+              ? this.browserInfoData.geoLocationData.languages
+              : null,
+            country: this.browserInfoData?.geoLocationData?.country_name
+              ? this.browserInfoData.geoLocationData.country_name
+              : null,
           },
           formData: this.getFormDataByPreChatForm(preChatFormData),
         },
@@ -1335,6 +1503,88 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
   }
+  uploadFile_from_form(event: Event, additionalText: string): void {
+    const input = event.target as HTMLInputElement;
+    let responce: any;
+    if (input.files && input.files.length > 0) {
+      const files = input.files;
+      const availableExtensions = [
+        'txt',
+        'png',
+        'jpg',
+        'jpeg',
+        'pdf',
+        'ppt',
+        'pptx',
+        'xlsx',
+        'xls',
+        'doc',
+        'docx',
+        'rtf',
+        'mp3',
+        'mp4',
+        'webp',
+      ];
+
+      const file = files[0];
+      const fileSize = file.size;
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+
+      if (fileSize <= 5000000) {
+        if (fileExtension && availableExtensions.includes(fileExtension)) {
+          const fd = new FormData();
+          fd.append('file', file);
+          fd.append(
+            'conversationId',
+            `${Math.floor(Math.random() * 90000) + 10000}`,
+          );
+          console.log('Ready to upload file:', fileSize, fileExtension);
+
+          // Call to the SDK's file upload function
+          this.sdk.moveToFileServer(fd, (res: any) => {
+
+
+            console.log(this.preChatFormGroup.get(additionalText))
+            this.constructCimMessage(
+              res.type.split('/')[0],
+              '',
+              null,
+              null,
+              res.type,
+              res.name,
+              res.size,
+              additionalText,
+              res.name.split('.').pop(),
+            );
+          });
+        } else {
+          console.log(file.name + ' unsupported file type');
+          this.snackBar.open(file.name + ' unsupported file type', 'err', {
+            panelClass: 'custom-snackbar',
+          });
+          this.removeUploadFile();
+        }
+      } else {
+        console.log(file.name + ' file size should be less than 5MB');
+        this.snackBar.open(
+          file.name + ' file size should be less than 5MB',
+          'err',
+          {
+            panelClass: 'custom-snackbar',
+          },
+        );
+        this.removeUploadFile();
+      }
+
+    }
+  }
+
+  after_upload_file(filename: string, confermation_payload: any) {
+    this.preChatFormGroup.get(filename)?.setValue(confermation_payload.body.attachment.mediaUrl)
+    this.fileUrl = this.preChatFormGroup.get(filename)?.value;
+
+    console.log(this.preChatFormGroup.get(filename))
+  }
 
   uploadFile(files: any, additionalText: string) {
     let availableExtensions = [
@@ -1772,7 +2022,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('font dropdown clicked');
     this.fontDropDown = !this.fontDropDown; // Toggle the fontDropDown variable
   }
-  
+
   setFontSize(e: any) {
     console.log('Set fontsize', e);
     try {
@@ -1792,7 +2042,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   clearSession() {
     this.preChatFormLoader = false;
-    if (this.isAudioCallActive || this.isVideoCallActive || this.isScreenShareActive) {
+    if (
+      this.isAudioCallActive ||
+      this.isVideoCallActive ||
+      this.isScreenShareActive
+    ) {
       this.callEnd();
     }
     this.cimMessage = [];
