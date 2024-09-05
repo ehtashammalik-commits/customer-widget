@@ -52,9 +52,6 @@ export class SdkService implements OnInit {
   public renderCallbackForm$: Observable<any> =
     this.callbackFormSubject.asObservable();
 
-  private fileConformation:Subject<any>=new Subject<any>();
-  public fileConformation$: Observable<any> = this.fileConformation.asObservable();
-
   private establishConnectionSubject: Subject<any> = new Subject<any>();
   public connectionResponse$: Observable<any> =
     this.establishConnectionSubject.asObservable();
@@ -223,7 +220,6 @@ export class SdkService implements OnInit {
 
   sendChatMessage(payload: any) {
     console.log('Customer Message Payload:', payload);
-    this.fileConformation.next(payload);
     sendMessage(payload);
 
   }

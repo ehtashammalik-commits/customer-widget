@@ -101,7 +101,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   activeScreenShareView = false;
   activeCallbackView = false;
   activeCallbackResponseView = false;
-  fileConfermation_responce: any;
   customerData: any;
   preChatFormData: any;
   chatPayLoad: any;
@@ -161,6 +160,38 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   matToolTipPosition = this.positionOptions[4];
   isMobile = false;
 
+  dictionary: { [key: string]: string } = {
+    Alphanum100: 'Alpha Numeric',
+    AlphanumSpecial200: 'Alpha Numeric ',
+    Boolean: 'Boolean',
+    Email: 'Email',
+    IP: 'IP',
+    Number: 'Number',
+    Password: 'Password',
+    PositiveNumber: 'Positive Number',
+    PhoneNumber: 'Phone Number',
+    String50: 'String',
+    String100: 'String',
+    String2000: 'String',
+    URL: 'URL',
+    alphaNumeric: 'Alpha Numeric',
+    alphaNumericSpecial: 'Alpha Numeric',
+    boolean: 'Boolean',
+    email: 'Email',
+    ip: 'IP',
+    number: 'Number',
+    password: 'Password',
+    positiveNumber: 'Positive Number',
+    phoneNumber: 'Phone Number',
+    shortAnswer: 'Short Answer',
+    paragraph: 'Paragraph',
+    url: 'URL',
+    date: 'Date',
+    time: 'Time',
+    dateTime: 'Date and Time',
+    file: 'File',
+  };
+
   // Widget Configuration
   title = '';
   subtitle = '';
@@ -199,6 +230,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   fileLoading = false;
   selectedFile!: File;
   fileUrl: string | null = null;
+  fileName: string | null = null;
   // Variables for handling chat messages language and text directions
   selectedLanguage: any;
   browserLang: any;
@@ -249,11 +281,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.preChatFormValidations = res;
       console.log('===========>validations', this.preChatFormValidations);
       this.createFormControls();
-    });
-    this.sdk.fileConformation$.subscribe((res) => {
-      console.log('File confirmation response:', res);
-      this.fileConfermation_responce = res;
-      this.after_upload_file(this.file_attribute_key, this.fileConfermation_responce)
     });
     this.route.queryParams.subscribe((params: { [x: string]: any }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
@@ -330,14 +357,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (configs.form !== '') this.sdk.renderPreChatForm(this.preChatFormId);
       },
     );
-
-    // this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
-    //   (formData) => {
-    //     this.formData = formData.attributes;
-    //     this.createFormControls();
-    //     console.log('Widget configurations:', formData.attributes);
-    //   },
-    // );
 
     this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
       (formData: { sections: { attributes: any[] }[] }) => {
@@ -425,15 +444,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private createFormControls(): void {
     for (const attribute of this.formData) {
-
-
       const matchingValidation = this.preChatFormValidations.find(
         (validation: any) => {
           return validation.type === attribute.valueType;
         },
       );
-
-
 
       const validators = attribute.isRequired ? [Validators.required] : [];
 
@@ -499,8 +514,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         },
       );
 
-
-
       const controlName = attribute.key;
       if (matchingValidation && matchingValidation.regex) {
         // Ensure regex is correctly formatted
@@ -519,7 +532,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
           this.short_ans_maxLength = maxlength;
           this.short_ans_minLength = minlength;
-
 
           validators.push(Validators.minLength(this.short_ans_minLength));
           validators.push(Validators.maxLength(this.short_ans_maxLength));
@@ -1352,7 +1364,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       try {
         this.scrollContainer.nativeElement.scrollTop =
           this.scrollContainer.nativeElement.scrollHeight;
-      } catch (err) { }
+      } catch (err) {}
     }, 350);
   }
 
@@ -1503,29 +1515,41 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
   }
-  uploadFile_from_form(event: Event, additionalText: string): void {
+  uploadFileFromForm(
+    event: Event,
+    additionalText: string,
+    restriction: boolean,
+    fileTypes: any,
+  ): void {
     const input = event.target as HTMLInputElement;
     let responce: any;
+    let availableExtensions: any;
     if (input.files && input.files.length > 0) {
       const files = input.files;
-      const availableExtensions = [
-        'txt',
-        'png',
-        'jpg',
-        'jpeg',
-        'pdf',
-        'ppt',
-        'pptx',
-        'xlsx',
-        'xls',
-        'doc',
-        'docx',
-        'rtf',
-        'mp3',
-        'mp4',
-        'webp',
-      ];
-
+      if (restriction) {
+        availableExtensions = fileTypes.map((extension: string) =>
+          extension.toLowerCase(),
+        );
+      } else {
+        availableExtensions = [
+          'txt',
+          'png',
+          'jpg',
+          'jpeg',
+          'pdf',
+          'ppt',
+          'pptx',
+          'xlsx',
+          'xls',
+          'doc',
+          'docx',
+          'rtf',
+          'mp3',
+          'mp4',
+          'webp',
+        ];
+      }
+      console.log(availableExtensions, 'available extensions: =>');
       const file = files[0];
       const fileSize = file.size;
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
@@ -1542,20 +1566,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
           // Call to the SDK's file upload function
           this.sdk.moveToFileServer(fd, (res: any) => {
-
-
-            console.log(this.preChatFormGroup.get(additionalText))
-            this.constructCimMessage(
-              res.type.split('/')[0],
-              '',
-              null,
-              null,
-              res.type,
-              res.name,
-              res.size,
-              additionalText,
-              res.name.split('.').pop(),
-            );
+            console.log(res, '=> file uploaded data');
+            this.fileName = res.name;
+            this.fileUrl = `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
+            console.log('=> file uploaded url', this.fileUrl);
+            this.preChatFormGroup
+              .get(this.file_attribute_key)
+              ?.setValue(this.fileUrl);
           });
         } else {
           console.log(file.name + ' unsupported file type');
@@ -1575,15 +1592,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         );
         this.removeUploadFile();
       }
-
     }
-  }
-
-  after_upload_file(filename: string, confermation_payload: any) {
-    this.preChatFormGroup.get(filename)?.setValue(confermation_payload.body.attachment.mediaUrl)
-    this.fileUrl = this.preChatFormGroup.get(filename)?.value;
-
-    console.log(this.preChatFormGroup.get(filename))
   }
 
   uploadFile(files: any, additionalText: string) {
@@ -1774,8 +1783,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   chatTranscript() {
     if (localStorage.getItem('conversationId') !== '') {
       window.open(
-        `widget-assets/chat-transcript/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
-        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier
+        `widget-assets/chat-transcript/?ccmUrl=${
+          this.__appConfig.appConfig.CCM_URL
+        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${
+          this.serviceIdentifier
         }&conversationId=${localStorage.getItem(
           'conversationId',
         )}&browserLang=${this.browserLang}`,
@@ -2029,7 +2040,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       localStorage.setItem('fontSize', e);
       this.changeFont();
       this.setFontFromLocalStorage();
-    } catch (error) { }
+    } catch (error) {}
   }
 
   private setFontFromLocalStorage() {
@@ -2037,7 +2048,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (localStorage.getItem('fontSize') !== null) {
         this.fontSize.setValue(localStorage.getItem('fontSize'));
       }
-    } catch (error) { }
+    } catch (error) {}
   }
 
   clearSession() {
@@ -2055,6 +2066,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.sdk.handleChatEnd(this.customerData);
     this.clearMessageData();
     this.fileLoading = false;
+    this.fileUrl = '';
     this.imageUrls = [];
     this.selectedFile = null as any;
   }
@@ -2101,5 +2113,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }, 1000);
       }
     });
+  }
+
+  getLabel(valueType: string): string {
+    return this.dictionary[valueType] || valueType; // Return the  to valueType matchinf value from the dict
   }
 }
