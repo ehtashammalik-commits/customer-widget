@@ -486,8 +486,8 @@
                         ? customerIdentifier
                         : ''
                     "
-                    [attr.maxlength]="alphaNumeric_maxLength"
-                    [attr.minlength]="alphaNumeric_minLength"
+                    [attr.maxlength]="100"
+                    [attr.minlength]="0"
                     [ngStyle]="{
                       border: isMaxLengthError(
                         attribute.key,
@@ -705,7 +705,7 @@
                   (attribute.valueType === 'paragraph' ||
                     attribute.valueType === 'shortAnswer' ||
                     attribute.valueType === 'alphaNumeric' ||
-                    attribute.valueType === 'alphaNumericSpecial' || 
+                    attribute.valueType === 'alphaNumericSpecial' ||
                     attribute.valueType === 'positiveNumber' ||
                     attribute.valueType === 'number')
                 "
@@ -1344,7 +1344,8 @@
                       alt="avatar"
                     />
                   </div>
-                  <div class="agent-message">
+                  <div class="agent-message"
+                  [ngStyle]="{'min-width': message.body?.subType == 'SURVEY' ? '120px' : '85px'}">
                     <div class="header">
                       <span
                         class="name"
