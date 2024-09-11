@@ -514,11 +514,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           validators.push(Validators.maxLength(this.paragraph_maxLength));
         } else if (matchingValidation.type === 'number') {
           validators.push(Validators.minLength(1));
-          validators.push(Validators.maxLength(200));
+          validators.push(Validators.maxLength(100));
         } else if (matchingValidation.type === 'positiveNumber') {
           validators.push(Validators.minLength(1));
-          validators.push(Validators.maxLength(200));
-        } else {
+          validators.push(Validators.maxLength(100));
+        } else if(matchingValidation.type !== 'dateTime' && matchingValidation.type !== 'date' && matchingValidation.type !== 'time') {
           const correctedRegex = new RegExp(matchingValidation.regex);
           validators.push(Validators.pattern(correctedRegex));
         }
@@ -595,10 +595,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           validators.push(Validators.maxLength(this.paragraph_maxLength));
         } else if (matchingValidation.type === 'number') {
           validators.push(Validators.minLength(1));
-          validators.push(Validators.maxLength(200));
+          validators.push(Validators.maxLength(100));
         } else if (matchingValidation.type === 'positiveNumber') {
           validators.push(Validators.minLength(1));
-          validators.push(Validators.maxLength(200));
+          validators.push(Validators.maxLength(100));
         } else {
           const correctedRegex = new RegExp(matchingValidation.regex);
           validators.push(Validators.pattern(correctedRegex));
