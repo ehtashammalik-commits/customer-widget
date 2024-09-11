@@ -2081,3 +2081,38 @@ mat-spinner {
     }
   }
 }
+
+.survye_msg {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+.surveyicon {
+  font-size: 50px !important;
+  color: #007bff !important;
+}
+.survey_link {
+  color: #007bff;
+  position: absolute;
+  bottom: 15%;
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.message2 {
+  font-family: "Roboto";
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 18px;
+  font-style: normal;
+  text-align: left;
+  color: #000000;
+  width: auto;
+  max-width: 215px;
+  line-break: normal;
+  word-break: break-word;
+  white-space: normal;
+}

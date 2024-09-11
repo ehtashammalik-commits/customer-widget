@@ -399,7 +399,7 @@
                 class="field-error error_text_for_filling"
                 *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched"
               >
-                please fill in all the required fields
+                Please fill in all the required fields
               </span>
             </div>
             <div
@@ -443,7 +443,9 @@
                           *ngIf="attribute?.isRequired === true"
                           >*</span
                         >
-                        <span class="fileType">( All supported file types allowed )</span>
+                        <span class="fileType"
+                          >( All supported file types allowed )</span
+                        >
                       </ng-container>
                     </ng-container>
                     <ng-container *ngIf="attribute?.valueType !== 'file'">
@@ -465,7 +467,11 @@
                       attribute.valueType !== 'paragraph' &&
                       attribute.valueType !== 'shortAnswer' &&
                       attribute.valueType !== 'Password' &&
-                      attribute.valueType !== 'password'
+                      attribute.valueType !== 'password' &&
+                      attribute.valueType !== 'alphaNumeric' &&
+                      attribute.valueType !== 'alphaNumericSpecial' &&
+                      attribute.valueType !== 'number' &&
+                      attribute.valueType !== 'positiveNumber'
                     "
                     matInput
                     id="{{ attribute.key }}"
@@ -480,6 +486,42 @@
                         ? customerIdentifier
                         : ''
                     "
+                    [attr.maxlength]="alphaNumeric_maxLength"
+                    [attr.minlength]="alphaNumeric_minLength"
+                    [ngStyle]="{
+                      border: isMaxLengthError(
+                        attribute.key,
+                        attribute.valueType
+                      )
+                        ? '1px solid red'
+                        : 'none'
+                    }"
+                  />
+                  <input
+                    *ngIf="
+                      attribute.valueType === 'alphaNumeric' ||
+                      attribute.valueType === 'alphaNumericSpecial' ||
+                      attribute.valueType === 'number' ||
+                      attribute.valueType === 'positiveNumber'
+                    "
+                    matInput
+                    id="{{ attribute.key }}"
+                    type="{{ attribute.valueType }}"
+                    [formControlName]="attribute.key"
+                    [placeholder]="attribute.helpText"
+                    class="widget-form-control"
+                    autocomplete="on"
+                    [required]="attribute?.isRequired"
+                    [attr.maxlength]="100"
+                    [attr.minlength]="1"
+                    [ngStyle]="{
+                      border: isMaxLengthError(
+                        attribute.key,
+                        attribute.valueType
+                      )
+                        ? '1px solid red'
+                        : 'none'
+                    }"
                   />
                   <!-- for password -->
                   <input
@@ -490,12 +532,18 @@
                     type="password"
                     id="{{ attribute.key }}"
                     [formControlName]="attribute.key"
-                    [placeholder]="
-                      'Password (Min 8 characters, First letter capital)'
-                    "
                     class="widget-form-control"
                     [attr.required]="attribute?.isRequired ? true : null"
                     minlength="8"
+                    maxlength="256"
+                    [ngStyle]="{
+                      border: isMaxLengthError(
+                        attribute.key,
+                        attribute.valueType
+                      )
+                        ? '1px solid red'
+                        : 'none'
+                    }"
                   />
                   <!-- for short answer -->
                   <input
@@ -655,7 +703,11 @@
                   preChatFormGroup.get(attribute.key) &&
                   isMaxLengthError(attribute.key, attribute.valueType) &&
                   (attribute.valueType === 'paragraph' ||
-                    attribute.valueType === 'shortAnswer')
+                    attribute.valueType === 'shortAnswer' ||
+                    attribute.valueType === 'alphaNumeric' ||
+                    attribute.valueType === 'alphaNumericSpecial' || 
+                    attribute.valueType === 'positiveNumber' ||
+                    attribute.valueType === 'number')
                 "
               >
                 <span class="field-error"> Maximum Limit reached </span>
@@ -1310,7 +1362,6 @@
                         }}</span
                       >
                     </div>
-
                     <span
                       class="message"
                       *ngIf="message.body.type == 'PLAIN'"
@@ -1330,6 +1381,30 @@
                       }"
                     >
                     </span>
+                    <div class="surveyDiv">
+                      <span
+                        *ngIf="message.body?.subType == 'SURVEY'"
+                        class="material-symbols-outlined surveyicon"
+                        >description</span
+                      >
+                      <a
+                        class="survey_link"
+                        target="_blank"
+                        *ngIf="message.body?.subType == 'SURVEY'"
+                        href="{{ message.body.surveyLink }}"
+                        [ngStyle]="{
+                          'font-size': fontSize.value + 'px',
+                          'line-height':
+                            fontSize.value == '14'
+                              ? '20px'
+                              : fontSize.value == '16'
+                              ? '24px'
+                              : '18px'
+                        }"
+                      >
+                        {{ surveyTitle }}
+                      </a>
+                    </div>
                     <!-- Message Type Button -->
                     <div
                       class="structured-message-area"

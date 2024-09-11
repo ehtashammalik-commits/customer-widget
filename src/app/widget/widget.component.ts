@@ -128,6 +128,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   //(paragraph)
   paragraph_maxLength: number = 0;
   paragraph_minLength: number = 0;
+
+  alphaNumeric_maxLength: number = 0;
+  alphaNumeric_minLength: number = 0;
+
+  alphaNumericSpecial_maxLength: number = 0;
+  alphaNumericSpecial_minLength: number = 0;
+
+  password_maxLength = 0;
+  password_minLength = 0;
   // Audio Screen Variables
   counterVar: any; // will be used in count down timer
   agentName: string = 'Expertflow Agent'; // Agent Name during Active call will be pushed in this variable to show on the screen
@@ -208,6 +217,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   text: string = '';
   composer_input_disabled: boolean = false;
   isTyping: boolean = true;
+  surveyTitle: any = 'Survey Form';
 
   @Input() formData!: any[];
   @Input() callbackFormData!: any[];
@@ -380,10 +390,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (data: { isChatAvailable: boolean; data: any[] }) => {
         if (data.isChatAvailable == true) {
           this.changeScreen('chat');
-          console.log('on Chat Resumed Response:', data);
-          this.cimMessage = data.data;
-          this.isChatActive = true;
-          this.processSeenMessages();
+          console.log('on Chat Resumed Response:', data.data);
+          this.handleResumedMessages(data.data);
         } else if (data.isChatAvailable == false) {
           localStorage.removeItem('widget-error');
           this.changeScreen('end');
@@ -449,12 +457,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           return validation.type === attribute.valueType;
         },
       );
-
       const validators = attribute.isRequired ? [Validators.required] : [];
-
       const controlName = attribute.key;
       if (matchingValidation && matchingValidation.regex) {
-        // Ensure regex is correctly formatted
         if (matchingValidation.type === 'phoneNumber') {
           const phoneNumberRegex = new RegExp(
             '^(\\+\\d{1,3}[\\s-])?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,4}[\\s-]?\\d{1,9}$',
@@ -467,33 +472,54 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           const { minlength, maxlength } = this.extractMinMaxLength(
             matchingValidation.regex,
           );
-
           this.short_ans_maxLength = maxlength;
           this.short_ans_minLength = minlength;
-
-          // Apply minLength and maxLength validators correctly
           validators.push(Validators.minLength(this.short_ans_minLength));
           validators.push(Validators.maxLength(this.short_ans_maxLength));
+        } else if (matchingValidation.type === 'alphaNumeric') {
+          const { minlength, maxlength } = this.extractMinMaxLength(
+            matchingValidation.regex,
+          );
+          this.alphaNumeric_maxLength = maxlength;
+          this.alphaNumeric_minLength = minlength;
+          validators.push(Validators.minLength(this.alphaNumeric_minLength));
+          validators.push(Validators.maxLength(this.alphaNumeric_maxLength));
+        } else if (matchingValidation.type === 'alphaNumericSpecial') {
+          const { minlength, maxlength } = this.extractMinMaxLength(
+            matchingValidation.regex,
+          );
+          this.alphaNumericSpecial_maxLength = maxlength;
+          this.alphaNumericSpecial_minLength = minlength;
+          validators.push(
+            Validators.minLength(this.alphaNumericSpecial_maxLength),
+          );
+          validators.push(
+            Validators.maxLength(this.alphaNumericSpecial_maxLength),
+          );
+        } else if (matchingValidation.type === 'password') {
+          const { minlength, maxlength } = this.extractMinMaxLength(
+            matchingValidation.regex,
+          );
+          this.password_maxLength = maxlength;
+          this.password_minLength = minlength;
+          validators.push(Validators.minLength(this.password_minLength));
+          validators.push(Validators.maxLength(this.password_maxLength));
         } else if (matchingValidation.type === 'paragraph') {
           const { minlength, maxlength } = this.extractMinMaxLength(
             matchingValidation.regex,
           );
-
           this.paragraph_maxLength = maxlength;
           this.paragraph_minLength = minlength;
-
           validators.push(Validators.minLength(this.paragraph_minLength));
           validators.push(Validators.maxLength(this.paragraph_maxLength));
-        } else if (matchingValidation.type === 'time') {
-          console.log('no regex for time');
-        } else if (matchingValidation.type === 'dateTime') {
-          console.log('no regex for datetime');
-        } else if (matchingValidation.type === 'file') {
-          this.file_attribute_key = attribute.key;
-          //no regex for file
+        } else if (matchingValidation.type === 'number') {
+          validators.push(Validators.minLength(1));
+          validators.push(Validators.maxLength(200));
+        } else if (matchingValidation.type === 'positiveNumber') {
+          validators.push(Validators.minLength(1));
+          validators.push(Validators.maxLength(200));
         } else {
           const correctedRegex = new RegExp(matchingValidation.regex);
-
           validators.push(Validators.pattern(correctedRegex));
         }
       }
@@ -513,10 +539,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           return validation.type === attribute.valueType;
         },
       );
-
       const controlName = attribute.key;
       if (matchingValidation && matchingValidation.regex) {
-        // Ensure regex is correctly formatted
         if (matchingValidation.type === 'phoneNumber') {
           const phoneNumberRegex = new RegExp(
             '^(\\+\\d{1,3}[\\s-])?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,4}[\\s-]?\\d{1,9}$',
@@ -529,29 +553,54 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           const { minlength, maxlength } = this.extractMinMaxLength(
             matchingValidation.regex,
           );
-
           this.short_ans_maxLength = maxlength;
           this.short_ans_minLength = minlength;
-
           validators.push(Validators.minLength(this.short_ans_minLength));
           validators.push(Validators.maxLength(this.short_ans_maxLength));
+        } else if (matchingValidation.type === 'alphaNumeric') {
+          const { minlength, maxlength } = this.extractMinMaxLength(
+            matchingValidation.regex,
+          );
+          this.alphaNumeric_maxLength = maxlength;
+          this.alphaNumeric_minLength = minlength;
+          validators.push(Validators.minLength(this.alphaNumeric_minLength));
+          validators.push(Validators.maxLength(this.alphaNumeric_maxLength));
+        } else if (matchingValidation.type === 'alphaNumericSpecial') {
+          const { minlength, maxlength } = this.extractMinMaxLength(
+            matchingValidation.regex,
+          );
+          this.alphaNumericSpecial_maxLength = maxlength;
+          this.alphaNumericSpecial_minLength = minlength;
+          validators.push(
+            Validators.minLength(this.alphaNumericSpecial_maxLength),
+          );
+          validators.push(
+            Validators.maxLength(this.alphaNumericSpecial_maxLength),
+          );
+        } else if (matchingValidation.type === 'password') {
+          const { minlength, maxlength } = this.extractMinMaxLength(
+            matchingValidation.regex,
+          );
+          this.password_maxLength = maxlength;
+          this.password_minLength = minlength;
+          validators.push(Validators.minLength(this.password_minLength));
+          validators.push(Validators.maxLength(this.password_maxLength));
         } else if (matchingValidation.type === 'paragraph') {
           const { minlength, maxlength } = this.extractMinMaxLength(
             matchingValidation.regex,
           );
-
           this.paragraph_maxLength = maxlength;
           this.paragraph_minLength = minlength;
-
           validators.push(Validators.minLength(this.paragraph_minLength));
           validators.push(Validators.maxLength(this.paragraph_maxLength));
-        } else if (matchingValidation.type === 'time') {
-          console.log('no regex for time');
-        } else if (matchingValidation.type === 'dateTime') {
-          console.log('no regex for datetime');
+        } else if (matchingValidation.type === 'number') {
+          validators.push(Validators.minLength(1));
+          validators.push(Validators.maxLength(200));
+        } else if (matchingValidation.type === 'positiveNumber') {
+          validators.push(Validators.minLength(1));
+          validators.push(Validators.maxLength(200));
         } else {
           const correctedRegex = new RegExp(matchingValidation.regex);
-
           validators.push(Validators.pattern(correctedRegex));
         }
       }
@@ -579,6 +628,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         maxLength = this.short_ans_maxLength;
       } else if (valueType === 'paragraph') {
         maxLength = this.paragraph_maxLength;
+      } else if (valueType === 'alphaNumeric') {
+        maxLength = 100;
+      } else if (valueType === 'alphaNumericSpecial') {
+        maxLength = 100;
+      } else if (valueType === 'number') {
+        maxLength = 100;
+      } else if (valueType === 'positiveNumber') {
+        maxLength = 100;
+      } else if (valueType === 'password') {
+        maxLength = this.password_maxLength;
       }
 
       // Ensure maxLength is set
@@ -1144,12 +1203,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
         console.log('Event  received with data  ', cimMessage.body);
 
-        //if timer exist restart the timer
+        // If timer exists, restart the timer
         if (!this.typingIndicatorTimer) {
-          console.log('timer started for indicator to show ', cimMessage.body);
+          console.log('Timer started for indicator to show ', cimMessage.body);
 
           this.typingIndicatorTimer = setTimeout(() => {
-            console.log('timer ended for indicator to show ', cimMessage.body);
+            console.log('Timer ended for indicator to show ', cimMessage.body);
             this.typingIndicatorTimer = null;
           }, 5000);
         } else {
@@ -1159,6 +1218,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           }, 5000);
         }
       }
+    } else if (
+      cimMessage.body.type.toLowerCase() == 'plain' &&
+      cimMessage.header.sender &&
+      (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
+        cimMessage.header.sender.type.toLowerCase() == 'bot')
+    ) {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const urls = cimMessage.body.markdownText.match(urlRegex);
+      if (urls) {
+        for (let url of urls) {
+          if (url.includes('&type=survey')) {
+            cimMessage.body.subType = 'SURVEY';
+            cimMessage.body.surveyLink = url;
+            const normalText = cimMessage.body.markdownText
+              .replace(urlRegex, '')
+              .trim();
+            cimMessage.body.markdownText = normalText;
+            break; // Exit the loop if found
+          }
+        }
+      }
+
+      this.cimMessage.push(cimMessage);
+      this.browserNotificationService.notify(cimMessage);
+      this.scrollToBottom();
+      this.handleMessageReport(cimMessage);
     } else {
       if (
         cimMessage.body.type.toLowerCase() != 'notification' &&
@@ -1172,6 +1257,49 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.scrollToBottom();
       this.handleMessageReport(cimMessage);
     }
+  }
+
+  handleResumedMessages(cimMessages: any[]) {
+    cimMessages.forEach((cimMessage) => {
+      if (
+        cimMessage.body.type.toLowerCase() == 'plain' &&
+        cimMessage.header.sender &&
+        (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
+          cimMessage.header.sender.type.toLowerCase() == 'bot')
+      ) {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const urls = cimMessage.body.markdownText.match(urlRegex);
+        // Check if any URLs are found
+        if (urls) {
+          urls.forEach((url: string | string[]) => {
+            if (url.includes('&type=survey')) {
+              cimMessage.body.subType = 'SURVEY';
+              cimMessage.body.surveyLink = url;
+              cimMessage.body.markdownText = cimMessage.body.markdownText
+                .replace(urlRegex, '')
+                .trim();
+            }
+          });
+        }
+
+        this.cimMessage.push(cimMessage);
+        this.isChatActive = true;
+        this.processSeenMessages();
+        this.scrollToBottom();
+      } else {
+        if (
+          cimMessage.body.type.toLowerCase() != 'notification' &&
+          cimMessage.header.sender.type.toLowerCase() == 'agent'
+        ) {
+          clearTimeout(this.typingIndicatorTimer);
+          this.typingIndicatorTimer = null;
+        }
+        this.cimMessage.push(cimMessage);
+        this.isChatActive = true;
+        this.processSeenMessages();
+        this.scrollToBottom();
+      }
+    });
   }
 
   updateStatusOfCustomerMessage(messageId: string, status: string) {
