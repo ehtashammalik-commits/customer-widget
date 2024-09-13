@@ -17,14 +17,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 
-import { NgxLinkifyjsModule } from "ngx-linkifyjs";
+import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
 import { tagFormatPipe } from './tagFormat.pipe';
 import { AppComponent } from './app.component';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { AppRoutingModule, routingComponents } from './app-routing.module';
 import { ConfigService } from './services/config.service';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
-import { getMediaFromTask } from "./getMediaFromTask.pipe";
+import { getMediaFromTask } from './getMediaFromTask.pipe';
 
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
@@ -39,11 +39,17 @@ export function initializeApp1(appConfigService: ConfigService) {
 }
 
 @NgModule({
-  declarations: [AppComponent, routingComponents, ConfirmDialogComponent, tagFormatPipe, getMediaFromTask],
+  declarations: [
+    AppComponent,
+    routingComponents,
+    ConfirmDialogComponent,
+    tagFormatPipe,
+    getMediaFromTask,
+  ],
   imports: [
     NgxLinkifyjsModule.forRoot({
       enableHash: false,
-      enableMention: true
+      enableMention: true,
     }),
     BrowserModule,
     HttpClientModule,
@@ -63,9 +69,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatDialogModule,
     MatChipsModule,
   ],
-  exports: [
-    getMediaFromTask
-  ],
+  exports: [getMediaFromTask],
   providers: [
     {
       provide: LocationStrategy,

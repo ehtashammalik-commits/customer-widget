@@ -5,9 +5,14 @@ import {
   ElementRef,
   ViewChild,
   Input,
-  ChangeDetectorRef
+  ChangeDetectorRef,
 } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import {
+  FormGroup,
+  FormBuilder,
+  Validators,
+  FormControl,
+} from '@angular/forms';
 import { SdkService } from '../services/sdk.service';
 import { ConfigService } from '../services/config.service';
 import { BrowserNotificationService } from '../services/browser-notification.service';
@@ -50,25 +55,25 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   @ViewChild('localVideo') myVideoLocal!: ElementRef;
 
   scrollTop = 0;
-  fontSize = new FormControl("12");
+  fontSize = new FormControl('12');
   public scrollCon: any;
   webRtcSecureLink: string | null = null; // variable to store secure link got from URL params
   customerIdentifier: any; // variable to store customer channel identifier got from URL params
-  widgetIdentifier: string | null = null;;  // variable to store widget identifier got from URL params
+  widgetIdentifier: string | null = null; // variable to store widget identifier got from URL params
   serviceIdentifier: any; // variable to store service identifier got from URL params
 
   sendTypingStartedEventTimer: any = null;
   eventTriggerType = '';
 
   additionalPanel = false; // If true will show Popup Panel on top of widget icon
-  isIconWidget = true;   // If true will show widget icon
+  isIconWidget = true; // If true will show widget icon
   preChatFormScreen = false; // If true will show pre chat form screen
-  widgetChatScreen = false;  // If true will show widget Chat screen
+  widgetChatScreen = false; // If true will show widget Chat screen
   chatError = false; // If true will show error in case of chat failure.
   chatEndScreen = false; //If true will show chat End Screen at the end of Chat
 
   callbackFormScreen = false; // If true will show callback form screen to schedule callback
-  callbackResponseScreen = false;  // If true will show Callback Response screen after receiving response from server
+  callbackResponseScreen = false; // If true will show Callback Response screen after receiving response from server
 
   // if true will enable standalone webRTC video call feature
   webRtcVideoCallScreen: boolean = false;
@@ -131,11 +136,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   callbackResponseStatus = ''; // Callback Response Status Text to show on the Callback response Screen
   enabledWebhook: boolean = false; //If true than show webhook is enabled in the widget and will push notification to defined webhook
 
-  standaloneCallback: boolean = false;  //If true than it will enable standalone callback
-  standaloneWebRtc: boolean = false;  //If true than it will enable standalone webRtc Video Call and hide Chat Features
+  standaloneCallback: boolean = false; //If true than it will enable standalone callback
+  standaloneWebRtc: boolean = false; //If true than it will enable standalone webRtc Video Call and hide Chat Features
 
   fontDropDown = false;
-  positionOptions: TooltipPosition[] = ['after', 'before', 'above', 'below', 'left', 'right'];
+  positionOptions: TooltipPosition[] = [
+    'after',
+    'before',
+    'above',
+    'below',
+    'left',
+    'right',
+  ];
   matToolTipPosition = this.positionOptions[4];
   isMobile = false;
 
@@ -201,7 +213,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-
     // Load the standalone webRtc Authentication screen or the active chat screen depending on whether the user is coming from secure link or not.
     if (this.standaloneWebRtc) {
       this.changeScreen('webRtcScreen');
@@ -220,14 +231,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-
     this.route.queryParams.subscribe((params) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
       this.widgetIdentifier = params['widgetIdentifier'];
 
       // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
-      const rawEncryptedKey = params['encryptedKey'] ? params['encryptedKey'] : null;
+      const rawEncryptedKey = params['encryptedKey']
+        ? params['encryptedKey']
+        : null;
       if (rawEncryptedKey !== null) {
         // Directly replace spaces with '+' if you're sure there should be no spaces
         this.webRtcSecureLink = rawEncryptedKey.replace(/ /g, '+');
@@ -238,20 +250,42 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (this.webRtcSecureLink != undefined && this.webRtcSecureLink != '') {
         this.standaloneWebRtc = true;
         if (this.widgetIdentifier == undefined || this.widgetIdentifier == '') {
-          alert("Error: Please check with Administrator. Widget identifier is missing!!!");
+          alert(
+            'Error: Please check with Administrator. Widget identifier is missing!!!',
+          );
         }
-        console.log('Secure Link:', this.webRtcSecureLink, this.widgetIdentifier);
+        console.log(
+          'Secure Link:',
+          this.webRtcSecureLink,
+          this.widgetIdentifier,
+        );
       } else {
         this.standaloneWebRtc = false;
-        if (this.serviceIdentifier == undefined || this.serviceIdentifier == '') {
-          alert("Error: Please check with Administrator. Service identifier is missing!!!");
+        if (
+          this.serviceIdentifier == undefined ||
+          this.serviceIdentifier == ''
+        ) {
+          alert(
+            'Error: Please check with Administrator. Service identifier is missing!!!',
+          );
         }
         if (this.widgetIdentifier == undefined || this.widgetIdentifier == '') {
-          alert("Error: Please check with Administrator. Widget identifier is missing!!!");
+          alert(
+            'Error: Please check with Administrator. Widget identifier is missing!!!',
+          );
         }
-        if (this.__appConfig.appConfig.CHANNEL_IDENTIFIER === 'channel_customer_identifier') {
-          if (this.customerIdentifier == undefined || this.customerIdentifier == '' || this.customerIdentifier == null) {
-            alert("Warning: 'channelCustomerIdentifier' parameter is missing in the url, Required for Customer Identification!!!");
+        if (
+          this.__appConfig.appConfig.CHANNEL_IDENTIFIER ===
+          'channel_customer_identifier'
+        ) {
+          if (
+            this.customerIdentifier == undefined ||
+            this.customerIdentifier == '' ||
+            this.customerIdentifier == null
+          ) {
+            alert(
+              "Warning: 'channelCustomerIdentifier' parameter is missing in the url, Required for Customer Identification!!!",
+            );
           }
         }
       }
@@ -267,7 +301,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.setWidgetConfigs(configs);
         this.loadBrowserLanguage();
         console.log('Widget configurations:', configs);
-        if (this.enabledCallback) this.sdk.renderCallbackForm(this.callbackConfig.callBackForm);
+        if (this.enabledCallback)
+          this.sdk.renderCallbackForm(this.callbackConfig.callBackForm);
         if (configs.form !== '') this.sdk.renderPreChatForm(this.preChatFormId);
       },
     );
@@ -304,22 +339,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       },
     );
 
-    this.onWebRtcCallSubject = this.sdk.onWebRtcCallResponse$.subscribe((data) => {
-      this.handleDialogStates(data);
-    });
+    this.onWebRtcCallSubject = this.sdk.onWebRtcCallResponse$.subscribe(
+      (data) => {
+        this.handleDialogStates(data);
+      },
+    );
 
-    this.onCallbackRequestSubject = this.sdk.onCallbackRequestResponse$.subscribe((data) => {
-      console.log('callback request response events => ', data);
+    this.onCallbackRequestSubject =
+      this.sdk.onCallbackRequestResponse$.subscribe((data) => {
+        console.log('callback request response events => ', data);
 
-      if (data && data.status && data.status.name) {
-        this.callbackResponseStatus = data.status.name.toLowerCase();
-      } else {
-        this.callbackResponseStatus = 'error';
-        console.error('Something Went Wrong Please check logs');
-      }
-      this.callbackLoader = false;
-      this.isChatActive ? this.changeView('callbackResponse') : this.changeScreen('callbackResponse');
-    });
+        if (data && data.status && data.status.name) {
+          this.callbackResponseStatus = data.status.name.toLowerCase();
+        } else {
+          this.callbackResponseStatus = 'error';
+          console.error('Something Went Wrong Please check logs');
+        }
+        this.callbackLoader = false;
+        this.isChatActive
+          ? this.changeView('callbackResponse')
+          : this.changeScreen('callbackResponse');
+      });
 
     this.establishConnectionSubject = this.sdk.connectionResponse$.subscribe(
       (response) => {
@@ -404,20 +444,30 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (this.preChatFormGroup.valid) {
         this.preChatFormLoader = true;
         this.preChatFormData = this.preChatFormGroup.value;
-        if (this.serviceIdentifier !== '' && this.serviceIdentifier !== null && this.serviceIdentifier !== undefined) {
+        if (
+          this.serviceIdentifier !== '' &&
+          this.serviceIdentifier !== null &&
+          this.serviceIdentifier !== undefined
+        ) {
           let eventPayload = this.getEventPayload(this.preChatFormData);
           console.log('Event Payload: ==>', eventPayload);
           // If Error is false than proceed with the start Chat and user data setting
-          if (!eventPayload.error) { this.setUserData(eventPayload.data, 'startChat'); }
+          if (!eventPayload.error) {
+            this.setUserData(eventPayload.data, 'startChat');
+          }
         } else {
           this.preChatFormLoader = false;
-          alert("Please Check with Administrator. Your service identifier is missing!");
+          alert(
+            'Please Check with Administrator. Your service identifier is missing!',
+          );
         }
       } else {
         // Mark all controls as touched to trigger validation errors
         this.markFormGroupTouched(this.preChatFormGroup);
       }
-    } catch (error) { alert('Error while submitting the form'); }
+    } catch (error) {
+      alert('Error while submitting the form');
+    }
   }
 
   onCallbackFormSubmit(): void {
@@ -425,7 +475,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       let callbackData = this.callbackFormGroup.value;
       console.log('Callback Data:', callbackData);
       this.callbackLoader = true;
-      this.sdk.sendCallbackRequest(this.callbackConfig, callbackData)
+      this.sdk.sendCallbackRequest(this.callbackConfig, callbackData);
     } catch {
       alert('Error while submitting the form');
     }
@@ -463,7 +513,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  checkFieldValue(data: { [x: string]: any; hasOwnProperty: (arg0: any) => any; }, field: any) {
+  checkFieldValue(
+    data: { [x: string]: any; hasOwnProperty: (arg0: any) => any },
+    field: any,
+  ) {
     if (data.hasOwnProperty(field)) {
       const value = data[field];
       // Check if the value is not null, empty, or undefined
@@ -471,16 +524,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         return { error: false, data: value };
       } else {
         const err = `This Field "${field}" is required.`;
-        return { error: true, data: err }
+        return { error: true, data: err };
       }
     } else {
       const err = `Error: The field "${field}" does not exist in the pre-chat form.`;
-      return { error: true, data: err }
+      return { error: true, data: err };
     }
   }
 
   getEventPayload(preChatFormData: any) {
-    const channelIdentifierData = this.checkFieldValue(preChatFormData, this.__appConfig.appConfig.CHANNEL_IDENTIFIER);
+    const channelIdentifierData = this.checkFieldValue(
+      preChatFormData,
+      this.__appConfig.appConfig.CHANNEL_IDENTIFIER,
+    );
     if (channelIdentifierData.error) {
       this.preChatFormLoader = false;
       alert(channelIdentifierData.data);
@@ -504,7 +560,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             country: null,
           },
           formData: this.getFormDataByPreChatForm(preChatFormData),
-        }
+        },
       };
     }
   }
@@ -523,7 +579,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return Object.entries(jsonObject).map(([key, value]) => ({
       value: value,
       key: key,
-      type: typeof value === "string" ? "string" : typeof value
+      type: typeof value === 'string' ? 'string' : typeof value,
     }));
   }
 
@@ -537,7 +593,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('Change Screen:', screen);
     switch (screen) {
       case 'widget':
-        if (sessionStorage.getItem('wrapper-hide') === 'true' || this.__appConfig.appConfig.ADDITIONAL_PANEL  !== true) {
+        if (
+          sessionStorage.getItem('wrapper-hide') === 'true' ||
+          this.__appConfig.appConfig.ADDITIONAL_PANEL !== true
+        ) {
           this.additionalPanel = false;
         } else {
           this.additionalPanel = true;
@@ -733,24 +792,37 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (event.id !== undefined || event.id !== '' || event.id !== null) {
         switch (event.type) {
           case 'SOCKET_RECONNECTED':
-            console.log('[SOCKET_RECONNECTED] ==> Chat Resume Request Sent: ', event.data);
+            console.log(
+              '[SOCKET_RECONNECTED] ==> Chat Resume Request Sent: ',
+              event.data,
+            );
             this.sdk.onChatResumed(
               event.data.serviceIdentifier,
               event.data.channelCustomerIdentifier,
             );
-            let error = localStorage.removeItem("widget-error");
+            let error = localStorage.removeItem('widget-error');
             this.changeScreen('chat');
-            console.log('[SOCKET_RECONNECTED] ==> Chat Resume event response:', this.customerData);
+            console.log(
+              '[SOCKET_RECONNECTED] ==> Chat Resume event response:',
+              this.customerData,
+            );
             break;
           case 'SOCKET_CONNECTED':
-            console.log('[SOCKET_CONNECTED] ==> New Connection Request Response:', event.data);
+            console.log(
+              '[SOCKET_CONNECTED] ==> New Connection Request Response:',
+              event.data,
+            );
             if (this.eventTriggerType === 'startChat') {
               this.chatPayLoad = {
                 type: 'CHAT_REQUESTED',
                 data: this.customerData,
               };
               this.sdk.sendChatRequest(this.chatPayLoad);
-              if (this.enabledWebhook) this.sdk.sendWebhookNotification(this.webhookUrl, this.chatPayLoad);
+              if (this.enabledWebhook)
+                this.sdk.sendWebhookNotification(
+                  this.webhookUrl,
+                  this.chatPayLoad,
+                );
               console.log('New Chat Start Request Sent');
             } else if (this.eventTriggerType === '') {
               console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
@@ -770,7 +842,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               'conversationId',
               event.data.header.conversationId,
             );
-            this.sdk.setConversationDataAgainstCustomerIdentifier(this.customerData.channelCustomerIdentifier, this.preChatFormData);
+            this.sdk.setConversationDataAgainstCustomerIdentifier(
+              this.customerData.channelCustomerIdentifier,
+              this.preChatFormData,
+            );
             break;
           case 'MESSAGE_RECEIVED':
             console.log('event response:', event.data);
@@ -1046,7 +1121,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       try {
         this.scrollContainer.nativeElement.scrollTop =
           this.scrollContainer.nativeElement.scrollHeight;
-      } catch (err) { }
+      } catch (err) {}
     }, 350);
   }
 
@@ -1093,7 +1168,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (msgType.toLowerCase() == 'plain') {
       let transformedIntent = this.transformPayload(intent);
       header.originalMessageId = originalMessageId ? originalMessageId : null;
-      header.intent = transformedIntent.intent ? transformedIntent.intent : null;
+      header.intent = transformedIntent.intent
+        ? transformedIntent.intent
+        : null;
       if (transformedIntent.entities) {
         header.entities = transformedIntent.entities;
       }
@@ -1282,7 +1359,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         'PLAIN',
         data.title.trim(),
         data.payload,
-        originalMessageId
+        originalMessageId,
       );
     }
   }
@@ -1384,8 +1461,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   chatTranscript() {
     if (localStorage.getItem('conversationId') !== '') {
       window.open(
-        `widget-assets/chat-transcript/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
-        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier
+        `widget-assets/chat-transcript/?ccmUrl=${
+          this.__appConfig.appConfig.CCM_URL
+        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${
+          this.serviceIdentifier
         }&conversationId=${localStorage.getItem(
           'conversationId',
         )}&browserLang=${this.browserLang}`,
@@ -1409,7 +1488,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   toggleCallMic() {
     this.isCallMute = !this.isCallMute; // Use assignment operator and logical NOT operator
     console.log(this.isCallMute);
-    const action = (this.isCallMute) ? 'mute_call' : 'unmute_call';
+    const action = this.isCallMute ? 'mute_call' : 'unmute_call';
     this.sdk.handleCallMic(action, this.dialogId);
   }
 
@@ -1422,7 +1501,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   toggleCallHold() {
     this.isCallOnHold = !this.isCallOnHold; // Use assignment operator and logical NOT operator
     console.log(this.isCallOnHold);
-    const action = (this.isCallOnHold) ? 'holdCall' : 'retrieveCall';
+    const action = this.isCallOnHold ? 'holdCall' : 'retrieveCall';
     this.sdk.handleCallHoldState(action, this.dialogId);
   }
 
@@ -1432,7 +1511,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.sdk.handleCallStart({
       type: callType,
-      authConfigs: this.setAuthorizedResponse
+      authConfigs: this.setAuthorizedResponse,
     });
     if (this.standaloneWebRtc) {
       this.isWebRtcVideoCallActive = true;
@@ -1469,27 +1548,45 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('[handleDialogStates] received dialog: ===> ', data);
 
     if (data.event === 'agentInfo') {
-      console.log('[handleDialogStates] Inside Agent Info Event: ===> ', data.response);
+      console.log(
+        '[handleDialogStates] Inside Agent Info Event: ===> ',
+        data.response,
+      );
       if (data.response.state === 'LOGIN') {
-        console.log('[handleDialogStates] SIP Connection Established with: ===> ', data.response.extension);
+        console.log(
+          '[handleDialogStates] SIP Connection Established with: ===> ',
+          data.response.extension,
+        );
       } else {
-        console.log('[handleDialogStates] SIP Connection Failed with: ===> ', data.response.extension);
+        console.log(
+          '[handleDialogStates] SIP Connection Failed with: ===> ',
+          data.response.extension,
+        );
       }
     }
     if (data.event === 'outboundDialing') {
-      console.log('[handleDialogStates] Inside Outbound Dialing Event: ===> ', data.response);
+      console.log(
+        '[handleDialogStates] Inside Outbound Dialing Event: ===> ',
+        data.response,
+      );
       if (data.response.dialog === null) {
         this.maintainDialog = null;
         this.dialogId = null;
       } else {
         switch (data.response.dialog.state) {
           case 'INITIATING':
-            console.log('[outboundDialing] INITIATING CALL DIALOG Event: ===> ', data.response.dialog);
+            console.log(
+              '[outboundDialing] INITIATING CALL DIALOG Event: ===> ',
+              data.response.dialog,
+            );
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
           case 'INITIATED':
-            console.log('[outboundDialing] INITIATED CALL DIALOG Event: ===> ', data.response.dialog);
+            console.log(
+              '[outboundDialing] INITIATED CALL DIALOG Event: ===> ',
+              data.response.dialog,
+            );
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
@@ -1504,22 +1601,34 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       } else {
         switch (data.response.dialog.state) {
           case 'INITIATING':
-            console.log('[dialogState] INITIATING CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] INITIATING CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
           case 'INITIATED':
-            console.log('[dialogState] INITIATED CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] INITIATED CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
           case 'ALERTING':
-            console.log('[dialogState] ALERTING CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] ALERTING CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
           case 'ACTIVE':
-            console.log('[dialogState] ACTIVE CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] ACTIVE CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             if (this.standaloneWebRtc) {
@@ -1529,7 +1638,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             }
             break;
           case 'FAILED':
-            console.log('[dialogState] FAILED CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] FAILED CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
             if (this.standaloneWebRtc) {
               this.endCountdown();
               this.changeScreen('error');
@@ -1541,7 +1653,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             }
             break;
           case 'DROPPED':
-            console.log('[dialogState] DROPPED CALL DIALOG: ===> ', data.response.dialog);
+            console.log(
+              '[dialogState] DROPPED CALL DIALOG: ===> ',
+              data.response.dialog,
+            );
             if (this.standaloneWebRtc) {
               this.callPopUpView = false;
               this.isWebRtcVideoCallActive = false;
@@ -1561,7 +1676,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (data.event === 'Error') {
       switch (data.response.type) {
         case 'generalError':
-          console.log('[Error] Call terminated by customer: ===>', `Error Type: ${data.response.type} with description: ${data.response.description}`)
+          console.log(
+            '[Error] Call terminated by customer: ===>',
+            `Error Type: ${data.response.type} with description: ${data.response.description}`,
+          );
           break;
       }
     }
@@ -1577,20 +1695,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.fontDropDown = !this.fontDropDown; // Toggle the fontDropDown variable
   }
   setFontSize(e: any) {
-    console.log("Set fontsize", e);
+    console.log('Set fontsize', e);
     try {
-      localStorage.setItem("fontSize", e);
+      localStorage.setItem('fontSize', e);
       this.changeFont();
       this.setFontFromLocalStorage();
-    } catch (error) { }
+    } catch (error) {}
   }
 
   private setFontFromLocalStorage() {
     try {
-      if (localStorage.getItem("fontSize") !== null) {
-        this.fontSize.setValue(localStorage.getItem("fontSize"));
+      if (localStorage.getItem('fontSize') !== null) {
+        this.fontSize.setValue(localStorage.getItem('fontSize'));
       }
-    } catch (error) { }
+    } catch (error) {}
   }
 
   clearSession() {
@@ -1616,10 +1734,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const entitiesMatch = trimmedInput.match(/\{.*\}/);
       const entities = entitiesMatch ? JSON.parse(entitiesMatch[0]) : null;
       // Remove the JSON-like string from the trimmed input
-      const intent = entitiesMatch ? trimmedInput.replace(entitiesMatch[0], '') : trimmedInput;
+      const intent = entitiesMatch
+        ? trimmedInput.replace(entitiesMatch[0], '')
+        : trimmedInput;
       return { intent, entities };
     }
-    return { intent: null, entities: null }
+    return { intent: null, entities: null };
   }
 
   authenticateToken(): void {
@@ -1628,7 +1748,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.sdk.authenticateRoomId({ roomId, secureToken }, (res: any) => {
       if (res.error) {
         console.log('Authentication Response not okay: ', res);
-        this.showAuthenticationResponseMessage = res.data.message ? res.data.message : res.message;
+        this.showAuthenticationResponseMessage = res.data.message
+          ? res.data.message
+          : res.message;
         this.showInvalidCodeError = true;
       } else {
         console.log('Authentication response success:', res);
@@ -1641,9 +1763,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.showInvalidCodeError = false;
         this.setAuthorizedResponse = res.data; // Now includes diallingUri
         console.log('<===>Auth Data:', this.setAuthorizedResponse);
-        setTimeout(() => { this.changeView('standaloneVideo'); }, 1000);
+        setTimeout(() => {
+          this.changeView('standaloneVideo');
+        }, 1000);
       }
     });
   }
-
 }

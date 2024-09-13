@@ -11,8 +11,7 @@ document.head.appendChild(socketIOScript);
 
 // Load SIP.js script
 const sipScript = document.createElement('script');
-sipScript.src =
-  'widget-assets/customer-sdk/sip-0.21.2.min.js';
+sipScript.src = 'widget-assets/customer-sdk/sip-0.21.2.min.js';
 document.head.appendChild(sipScript);
 
 // Load the SDK script
