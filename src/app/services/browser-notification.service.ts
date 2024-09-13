@@ -22,7 +22,10 @@ export class BrowserNotificationService {
         messageType === 'AGENT' ||
         messageType === 'SYSTEM'
       ) {
-        if ((textType === 'PLAIN' || textType === 'BUTTON') && document.hidden) {
+        if (
+          (textType === 'PLAIN' || textType === 'BUTTON') &&
+          document.hidden
+        ) {
           this.openBrowserNotification(messageType, messageText);
         }
         if (textType === 'PLAIN' || textType === 'BUTTON') {

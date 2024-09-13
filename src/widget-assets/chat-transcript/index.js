@@ -38,7 +38,7 @@ const senderIconMap = {
 const request = new XMLHttpRequest();
 request.open(
   "GET",
-  `${ccm_url}/message/?customerChannelIdentifier=${channel_customer_identifier}&serviceIdentifier=${service_identifier}&conversationId=${conversation_id}`,
+  `${ccm_url}/message?customerChannelIdentifier=${channel_customer_identifier}&serviceIdentifier=${service_identifier}&conversationId=${conversation_id}`,
 );
 request.send();
 request.onload = () => {
