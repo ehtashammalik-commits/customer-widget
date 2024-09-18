@@ -104,7 +104,6 @@ export class SdkService implements OnInit {
 
   renderPreChatForm(form_id: any) {
     getPreChatForm(this.ConfigData.FORM_URL, form_id, (res: any) => {
-      this.getFormValidation()
       this.preChatFormSubject.next(res);
     });
   }

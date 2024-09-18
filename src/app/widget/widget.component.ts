@@ -108,7 +108,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   typingIndicatorTimer: any = null;
   lastSeenMessageId: any = null;
   conversationId = '';
-  preChatFormValidations: any;
+  formValidations: any;
   // If this flag is 'true' than that's mean Chat is Active
   isChatActive = false;
   // If this flag is 'true' than that's mean Audio Call is Active (In Side Chat Screen)
@@ -287,11 +287,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.sdk.validationsSubcription.subscribe((res) => {
-      this.preChatFormValidations = res;
-      console.log('===========>validations', this.preChatFormValidations);
-      this.createFormControls();
-    });
     this.route.queryParams.subscribe((params: { [x: string]: any }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
@@ -360,6 +355,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe(
       (configs: { form: string }) => {
         this.setWidgetConfigs(configs);
+        this.sdk.getFormValidation();
         this.loadBrowserLanguage();
         console.log('Widget configurations:', configs);
         if (this.enabledCallback)
@@ -368,21 +364,38 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       },
     );
 
+    this.sdk.validationsSubcription.subscribe((res) => {
+      this.formValidations = res;
+      console.log('===========>validations', this.formValidations);
+      // this.createFormControls();
+    });
+
     this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
       (formData: { sections: { attributes: any[] }[] }) => {
         this.formData = formData.sections[0].attributes.filter((item: any) => {
           return item.valueType != 'checkbox';
         });
         console.log('Widget configurations:', formData.sections);
-        console.log('regex:', this.preChatFormValidations);
-        // this.createFormControls();
+        console.log('regex:', this.formValidations);
+        this.createFormValidationControls(
+          this.formData,
+          this.formValidations,
+          'preChatForm'
+        );
       },
     );
     this.callbackFormSubscription = this.sdk.renderCallbackForm$.subscribe(
-      (formData: { attributes: any[] }) => {
-        this.callbackFormData = formData.attributes;
-        this.createCallbackFormControls();
-        console.log('Widget configurations:', formData.attributes);
+      (formData: { sections: { attributes: any[] }[] }) => {
+        this.callbackFormData = formData.sections[0].attributes.filter((item: any) => {
+          return item.valueType != 'checkbox';
+        });
+        console.log('Widget configurations:', formData.sections);
+        console.log('regex:', this.formValidations);
+        this.createFormValidationControls(
+          this.callbackFormData,
+          this.formValidations,
+          'callBackForm'
+        );
       },
     );
 
@@ -450,165 +463,72 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
   }
 
-  private createFormControls(): void {
-    for (const attribute of this.formData) {
-      const matchingValidation = this.preChatFormValidations.find(
-        (validation: any) => {
-          return validation.type === attribute.valueType;
-        },
-      );
+  private createFormValidationControls(
+    formSchema: any,
+    formValidation: any,
+    formType: string
+  ): void {
+    for (const attribute of formSchema) {
+      const matchingValidation = formValidation.find((validation: any) => {
+        return validation.type === attribute.valueType;
+      });
+
       const validators = attribute.isRequired ? [Validators.required] : [];
       const controlName = attribute.key;
+      let minLength = 1;
+      let maxLength = 101;
+      let extractedLength;
+
       if (matchingValidation && matchingValidation.regex) {
-        if (matchingValidation.type === 'phoneNumber') {
-          const phoneNumberRegex = new RegExp(
-            '^(\\+\\d{1,3}[\\s-])?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,4}[\\s-]?\\d{1,9}$',
-          );
-          console.log('Adding regex validator:', matchingValidation.regex);
-          validators.push(Validators.pattern(phoneNumberRegex));
-        } else if (matchingValidation.type === 'boolean') {
-          validators.push(Validators.required);
-        } else if (matchingValidation.type === 'shortAnswer') {
-          const { minlength, maxlength } = this.extractMinMaxLength(
-            matchingValidation.regex,
-          );
-          this.short_ans_maxLength = maxlength;
-          this.short_ans_minLength = minlength;
-          validators.push(Validators.minLength(this.short_ans_minLength));
-          validators.push(Validators.maxLength(this.short_ans_maxLength));
-        } else if (matchingValidation.type === 'alphaNumeric') {
-          const { minlength, maxlength } = this.extractMinMaxLength(
-            matchingValidation.regex,
-          );
-          this.alphaNumeric_maxLength = maxlength;
-          this.alphaNumeric_minLength = minlength;
-          validators.push(Validators.minLength(this.alphaNumeric_minLength));
-          validators.push(Validators.maxLength(this.alphaNumeric_maxLength));
-        } else if (matchingValidation.type === 'alphaNumericSpecial') {
-          const { minlength, maxlength } = this.extractMinMaxLength(
-            matchingValidation.regex,
-          );
-          this.alphaNumericSpecial_maxLength = maxlength;
-          this.alphaNumericSpecial_minLength = minlength;
-          validators.push(
-            Validators.minLength(this.alphaNumericSpecial_maxLength),
-          );
-          validators.push(
-            Validators.maxLength(this.alphaNumericSpecial_maxLength),
-          );
-        } else if (matchingValidation.type === 'password') {
-          const { minlength, maxlength } = this.extractMinMaxLength(
-            matchingValidation.regex,
-          );
-          this.password_maxLength = maxlength;
-          this.password_minLength = minlength;
-          validators.push(Validators.minLength(this.password_minLength));
-          validators.push(Validators.maxLength(this.password_maxLength));
-        } else if (matchingValidation.type === 'paragraph') {
-          const { minlength, maxlength } = this.extractMinMaxLength(
-            matchingValidation.regex,
-          );
-          this.paragraph_maxLength = maxlength;
-          this.paragraph_minLength = minlength;
-          validators.push(Validators.minLength(this.paragraph_minLength));
-          validators.push(Validators.maxLength(this.paragraph_maxLength));
-        } else if (matchingValidation.type === 'number') {
-          validators.push(Validators.minLength(1));
-          validators.push(Validators.maxLength(100));
-        } else if (matchingValidation.type === 'positiveNumber') {
-          validators.push(Validators.minLength(1));
-          validators.push(Validators.maxLength(100));
-        } else if(matchingValidation.type !== 'dateTime' && matchingValidation.type !== 'date' && matchingValidation.type !== 'time') {
-          const correctedRegex = new RegExp(matchingValidation.regex);
-          validators.push(Validators.pattern(correctedRegex));
+        switch (matchingValidation.type.toLowerCase()) {
+          case 'phonenumber':
+            const phoneNumberRegex = new RegExp(
+              '^(\\+\\d{1,3}[\\s-])?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,9}$'
+            );
+            validators.push(Validators.pattern(phoneNumberRegex));
+            break;
+
+          case 'boolean':
+          case 'mcq':
+          case 'dropdown':
+            validators.push(Validators.required);
+            break;
+
+          case 'shortanswer':
+          case 'alphanumeric':
+          case 'alphanumericspecial':
+          case 'password':
+          case 'paragraph':
+          case 'number':
+          case 'positivenumber':
+            extractedLength = this.extractMinMaxLength(matchingValidation.regex);
+            validators.push(
+              Validators.minLength(extractedLength.minLength ?? minLength)
+            );
+            validators.push(
+              Validators.maxLength(extractedLength.maxLength ?? maxLength)
+            );
+            break;
+
+          case 'datetime':
+          case 'date':
+          case 'time':
+            // Skip validation for date/time types
+            break;
+
+          default:
+            const correctedRegex = new RegExp(matchingValidation.regex);
+            validators.push(Validators.pattern(correctedRegex));
+            break;
         }
       }
 
-      this.preChatFormGroup.addControl(
-        controlName,
-        this.fb.control('', validators),
-      );
-    }
-  }
-
-  private createCallbackFormControls(): void {
-    for (const attribute of this.callbackFormData) {
-      const validators = attribute.isRequired ? [Validators.required] : [];
-      const matchingValidation = this.preChatFormValidations.find(
-        (validation: any) => {
-          return validation.type === attribute.valueType;
-        },
-      );
-      const controlName = attribute.key;
-      if (matchingValidation && matchingValidation.regex) {
-        if (matchingValidation.type === 'phoneNumber') {
-          const phoneNumberRegex = new RegExp(
-            '^(\\+\\d{1,3}[\\s-])?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,4}[\\s-]?\\d{1,9}$',
-          );
-          console.log('Adding regex validator:', matchingValidation.regex);
-          validators.push(Validators.pattern(phoneNumberRegex));
-        } else if (matchingValidation.type === 'boolean') {
-          validators.push(Validators.required);
-        } else if (matchingValidation.type === 'shortAnswer') {
-          const { minlength, maxlength } = this.extractMinMaxLength(
-            matchingValidation.regex,
-          );
-          this.short_ans_maxLength = maxlength;
-          this.short_ans_minLength = minlength;
-          validators.push(Validators.minLength(this.short_ans_minLength));
-          validators.push(Validators.maxLength(this.short_ans_maxLength));
-        } else if (matchingValidation.type === 'alphaNumeric') {
-          const { minlength, maxlength } = this.extractMinMaxLength(
-            matchingValidation.regex,
-          );
-          this.alphaNumeric_maxLength = maxlength;
-          this.alphaNumeric_minLength = minlength;
-          validators.push(Validators.minLength(this.alphaNumeric_minLength));
-          validators.push(Validators.maxLength(this.alphaNumeric_maxLength));
-        } else if (matchingValidation.type === 'alphaNumericSpecial') {
-          const { minlength, maxlength } = this.extractMinMaxLength(
-            matchingValidation.regex,
-          );
-          this.alphaNumericSpecial_maxLength = maxlength;
-          this.alphaNumericSpecial_minLength = minlength;
-          validators.push(
-            Validators.minLength(this.alphaNumericSpecial_maxLength),
-          );
-          validators.push(
-            Validators.maxLength(this.alphaNumericSpecial_maxLength),
-          );
-        } else if (matchingValidation.type === 'password') {
-          const { minlength, maxlength } = this.extractMinMaxLength(
-            matchingValidation.regex,
-          );
-          this.password_maxLength = maxlength;
-          this.password_minLength = minlength;
-          validators.push(Validators.minLength(this.password_minLength));
-          validators.push(Validators.maxLength(this.password_maxLength));
-        } else if (matchingValidation.type === 'paragraph') {
-          const { minlength, maxlength } = this.extractMinMaxLength(
-            matchingValidation.regex,
-          );
-          this.paragraph_maxLength = maxlength;
-          this.paragraph_minLength = minlength;
-          validators.push(Validators.minLength(this.paragraph_minLength));
-          validators.push(Validators.maxLength(this.paragraph_maxLength));
-        } else if (matchingValidation.type === 'number') {
-          validators.push(Validators.minLength(1));
-          validators.push(Validators.maxLength(100));
-        } else if (matchingValidation.type === 'positiveNumber') {
-          validators.push(Validators.minLength(1));
-          validators.push(Validators.maxLength(100));
-        } else {
-          const correctedRegex = new RegExp(matchingValidation.regex);
-          validators.push(Validators.pattern(correctedRegex));
-        }
+      if (formType === 'preChatForm') {
+        this.preChatFormGroup.addControl(
+          controlName,
+          this.fb.control('', validators)
+        );
       }
-
-      this.callbackFormGroup.addControl(
-        attribute.key,
-        this.fb.control('', validators),
-      );
     }
   }
 
@@ -625,19 +545,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       let maxLength: number | null = null;
 
       if (valueType === 'shortAnswer') {
-        maxLength = this.short_ans_maxLength;
+        maxLength = 101;
       } else if (valueType === 'paragraph') {
-        maxLength = this.paragraph_maxLength;
+        maxLength = 2001;
       } else if (valueType === 'alphaNumeric') {
-        maxLength = 100;
+        maxLength = 101;
       } else if (valueType === 'alphaNumericSpecial') {
-        maxLength = 100;
+        maxLength = 101;
       } else if (valueType === 'number') {
-        maxLength = 100;
+        maxLength = 101;
       } else if (valueType === 'positiveNumber') {
-        maxLength = 100;
+        maxLength = 101;
       } else if (valueType === 'password') {
-        maxLength = this.password_maxLength;
+        maxLength = 256;
       }
 
       // Ensure maxLength is set
@@ -690,18 +610,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  extractMinMaxLength(regex: string): { minlength: any; maxlength: any } {
-    // Match the pattern that includes min and max lengths
-    const match = regex.match(/\{(\d+),(\d+)\}\$/);
 
-    if (match) {
-      const minlength = parseInt(match[1], 10);
-      const maxlength = parseInt(match[2], 10);
-      return { minlength, maxlength };
-    } else {
-      return { minlength: null, maxlength: null }; // Return null if the pattern doesn't match
-    }
+  private extractMinMaxLength(regex: string): { minLength: number | null, maxLength: number | null } {
+    // Extract min/max length from regex
+    const minMatch = regex.match(/(?<=.{)\d+/);
+    const maxMatch = regex.match(/(?<=,)\d+(?=})/);
+
+    return {
+      minLength: minMatch ? parseInt(minMatch[0], 10) : null,
+      maxLength: maxMatch ? parseInt(maxMatch[0], 10) : null
+    };
   }
+
   onFormSubmit(): void {
     try {
       if (this.preChatFormGroup.valid) {
