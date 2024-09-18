@@ -473,6 +473,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         return validation.type === attribute.valueType;
       });
 
+    
+
       const validators = attribute.isRequired ? [Validators.required] : [];
       const controlName = attribute.key;
       let minLength = 1;
@@ -491,7 +493,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'boolean':
           case 'mcq':
           case 'dropdown':
+
+      
+          if (attribute.isRequired) {
             validators.push(Validators.required);
+        }
+        
             break;
 
           case 'shortanswer':
@@ -522,6 +529,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
         }
       }
+      console.log("validator is ",...validators)
 
       if (formType === 'preChatForm') {
         this.preChatFormGroup.addControl(
