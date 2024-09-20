@@ -2116,3 +2116,58 @@ mat-spinner {
   word-break: break-word;
   white-space: normal;
 }
+
+.validation-msg {
+  display: flex;
+  align-items: center;
+}
+
+.info-icon {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  margin-left: 5px;
+  color: #007bff;
+  font-weight: bold;
+  bottom: 6px;
+  right: 6px;
+}
+
+.info-icon .tooltip {
+  font-size: 12px;
+  visibility: hidden;
+  width: 170px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+  bottom: 100%; /* Position above the icon */
+  left: 0;
+  /* margin-left: -90px; Center the tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip-sm {
+  width: 100px !important;
+}
+
+.info-icon:hover .tooltip {
+  visibility: visible;
+  opacity: 0.7;
+}
+
+/* Add an arrow below the tooltip */
+.info-icon .tooltip::after {
+  content: "";
+  position: absolute;
+  top: 98%;
+  left: 8%;
+  margin-left: -10px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent; /* Tooltip arrow */
+}

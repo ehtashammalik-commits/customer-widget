@@ -380,21 +380,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.createFormValidationControls(
           this.formData,
           this.formValidations,
-          'preChatForm'
+          'preChatForm',
         );
       },
     );
     this.callbackFormSubscription = this.sdk.renderCallbackForm$.subscribe(
       (formData: { sections: { attributes: any[] }[] }) => {
-        this.callbackFormData = formData.sections[0].attributes.filter((item: any) => {
-          return item.valueType != 'checkbox';
-        });
+        this.callbackFormData = formData.sections[0].attributes.filter(
+          (item: any) => {
+            return item.valueType != 'checkbox';
+          },
+        );
         console.log('Widget configurations:', formData.sections);
         console.log('regex:', this.formValidations);
         this.createFormValidationControls(
           this.callbackFormData,
           this.formValidations,
-          'callBackForm'
+          'callBackForm',
         );
       },
     );
@@ -466,14 +468,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private createFormValidationControls(
     formSchema: any,
     formValidation: any,
-    formType: string
+    formType: string,
   ): void {
     for (const attribute of formSchema) {
       const matchingValidation = formValidation.find((validation: any) => {
         return validation.type === attribute.valueType;
       });
-
-    
 
       const validators = attribute.isRequired ? [Validators.required] : [];
       const controlName = attribute.key;
@@ -485,7 +485,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         switch (matchingValidation.type.toLowerCase()) {
           case 'phonenumber':
             const phoneNumberRegex = new RegExp(
-              '^(\\+\\d{1,3}[\\s-])?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,9}$'
+              '^(\\+\\d{1,3}[\\s-])?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,9}$',
             );
             validators.push(Validators.pattern(phoneNumberRegex));
             break;
@@ -493,14 +493,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'boolean':
           case 'mcq':
           case 'dropdown':
-
-      
-          if (attribute.isRequired) {
-            validators.push(Validators.required);
-        }
-        
+            if (attribute.isRequired) {
+              validators.push(Validators.required);
+            }
             break;
-
           case 'shortanswer':
           case 'alphanumeric':
           case 'alphanumericspecial':
@@ -508,13 +504,30 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'paragraph':
           case 'number':
           case 'positivenumber':
-            extractedLength = this.extractMinMaxLength(matchingValidation.regex);
-            validators.push(
-              Validators.minLength(extractedLength.minLength ?? minLength)
+            extractedLength = this.extractMinMaxLength(
+              matchingValidation.regex,
             );
             validators.push(
-              Validators.maxLength(extractedLength.maxLength ?? maxLength)
+              Validators.minLength(extractedLength.minLength ?? minLength),
             );
+            validators.push(
+              Validators.maxLength(extractedLength.maxLength ?? maxLength),
+            );
+            if (
+              matchingValidation.type.toLowerCase() !== 'shortanswer' &&
+              matchingValidation.type.toLowerCase() !== 'paragraph'
+            ) {
+              validators.push(
+                Validators.pattern(
+                  matchingValidation.type.toLowerCase() === 'password'
+                    ? new RegExp(
+                        '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_])[A-Za-z\\d\\W_]{8,256}$',
+                      )
+                    : matchingValidation.regex,
+                ),
+              );
+            }
+
             break;
 
           case 'datetime':
@@ -529,12 +542,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
         }
       }
-      console.log("validator is ",...validators)
+      console.log('validator is ', ...validators);
 
       if (formType === 'preChatForm') {
         this.preChatFormGroup.addControl(
           controlName,
-          this.fb.control('', validators)
+          this.fb.control('', validators),
         );
       }
     }
@@ -566,6 +579,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         maxLength = 101;
       } else if (valueType === 'password') {
         maxLength = 256;
+      }
+      else if (valueType === 'email') {
+        maxLength = 101;
       }
 
       // Ensure maxLength is set
@@ -619,14 +635,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private extractMinMaxLength(regex: string): { minLength: number | null, maxLength: number | null } {
+  private extractMinMaxLength(regex: string): {
+    minLength: number | null;
+    maxLength: number | null;
+  } {
     // Extract min/max length from regex
     const minMatch = regex.match(/(?<=.{)\d+/);
     const maxMatch = regex.match(/(?<=,)\d+(?=})/);
 
     return {
       minLength: minMatch ? parseInt(minMatch[0], 10) : null,
-      maxLength: maxMatch ? parseInt(maxMatch[0], 10) : null
+      maxLength: maxMatch ? parseInt(maxMatch[0], 10) : null,
     };
   }
 

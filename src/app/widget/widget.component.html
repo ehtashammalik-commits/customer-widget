@@ -345,7 +345,7 @@
                   <span *ngIf="
                       preChatFormGroup.get(attribute.key)?.hasError('required')
                     " class="field-error">
-                    {{ attribute.valueType }} is required
+                    {{ getLabel(attribute.valueType) }} is required
                   </span>
                   <span *ngIf="
                       preChatFormGroup.get(attribute.key)?.hasError('pattern')
@@ -353,8 +353,9 @@
                     {{ getLabel(attribute.valueType) }} does not match the
                     required format
                   </span>
+                  
                   <span *ngIf="isMaxLengthError(attribute.key, attribute.valueType)" class="field-error">
-                    Maximum Limit reached
+                    Maximum limit reached
                   </span>
                 </div>
               </div>
@@ -420,12 +421,17 @@
                         }}</span>
                       <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                       <span class="fileType">
-                        ({{
-                        attribute.fileData.restrictFile
+                        <span class="info-icon tooltip-sm">
+  <img src="widget-assets/images/info.png" alt="Info Tag" width="10" height="10">
+  <span class="tooltip">
+    {{
+    attribute.fileData.restrictFile
                         ? attribute.fileData.fileExtension.join(", ")
-                        : "All
-                        supported file types allowed"
-                        }})
+                        : "PNG, JPEG, JPG, PDF, PPT, DOC, DOCX, XLS, XLSX, TXT, SVG, PPTX, CSS, OGA, MPGA, WEBP, MP3, MP4, GIF"
+                      }}
+  </span>
+</span>
+
                       </span>
                     </ng-container>
                     <ng-container *ngIf="attribute?.valueType !== 'file'">
@@ -574,20 +580,32 @@
                 </ng-container>
 
                 <!-- Validation Error Messages -->
-                <div *ngIf="preChatFormGroup.get(attribute.key)?.touched">
+                <div class="validation-msg" *ngIf="preChatFormGroup.get(attribute.key)?.touched">
                   <span *ngIf="
                       preChatFormGroup.get(attribute.key)?.hasError('required')
                     " class="field-error">
-                    {{ attribute.valueType }} is required
+                    {{ getLabel(attribute.valueType) }} is required
                   </span>
                   <span *ngIf="
-                      preChatFormGroup.get(attribute.key)?.hasError('pattern')
+                    !isMaxLengthError(attribute.key, attribute.valueType) &&  preChatFormGroup.get(attribute.key)?.hasError('pattern')&& attribute.valueType.toLowerCase()!='password'
                     " class="field-error">
                     {{ getLabel(attribute.valueType) }} does not match the
                     required format
                   </span>
+                  <span *ngIf="
+                  !isMaxLengthError(attribute.key, attribute.valueType) && preChatFormGroup.get(attribute.key)?.hasError('pattern') && !preChatFormGroup.get(attribute.key)?.hasError('minlength') && attribute.valueType.toLowerCase()=='password'
+                    " class="field-error">
+                    Password must include uppercase, lowercase, number, and special character
+                  </span>
+                  <span *ngIf="
+  preChatFormGroup.get(attribute.key)?.hasError('minlength') &&
+  attribute.valueType.toLowerCase() == 'password'
+" class="field-error">
+  Password must be at least 8 characters long
+</span>
+
                   <span *ngIf="isMaxLengthError(attribute.key, attribute.valueType)" class="field-error">
-                    Maximum Limit reached
+                    Maximum limit reached
                   </span>
                 </div>
               </div>
@@ -1595,7 +1613,7 @@
                     <span *ngIf="
                       preChatFormGroup.get(attribute.key)?.hasError('required')
                     " class="field-error">
-                      {{ attribute.valueType }} is required
+                      {{getLabel(attribute.valueType) }} is required
                     </span>
                     <span *ngIf="
                       preChatFormGroup.get(attribute.key)?.hasError('pattern')
@@ -1604,7 +1622,7 @@
                       required format
                     </span>
                     <span *ngIf="isMaxLengthError(attribute.key, attribute.valueType)" class="field-error">
-                      Maximum Limit reached
+                      Maximum limit reached
                     </span>
                   </div>
                 </div>
