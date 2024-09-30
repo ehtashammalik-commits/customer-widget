@@ -194,6 +194,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   browserLang: any;
   textDirection = '';
   logoEnabled: boolean = false;
+  isUsernameEnabled: boolean = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -210,6 +211,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
+    this.isUsernameEnabled = __appConfig.appConfig.USERNAME_ENABLED
   }
 
   ngAfterViewInit(): void {
@@ -924,10 +926,59 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         clearTimeout(this.typingIndicatorTimer);
         this.typingIndicatorTimer = null;
       }
+
+      if (cimMessage.body.type.toLowerCase() == 'notification') {
+        if (
+          cimMessage.body.notificationData.data.agentParticipant &&
+          cimMessage.body.notificationData.data.agentParticipant.participant &&
+          cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser
+        ) {
+          let fullName = this.getAgentDisplayName(cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser);
+          if (!this.isUsernameEnabled) {
+            cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser.username = fullName;
+          }
+        }
+
+        if (
+          cimMessage.body.notificationData.data.conversationParticipant &&
+          cimMessage.body.notificationData.data.conversationParticipant.participant &&
+          cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser
+        ) {
+          let fullName = this.getAgentDisplayName(cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser);
+          if (!this.isUsernameEnabled) {
+            cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser.username = fullName;
+          }
+        }
+      }
+
+      if (cimMessage.header.sender.type.toLowerCase() == "agent") {
+        let fullName = this.getAgentDisplayName(cimMessage.header.sender.additionalDetail);
+        if (!this.isUsernameEnabled) {
+          cimMessage.header.sender.senderName = fullName;
+        }
+      }
+
       this.cimMessage.push(cimMessage);
       this.browserNotificationService.notify(cimMessage);
       this.scrollToBottom();
       this.handleMessageReport(cimMessage);
+    }
+  }
+
+  getAgentDisplayName(user: any): string {
+    if (user) {
+      const { firstName, lastName } = user;
+      if (firstName && lastName) {
+        return `${firstName} ${lastName}`;
+      } else if (firstName) {
+        return `${firstName}`;
+      } else if (lastName) {
+        return `${lastName}`;
+      } else {
+        return 'Agent';
+      }
+    } else {
+      return 'Agent';
     }
   }
 
@@ -1124,6 +1175,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       } catch (err) {}
     }, 350);
   }
+
+
 
   clearMessageData() {
     this.composer_input_disabled = false;
