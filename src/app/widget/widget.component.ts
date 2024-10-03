@@ -154,6 +154,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   callbackResponseStatus = ''; // Callback Response Status Text to show on the Callback response Screen
   enabledWebhook: boolean = false; //If true than show webhook is enabled in the widget and will push notification to defined webhook
   file_attribute_key: any;
+
   standaloneCallback: boolean = false; //If true than it will enable standalone callback
   standaloneWebRtc: boolean = false; //If true than it will enable standalone webRtc Video Call and hide Chat Features
 
@@ -246,6 +247,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   browserLang: any;
   textDirection = '';
   logoEnabled: boolean = false;
+  isUsernameEnabled: boolean = true;
 
   browserInfoData: any;
 
@@ -266,6 +268,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
+    this.isUsernameEnabled = __appConfig.appConfig.USERNAME_ENABLED
   }
 
   ngAfterViewInit(): void {
@@ -521,8 +524,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
                 Validators.pattern(
                   matchingValidation.type.toLowerCase() === 'password'
                     ? new RegExp(
-                        '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_])[A-Za-z\\d\\W_]{8,256}$',
-                      )
+                      '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_])[A-Za-z\\d\\W_]{8,256}$',
+                    )
                     : matchingValidation.regex,
                 ),
               );
@@ -1199,6 +1202,38 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         clearTimeout(this.typingIndicatorTimer);
         this.typingIndicatorTimer = null;
       }
+
+      if (cimMessage.body.type.toLowerCase() == 'notification') {
+        if (
+          cimMessage.body.notificationData.data.agentParticipant &&
+          cimMessage.body.notificationData.data.agentParticipant.participant &&
+          cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser
+        ) {
+          let fullName = this.getAgentDisplayName(cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser);
+          if (!this.isUsernameEnabled) {
+            cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser.username = fullName;
+          }
+        }
+
+        if (
+          cimMessage.body.notificationData.data.conversationParticipant &&
+          cimMessage.body.notificationData.data.conversationParticipant.participant &&
+          cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser
+        ) {
+          let fullName = this.getAgentDisplayName(cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser);
+          if (!this.isUsernameEnabled) {
+            cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser.username = fullName;
+          }
+        }
+      }
+
+      if (cimMessage.header.sender.type.toLowerCase() == "agent") {
+        let fullName = this.getAgentDisplayName(cimMessage.header.sender.additionalDetail);
+        if (!this.isUsernameEnabled) {
+          cimMessage.header.sender.senderName = fullName;
+        }
+      }
+
       this.cimMessage.push(cimMessage);
       this.browserNotificationService.notify(cimMessage);
       this.scrollToBottom();
@@ -1247,6 +1282,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.scrollToBottom();
       }
     });
+  }
+  getAgentDisplayName(user: any): string {
+    if (user) {
+      const { firstName, lastName } = user;
+      if (firstName && lastName) {
+        return `${firstName} ${lastName}`;
+      } else if (firstName) {
+        return `${firstName}`;
+      } else if (lastName) {
+        return `${lastName}`;
+      } else {
+        return 'Agent';
+      }
+    } else {
+      return 'Agent';
+    }
   }
 
   updateStatusOfCustomerMessage(messageId: string, status: string) {
@@ -1439,9 +1490,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       try {
         this.scrollContainer.nativeElement.scrollTop =
           this.scrollContainer.nativeElement.scrollHeight;
-      } catch (err) {}
+      } catch (err) { }
     }, 350);
   }
+
+
 
   clearMessageData() {
     this.composer_input_disabled = false;
@@ -1858,10 +1911,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   chatTranscript() {
     if (localStorage.getItem('conversationId') !== '') {
       window.open(
-        `widget-assets/chat-transcript/?ccmUrl=${
-          this.__appConfig.appConfig.CCM_URL
-        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${
-          this.serviceIdentifier
+        `widget-assets/chat-transcript/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
+        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier
         }&conversationId=${localStorage.getItem(
           'conversationId',
         )}&browserLang=${this.browserLang}`,
@@ -1906,6 +1957,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.callText = callType;
     this.startCountdown();
 
+    this.sdk.handleCallStart({
+      type: callType,
+      authConfigs: this.setAuthorizedResponse,
+    });
     if (this.standaloneWebRtc) {
       console.log('standalone webrtc call <==');
       this.sdk.handleCallStart({
@@ -2115,7 +2170,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       localStorage.setItem('fontSize', e);
       this.changeFont();
       this.setFontFromLocalStorage();
-    } catch (error) {}
+    } catch (error) { }
   }
 
   private setFontFromLocalStorage() {
@@ -2123,7 +2178,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (localStorage.getItem('fontSize') !== null) {
         this.fontSize.setValue(localStorage.getItem('fontSize'));
       }
-    } catch (error) {}
+    } catch (error) { }
   }
 
   clearSession() {

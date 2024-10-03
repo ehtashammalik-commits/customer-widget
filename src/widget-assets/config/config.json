@@ -8,5 +8,6 @@
   "AUTHENTICATOR_URL": "https://efcx-frontend.expertflow.com/secure-link",
   "CHANNEL_IDENTIFIER": "phone",
   "ENABLE_LOGO": false,
-  "ADDITIONAL_PANEL": true
+  "ADDITIONAL_PANEL": true,
+  "USERNAME_ENABLED": true
 }
