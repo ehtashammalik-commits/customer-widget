@@ -787,7 +787,12 @@
                       message.body.notificationData.data.conversationParticipant
                         .role !== 'ASSISTANT'))
                 ">
-                <div class="widget-chat-notification">
+                <div class="widget-chat-notification" [ngClass]="{
+                  no_border:
+                    message.body.notificationType == 'NO_AGENT_AVAILABLE' &&
+                    message.body.notificationData.data.requestType
+                      .direction == 'CONSULT'
+                }">
                   <span *ngIf="
                       message.body.notificationType == 'AGENT_SUBSCRIBED' &&
                       message.body.notificationData.data.agentParticipant
@@ -855,8 +860,10 @@
                   </span>
 
                   <span *ngIf="
-                      message.body.notificationType == 'NO_AGENT_AVAILABLE'
-                    " innerHTML="{{
+                  message.body.notificationType == 'NO_AGENT_AVAILABLE' &&
+                  message.body.notificationData.data.requestType
+                    .direction != 'CONSULT'
+                " innerHTML="{{
                       enableDynamicLink
                         ? 'No agents are available at the moment'
                         : 'No agents are available at the moment'
@@ -1095,10 +1102,9 @@
                               : fontSize.value == '16'
                               ? '13px'
                               : '9px'
-                        }">{{
-                        message.header.sender.senderName.toUpperCase()
-                        }}</span>
+                        }">{{ message.header.sender.senderName.toUpperCase() }}</span>
                     </div>
+
                     <span class="message" *ngIf="message.body.type == 'PLAIN'" innerHTML="{{
                         enableDynamicLink
                           ? (message.body.markdownText | linkify | tagFormat)
@@ -1629,6 +1635,7 @@
                         [formControlName]="attribute.key" [value]="option.label" [required]="attribute?.isRequired" />
                       <label [for]="option">{{ option.label }}</label>
                     </div>
+                  </ng-container>
 
                   <!-- Validation Error Messages -->
                   <div *ngIf="preChatFormGroup.get(attribute.key)?.touched">
@@ -1637,7 +1644,28 @@
                     " class="field-error">
                       {{getLabel(attribute.valueType) }} is required
                     </span>
+                    <span *ngIf="
+                      preChatFormGroup.get(attribute.key)?.hasError('pattern')
+                    " class="field-error">
+                      {{ getLabel(attribute.valueType) }} does not match the
+                      required format
+                    </span>
+                    <span *ngIf="isMaxLengthError(attribute.key, attribute.valueType)" class="field-error">
+                      Maximum limit reached
+                    </span>
                   </div>
+                </div>
+              </div>
+              <div class="widget-form-button">
+                <button id="formTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
+                  class="widget-btn widget-form-trigger widget-color">
+                  Request Callback
+                </button>
+              </div>
+            </form>
+          </div>
+        </ng-container>
+        <!-- Callback Response View Screen -->
         <ng-container *ngIf="activeCallbackResponseView">
           <div class="widget-callback-response-content">
             <div class="response-icon">
@@ -1825,29 +1853,6 @@
 
             <input id="formTrigger" type="submit" class="widget-error-trigger" value="Send me transcript"
               *ngIf="enableDownloadTranscript" />
-          </div>
-        </div>
-      </div>
-    </div>
-  </ng-container>
-
-  <!--------------------------------------------->
-  <!------ /Call Popup for Audio/Video Call ----->
-  <!--------------------------------------------->
-  <ng-container *ngIf="callPopUpView">
-    <div class="widget-call-area">
-      <div class="call-popup">
-        <p><span innerHTML="Initiating {{ callText }} call"></span></p>
-        <div class="audio-agent">
-          <div class="loader"></div>
-          <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon" />
-        </div>
-        <div class="agent-detail">
-          <p class="name">{{ agentName }}</p>
-        </div>
-        <div class="end-call-btn" (click)="callEnd()">
-          <div class="end-call-btn-sm">
-            <span class="material-symbols-outlined"> call_end </span>
           </div>
         </div>
       </div>
