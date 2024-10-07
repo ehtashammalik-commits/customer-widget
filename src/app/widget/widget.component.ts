@@ -839,6 +839,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isChatMax = false;
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
+        this.fileName = ''
         break;
       case 'chat':
         this.additionalPanel = false;
@@ -1699,7 +1700,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.sdk.moveToFileServer(fd, (res: any) => {
             console.log(res, '=> file uploaded data');
             if (res?.isFileInvalid) {
-              this.snackBar.open(file.name + res?.error?.message, 'X', {
+              this.snackBar.open(res?.errorMesage, 'X', {
                 panelClass: 'custom-snackbar',
               });
               return;

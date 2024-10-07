@@ -315,8 +315,8 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
       callback(result);
     })
     .catch((error) => {
-      console.error('Error: ', error);
-      callback({ error, isFileInvalid: true });
+      console.error('Error: ', error.message);
+      callback({ error, isFileInvalid: true, errorMesage: "The file name contains special characters. Only underscore, hyphen and space are allowed in file name." });
     });
 }
 /**
