@@ -376,7 +376,7 @@
                     {{ getLabel(attribute.valueType) }} does not match the
                     required format
                   </span>
-                  
+
                   <span *ngIf="isMaxLengthError(attribute.key, attribute.valueType)" class="field-error">
                     Maximum limit reached
                   </span>
@@ -445,15 +445,16 @@
                       <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                       <span class="fileType">
                         <span class="info-icon tooltip-sm">
-  <img src="widget-assets/images/info.png" alt="Info Tag" width="10" height="10">
-  <span class="tooltip">
-    {{
-    attribute.fileData.restrictFile
-                        ? attribute.fileData.fileExtension.join(", ")
-                        : "PNG, JPEG, JPG, PDF, PPT, DOC, DOCX, XLS, XLSX, TXT, SVG, PPTX, CSS, OGA, MPGA, WEBP, MP3, MP4, GIF"
-                      }}
-  </span>
-</span>
+                          <img src="widget-assets/images/info.png" alt="Info Tag" width="10" height="10">
+                          <span class="tooltip">
+                            {{
+                            attribute.fileData.restrictFile
+                            ? attribute.fileData.fileExtension.join(", ")
+                            : "PNG, JPEG, JPG, PDF, PPT, DOC, DOCX, XLS, XLSX, TXT, SVG, PPTX, CSS, OGA, MPGA, WEBP,
+                            MP3, MP4, GIF"
+                            }}
+                          </span>
+                        </span>
 
                       </span>
                     </ng-container>
@@ -546,7 +547,7 @@
                   <!-- File Input -->
                   <div class="file-upload-wrapper" *ngIf="attribute.valueType === 'file'">
                     <div class="file-input-container">
-                      <input type="file" [required]="attribute?.isRequired" (change)="
+                      <input [formControlName]="attribute?.key" type="file" [required]="attribute?.isRequired" (change)="
                           uploadFileFromForm(
                             $event,
                             attribute.key,
@@ -624,8 +625,8 @@
   preChatFormGroup.get(attribute.key)?.hasError('minlength') &&
   attribute.valueType.toLowerCase() == 'password'
 " class="field-error">
-  Password must be at least 8 characters long
-</span>
+                    Password must be at least 8 characters long
+                  </span>
 
                   <span *ngIf="isMaxLengthError(attribute.key, attribute.valueType)" class="field-error">
                     Maximum limit reached

@@ -316,7 +316,7 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
     })
     .catch((error) => {
       console.error('Error: ', error);
-      callback(error);
+      callback({ error, isFileInvalid: true });
     });
 }
 /**

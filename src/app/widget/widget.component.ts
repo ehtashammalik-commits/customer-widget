@@ -240,7 +240,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   fileLoading = false;
   selectedFile!: File;
-  fileUrl: string | null = null;
+  fileUrl: any = "";
   fileName: string | null = null;
   // Variables for handling chat messages language and text directions
   selectedLanguage: any;
@@ -548,6 +548,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       console.log('validator is ', ...validators);
 
       if (formType === 'preChatForm') {
+
+        console.log("===============================================> control ", controlName)
         this.preChatFormGroup.addControl(
           controlName,
           this.fb.control('', validators),
@@ -1501,6 +1503,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.text = '';
     this.scrollToBottom();
     this.scrollCon = 45;
+    this.fileName = ''
   }
 
   constructCimMessage(
@@ -1695,16 +1698,30 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           // Call to the SDK's file upload function
           this.sdk.moveToFileServer(fd, (res: any) => {
             console.log(res, '=> file uploaded data');
+            if (res?.isFileInvalid) {
+              this.snackBar.open(file.name + res?.error?.message, 'X', {
+                panelClass: 'custom-snackbar',
+              });
+              return;
+            }
+
+            console.log(res.name, '=> file details');
+
             this.fileName = res.name;
             this.fileUrl = `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
             console.log('=> file uploaded url', this.fileUrl);
-            this.preChatFormGroup
-              .get(this.file_attribute_key)
-              ?.setValue(this.fileUrl);
+            // Clear the file input field
+            let fileElem = event.target as HTMLInputElement;
+            fileElem.value = '';
+            const fileControl = this.preChatFormGroup.get(additionalText) as FormControl;
+            fileControl?.setValue('');
+            fileControl.clearValidators()
+            fileControl.updateValueAndValidity()
           });
+
         } else {
           console.log(file.name + ' unsupported file type');
-          this.snackBar.open(file.name + ' unsupported file type', 'err', {
+          this.snackBar.open(file.name + ' unsupported file type', 'X', {
             panelClass: 'custom-snackbar',
           });
           this.removeUploadFile();
