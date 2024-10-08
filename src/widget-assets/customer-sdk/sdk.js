@@ -765,6 +765,28 @@ function callbackRequest(url, payload, callback) {
   }
 }
 
+
+async function getCalendarId(url, serviceIdentifier ,callback) {
+  const response = await fetch(`${url}/channels/service-identifier/${serviceIdentifier}`, {
+    method: 'GET', // Specify the HTTP method as GET
+    headers: {
+      'Content-Type': 'application/json' // Set appropriate headers if needed
+    }
+  });
+  callback(response)
+}
+
+
+async function getCalendarEvents(url, calendarId, startTime, endTime,callback) {
+  const response = await fetch(`${url}/channels/service-identifier/${serviceIdentifier}`, {
+    method: 'GET', // Specify the HTTP method as GET
+    headers: {
+      'Content-Type': 'application/json' // Set appropriate headers if needed
+    }
+  });
+  callback(response)
+}
+
 /**
  * Webhook Notifications Functions
  * @param {*} data

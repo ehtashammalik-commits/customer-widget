@@ -16,7 +16,9 @@ declare var widgetConfigs: any,
   postMessages: any,
   callbackRequest: any,
   authenticateRequest: any,
-  getBrowserInfo: any;
+  getBrowserInfo: any,
+  getCalendarId: any,
+  getCalendarEvents:any;
 
 type formAttributeMappings = {
   name: string[];
@@ -90,6 +92,21 @@ export class SdkService implements OnInit {
       }
     });
   }
+
+  fetchBusinessCalendarId() {
+    const url = this.ConfigData.CCM_URL
+    //console.log("here is channelIdentifier", th)
+    const serviceIdentifier = this.serviceIdentifier
+    getCalendarId(url, serviceIdentifier,  (response: any) => {
+      // handle the response here
+      console.log(response);
+    })
+  }
+
+  getCalendarEvents() {
+    
+  }
+
 
   loadWidget(ccm_url: any, widget_identifier: any) {
     widgetConfigs(ccm_url, widget_identifier, (res: any) => {
@@ -242,6 +259,12 @@ export class SdkService implements OnInit {
   handleChatEnd(customerPayload: any) {
     chatEnd(customerPayload);
   }
+
+   /**************************
+   *  BUSINESS CALENDARS
+   * @param calendarId
+   *************************/
+
 
   /**************************
    *  WEB RTC CALL FUNCTIONS

@@ -259,6 +259,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
       // Pass parameters to service after you have received them.
       this.passUrlParamsToServices();
+      this.getCalendarEvents()
     });
 
     this.preChatFormGroup = this.fb.group({});
@@ -335,6 +336,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.loadBrowserLanguage();
     this.setFontFromLocalStorage();
+  }
+
+  getCalendarEvents() {
+    this.sdk.fetchBusinessCalendarId()
   }
 
   async passUrlParamsToServices() {
