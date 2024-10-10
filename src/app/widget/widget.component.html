@@ -1368,7 +1368,8 @@
             <span>Max Limit Reached</span>
           </div>
           <div class="widget-composer">
-            <span class="material-symbols-outlined emoji-btn" *ngIf="enableEmoji">
+            <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined emoji-btn"
+              *ngIf="enableEmoji">
               add_reaction
             </span>
             <textarea class="widget-chat-composer" data-emoji-picker="true" matInput id="messageTextarea"
@@ -1385,14 +1386,16 @@
               ">
               <label for="file-upload">
                 <span class="material-symbols-outlined file-btn" matTooltip="File Transfer"
-                  [matTooltipPosition]="matToolTipPosition!">
+                  [ngClass]="{'chat-disable':isComposerDisable}" [matTooltipPosition]="matToolTipPosition!">
                   attach_file
                 </span>
               </label>
-              <input accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp,.pptx,.ppt"
+              <input [disabled]="isComposerDisable"
+                accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp,.pptx,.ppt"
                 id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
             </div>
-            <span class="material-symbols-outlined send-btn" *ngIf="isTyping" (click)="onSendMessage()">
+            <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined send-btn"
+              *ngIf="isTyping" (click)="onSendMessage()">
               send
             </span>
           </div>

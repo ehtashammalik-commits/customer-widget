@@ -72,7 +72,7 @@ export class SdkService implements OnInit {
     this.loadSdk();
   }
 
-  ngOnInit(): void { this.getFormValidation() }
+  ngOnInit(): void { }
 
   receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
     this.widgetIdentifier = widgetIdentifier;
@@ -109,11 +109,10 @@ export class SdkService implements OnInit {
     });
   }
 
-  getFormValidation() {
+  getFormValidation(callback: any) {
     formValidation(this.ConfigData.FORM_URL, (res: any) => {
-
       this.preChatFormValidationSubject.next(res);
-      console.log('=>>')
+      callback()
     })
   }
 

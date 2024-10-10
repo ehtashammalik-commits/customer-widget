@@ -250,7 +250,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isUsernameEnabled: boolean = true;
 
   browserInfoData: any;
-
+  // Handle Composer Field
+  isComposerDisable: boolean = false;
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -290,6 +291,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+
     this.route.queryParams.subscribe((params: { [x: string]: any }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
@@ -358,12 +360,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe(
       (configs: { form: string }) => {
         this.setWidgetConfigs(configs);
-        this.sdk.getFormValidation();
+
         this.loadBrowserLanguage();
         console.log('Widget configurations:', configs);
-        if (this.enabledCallback)
+        if (this.enabledCallback) {
+
           this.sdk.renderCallbackForm(this.callbackConfig.callBackForm);
-        if (configs.form !== '') this.sdk.renderPreChatForm(this.preChatFormId);
+        }
+        this.sdk.getFormValidation(() => {
+          if (configs.form !== '') this.sdk.renderPreChatForm(this.preChatFormId);
+        });
+
       },
     );
 
@@ -937,6 +944,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isWebRtcMax = false;
         break;
     }
+    this.cdRef.detectChanges()
   }
 
   changeView(view: any) {
@@ -1040,12 +1048,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         break;
     }
+    this.cdRef.detectChanges()
   }
 
   eventListener(event: any) {
     try {
+      let lastMessage = this.cimMessage[this.cimMessage.length - 1];
+      let messageType = lastMessage?.body?.subType?.toLowerCase();
+      console.log("mesage type ================>", messageType)
+      console.log("event.type", event.type)
       if (event.id !== undefined || event.id !== '' || event.id !== null) {
         switch (event.type) {
+          case 'CHANNEL_SESSION_ENDED':
+          case 'CHANNEL_SESSION_EXPIRED':
+          case 'SOCKET_DISCONNECTED':
+            localStorage.removeItem('user');
+            if (messageType !== 'survey') {
+              this.clearSession();
+            }
+            this.composerDisable()
+            break;
           case 'SOCKET_RECONNECTED':
             console.log(
               '[SOCKET_RECONNECTED] ==> Chat Resume Request Sent: ',
@@ -1090,28 +1112,33 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
           case 'CHANNEL_SESSION_STARTED':
             this.isChatActive = true;
+            this.isComposerDisable = false;
             this.preChatFormLoader = false;
-            console.log('event response:', event.data);
             this.conversationId = event.data.header.conversationId;
             localStorage.setItem(
               'conversationId',
               event.data.header.conversationId,
             );
+
             this.sdk.setConversationDataAgainstCustomerIdentifier(
               this.customerData.channelCustomerIdentifier,
               this.preChatFormData,
             );
+
+            // this.composerDisable()
             break;
           case 'MESSAGE_RECEIVED':
             console.log('event response:', event.data);
             this.handleCimMessage(event.data);
             console.log('Cim Message Array: ', this.cimMessage);
             break;
-          case 'SOCKET_DISCONNECTED':
-            console.log('event response:', event.data);
-            localStorage.removeItem('user');
-            this.clearSession();
-            break;
+          // case 'SOCKET_DISCONNECTED':
+          //   console.log('event response:', event.data);
+          //   localStorage.removeItem('user');
+          //   if (messageType !== 'survey') {
+          //     this.clearSession();
+          //   }
+          //   break;
           case 'CONNECT_ERROR':
             this.changeScreen('error');
             console.log('event response:', event.data);
@@ -1177,7 +1204,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
         cimMessage.header.sender.type.toLowerCase() == 'bot')
     ) {
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+
+      const urlRegex = /(?:https?:\/\/)?(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:\/[^\s]*)?/g;
       const urls = cimMessage.body.markdownText.match(urlRegex);
       if (urls) {
         for (let url of urls) {
@@ -1244,6 +1273,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+  composerDisable() {
+    console.log("message element is ", this.messageElement)
+    const messageRef: any = this.messageElement?.nativeElement;
+    if (messageRef) {
+      this.renderer.setAttribute(messageRef, 'disabled', 'true')
+      this.renderer.setAttribute(messageRef, 'placeholder', 'Unable to send message')
+      this.renderer.setProperty(messageRef, 'value', '');
+      this.isComposerDisable = true;
+    }
+
+    // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
+  }
+
   handleResumedMessages(cimMessages: any[]) {
     cimMessages.forEach((cimMessage) => {
       if (
@@ -1252,7 +1294,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
           cimMessage.header.sender.type.toLowerCase() == 'bot')
       ) {
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const urlRegex = /((https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?)/g;
+
         const urls = cimMessage.body.markdownText.match(urlRegex);
         // Check if any URLs are found
         if (urls) {
@@ -1462,11 +1505,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.messageElement.nativeElement.focus();
     const el: any = document.getElementById('messageTextarea');
     this.text = el.value;
-    this.scrollCon = this.elementView.nativeElement.scrollHeight;
-    this.scrollContainer = this.scrollContainer.nativeElement.scrollHeight;
+    this.scrollCon = this.elementView?.nativeElement.scrollHeight;
+    this.scrollContainer = this.scrollContainer?.nativeElement.scrollHeight;
   }
 
   onSendMessage() {
+    if (this.isComposerDisable) return;
     this.cdRef.detectChanges();
     this.scrollToBottom();
 

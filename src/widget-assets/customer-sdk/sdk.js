@@ -118,6 +118,15 @@ function eventListeners(callback) {
     console.log(`MESSAGE_RECEIVED received: `, message);
     callback({ type: "MESSAGE_RECEIVED", data: message });
   });
+
+  this.socket.on("CHANNEL_SESSION_ENDED", (reason) => {
+    console.log("CHANNEL_SESSION_ENDED")
+    callback({ type: "CHANNEL_SESSION_ENDED", data: reason })
+  })
+  this.socket.on("CHANNEL_SESSION_EXPIRED", (reason) => {
+    console.log("CHANNEL_SESSION_EXPIRED")
+    callback({ type: "CHANNEL_SESSION_EXPIRED", data: reason })
+  })
   this.socket.on('disconnect', (reason) => {
     console.error(`Connection lost with the server: `, reason);
     // const gtmObject = {
@@ -130,6 +139,7 @@ function eventListeners(callback) {
     // window.parent.postMessage(gtmObject, '*');
     callback({ type: "SOCKET_DISCONNECTED", data: reason });
   });
+
   this.socket.on('connect_error', (error) => {
     console.log(`unable to establish connection with the server: `, error.message);
     localStorage.setItem("widget-error", "1");

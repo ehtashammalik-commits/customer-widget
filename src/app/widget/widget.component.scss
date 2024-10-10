@@ -428,6 +428,7 @@ button.close-widget-wrapper {
 .input-border-warning {
   border: 2px solid red !important;
 }
+
 /* File upload wrapper */
 .fileType {
   font-size: smaller;
@@ -435,12 +436,16 @@ button.close-widget-wrapper {
   font-family: Roboto;
   margin-left: 2px;
 }
+
 .file-input-container {
   position: relative;
   display: inline-block;
-  width: 88px; /* Set width to auto to fit the content */
-  vertical-align: middle; /* Align with the link */
+  width: 88px;
+  /* Set width to auto to fit the content */
+  vertical-align: middle;
+  /* Align with the link */
 }
+
 .input-label {
   display: inline-block;
   padding: 0px 7px;
@@ -455,18 +460,26 @@ button.close-widget-wrapper {
 }
 
 .file-input {
-  opacity: 0; /* Hide the default input */
+  opacity: 0;
+  /* Hide the default input */
   position: absolute;
   width: 0;
   height: 0;
   overflow: hidden;
-  border-radius: 25px; /* Rounded corners for a pill-like shape */
-  border: 1px solid transparent; /* Transparent border */
-  font-size: 10px; /* Slightly larger font size for better readability */
-  color: #fff; /* White text color */
-  height: 34px; /* Adjust height for better appearance */
-  line-height: 26px; /* Center text vertically */
-  padding: 0 15px; /* Adjust padding for better spacing */
+  border-radius: 25px;
+  /* Rounded corners for a pill-like shape */
+  border: 1px solid transparent;
+  /* Transparent border */
+  font-size: 10px;
+  /* Slightly larger font size for better readability */
+  color: #fff;
+  /* White text color */
+  height: 34px;
+  /* Adjust height for better appearance */
+  line-height: 26px;
+  /* Center text vertically */
+  padding: 0 15px;
+  /* Adjust padding for better spacing */
   cursor: pointer;
   text-align: center;
   background-color: var(--main-color);
@@ -475,9 +488,12 @@ button.close-widget-wrapper {
 }
 
 .file-link-container {
-  display: inline-block; /* Display the link side by side */
-  vertical-align: middle; /* Align with the input */
-  margin-left: 10px; /* Space between the input and link */
+  display: inline-block;
+  /* Display the link side by side */
+  vertical-align: middle;
+  /* Align with the input */
+  margin-left: 10px;
+  /* Space between the input and link */
 }
 
 .link {
@@ -562,6 +578,7 @@ button.close-widget-wrapper {
   top: 2px;
   display: block;
 }
+
 .error_text_for_filling {
   font-size: 12px;
   text-shadow: 0 0 red;
@@ -1410,11 +1427,11 @@ mat-spinner {
   outline: none;
 }
 
-#file-btn > label {
+#file-btn>label {
   margin-bottom: 0 !important;
 }
 
-#file-btn > input {
+#file-btn>input {
   display: none;
 }
 
@@ -1519,6 +1536,7 @@ mat-spinner {
 
 // Language Direction Right
 .right-direction {
+
   input,
   textarea,
   a,
@@ -2088,15 +2106,18 @@ mat-spinner {
   justify-content: flex-start;
   align-items: center;
 }
+
 .surveyicon {
   font-size: 50px !important;
   color: #007bff !important;
 }
+
 .survey_link {
   color: #007bff;
   position: absolute;
   bottom: 15%;
   text-decoration: none;
+
   &:hover {
     text-decoration: underline;
   }
@@ -2144,7 +2165,8 @@ mat-spinner {
   border-radius: 6px;
   position: absolute;
   z-index: 1;
-  bottom: 100%; /* Position above the icon */
+  bottom: 100%;
+  /* Position above the icon */
   left: 0;
   /* margin-left: -90px; Center the tooltip */
   opacity: 0;
@@ -2169,5 +2191,11 @@ mat-spinner {
   margin-left: -10px;
   border-width: 5px;
   border-style: solid;
-  border-color: #555 transparent transparent transparent; /* Tooltip arrow */
+  border-color: #555 transparent transparent transparent;
+  /* Tooltip arrow */
+}
+
+
+.chat-disable {
+  cursor: not-allowed !important;
 }
