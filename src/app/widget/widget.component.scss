@@ -2200,3 +2200,16 @@ mat-spinner {
   cursor: not-allowed !important;
   opacity: 0.3;
 }
+
+.custom-dropdown {
+  display: block;
+  border-radius: 7px;
+  border: none;
+  height: 40px;
+  line-height: 36px;
+  padding: 0 10px;
+  outline: none;
+  width: 100%;
+  font-size: 13px !important;
+  background: #eff2f7;
+}

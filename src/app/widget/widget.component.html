@@ -547,7 +547,7 @@
                   <!-- File Input -->
                   <div class="file-upload-wrapper" *ngIf="attribute.valueType === 'file'">
                     <div class="file-input-container">
-                      <input [formControlName]="attribute?.key" type="file" [required]="attribute?.isRequired" (change)="
+                      <input type="file" value="" [required]="attribute?.isRequired" (change)="
                           uploadFileFromForm(
                             $event,
                             attribute.key,
@@ -586,23 +586,39 @@
                         : 'none'
                     }"></textarea>
                 </ng-container>
-
                 <!-- OPTIONS Fields -->
                 <ng-container *ngSwitchCase="'OPTIONS'">
-                  <label>
-                    <span id="{{ attribute.key }}">{{ attribute.label }}</span>
-                    <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
-                  </label>
-                  <div *ngFor="
+                  <ng-container [ngSwitch]="attribute.valueType">
+                    <ng-container *ngSwitchCase="'dropdown'">
+                      <label>
+                        <span id="{{ attribute.key }}">{{ attribute.label }}</span>
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                      </label>
+                      <select class="custom-dropdown" [formControlName]="attribute.key"
+                        [required]="attribute?.isRequired">
+                        <option value="">{{attribute.helpText || 'Select an option'}}</option>
+                        <option *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
+                          [value]="option.label">
+                          {{ option.label }}
+                        </option>
+                      </select>
+                    </ng-container>
+                    <ng-container *ngSwitchDefault>
+                      <label>
+                        <span id="{{ attribute.key }}">{{ attribute.label }}</span>
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                      </label>
+                      <div *ngFor="
                       let option of attribute.attributeOptions.attributeData[0]
                         .values
                     ">
-                    <input class="radio-btn" type="radio" [id]="option" [name]="attribute.key"
-                      [formControlName]="attribute.key" [value]="option.label" [required]="attribute?.isRequired" />
-                    <label [for]="option">{{ option.label }}</label>
-                  </div>
+                        <input class="radio-btn" type="radio" [id]="option" [name]="attribute.key"
+                          [formControlName]="attribute.key" [value]="option.label" [required]="attribute?.isRequired" />
+                        <label [for]="option">{{ option.label }}</label>
+                      </div>
+                    </ng-container>
+                  </ng-container>
                 </ng-container>
-
                 <!-- Validation Error Messages -->
                 <div class="validation-msg" *ngIf="preChatFormGroup.get(attribute.key)?.touched">
                   <span *ngIf="
@@ -1580,7 +1596,6 @@
                         ? '1px solid red'
                         : 'none'
                     }" />
-
                     <!-- File Input -->
                     <div class="file-upload-wrapper" *ngIf="attribute.valueType === 'file'">
                       <div class="file-input-container">

@@ -1645,7 +1645,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       };
     } else {
       console.log('Unable to process the file');
-      this.snackBar.open('unable to process the file', 'err');
+      this.snackBar.open('unable to process the file', 'X');
       return;
     }
 
@@ -1729,7 +1729,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const file = files[0];
       const fileSize = file.size;
       const fileExtension = file.name.split('.').pop()?.toLowerCase();
-
+      const fileElem = event.target as HTMLInputElement;
+      const fileControl = this.preChatFormGroup.get(additionalText) as FormControl;
       if (fileSize <= 5000000) {
         if (fileExtension && availableExtensions.includes(fileExtension)) {
           const fd = new FormData();
@@ -1747,44 +1748,51 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               this.snackBar.open(res?.errorMesage, 'X', {
                 panelClass: 'custom-snackbar',
               });
+              this.resetFileValidation(event, additionalText)
               return;
             }
-
             console.log(res.name, '=> file details');
-
             this.fileName = res.name;
             this.fileUrl = `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
             console.log('=> file uploaded url', this.fileUrl);
-            // Clear the file input field
-            let fileElem = event.target as HTMLInputElement;
-            fileElem.value = '';
-            const fileControl = this.preChatFormGroup.get(additionalText) as FormControl;
-            fileControl?.setValue('');
-            fileControl.clearValidators()
-            fileControl.updateValueAndValidity()
+            fileControl?.setValue(this.fileUrl);
           });
-
         } else {
           console.log(file.name + ' unsupported file type');
           this.snackBar.open(file.name + ' unsupported file type', 'X', {
             panelClass: 'custom-snackbar',
           });
-          this.removeUploadFile();
+          this.resetFileValidation(event, additionalText)
         }
+
       } else {
         console.log(file.name + ' file size should be less than 5MB');
         this.snackBar.open(
           file.name + ' file size should be less than 5MB',
-          'err',
+          'X',
           {
             panelClass: 'custom-snackbar',
           },
         );
-        this.removeUploadFile();
+        this.resetFileValidation(event, additionalText)
       }
+
+      fileElem.value = ''
     }
   }
-
+  resetFileValidation(event: Event, additionalText: string) {
+    const fileElem = event.target as HTMLInputElement;
+    const fileControl = this.preChatFormGroup.get(additionalText) as FormControl;
+    this.removeUploadFile();
+    this.fileName = ''
+    fileControl?.setValue('');
+    if (fileElem?.required) {
+      fileControl?.setValidators([Validators.required]);
+    } else {
+      fileControl?.clearValidators();
+    }
+    fileControl.updateValueAndValidity()
+  }
   uploadFile(files: any, additionalText: string) {
     let availableExtensions = [
       'txt',
@@ -1836,17 +1844,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               },
             );
           } else {
-            console.log(files[i].name + ' File size should be less than 5MB');
-            this.snackBar.open(files[i].name + ' unsupported type', 'err', {
+            this.snackBar.open(files[i].name + ' unsupported type', 'X', {
               panelClass: 'custom-snackbar',
             });
             this.removeUploadFile();
           }
         } else {
+          console.log(this.preChatFormGroup.get(additionalText))
           console.log(files[i].name + ' File size should be less than 5MB');
           this.snackBar.open(
             files[i].name + ' File size should be less than 5MB',
-            'err',
+            'X',
             {
               panelClass: 'custom-snackbar',
             },
