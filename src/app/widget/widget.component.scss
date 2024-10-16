@@ -18,6 +18,26 @@ $text-color: #464646;
   width: 8px;
 }
 
+.edited-label {
+    margin-left: 2px;
+    position: relative;
+    padding-left: 7px;
+    display: inline-block;
+  &:before{
+    content: "";
+    width: 3px;
+    height: 3px;
+    border-radius: 4px;
+    margin: 3px 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: inline-block;
+    position: absolute;
+    left: 0px;
+    top: 5px;
+    }
+}
+
+
 ::-webkit-scrollbar-track {
   border-radius: 5px;
   margin-top: 5px;
