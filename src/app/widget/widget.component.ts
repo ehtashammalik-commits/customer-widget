@@ -330,7 +330,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (data.isChatAvailable == true) {
           this.changeScreen('chat');
           let comingData = data.data
-          console.log("Coming Data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", comingData)
           if (Array.isArray(comingData)) {
             comingData.forEach((message: any) => {
               // Check if the message intent is 'update'

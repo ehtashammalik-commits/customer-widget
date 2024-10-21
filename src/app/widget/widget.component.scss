@@ -19,11 +19,13 @@ $text-color: #464646;
 }
 
 .edited-label {
-    margin-left: 2px;
+    margin-left: 0px;
+    margin-right: 2px;
     position: relative;
-    padding-left: 7px;
+    padding-right: 7px;
     display: inline-block;
-  &:before{
+    font-size: 9px;
+  &::after{
     content: "";
     width: 3px;
     height: 3px;
@@ -32,7 +34,7 @@ $text-color: #464646;
     background: rgba(0, 0, 0, 0.3);
     display: inline-block;
     position: absolute;
-    left: 0px;
+    right: 0px;
     top: 5px;
     }
 }
