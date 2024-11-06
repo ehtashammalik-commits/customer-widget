@@ -952,10 +952,12 @@
                           }}</span>
                       </a>
                     </div>
-                    <span class="time">{{
+                    <!-- Checking time stamp here now. -->
+                    <span class="time"> <small class="edited-label" *ngIf="message.isEdited">Edited</small> {{
                       message.header.timestamp | date: "h:mm a"
-                      }}</span>
+                      }} </span>
                   </div>
+                  
                 </div>
               </div>
             </div>
