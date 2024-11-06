@@ -25,6 +25,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ActivatedRoute } from '@angular/router';
 import { TooltipPosition } from '@angular/material/tooltip';
+declare var EmojiPicker: any;
 
 @Component({
   selector: 'app-widget',
@@ -428,6 +429,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (configs.webhook !== null) {
       this.webhookUrl = configs.webhook.webhookUrl;
       this.enabledWebhook = configs.webhook.enableWebhook;
+    }
+    if(configs.enableEmoji){
+      setTimeout(() => {
+        new EmojiPicker();
+      }, 500)
     }
   }
 

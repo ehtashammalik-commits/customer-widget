@@ -1014,10 +1014,11 @@
             <span>Max Limit Reached</span>
           </div>
           <div class="widget-composer">
-            <span class="material-symbols-outlined emoji-btn" *ngIf="enableEmoji">
+            <!-- <span class="material-symbols-outlined emoji-btn" *ngIf="enableEmoji">
               add_reaction
-            </span>
-            <textarea class="widget-chat-composer" data-emoji-picker="true" matInput id="messageTextarea"
+            </span> -->
+            <textarea class="widget-chat-composer" 
+              [attr.data-emoji-picker]="enableEmoji" matInput id="messageTextarea"
               cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
               placeholder="Type Message Here ..." #message maxlength="{{ messageLimit }}" [(ngModel)]="text"
               (change)="textChanged()" (focus)="onTextAreaFocus()" (keyup)="onKeyPress($event)"
