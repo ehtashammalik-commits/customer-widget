@@ -404,18 +404,21 @@ button.close-widget-wrapper {
 
 .widget-form-area form {
   margin: 0;
-  height: auto;
+  // height: auto;
+  height: 100%;
+  overflow-y: scroll;
 }
 
 .widget-form-content {
-  padding: 10px;
   background-color: $white-color;
   border-radius: 10px;
   position: absolute;
   top: 34px;
   overflow-y: scroll;
-  max-height: 520px;
   height: 100%;
+  padding: 10px 5px 5px 10px;
+  max-height: 450px;
+  padding-bottom: 12px;
 }
 
 .widget-form-content p {
@@ -442,6 +445,89 @@ button.close-widget-wrapper {
   font-style: normal;
   text-align: left;
   color: #454545;
+}
+
+.input-border-warning {
+  border: 2px solid red !important;
+}
+
+/* File upload wrapper */
+.fileType {
+  font-size: smaller;
+  font-style: normal;
+  font-family: Roboto;
+  margin-left: 2px;
+}
+
+.file-input-container {
+  position: relative;
+  display: inline-block;
+  width: 88px;
+  /* Set width to auto to fit the content */
+  vertical-align: middle;
+  /* Align with the link */
+}
+
+.input-label {
+  display: inline-block;
+  padding: 0px 7px;
+  background-color: var(--main-color);
+  color: white;
+  cursor: pointer;
+  border-radius: 25px;
+  margin-left: 8px;
+  font-family: "Roboto";
+  font-size: 12px;
+  font-style: normal;
+}
+
+.file-input {
+  opacity: 0;
+  /* Hide the default input */
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  border-radius: 25px;
+  /* Rounded corners for a pill-like shape */
+  border: 1px solid transparent;
+  /* Transparent border */
+  font-size: 10px;
+  /* Slightly larger font size for better readability */
+  color: #fff;
+  /* White text color */
+  height: 34px;
+  /* Adjust height for better appearance */
+  line-height: 26px;
+  /* Center text vertically */
+  padding: 0 15px;
+  /* Adjust padding for better spacing */
+  cursor: pointer;
+  text-align: center;
+  background-color: var(--main-color);
+  box-sizing: border-box;
+  width: 90px;
+}
+
+.file-link-container {
+  display: inline-block;
+  /* Display the link side by side */
+  vertical-align: middle;
+  /* Align with the input */
+  margin-left: 10px;
+  /* Space between the input and link */
+}
+
+.link {
+  font-size: 10px;
+  color: var(--main-color);
+  text-decoration: underline;
+  cursor: pointer;
+  display: block;
+  width: 180px;
+  white-space: nowrap;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
 }
 
 .widget-form-group .widget-form-control {
@@ -515,11 +601,20 @@ button.close-widget-wrapper {
   display: block;
 }
 
+.error_text_for_filling {
+  font-size: 12px;
+  text-shadow: 0 0 red;
+}
+
 .widget-form-button {
   position: absolute;
+  padding-top: 5px;
   bottom: 20px;
   width: 100%;
   left: 0px;
+  //   button {
+  //   width: 100% !important;
+  // }
 }
 
 .transcript-checkbox {
@@ -988,7 +1083,7 @@ button.close-widget-wrapper {
     display: grid;
     width: auto;
     max-width: 240px;
-    min-width: 85px;
+    // min-width: 85px;
     border: 1px solid;
     border-color: #f2f2f2;
     background: #f2f2f2;
@@ -1354,11 +1449,11 @@ mat-spinner {
   outline: none;
 }
 
-#file-btn > label {
+#file-btn>label {
   margin-bottom: 0 !important;
 }
 
-#file-btn > input {
+#file-btn>input {
   display: none;
 }
 
@@ -1463,6 +1558,7 @@ mat-spinner {
 
 // Language Direction Right
 .right-direction {
+
   input,
   textarea,
   a,
@@ -1676,9 +1772,9 @@ mat-spinner {
   }
 
   .agent-detail {
-    position: relative;
+    position: absolute;
     top: 40%;
-    right: 0px;
+    left: 27%;
     text-align: center;
     line-height: 10px;
     font-style: normal;
@@ -1943,6 +2039,7 @@ mat-spinner {
   background-color: rgb(255, 255, 255);
   border-radius: 10px;
   margin-top: 20px;
+
   // position: relative;
   // top: 20px;
   p {
@@ -2025,9 +2122,116 @@ mat-spinner {
   }
 }
 
+.survye_msg {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.surveyicon {
+  font-size: 50px !important;
+  color: #007bff !important;
+}
+
+.survey_link {
+  color: #007bff;
+  position: absolute;
+  bottom: 15%;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.message2 {
+  font-family: "Roboto";
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 18px;
+  font-style: normal;
+  text-align: left;
+  color: #000000;
+  width: auto;
+  max-width: 215px;
+  line-break: normal;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.validation-msg {
+  display: flex;
+  align-items: center;
+}
+
+.info-icon {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  margin-left: 5px;
+  color: #007bff;
+  font-weight: bold;
+  bottom: 6px;
+  right: 6px;
+}
+
+.info-icon .tooltip {
+  font-size: 12px;
+  visibility: hidden;
+  width: 170px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  /* Position above the icon */
+  left: 0;
+  /* margin-left: -90px; Center the tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip-sm {
+  width: 100px !important;
+}
+
+.info-icon:hover .tooltip {
+  visibility: visible;
+  opacity: 0.7;
+}
+
+/* Add an arrow below the tooltip */
+.info-icon .tooltip::after {
+  content: "";
+  position: absolute;
+  top: 98%;
+  left: 8%;
+  margin-left: -10px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+  /* Tooltip arrow */
+}
 
 
-// 
-.no_border{
-  border: none !important;
+.chat-disable {
+  cursor: not-allowed !important;
+  opacity: 0.3;
+}
+
+.custom-dropdown {
+  display: block;
+  border-radius: 7px;
+  border: none;
+  height: 40px;
+  line-height: 36px;
+  padding: 0 10px;
+  outline: none;
+  width: 100%;
+  font-size: 13px !important;
+  background: #eff2f7;
 }

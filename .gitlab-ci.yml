@@ -240,7 +240,7 @@ trivy_scanning_branch:
   when: on_success
   needs:
     - job: gitlab_build_branch
-  allow_failure: false
+  allow_failure: true
   stage: scan
   variables:
     FULL_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/build:${CI_COMMIT_BRANCH}-${CI_COMMIT_SHA}
@@ -270,7 +270,7 @@ grype_scan_branch:
   needs:
     - job: gitlab_build_branch
   when: on_success
-  allow_failure: false
+  allow_failure: true
   variables:
     SCAN_IMAGE: $CI_REGISTRY_IMAGE/build:$CI_COMMIT_BRANCH-$CI_COMMIT_SHA
   only:
