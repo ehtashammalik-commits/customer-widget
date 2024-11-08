@@ -83,10 +83,6 @@ function messageFunction() {
 
   for (const msg in processedMessages) {
     const message = processedMessages[msg];
-    console.log("before Handling number of messages now", processedMessages)
-    
-
-    console.log("AFTER HANDLING ", processedMessages)
 
     let date = message.header.timestamp.slice(0, 10).replace(/-/g, "/");
     let dateTime = new Date(message.header.timestamp); //Convert UTC without GMT dateTime to Locale with GMT

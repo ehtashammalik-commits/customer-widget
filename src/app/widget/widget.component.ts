@@ -427,7 +427,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               }
             });
           }
-          this.isChatActive = true;
           console.log('on Chat Resumed Response:', data.data);
           this.handleResumedMessages(data.data);
         } else if (data.isChatAvailable == false) {
