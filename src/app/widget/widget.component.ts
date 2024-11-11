@@ -415,6 +415,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (data: { isChatAvailable: boolean; data: any[] }) => {
         if (data.isChatAvailable == true) {
           this.changeScreen('chat');
+          let comingData = data.data
+          if (Array.isArray(comingData)) {
+            comingData.forEach((message: any) => {
+              // Check if the message intent is 'update'
+              if (message && message.header && message.header.intent && message.header.intent.toLowerCase() === 'update') {
+                this.editMessage(message); // Update existing message
+              } else {
+                // If it's a new message, push it to the array
+                this.cimMessage.push(message);
+              }
+            });
+          }
           console.log('on Chat Resumed Response:', data.data);
           this.handleResumedMessages(data.data);
         } else if (data.isChatAvailable == false) {
@@ -1167,6 +1179,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   handleCimMessage(cimMessage: any) {
     if (
+     
       cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
       cimMessage.header.sender &&
       (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
@@ -1266,12 +1279,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
       }
 
-      this.cimMessage.push(cimMessage);
-      this.browserNotificationService.notify(cimMessage);
-      this.scrollToBottom();
-      this.handleMessageReport(cimMessage);
+      if (cimMessage && cimMessage.header && cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
+        this.editMessage(cimMessage);
+        this.handleMessageReport(cimMessage);
+      } else {
+        this.cimMessage.push(cimMessage);
+        this.browserNotificationService.notify(cimMessage);
+        this.scrollToBottom();
+        this.handleMessageReport(cimMessage);
+      }      
     }
   }
+
+  editMessage(cimMessage: any) {
+    const messageId = cimMessage.header.originalMessageId;
+  
+    // Find the message by messageId
+    const existingMessageIndex = this.cimMessage.findIndex(msg => msg.id === messageId);
+
+    if (existingMessageIndex !== -1) {
+      const newContent = cimMessage.body.markdownText
+      this.cimMessage[existingMessageIndex].body.markdownText = newContent;
+      this.cimMessage[existingMessageIndex].isEdited = true;
+
+    }
+  }
+  
 
   composerDisable() {
     console.log("message element is ", this.messageElement)

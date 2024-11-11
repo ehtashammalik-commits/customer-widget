@@ -254,6 +254,11 @@ body {
     box-shadow: 1px 0 0 #d9dbdf, 0 -1px 0 #d9dbdf;
 }
 
+small.edit-message {
+    font-size: 9px;
+    position: relative;
+}
+
 .chat-message-content.image-type .message-stamp {
     position: absolute;
     width: 100%;
