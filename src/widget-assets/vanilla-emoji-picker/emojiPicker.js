@@ -93,14 +93,16 @@
             emojiPicker.tabIndex = 0;
 
             emojiPicker.addEventListener("blur", function (event) {
-              emojiPicker.style.display = "none";
+              setTimeout(() => {
+                emojiPicker.style.display = "none";
+              }, 200);
             }, false);
 
               emojiPicker.id = "EmojiLink";
-              emojiPicker.style.position = "absolute";
+              emojiPicker.style.position = "relative";
               emojiPicker.style.left = "2px";
               emojiPicker.style.outline = "none";
-              emojiPicker.style.top = "-200px";
+              emojiPicker.style.top = "-40px";
               emojiPicker.style.zIndex = "99";
               emojiPicker.style.display = "none";
               emojiPicker.style.width = "232px";
@@ -132,13 +134,14 @@
               emojiTrigger.classList.add('material-symbols-outlined');
               emojiTrigger.classList.add('emoji-btn');
               emojiTrigger.onclick = function () {
-                if (emojiPicker.disabled) {
-                  return;
-                }
-                if (emojiPicker.style.display === "none") {
+                if (emojiPicker.style.display === "block") {
+                  // If picker is visible, hide it
+                  emojiPicker.style.display = "none";
+                } else {
+                  // Otherwise, show it
                   emojiPicker.style.display = "block";
+                  emojiPicker.focus();
                 }
-                emojiPicker.focus();
               };
 
             emojiContainer.appendChild(emojiTrigger);

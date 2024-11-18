@@ -1020,11 +1020,12 @@
               add_reaction
             </span> -->
             <textarea class="widget-chat-composer" 
+            #messageComposer
               [attr.data-emoji-picker]="enableEmoji" matInput id="messageTextarea"
               cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
               placeholder="Type Message Here ..." #message maxlength="{{ messageLimit }}" [(ngModel)]="text"
               (change)="textChanged()" (focus)="onTextAreaFocus()" (keyup)="onKeyPress($event)"
-              (keyup.enter)="isMobile ? '' : onSendMessage()" (keyup.enter)="onEnterKey($event)" [ngClass]="{
+              (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)" (keyup.enter)="onEnterKey($event)" [ngClass]="{
                 'error-border': text.length == messageLimit,
                 'resize-left': enableEmoji === false,
                 'resize-right': enableFileTransfer === false
@@ -1041,7 +1042,7 @@
               <input accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp,.pptx,.ppt"
                 id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
             </div>
-            <span class="material-symbols-outlined send-btn" *ngIf="isTyping" (click)="onSendMessage()">
+            <span class="material-symbols-outlined send-btn" *ngIf="isTyping" (click)="onSendMessage(messageComposer.value);">
               send
             </span>
           </div>

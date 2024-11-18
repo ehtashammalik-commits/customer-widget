@@ -52,6 +52,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private scrollContainer!: ElementRef;
   @Input() conversation: any;
 
+  // @ViewChild("replyInput", { static: true })
+  // replyInput!: ElementRef;
+
   @ViewChild('remoteVideo') remoteVideo!: ElementRef;
   @ViewChild('localVideo') myVideoLocal!: ElementRef;
 
@@ -440,11 +443,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.webhookUrl = configs.webhook.webhookUrl;
       this.enabledWebhook = configs.webhook.enableWebhook;
     }
-    if(configs.enableEmoji){
-      setTimeout(() => {
-        new EmojiPicker();
-      }, 500)
-    }
   }
 
   private markFormGroupTouched(formGroup: FormGroup) {
@@ -739,6 +737,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
+        if(this.enableEmoji){
+          setTimeout(() => {
+            new EmojiPicker();
+          }, 500)
+        }
         break;
       case 'callback':
         this.activeChatView = false;
@@ -1178,27 +1181,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.messageElement.nativeElement.focus();
     const el: any = document.getElementById('messageTextarea');
     this.text = el.value;
-    this.scrollCon = this.elementView.nativeElement.scrollHeight;
+    this.scrollCon = this.elementView && this.elementView.nativeElement.scrollHeight;
     this.scrollContainer = this.scrollContainer.nativeElement.scrollHeight;
   }
 
-  onSendMessage() {
+  onSendMessage(replyInputValue: any) {
     this.cdRef.detectChanges();
     this.scrollToBottom();
 
     if (this.imageUrls.length > 0) {
       this.fileLoading = true;
       let additionalText = '';
-      if (this.text.trim() !== '') {
-        additionalText = this.text.trim();
+      if (replyInputValue.trim() !== '') {
+        additionalText = replyInputValue.trim();
         this.clearMessageData();
       }
       this.uploadFile(this.selectedFile, additionalText);
     } else {
-      if (this.text.trim() !== '') {
-        console.log('Customer message: ', this.text.trim());
+      if (replyInputValue.trim() !== '') {
+        console.log('Customer message: ', replyInputValue.trim());
 
-        this.constructCimMessage('PLAIN', this.text.trim(), null, null);
+        this.constructCimMessage('PLAIN', replyInputValue.trim(), null, null);
         this.clearMessageData();
       }
     }
@@ -1216,6 +1219,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   clearMessageData() {
+    this.elementView.nativeElement.value = ''
     this.composer_input_disabled = false;
     this.text = '';
     this.scrollToBottom();
