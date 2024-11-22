@@ -1,6 +1,6 @@
 const { customerWidgetUrl, serviceIdentifier, widgetIdentifier } = __cim;
 const priorityCookies = ['mtc_id', '_ga']; // Add any other cookies you want to prioritize
-
+window.dataLayer = window.dataLayer || [];
 function getCookieValue(cookieName) {
   const cookies = document.cookie.split('; ');
   for (const cookie of cookies) {
@@ -65,3 +65,36 @@ chatIframe.style.minWidth = '0px';
 chatIframe.style.background = 'transparent';
 document.body.appendChild(parentSection);
 parentSection.appendChild(chatIframe);
+
+function browserInfoDataToIframe() {
+  const data = __cim;
+  // console.log('__cim variable data response in init widget :', data);
+  chatIframe.contentWindow.postMessage({
+    type: 'browserInfoData',
+    data: data
+  }, getOrigin(customerWidgetUrl)); // Use getOrigin instead of URL constructor
+}
+
+// Send sessionStorage data once the iframe is loaded
+chatIframe.onload = function () {
+  browserInfoDataToIframe();
+};
+
+// Function to extract origin from URL
+function getOrigin(url) {
+  const link = document.createElement('a');
+  link.href = url;
+  return link.origin;
+}
+
+window.addEventListener('message', (event) => {
+  console.log('Received Message for GTM Event <==', event);
+  if (event.data.type === 'gtmDataLayer') {
+    const dataLayerObj = {
+      event: event.data.type,
+      data: event.data.data
+    }
+    window.dataLayer.push(dataLayerObj);
+    console.log('Received Message for GTM', event.data.data);
+  }
+}, false);

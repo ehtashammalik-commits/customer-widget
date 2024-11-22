@@ -4,6 +4,7 @@ import { Observable, Subject } from 'rxjs';
 
 declare var widgetConfigs: any,
   getPreChatForm: any,
+  formValidation: any,
   establishConnection: any,
   setConversationDataByCustomerIdentifier: any,
   chatRequest: any,
@@ -42,6 +43,10 @@ export class SdkService implements OnInit {
   public renderPreChatForm$: Observable<any> =
     this.preChatFormSubject.asObservable();
 
+  private preChatFormValidationSubject: Subject<any> = new Subject<any>();
+  public validationsSubcription: Observable<any> =
+    this.preChatFormValidationSubject.asObservable();
+
   private callbackFormSubject: Subject<any> = new Subject<any>();
   public renderCallbackForm$: Observable<any> =
     this.callbackFormSubject.asObservable();
@@ -67,7 +72,7 @@ export class SdkService implements OnInit {
     this.loadSdk();
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
     this.widgetIdentifier = widgetIdentifier;
@@ -102,6 +107,13 @@ export class SdkService implements OnInit {
     getPreChatForm(this.ConfigData.FORM_URL, form_id, (res: any) => {
       this.preChatFormSubject.next(res);
     });
+  }
+
+  getFormValidation(callback: any) {
+    formValidation(this.ConfigData.FORM_URL, (res: any) => {
+      this.preChatFormValidationSubject.next(res);
+      callback()
+    })
   }
 
   renderCallbackForm(form_id: any) {
@@ -152,41 +164,24 @@ export class SdkService implements OnInit {
     chatRequest(payload);
   }
 
-  createStandardFormObj(
-    inputObject: Record<string, string>,
-  ): Record<string, string> {
-    const resultObject: Record<string, string> = {
-      name: '',
-      email: '',
-      phone: '',
-      identifier: '',
-    };
-    const attributeMappings: formAttributeMappings = {
-      name: ['first_name', 'full_name', 'name'],
-      phone: ['phone', 'phone_number', 'mobile', 'business_number'],
-      email: ['email', 'business_email', 'personal_email', 'email_address'],
-      identifier: ['channel_customer_identifier'],
-    } as formAttributeMappings;
-    for (const key in inputObject) {
-      for (const attribute in attributeMappings) {
-        if (
-          attributeMappings[attribute as keyof formAttributeMappings].includes(
-            key,
-          ) &&
-          inputObject[key] !== ''
-        ) {
-          resultObject[attribute] = inputObject[key];
-        }
+  createStandardFormObj(attributes: Attribute[]): Record<string, any> {
+    const resultObject: Record<string, any> = {};
+    attributes.forEach(attribute => {
+      if (attribute.key && attribute.value !== undefined) {
+        resultObject[attribute.key] = attribute.value;
       }
-    }
+    });
     return resultObject;
   }
 
   sendWebhookNotification(webhook_url: any, payload: any) {
-    let formObj = this.createStandardFormObj(payload.data.formData.attributes);
-    const message = `${formObj['name']} having email: ${formObj['email']} phone: ${formObj['phone']} with Identifier: ${formObj['identifier']} started a chat`;
-
-    webhookNotifications(webhook_url, message);
+    let notificationObj = this.createStandardFormObj(payload.data.formData.attributes);
+    let additionalData = {
+      icon: '/customer-widget/widget-assets/images/favicon.ico',
+      agent_url: this.ConfigData.FORM_URL
+    }
+    console.log('Form Object to send webhook notification: ', notificationObj);
+    webhookNotifications(webhook_url, additionalData, notificationObj);
   }
 
   fetchBrowserData(apiKey: any, callback: any) {
@@ -230,6 +225,7 @@ export class SdkService implements OnInit {
   sendChatMessage(payload: any) {
     console.log('Customer Message Payload:', payload);
     sendMessage(payload);
+
   }
 
   moveToFileServer(filePayload: any, callback: any) {
@@ -350,4 +346,10 @@ export class SdkService implements OnInit {
     console.log('handle video show/hide in sdk service');
     videoControl();
   }
+}
+
+interface Attribute {
+  key: string;
+  value: any;
+  [otherProps: string]: any; // Allow for any additional properties
 }

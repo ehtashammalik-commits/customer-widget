@@ -61,10 +61,13 @@
     ],
     "globals": {
       "ts-jest": {
-        "tsConfig": "<rootDir>/tsconfig.spec.json",
+        "tsconfig": "<rootDir>/tsconfig.spec.json",
         "stringifyContentPathRegex": "\\.html$"
       }
     },
+    "transformIgnorePatterns": [
+      "node_modules/(?!rxjs)"
+    ],
     "jestSonar": {
       "reportPath": "coverage",
       "reportFile": "test-report.xml",
