@@ -27,6 +27,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ActivatedRoute } from '@angular/router';
 import { TooltipPosition } from '@angular/material/tooltip';
+declare var EmojiPicker: any;
 
 @Component({
   selector: 'app-widget',
@@ -970,6 +971,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
+        if(this.enableEmoji){
+          setTimeout(() => {
+            new EmojiPicker();
+          }, 500)
+        }
         break;
       case 'callback':
         this.activeChatView = false;
@@ -1542,7 +1548,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.scrollContainer = this.scrollContainer?.nativeElement.scrollHeight;
   }
 
-  onSendMessage() {
+  onSendMessage(replyInputValue: any) {
     if (this.isComposerDisable) return;
     this.cdRef.detectChanges();
     this.scrollToBottom();
@@ -1550,16 +1556,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (this.imageUrls.length > 0) {
       this.fileLoading = true;
       let additionalText = '';
-      if (this.text.trim() !== '') {
-        additionalText = this.text.trim();
+      if (replyInputValue.trim() !== '') {
+        additionalText = replyInputValue.trim();
         this.clearMessageData();
       }
       this.uploadFile(this.selectedFile, additionalText);
     } else {
-      if (this.text.trim() !== '') {
-        console.log('Customer message: ', this.text.trim());
+      if (replyInputValue.trim() !== '') {
+        console.log('Customer message: ', replyInputValue.trim());
 
-        this.constructCimMessage('PLAIN', this.text.trim(), null, null);
+        this.constructCimMessage('PLAIN', replyInputValue.trim(), null, null);
         this.clearMessageData();
       }
     }
@@ -1577,6 +1583,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   clearMessageData() {
+    this.elementView.nativeElement.value = ''
     this.composer_input_disabled = false;
     this.text = '';
     this.scrollToBottom();
