@@ -21,6 +21,24 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.compone
 import { ActivatedRoute } from '@angular/router';
 import { TooltipPosition } from '@angular/material/tooltip';
 
+interface Shift {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+}
+
+interface Event {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string | null;
+  type: string;
+  shifts?: Shift[];  // Business Hours events will have shifts
+  validityPeriod: string;
+  calendar: string[];
+  eventColor: string;
+}
 @Component({
   selector: 'app-widget',
   templateUrl: './widget.component.html',
@@ -163,6 +181,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   preChatFormLoader = false;
   callbackLoader = false;
   callbackConfig: any;
+  todayShifts: { eventId: string, shiftName: string | null, startTime: string, endTime: string }[] = [];
+  events: Event[] = []; 
+  orderedEvents: any[] = [];
+  daySummary: { startOfDay: string | null; endOfDay: string | null } | null = null;
+
 
   webhookUrl: any;
 
@@ -336,11 +359,80 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.loadBrowserLanguage();
     this.setFontFromLocalStorage();
+    this.getCalendarEvents()
   }
 
-  getCalendarEvents() {
-    this.sdk.fetchBusinessCalendarId()
+  async getCalendarEvents() {
+    this.sdk
+      .fetchBusinessCalendarId()
+      .then((calendarId:string) => {
+
+        return this.sdk.getCalendarEvents(calendarId);
+      })
+      .then((events) => {
+        this.events = events.events;
+        this.getTodayEvent();
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   }
+
+  getTodayEvent(): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      try {
+        const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+  
+        // Filter events happening today and of type BUSINESS_HOURS
+        const todayEvents = this.events.filter(
+          (event) =>
+            event.type === 'BUSINESS_HOURS' &&
+            ((event.shifts && event.shifts.some((shift) => shift.startTime.startsWith(today))))
+        );
+  
+        // Extract and map Business Hours shifts
+        const businessHourShifts = todayEvents.flatMap((event) =>
+          event.shifts?.map((shift) => ({
+            eventId: event.id,
+            eventName: event.name,
+            type: event.type,
+            shiftName: shift.name,
+            startTime: shift.startTime,
+            endTime: shift.endTime,
+            originalStartTime: event.startTime,
+            originalEndTime: event.endTime,
+          }))
+        );
+  
+        // Sort the Business Hour shifts by start time
+        this.orderedEvents = businessHourShifts.sort(
+          (a, b) => new Date(a?.startTime ?? '').getTime() - new Date(b?.startTime ?? '').getTime()
+        );
+
+        const firstShift = this.orderedEvents[0];
+            const lastShift = this.orderedEvents[this.orderedEvents.length - 1];
+
+             this.daySummary = {
+                startOfDay: firstShift?.startTime,
+                endOfDay: lastShift?.endTime
+            };
+  
+        resolve(this.orderedEvents);
+      } catch (error) {
+        // Reject the promise if any error occurs
+        reject("Error processing Business Hours events: " + error);
+      }
+    });
+  }
+  
+  
+  
+
+  formatTime(dateTime: string): string {
+    const date = new Date(dateTime);
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+
 
   async passUrlParamsToServices() {
     await this.sdk.receiveUrlParamsValue(

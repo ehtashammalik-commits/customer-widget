@@ -13,11 +13,16 @@
         <button class="close-widget-wrapper" (click)="closeWrapper()">
           <span class="material-symbols-outlined"> close </span>
         </button>
-        <strong>{{ title }}</strong>
-        <p>{{ subtitle }}</p>
+        <div class="wrappper-inner-content">
+          <strong>{{ title }}</strong>
+          <p>{{ subtitle }}</p>
+          <div *ngIf="daySummary">
+            <p>Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date: 'shortTime' }}</p>
+          </div>  
+      </div>  
       </div>
       <div class="widget-wrapper-content">
-        <p>Ask us a question, our support team is pleased to help you.</p>
+        <p>Ask us a question, our support team is pleased to help you.</p>    
         <button class="widget-color" (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
           Connect with us
         </button>
@@ -249,6 +254,9 @@
       <div class="widget-form">
         <div class="widget-form-header widget-color" (click)="changeScreen('widget')">
           <h5 id="headerHeading">{{ title }}</h5>
+          <div *ngIf="daySummary">
+            <p>Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date: 'shortTime' }}</p>
+          </div>    
           <span class="widget-header-icon">
             <span class="topbar-icon material-symbols-outlined" matTooltip="Minimize"
               [matTooltipPosition]="matToolTipPosition!">minimize</span>
@@ -259,7 +267,7 @@
             <p>
               Please fill out the form below to start chatting with an agent
               now!
-            </p>
+            </p> 
             <!-- Custom Widget logo -->
             <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg" alt="Live Chat"
               *ngIf="logoEnabled" />

@@ -766,25 +766,33 @@ function callbackRequest(url, payload, callback) {
 }
 
 
-async function getCalendarId(url, serviceIdentifier ,callback) {
-  const response = await fetch(`${url}/channels/service-identifier/${serviceIdentifier}`, {
-    method: 'GET', // Specify the HTTP method as GET
-    headers: {
-      'Content-Type': 'application/json' // Set appropriate headers if needed
-    }
-  });
-  callback(response)
+// async function getCalendarId(url, serviceIdentifier ,callback) {
+//   console.log("here I am in the sdk for calling")
+//   const response = await fetch(`${url}/channels/service-identifier/${serviceIdentifier}`, {
+//     method: 'GET', // Specify the HTTP method as GET
+//     headers: {
+//       'Content-Type': 'application/json' // Set appropriate headers if needed
+//     }
+//   });
+
+//   console.log("here is the reponse now", response)
+//   callback(response)
+// }
+
+function getCalendarId(url, serviceIdentifier, callback) {
+  fetch(`${url}/channels/service-identifier/${serviceIdentifier}`)
+    .then(response => response.json())
+    .then((data) => {
+      callback(data);
+    });
 }
 
-
-async function getCalendarEvents(url, calendarId, startTime, endTime,callback) {
-  const response = await fetch(`${url}/channels/service-identifier/${serviceIdentifier}`, {
-    method: 'GET', // Specify the HTTP method as GET
-    headers: {
-      'Content-Type': 'application/json' // Set appropriate headers if needed
-    }
-  });
-  callback(response)
+function getCalendarEvents(calendarId,url, startTime,endTime,callback) {
+  fetch(`${url}/calendars/events?&calendarId=${calendarId}&startTime=${startTime}&endTime=${endTime}`)
+    .then(response => response.json())
+    .then((data) => {
+      callback(data);
+    });
 }
 
 /**
