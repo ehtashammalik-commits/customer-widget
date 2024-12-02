@@ -4,6 +4,7 @@ import { Observable, Subject } from 'rxjs';
 
 declare var widgetConfigs: any,
   getPreChatForm: any,
+  formValidation: any,
   establishConnection: any,
   setConversationDataByCustomerIdentifier: any,
   chatRequest: any,
@@ -30,7 +31,6 @@ type formAttributeMappings = {
 @Injectable({
   providedIn: 'root',
 })
-
 export class SdkService implements OnInit {
   private sdkLoaded: boolean = false;
   ConfigData: any;
@@ -45,6 +45,10 @@ export class SdkService implements OnInit {
   public renderPreChatForm$: Observable<any> =
     this.preChatFormSubject.asObservable();
 
+  private preChatFormValidationSubject: Subject<any> = new Subject<any>();
+  public validationsSubcription: Observable<any> =
+    this.preChatFormValidationSubject.asObservable();
+
   private callbackFormSubject: Subject<any> = new Subject<any>();
   public renderCallbackForm$: Observable<any> =
     this.callbackFormSubject.asObservable();
@@ -58,10 +62,12 @@ export class SdkService implements OnInit {
     this.onChatResumedSubject.asObservable();
 
   private onWebRtcCallSubject: Subject<any> = new Subject<any>();
-  public onWebRtcCallResponse$: Observable<any> = this.onWebRtcCallSubject.asObservable();
+  public onWebRtcCallResponse$: Observable<any> =
+    this.onWebRtcCallSubject.asObservable();
 
   private onCallbackRequestSubject: Subject<any> = new Subject<any>();
-  public onCallbackRequestResponse$: Observable<any> = this.onCallbackRequestSubject.asObservable();
+  public onCallbackRequestResponse$: Observable<any> =
+    this.onCallbackRequestSubject.asObservable();
 
   constructor(private _ConfigService: ConfigService) {
     this.ConfigData = this._ConfigService.appConfig;
@@ -150,6 +156,13 @@ export class SdkService implements OnInit {
     });
   }
 
+  getFormValidation(callback: any) {
+    formValidation(this.ConfigData.FORM_URL, (res: any) => {
+      this.preChatFormValidationSubject.next(res);
+      callback()
+    })
+  }
+
   renderCallbackForm(form_id: any) {
     getPreChatForm(this.ConfigData.FORM_URL, form_id, (res: any) => {
       this.callbackFormSubject.next(res);
@@ -172,11 +185,17 @@ export class SdkService implements OnInit {
     );
   }
 
-  setConversationDataAgainstCustomerIdentifier(customerChannelIdentifier: any, preChatFormData: any) {
+  setConversationDataAgainstCustomerIdentifier(
+    customerChannelIdentifier: any,
+    preChatFormData: any,
+  ) {
     setConversationDataByCustomerIdentifier(
-      this.ConfigData.CONVERSATIONAL_URL, customerChannelIdentifier, preChatFormData, (res: any) => {
+      this.ConfigData.CONVERSATIONAL_URL,
+      customerChannelIdentifier,
+      preChatFormData,
+      (res: any) => {
         console.log('Set ConversationData Request', res);
-      }
+      },
     );
   }
 
@@ -192,41 +211,31 @@ export class SdkService implements OnInit {
     chatRequest(payload);
   }
 
-  createStandardFormObj(inputObject: Record<string, string>): Record<string, string> {
-    const resultObject: Record<string, string> = {
-      name: '',
-      email: '',
-      phone: '',
-      identifier: '',
-    };
-    const attributeMappings: formAttributeMappings = {
-      name: ["first_name", "full_name", "name"],
-      phone: ["phone", "phone_number", "mobile", "business_number"],
-      email: ["email", "business_email", "personal_email", "email_address"],
-      identifier: ["channel_customer_identifier"],
-    } as formAttributeMappings;
-    for (const key in inputObject) {
-      for (const attribute in attributeMappings) {
-        if (attributeMappings[attribute as keyof formAttributeMappings].includes(key) && inputObject[key] !== '') {
-          resultObject[attribute] = inputObject[key];
-        }
+  createStandardFormObj(attributes: Attribute[]): Record<string, any> {
+    const resultObject: Record<string, any> = {};
+    attributes.forEach(attribute => {
+      if (attribute.key && attribute.value !== undefined) {
+        resultObject[attribute.key] = attribute.value;
       }
-    }
+    });
     return resultObject;
   }
 
   sendWebhookNotification(webhook_url: any, payload: any) {
-    let formObj = this.createStandardFormObj(payload.data.formData.attributes);
-    const message = `${formObj['name']} having email: ${formObj['email']} phone: ${formObj['phone']} with Identifier: ${formObj['identifier']} started a chat`;
-
-    webhookNotifications(webhook_url, message);
+    let notificationObj = this.createStandardFormObj(payload.data.formData.attributes);
+    let additionalData = {
+      icon: '/customer-widget/widget-assets/images/favicon.ico',
+      agent_url: this.ConfigData.FORM_URL
+    }
+    console.log('Form Object to send webhook notification: ', notificationObj);
+    webhookNotifications(webhook_url, additionalData, notificationObj);
   }
 
   fetchBrowserData(apiKey: any, callback: any) {
     getBrowserInfo(apiKey, (res: any) => {
       console.log('browser info in sdk.service:', res);
       callback(res);
-    })
+    });
   }
 
   sendCallbackRequest(configs: any, formData: any) {
@@ -239,22 +248,21 @@ export class SdkService implements OnInit {
       businessParam2: formObj['email'],
       businessParam3: formObj['identifier'],
       businessParam4: this.getCurrentDate(),
-      duplicateCallbacks: configs.allowDuplicate
+      duplicateCallbacks: configs.allowDuplicate,
     };
 
-    console.log("send callback request: ", payload);
+    console.log('send callback request: ', payload);
     callbackRequest(configs.callbackUrl, payload, (res: any) => {
       this.onCallbackRequestSubject.next(res);
-    })
-
+    });
   }
 
   getCurrentDate() {
     var currentDate = new Date();
     // Get the current year, month, and day
     var year = currentDate.getFullYear();
-    var month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-    var day = String(currentDate.getDate()).padStart(2, "0");
+    var month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    var day = String(currentDate.getDate()).padStart(2, '0');
 
     // Combine the year, month, and day with hyphens using template literals
     var formattedDate = `${year}-${month}-${day}`;
@@ -264,6 +272,7 @@ export class SdkService implements OnInit {
   sendChatMessage(payload: any) {
     console.log('Customer Message Payload:', payload);
     sendMessage(payload);
+
   }
 
   moveToFileServer(filePayload: any, callback: any) {
@@ -276,7 +285,10 @@ export class SdkService implements OnInit {
     );
   }
 
-  authenticateRoomId(authPayload: { roomId: string | null, secureToken: string | null }, callback: any) {
+  authenticateRoomId(
+    authPayload: { roomId: string | null; secureToken: string | null },
+    callback: any,
+  ) {
     authenticateRequest(
       this.ConfigData.AUTHENTICATOR_URL,
       authPayload,
@@ -302,9 +314,8 @@ export class SdkService implements OnInit {
    *************************/
 
   loginSipWebRtc(webRtc: any) {
-
     const login = {
-      action: "login",
+      action: 'login',
       parameter: {
         loginId: webRtc.sipExtension,
         password: webRtc.extensionPassword,
@@ -312,9 +323,9 @@ export class SdkService implements OnInit {
         sipConfig: webRtc,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
-        }
-      }
-    }
+        },
+      },
+    };
     postMessages(login);
   }
 
@@ -328,9 +339,9 @@ export class SdkService implements OnInit {
         authData: callPayload.authConfigs,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
-        }
-      }
-    }
+        },
+      },
+    };
     postMessages(dialCall);
   }
 
@@ -342,37 +353,45 @@ export class SdkService implements OnInit {
         dialogId: sessionDialogId,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
-        }
-      }
-    }
+        },
+      },
+    };
     postMessages(endCall);
   }
 
   handleCallMic(action: any, sessionDialogId: any) {
-    console.log('handle mic mute/unmute in sdk service', action, sessionDialogId);
+    console.log(
+      'handle mic mute/unmute in sdk service',
+      action,
+      sessionDialogId,
+    );
     const micPayload = {
       action: action,
       parameter: {
         dialogId: sessionDialogId,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
-        }
-      }
-    }
+        },
+      },
+    };
     postMessages(micPayload);
   }
 
   handleCallHoldState(action: any, sessionDialogId: any) {
-    console.log('handle mic mute/unmute in sdk service', action, sessionDialogId);
+    console.log(
+      'handle mic mute/unmute in sdk service',
+      action,
+      sessionDialogId,
+    );
     const callStatePayload = {
       action: action,
       parameter: {
         dialogId: sessionDialogId,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
-        }
-      }
-    }
+        },
+      },
+    };
     postMessages(callStatePayload);
   }
 
@@ -380,4 +399,10 @@ export class SdkService implements OnInit {
     console.log('handle video show/hide in sdk service');
     videoControl();
   }
+}
+
+interface Attribute {
+  key: string;
+  value: any;
+  [otherProps: string]: any; // Allow for any additional properties
 }
