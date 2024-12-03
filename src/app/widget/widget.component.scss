@@ -86,20 +86,24 @@ $text-color: #464646;
   // box-shadow: 45px 55px 100px #efefef;
   transition: all 0.3s;
   max-width: 300px;
-  position: absolute;
+  position: fixed;
   z-index: 10000;
   width: 300px;
-  height: 200px;
+  height: 230px;
   border: none;
   right: 15px;
   bottom: 92px;
+  .wrapper-inner{
+    position: absolute;
+    bottom: 0;
+  }
 }
 
 .widget-wrapper-header {
   background: var(--main-color);
   color: $white-color;
   text-align: center;
-    padding: 10px 10px 15px;
+    padding: 10px;
     border-radius: 10px;
     position: relative;
     bottom: -12px;
@@ -107,6 +111,7 @@ $text-color: #464646;
     margin-left: auto;
     /* max-height: 150px; */
     margin-right: auto;
+    border-bottom: 12px solid var(--main-color);
 }
 
 .widget-wrapper-header p {
@@ -138,12 +143,13 @@ $text-color: #464646;
   padding: 10px;
   text-align: center;
   background: $white-color;
-  position: absolute;
-  top: 70px;
+  position: relative;
+  // top: 70px;
   width: 96%;
   height: 125px;
   left: 6px;
   border-radius: 10px;
+  bottom: 5px;
 }
 
 .widget-wrapper-content p {
@@ -346,17 +352,28 @@ button.close-widget-wrapper {
 }
 
 .widget-form-header {
-  padding: 0 5px;
+  padding: 0 10px;
   height: 50px;
   border-radius: 10px;
   cursor: pointer;
+  &.exist-calendar{
+    h5{
+      line-height: 25px;
+    }
+  }
+  p{
+    font-size: 10px;
+    margin: 0;
+    position: relative;
+    line-height: 10px;
+  }
 }
 
 .widget-form-header h5 {
-  line-height: 36px;
+  line-height: 40px;
   margin: 0;
   display: inline-block;
-  position: absolute;
+  // position: absolute;
   left: 10px;
   height: 15px;
   font-family: "Roboto";

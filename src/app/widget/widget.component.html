@@ -9,25 +9,28 @@
   <!--------------------------->
   <ng-container *ngIf="additionalPanel && !standaloneWebRtc">
     <div class="widget-wrapper">
-      <div class="widget-wrapper-header widget-color">
-        <button class="close-widget-wrapper" (click)="closeWrapper()">
-          <span class="material-symbols-outlined"> close </span>
-        </button>
-        <div class="wrappper-inner-content">
-          <strong>{{ title }}</strong>
-          <p>{{ subtitle }}</p>
-          <div *ngIf="daySummary">
-            <p>Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date: 'shortTime' }}</p>
-          </div>  
-      </div>  
+      <div class="wrapper-inner">
+
+        <div class="widget-wrapper-header widget-color">
+          <button class="close-widget-wrapper" (click)="closeWrapper()">
+            <span class="material-symbols-outlined"> close </span>
+          </button>
+          <div class="wrappper-inner-content">
+            <strong>{{ title }}</strong>
+            <p>{{ subtitle }}</p>
+            <div *ngIf="daySummary">
+              <p>Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date: 'shortTime' }}</p>
+            </div>  
+        </div>  
+        </div>
+        <div class="widget-wrapper-content">
+          <p>Ask us a question, our support team is pleased to help you.</p>    
+          <button class="widget-color" (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
+            Connect with us
+          </button>
+        </div>
       </div>
-      <div class="widget-wrapper-content">
-        <p>Ask us a question, our support team is pleased to help you.</p>    
-        <button class="widget-color" (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
-          Connect with us
-        </button>
-      </div>
-    </div>
+  </div>
   </ng-container>
 
   <!---------------------------------------->
@@ -406,11 +409,9 @@
   <ng-container *ngIf="preChatFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-color" (click)="changeScreen('widget')">
+        <div class="widget-form-header widget-color" [ngClass]="{'exist-calendar':daySummary}" (click)="changeScreen('widget')">
           <h5 id="headerHeading">{{ title }}</h5>
-          <div *ngIf="daySummary">
-            <p>Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date: 'shortTime' }}</p>
-          </div>    
+            <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date: 'shortTime' }}</p>
           <span class="widget-header-icon">
             <span class="topbar-icon material-symbols-outlined" matTooltip="Minimize"
               [matTooltipPosition]="matToolTipPosition!">minimize</span>
