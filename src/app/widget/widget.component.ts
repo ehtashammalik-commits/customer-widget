@@ -41,7 +41,7 @@ interface EventData {
   startTime: string;
   endTime: string | null;
   type: string;
-  shifts?: Shift[];  // Business Hours events will have shifts
+  shifts?: Shift[];
   validityPeriod: string;
   calendar: string[];
   eventColor: string;
@@ -248,7 +248,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   todayShifts: { eventId: string, shiftName: string | null, startTime: string, endTime: string }[] = [];
   events: EventData[] = []; 
   orderedEvents: any[] = [];
-  daySummary: { startOfDay: string | null; endOfDay: string | null } | null = null;
+  daySummary: { startOfDay: Date | null; endOfDay: Date | null } | null = null;
 
 
   webhookUrl: any;
@@ -518,11 +518,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         const todayEvents = this.events.filter(
           (event) =>
             event.type === 'BUSINESS_HOURS' &&
-            ((event.shifts && event.shifts.some((shift) => shift.startTime.startsWith(today))))
+            event.shifts?.some((shift) => shift.endTime.startsWith(today))
         );
   
-        // Extract and map Business Hours shifts
-        const businessHourShifts = todayEvents.flatMap((event) =>
+        // Flatten all shifts into a single array
+        const allShifts = todayEvents.flatMap((event) =>
           event.shifts?.map((shift) => ({
             eventId: event.id,
             eventName: event.name,
@@ -530,23 +530,36 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             shiftName: shift.name,
             startTime: shift.startTime,
             endTime: shift.endTime,
-            originalStartTime: event.startTime,
-            originalEndTime: event.endTime,
           }))
         );
   
-        // Sort the Business Hour shifts by start time
-        this.orderedEvents = businessHourShifts.sort(
-          (a, b) => new Date(a?.startTime ?? '').getTime() - new Date(b?.startTime ?? '').getTime()
+        // If no shifts are available, handle accordingly
+        if (!allShifts.length) {
+          this.daySummary = null;
+          return resolve([]);
+        }
+        const minStartTime = new Date(
+          Math.min(
+            ...allShifts
+              .map((shift) => (shift?.startTime ? new Date(shift.startTime).getTime() : Infinity))
+          )
         );
 
-        const firstShift = this.orderedEvents[0];
-            const lastShift = this.orderedEvents[this.orderedEvents.length - 1];
-
-             this.daySummary = {
-                startOfDay: firstShift?.startTime,
-                endOfDay: lastShift?.endTime
-            };
+        const maxEndTime = new Date(
+          Math.max(
+            ...allShifts
+              .map((shift) => (shift?.endTime ? new Date(shift.endTime).getTime() : -Infinity))
+          )
+        );
+  
+        // Set the day summary with the minimum and maximum times
+        this.daySummary = {
+          startOfDay: minStartTime,
+          endOfDay: maxEndTime,
+        };
+  
+        
+        ///this.orderedEvents = allShifts;
   
         resolve(this.orderedEvents);
       } catch (error) {
@@ -555,6 +568,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     });
   }
+  
+  
+  
   
   
   
