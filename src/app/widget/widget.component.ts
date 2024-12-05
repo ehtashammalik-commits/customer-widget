@@ -512,20 +512,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getTodayEvent(): Promise<any[]> {
     return new Promise((resolve, reject) => {
       try {
-        const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-  
+        
+        const today = new Date();
+        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Start of today in local time
+        const todayEnd = new Date(todayStart);
+        todayEnd.setDate(todayStart.getDate() + 1); // Start of tomorrow in local time
+
+
         // Filter events happening today and of type BUSINESS_HOURS
         const todayEvents = this.events.filter(
           (event) =>
             event.type === 'BUSINESS_HOURS' &&
-            event.shifts?.some((shift) => shift.endTime.startsWith(today))
+            event.shifts?.some((shift) => {
+              const shiftStart = new Date(shift.startTime); // Convert to local time
+              const shiftEnd = new Date(shift.endTime); // Convert to local time
+
+              // Check if either start or end time falls within today's local date range
+              return (
+                (shiftStart >= todayStart && shiftStart < todayEnd) ||
+                (shiftEnd >= todayStart && shiftEnd < todayEnd)
+              );
+            })
         );
-  
+
         // Flatten all shifts into a single array
         const allShifts = todayEvents.flatMap((event) =>
           event.shifts?.map((shift) => ({
-            eventId: event.id,
-            eventName: event.name,
             type: event.type,
             shiftName: shift.name,
             startTime: shift.startTime,
@@ -557,7 +569,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           startOfDay: minStartTime,
           endOfDay: maxEndTime,
         };
-  
         
         ///this.orderedEvents = allShifts;
   
