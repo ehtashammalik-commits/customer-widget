@@ -19,6 +19,7 @@ console.log(
   channel_customer_identifier,
 );
 var messages = [];
+let processedMessages = []
 let originURL = new URL(ccm_url).origin;
 const senderIconMap = {
   "web-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_WEB.svg`,
@@ -38,14 +39,16 @@ const senderIconMap = {
 const request = new XMLHttpRequest();
 request.open(
   "GET",
-  `${ccm_url}/message/?customerChannelIdentifier=${channel_customer_identifier}&serviceIdentifier=${service_identifier}&conversationId=${conversation_id}`,
+  `${ccm_url}/message?customerChannelIdentifier=${channel_customer_identifier}&serviceIdentifier=${service_identifier}&conversationId=${conversation_id}`,
 );
 request.send();
 request.onload = () => {
+  console.log("this is the first thing to look at.... ")
   if (request.status === 200) {
     messages = JSON.parse(request.response);
     console.log("Messages :", messages);
     rtlLanguage();
+    preProcessMessages()
     messageFunction();
   } else {
     console.log(
@@ -63,11 +66,24 @@ function rtlLanguage() {
   }
 }
 
+function preProcessMessages() {
+  messages.forEach(message => {
+    if (message.header && message.header.intent && message.header.intent.toLowerCase() === 'update') {
+      editMessage(message, processedMessages);
+    } else {
+      processedMessages.push(message)
+    }
+  });
+}
+
 //Function for Chat Messages Of BOT , AGENT and CUSTOMER
 function messageFunction() {
   let chatDiv = `<div>`;
-  for (const msg in messages) {
-    const message = messages[msg];
+
+
+  for (const msg in processedMessages) {
+    const message = processedMessages[msg];
+
     let date = message.header.timestamp.slice(0, 10).replace(/-/g, "/");
     let dateTime = new Date(message.header.timestamp); //Convert UTC without GMT dateTime to Locale with GMT
     let min =
@@ -75,6 +91,10 @@ function messageFunction() {
         `0${dateTime.getMinutes()}` :
         `${dateTime.getMinutes()}`;
     let time = timeConvert(`${dateTime.getHours()}:${min}`);
+    let edited = ''
+    if(message.isEdited) {
+      edited = `<small class ='edit-message'>Edited</small>`
+    }
     document.getElementById("chatDate").innerHTML = date;
 
     if (message.header.sender.type == "BOT") {
@@ -278,7 +298,7 @@ function messageFunction() {
             <div class="chat-message-content">
               <div class="user-name"><span>${message.header.sender.senderName}</span></div>
               <p><span>${message.body.markdownText}</span>
-                <span class="message-stamp"><span class="chat-time">${time}</span></span></p>
+                <span class="message-stamp"><span class="chat-time">${edited} ${time}</span></p>
             </div>
           </div>`;
       }
@@ -495,6 +515,9 @@ function messageFunction() {
       }
     }
   }
+  
+  
+  
   chatDiv += "</div>";
   document.getElementById("msg").innerHTML = chatDiv;
 
@@ -505,6 +528,23 @@ function messageFunction() {
       window.print();
     }
   }, 2000); //wait 2 seconds
+}
+
+function editMessage(cimMessage) {
+  const messageId = cimMessage.header.originalMessageId;
+
+  // Find the message by messageId
+  const existingMessageIndex = processedMessages.findIndex(function(msg) {
+    return msg.id === messageId;
+  });
+
+  if (existingMessageIndex !== -1) {
+    // Update the content of the existing message
+    const newContent = cimMessage.body.markdownText;
+    processedMessages[existingMessageIndex].body.markdownText = newContent;
+    processedMessages[existingMessageIndex].isEdited = true;
+
+  }
 }
 // Function for Converting Time in Message box
 function timeConvert(time) {

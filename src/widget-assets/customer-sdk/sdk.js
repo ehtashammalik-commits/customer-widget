@@ -101,16 +101,45 @@ function eventListeners(callback) {
   });
   this.socket.on('CHANNEL_SESSION_STARTED', (data) => {
     console.log(`Channel Session Started Data: `, data);
+    const gtmObject = {
+      type: 'gtmDataLayer',
+      data: {
+        type: 'CHAT STARTED',
+        data: {
+          customerIdentifier: data.header.channelData.channelCustomerIdentifier,
+          serviceIdentifier: data.header.channelData.serviceIdentifier,
+        }
+      }
+    }
+    window.parent.postMessage(gtmObject, '*');
     callback({ type: "CHANNEL_SESSION_STARTED", data: data });
   });
   this.socket.on('MESSAGE_RECEIVED', (message) => {
     console.log(`MESSAGE_RECEIVED received: `, message);
     callback({ type: "MESSAGE_RECEIVED", data: message });
   });
+
+  this.socket.on("CHANNEL_SESSION_ENDED", (reason) => {
+    console.log("CHANNEL_SESSION_ENDED")
+    callback({ type: "CHANNEL_SESSION_ENDED", data: reason })
+  })
+  this.socket.on("CHANNEL_SESSION_EXPIRED", (reason) => {
+    console.log("CHANNEL_SESSION_EXPIRED")
+    callback({ type: "CHANNEL_SESSION_EXPIRED", data: reason })
+  })
   this.socket.on('disconnect', (reason) => {
     console.error(`Connection lost with the server: `, reason);
+    // const gtmObject = {
+    //   type: 'gtmDataLayer',
+    //   data: {
+    //     type: 'CHAT ENDED',
+    //     data: reason
+    //   }
+    // }
+    // window.parent.postMessage(gtmObject, '*');
     callback({ type: "SOCKET_DISCONNECTED", data: reason });
   });
+
   this.socket.on('connect_error', (error) => {
     console.log(`unable to establish connection with the server: `, error.message);
     localStorage.setItem("widget-error", "1");
@@ -150,6 +179,17 @@ function chatRequest(data) {
         serviceIdentifier: data.data.serviceIdentifier,
         additionalAttributes: additionalAttributesData
       };
+      // const gtmObject = {
+      //   type: 'gtmDataLayer',
+      //   data: {
+      //     type: 'CHAT REQUESTED',
+      //     data: {
+      //       customerIdentifier: data.data.channelCustomerIdentifier,
+      //       serviceIdentifier: data.data.serviceIdentifier,
+      //     }
+      //   }
+      // }
+      // window.parent.postMessage(gtmObject, '*');
       this.socket.emit('CHAT_REQUESTED', obj);
       console.log(`SEND CHAT_REQUESTED DATA:`, obj);
     }
@@ -213,9 +253,23 @@ function chatEnd(data) {
  * @param {*} data
  */
 function resumeChat(data, callback) {
+  const gtmObject = {
+    type: 'gtmDataLayer',
+    data: {
+      type: 'BROWSER NAVIGATED',
+      data: {
+        customerIdentifier: data.channelCustomerIdentifier,
+        serviceIdentifier: data.serviceIdentifier,
+      }
+    }
+  }
+  console.log(data, 'Resume Chat Before Emit Console.log');
   this.socket.emit("CHAT_RESUMED", data, (res) => {
     if (res) {
       console.log(res, 'resume chat response in sdk.');
+      if (res.isChatAvailable) {
+        window.parent.postMessage(gtmObject, '*');
+      }
       callback(res);
     }
   });
@@ -270,8 +324,8 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
       callback(result);
     })
     .catch((error) => {
-      console.error('Error: ', error);
-      callback(error);
+      console.error('Error: ', error.message);
+      callback({ error, isFileInvalid: true, errorMesage: "The file name contains special characters. Only underscore, hyphen and space are allowed in file name." });
     });
 }
 /**
@@ -476,17 +530,53 @@ function callbackRequest(url, payload, callback) {
  * Webhook Notifications Functions
  * @param {*} data
  */
-function webhookNotifications(url, data) {
-  let notifications = {};
-  notifications['text'] = `${data}`
-  fetch(`${url}`, {
+
+function webhookNotifications(webhookUrl, additionalData, data) {
+  // Constructing the message dynamically based on the keys and values in the data object
+  let imageUrl = modifyUrlPath(additionalData.agent_url, additionalData.icon);
+
+  let formattedText = '';
+  for (const [key, value] of Object.entries(data)) {
+    formattedText += `${capitalizeFirstLetter(key)}: ${value ? value : 'N/A'}\n`;
+  }
+  let newAgentUrl = modifyUrlPath(additionalData.agent_url, '/unified-agent/');
+  formattedText += `To respond: <a href='${newAgentUrl}'>Click here</a>\n`;
+
+  let messageObj = {
+    "cards": [
+      {
+        "header": {
+          "title": `${data.first_name ? data.first_name : 'Customer'} started a new chat`,
+          "imageUrl": imageUrl,
+          "imageStyle": "IMAGE"
+        },
+        "sections": [
+          {
+            "widgets": [
+              {
+                "textParagraph": {
+                  "text": formattedText
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+  fetch(`${webhookUrl}`, {
     method: 'POST',
-    body: JSON.stringify(notifications),
+    body: JSON.stringify(messageObj), // Formatting as a JSON object for Google Workspace webhook
     headers: {
       "Content-Type": "application/json; charset=UTF-8"
     }
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        return response.json().then(err => Promise.reject(err));
+      }
+      return response.json();
+    })
     .then((result) => {
       console.log('Success: ', result);
     })
@@ -494,6 +584,23 @@ function webhookNotifications(url, data) {
       console.error('Error: ', error);
     });
 }
+
+// Helper function to capitalize the first letter of each key
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1).replace(/_/g, ' ');
+}
+
+function modifyUrlPath(originalUrl, newPath) {
+  try {
+    const url = new URL(originalUrl);
+    url.pathname = newPath;
+    return url.toString();
+  } catch (error) {
+    console.error("Invalid URL:", error);
+    return null;
+  }
+}
+
 /**
  * Web Widget SDK Functions for Chat Ends
  */
@@ -506,6 +613,7 @@ function webhookNotifications(url, data) {
  */
 
 // Initialize an object to keep track of function locks
+
 const functionLocks = {};
 var canCallFunction = true;
 var callendDialogId;
@@ -535,6 +643,16 @@ var mySessionDescriptionHandlerFactory = null
 
 // var remoteVideo = document.getElementById('remoteVideo');
 // var localVideo = document.getElementById('localVideo');
+var mySessionDescriptionHandlerFactory = null
+
+// Number of times to attempt reconnection before giving up
+// const reconnectionAttempts = 10;
+// // Number of seconds to wait between reconnection attempts
+// const reconnectionDelay = 5;
+// // Used to guard against overlapping reconnection attempts
+// let attemptingReconnection = false;
+// // If false, reconnection attempts will be discontinued or otherwise prevented
+// let shouldBeConnected = true;
 
 const dialogStatedata1 = {
   "event": "dialogState",
@@ -546,7 +664,7 @@ const dialogStatedata1 = {
       "dialedNumber": null,
       "customerNumber": null,
       "dnis": null,
-      "serviceIdentifier": null,
+      "serviceIdentifer": null,
       "callType": null,
       "ani": null,
       "wrapUpReason": null,
@@ -611,7 +729,7 @@ const outboundDialingdata12 = {
       "queueType": null,
       "dialedNumber": null,
       "dnis": null,
-      "serviceIdentifier": null,
+      "serviceIdentifer": null,
       "secondaryId": null,
       "state": "INITIATING",
       "isCallAlreadyActive": false,
@@ -665,7 +783,7 @@ const ConsultCalldata1 = {
       "queueType": null,
       "dialedNumber": null,
       "dnis": null,
-      "serviceIdentifier": null,
+      "serviceIdentifer": null,
       "secondaryId": null,
       "state": "INITIATING",
       "isCallAlreadyActive": false,
@@ -719,7 +837,7 @@ const invitedata1 = {
       "queueType": null,
       "dialedNumber": null,
       "dnis": null,
-      "serviceIdentifier": null,
+      "serviceIdentifer": null,
       "secondaryId": null,
       "state": "ALERTING",
       "isCallAlreadyActive": false,
@@ -851,6 +969,7 @@ let inviteDelegate = {
         dialogStatedata.response.dialog.callEndReason = match[1];
       }
     }
+
     if (invitedata && invitedata.event && invitedata.event === "dialogState") {
       const match = bye.incomingByeRequest.message.data.match(/text="([^"]+)"/);
 
@@ -858,23 +977,85 @@ let inviteDelegate = {
         invitedata.response.dialog.callEndReason = match[1];
       }
     }
-    // if (consultCalldata && consultCalldata.event && consultCalldata.event === "dialogState") {
-    //     const match = bye.incomingByeRequest.message.data.match(/text="([^"]+)"/);
+  //   if (consultCalldata && consultCalldata.event && consultCalldata.event === "dialogState") {
+  //       const match = bye.incomingByeRequest.message.data.match(/text="([^"]+)"/);
 
-    //     if (match && match[1]) {
-    //         consultCalldata.response.dialog.callEndReason = match[1];
-    //     }
-    // }
+  //       if (match && match[1]) {
+  //           consultCalldata.response.dialog.callEndReason = match[1];
+  //       }
+  //   }
 
-  },
   // onCancel(cancel ){console.log("onCancel MESSAGE  ********  ", cancel)},
   // onInfo(info ) {console.log("onInfo MESSAGE  ********  ", info)},
   // onInvite(reqeust , response , statusCode ){console.log("onInvite MESSAGE  ********  ", reqeust,response,statusCode)},
   // onMessage(message ){console.log("onMessage MESSAGE  ********  ", message)},
   // onRefer(referral){console.log("onRefer MESSAGE  ********  ", referral)},
   // onNotify(notification){console.log("onNotify MESSAGE  ********  ", notification)}
+
+  },
 }
 
+var errorsList = {
+  Forbidden: "Invalid Credentials.Plese provide valid credentials.",
+  Busy: "Device is busy",
+  Redirected: "Redirected",
+  Unavailable: "Unavailable",
+  "Not Found": "Not Found",
+  "Address Incomplete": "Address Incomplete",
+  "Incompatible SDP": "Incompatible SDP",
+  "Authentication Error": "Authentication Error",
+  "Request Timeout": "The timeout expired for the client transaction before a response was received.",
+  "Connection Error": "WebSocket connection error occurred.",
+  "Invalid target": "The specified target can not be parsed as a valid SIP.URI",
+  "SIP Failure Code": "A negative SIP response was received which is not part of any of the groups defined in the table below.",
+  Terminated: "Session terminated normally by local or remote peer.",
+  Canceled: "Session canceled by local or remote peer",
+  "No Answer": "Incoming call was not answered in the time given in the configuration no_answer_timeout parameter.",
+  Expires: "Incoming call contains an Expires header and the local user did not answer within the time given in the header",
+  "No ACK": "An incoming INVITE was replied to with a 2XX status code, but no ACK was received.",
+  "No PRACK": "An incoming iNVITE was replied to with a reliable provisional response, but no PRACK was received",
+  "User Denied Media Access": "Local user denied media access when prompted for audio/video devices.",
+  "WebRTC not supported": "The browser or device does not support the WebRTC specification.",
+  "RTP Timeout": "There was an error involving the PeerConnection associated with the call.",
+  "Bad Media Description": "Received SDP is wrong.",
+  "‘Dialog Error": "	An in-dialog request received a 408 or 481 SIP error.",
+};
+
+var myMediaStreamFactory = async (constraints, sessionDescriptionHandler) => {
+  let mediaStream = new MediaStream();
+  if (constraints.audio === undefined) {
+    constraints.audio = true;
+  }
+  if (constraints.video === undefined) {
+    constraints.video = false;
+  }
+  if (constraints.video == "screenshare") {
+    await navigator.mediaDevices.getDisplayMedia({ video: true }).then(async (stream) => {
+      await navigator.mediaDevices.getUserMedia({ audio: true }).then((audioStream) => {
+        mediaStream = stream
+        mediaStream.addTrack(audioStream.getAudioTracks()[0])
+      }).catch((error) => {
+        permissionDenied(error, constraints)
+        return Promise.reject("Permisssion Deined !!")
+      })
+    }).catch((error) => {
+      permissionDenied(error, constraints)
+      return Promise.reject("Permisssion Deined !!")
+    })
+  }
+  else {
+    await navigator.mediaDevices.getUserMedia({ audio: constraints.audio, video: constraints.video }).then((stream) => {
+      mediaStream = stream
+    }).catch((error) => {
+      permissionDenied(error, constraints)
+      if (error.name === "NotFoundError") {
+        return Promise.reject("No Audio/Video Device Found")
+      }
+      return Promise.reject("Permisssion Deined !!")
+    })
+  }
+  return Promise.resolve(mediaStream);
+}
 
 function postMessages(obj, callback) {
   console.log(obj);
@@ -911,7 +1092,9 @@ function postMessages(obj, callback) {
       break;
     case 'makeConsult':
       makeConsultCall(obj.parameter.numberToConsult, obj.parameter.clientCallbackFunction);
-      // console.log('Freeswitch do not support makeConsult currently');
+      break;
+    case 'makeConsultQueue':
+      makeConsultCall_queue(obj.parameter.numberToTransfer, obj.parameter.queue, obj.parameter.queueType, obj.parameter.clientCallbackFunction);
       break;
     case 'makeConsultQueue':
       makeConsultCall_queue(obj.parameter.numberToTransfer, obj.parameter.queue, obj.parameter.queueType, obj.parameter.clientCallbackFunction);
@@ -919,7 +1102,6 @@ function postMessages(obj, callback) {
       break;
     case 'consultTransfer':
       makeConsultTransferCall(obj.parameter.clientCallbackFunction);
-      // console.log('Freeswitch do not support consultTransfer currently');
       break;
     case 'silentMonitor':
       console.log('Freeswitch do not support silentMonitor currently');
@@ -998,7 +1180,6 @@ function postMessages(obj, callback) {
       break;
     case 'getState':
       console.log('Freeswitch do not support getState currently');
-      //get_agent_status();
       break;
     case 'getNotReadyLogoutReasons':
       console.log('Freeswitch do not support getNotReadyLogoutReasons currently');
@@ -1044,10 +1225,8 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
   }
   const uri = SIP.UserAgent.makeURI("sip:" + extension + "@" + sip_uri);
   if (!uri) {
-    // Failed to create URI
   }
   mySessionDescriptionHandlerFactory = SIP.Web.defaultSessionDescriptionHandlerFactory(myMediaStreamFactory);
-  // if (!ua) {
   var config = {
     uri: uri,
     authorizationUsername: extension,
@@ -1061,10 +1240,10 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
     contactParams: { transport: "wss" },
     contactName: extension,
     /**
-* If true, a first provisional response after the 100 Trying will be sent automatically if UAC does not
-* require reliable provisional responses.
-* defaultValue `true`
-*/
+    * If true, a first provisional response after the 100 Trying will be sent automatically if UAC does not
+    * require reliable provisional responses.
+    * defaultValue `true`
+    */
     sendInitialProvisionalResponse: true,
     refreshFrequency: 5000,
     delegate: {
@@ -1156,7 +1335,6 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
         var variablelist = sip_from[0].substring(1, sip_from[0].length - 1).split("|")
         const sysdate = new Date();
         var datetime = sysdate.toISOString();
-
         var dnis = sip_from[1].split(">;")[0]
 
 
@@ -1170,6 +1348,25 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
          * 
          * Incase of Consult incomingCallSource = normal
          */
+
+        //develop changes
+        // var incomingCallSource = ""
+        // var incomingMediaType = invitation.incomingInviteRequest.message.headers["X-Media-Type"];
+        // if (incomingMediaType != undefined) {
+        //   incomingMediaType = incomingMediaType[0].raw;
+        //   incomingCallSource = "webrtc"
+        // } else {
+        //   var sdp = invitation.incomingInviteRequest.message.body;
+        //   if ((/\r\nm=audio /).test(sdp)) {
+        //     incomingMediaType = "audio";
+        //   }
+        //   if ((/\r\nm=video /).test(sdp)) {
+        //     incomingMediaType = "video";
+        //   }
+        //   incomingCallSource = "normal"
+        // }
+
+        call_variable_array = [];
 
         var incomingCallSource = ""
         var incomingMediaType = invitation.incomingInviteRequest.message.headers["X-Media-Type"];
@@ -1573,15 +1770,10 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
       error("subscriptionFailed", extension, errorr.message, callback);
     });
 
-
-
   // Allow the function to be called again after 5 seconds
   setTimeout(() => {
     canCallFunction = true;
   }, 1000); // 5000 milliseconds = 5 seconds
-
-  //
-
 
 }
 /**
@@ -1595,13 +1787,13 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
  * @param {string} callType - The type of call (OUT for outbound, MONITORING for monitoring).
  * @returns {void}
  */
+
 function initiate_call(calledNumber, DN, mediaType, authData, callback, callType) {
   var res = lockFunction("initiate_call", 500); // --- seconds cooldown
   if (!res) return;
   const undefinedParams = checkUndefinedParams(initiate_call, [calledNumber, DN, mediaType, authData, callback, callType]);
 
   if (undefinedParams.length > 0) {
-    // console.log(`Error: The following parameter(s) are undefined or null: ${undefinedParams.join(', ')}`);
     error("generalError", loginid, `Error: The following parameter(s) are undefined or null or empty: ${undefinedParams.join(', ')}`, callback);
     return;
   }
@@ -1642,7 +1834,6 @@ function initiate_call(calledNumber, DN, mediaType, authData, callback, callType
     var offerToReceiveAVideo = false   // if audio
     if (mediaType == "video") { constraintVideo = true; offerToReceiveAVideo = true }
     else if (mediaType == "screenshare") { constraintVideo = "screenshare"; offerToReceiveAVideo = true }
-
 
     // Options including delegate to capture response messages
     const inviteOptions = {
@@ -1755,7 +1946,6 @@ function initiate_call(calledNumber, DN, mediaType, authData, callback, callType
               outboundDialingdata.session = sessionall;
               calls.push(outboundDialingdata);
             }
-
 
           }
 
@@ -2765,9 +2955,9 @@ function makeConsultCall(calledNumber, callback) {
   } else {
     error('invalidState', loginid, "invalid action makeCall", callback);
   }
+}
 
   //sessionall.refer(consultSessioin);
-}
 /**
  * Initiate a consult call with queue.
  * This function allows an agent to initiate a consult call with the specified destination number and queue.
@@ -3461,6 +3651,7 @@ function sendDtmf(message, dialogId, callback) {
       });;
   }
 }
+
 window.addEventListener('beforeunload', (event) => {
   //need to check here.
   terminateAllCalls();
@@ -3666,13 +3857,14 @@ function setupRemoteMedia(session, callback) {
 
   var localVideo = document.getElementById('localVideo');
   if (localVideo) localVideo.srcObject = localStream_1;
-
   local_stream = localStream_1;
 }
+
 function registrationFailed(response) {
   //console.log('helo ',msg);
   error("subscriptionFailed", loginid, errorsList[response.message.reasonPhrase], callbackFunction);
 }
+
 function getCallIndex(dialogId) {
   for (let index = 0; index < calls.length; index++) {
     var element = calls[index];
@@ -3682,6 +3874,7 @@ function getCallIndex(dialogId) {
   }
   return -1;
 }
+
 function checkUndefinedParams(func, params) {
   const paramNames = getParameterNames(func);
   const undefinedParams = [];
@@ -3705,6 +3898,7 @@ function getParameterNames(func) {
   }
   return [];
 }
+
 function SendPostMessage(data) {
   try {
     if (sipconfig.voicePostMessageSending == true) {
@@ -3739,6 +3933,7 @@ function terminateAllCalls() {
     }
   userAgent.stop();
 }
+
 // Reusable function to check and set the lock state for a specific function
 function lockFunction(funcName, delay) {
   if (!functionLocks[funcName]) {
@@ -3998,6 +4193,33 @@ function sendingReInvite(dialogId, callback, streamType) {
     });
 }
 
+async function permissionDenied(error, constraints) {
+  if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+    const permissions = await Promise.all([
+      navigator.permissions.query({ name: 'camera' }),
+      navigator.permissions.query({ name: 'microphone' })
+    ]);
+
+    permissions.forEach((permission) => {
+      console.log(permission)
+      console.log(constraints)
+      let denied_component = ""
+      if (permission.state === 'denied') {
+
+        if (permission.name === "audio_capture") { denied_component = "audio" }
+        if (permission.name === "video_capture") { denied_component = "video" }
+        alert(`Access to ${denied_component} is denied. Please enable it in your browser settings.`);
+      }
+      if (permission.state === 'prompt' && permission.name === "video_capture") {
+        denied_component = "Screen-share"
+        alert(`Access to ${denied_component} is denied. Please enable it in your browser settings.`);
+      }
+    });
+  }
+  if (error.name === "NotFoundError") {
+    alert(`Audio/Video Device Not Found. Please make sure your Audio/Video Device are working`);
+  }
+}
 
 function agentDetailsToOtherParticiapnt(dialogId) {
   var index = getCallIndex(dialogId);
@@ -4019,6 +4241,7 @@ function agentDetailsToOtherParticiapnt(dialogId) {
       }
     }
     sendMessage(customEvent, dialogId)
+    // sendCallMessage(customEvent, dialogId)
   }
 }
 
