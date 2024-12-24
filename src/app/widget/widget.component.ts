@@ -976,7 +976,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
-        if(this.enableEmoji){
+        if (this.enableEmoji) {
           setTimeout(() => {
             new EmojiPicker();
           }, 500)
@@ -1266,7 +1266,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   handleCimMessage(cimMessage: any) {
     if (
-     
+
       cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
       cimMessage.header.sender &&
       (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
@@ -1378,13 +1378,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.browserNotificationService.notify(cimMessage);
         this.scrollToBottom();
         this.handleMessageReport(cimMessage);
-      }      
+      }
     }
   }
 
   editMessage(cimMessage: any) {
     const messageId = cimMessage.header.originalMessageId;
-  
+
     // Find the message by messageId
     const existingMessageIndex = this.cimMessage.findIndex(msg => msg.id === messageId);
 
@@ -1395,7 +1395,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     }
   }
-  
+
 
   composerDisable() {
     console.log("message element is ", this.messageElement)
@@ -1668,7 +1668,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       try {
         this.scrollContainer.nativeElement.scrollTop =
           this.scrollContainer.nativeElement.scrollHeight;
-      } catch (err) {}
+      } catch (err) { }
     }, 350);
   }
 
@@ -2113,10 +2113,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   chatTranscript() {
     if (localStorage.getItem('conversationId') !== '') {
       window.open(
-        `widget-assets/chat-transcript/?ccmUrl=${
-          this.__appConfig.appConfig.CCM_URL
-        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${
-          this.serviceIdentifier
+        `widget-assets/chat-transcript/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
+        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier
         }&conversationId=${localStorage.getItem(
           'conversationId',
         )}&browserLang=${this.browserLang}`,
@@ -2181,10 +2179,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.callText = callType;
     this.startCountdown();
 
-    this.sdk.handleCallStart({
-      type: callType,
-      authConfigs: this.setAuthorizedResponse,
-    });
     if (this.standaloneWebRtc) {
       console.log('standalone webrtc call <==');
       this.sdk.handleCallStart({
@@ -2430,7 +2424,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       localStorage.setItem('fontSize', e);
       this.changeFont();
       this.setFontFromLocalStorage();
-    } catch (error) {}
+    } catch (error) { }
   }
 
   private setFontFromLocalStorage() {
@@ -2438,7 +2432,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (localStorage.getItem('fontSize') !== null) {
         this.fontSize.setValue(localStorage.getItem('fontSize'));
       }
-    } catch (error) {}
+    } catch (error) { }
   }
 
   clearSession() {
