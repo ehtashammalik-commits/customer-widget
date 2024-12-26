@@ -528,20 +528,6 @@ function callbackRequest(url, payload, callback) {
   }
 }
 
-
-// async function getCalendarId(url, serviceIdentifier ,callback) {
-//   console.log("here I am in the sdk for calling")
-//   const response = await fetch(`${url}/channels/service-identifier/${serviceIdentifier}`, {
-//     method: 'GET', // Specify the HTTP method as GET
-//     headers: {
-//       'Content-Type': 'application/json' // Set appropriate headers if needed
-//     }
-//   });
-
-//   console.log("here is the reponse now", response)
-//   callback(response)
-// }
-
 function getCalendarId(url, serviceIdentifier, callback) {
   fetch(`${url}/channels/service-identifier/${serviceIdentifier}`)
     .then(response => response.json())

@@ -525,8 +525,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           (event) =>
             event.type === 'BUSINESS_HOURS' &&
             event.shifts?.some((shift) => {
-              const shiftStart = new Date(shift.startTime); // Convert to local time
-              const shiftEnd = new Date(shift.endTime); // Convert to local time
+              const shiftStart = new Date(shift.startTime);
+              const shiftEnd = new Date(shift.endTime);
 
               // Check if either start or end time falls within today's local date range
               return (
@@ -575,7 +575,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   
         resolve(this.orderedEvents);
       } catch (error) {
-        // Reject the promise if any error occurs
         reject("Error processing Business Hours events: " + error);
       }
     });
