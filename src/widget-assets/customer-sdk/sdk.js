@@ -1057,8 +1057,10 @@ var myMediaStreamFactory = async (constraints, sessionDescriptionHandler) => {
   return Promise.resolve(mediaStream);
 }
 
+// For the communication with freeswitch >>>>> Centralized function for all webRTC related stuff. 
+
 function postMessages(obj, callback) {
-  console.log(obj);
+  console.log("here is the sipConfig in the postMessages", sipconfig)
   if (Object.keys(sipconfig).length === 0) sipconfig = obj.parameter.sipConfig;
   switch (obj.action) {
     case 'login':
@@ -1212,8 +1214,6 @@ function postMessages(obj, callback) {
  */
 function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, callback) {
   //
-
-
   var res = lockFunction("connect_useragent", 500); // --- seconds cooldown
   if (!res) return;
   const undefinedParams = checkUndefinedParams(connect_useragent, [extension, sip_uri, sip_password, wssFs, sip_log, callback]);
@@ -2373,6 +2373,7 @@ function phone_unhold(callback, dialogId) {
  * @returns {void}
  */
 function phone_mute(callback, dialogId) {
+  console.log("PHONE <UTED IN THE SDK and dialogueID is", dialogId)
   var res = lockFunction("phone_mute", 500); // --- seconds cooldown
   if (!res) return;
   var index = getCallIndex(dialogId);
@@ -3791,7 +3792,6 @@ const attemptReconnection = (reconnectionAttempt = 1) => {
  * @param {Function} callback - The callback function to execute after setting up media.
  */
 function setupRemoteMedia(session, callback) {
-
   var pc = session.sessionDescriptionHandler.peerConnection;
   var remoteStream;
   remoteStream = new MediaStream();
@@ -3805,16 +3805,22 @@ function setupRemoteMedia(session, callback) {
     remoteStream.addTrack(receivervideo.track);
   }
   remote_stream = remoteStream;
-
   setTimeout(() => {
-    if (document.getElementById('remoteVideo')) document.getElementById('remoteVideo').srcObject = remoteStream;
+
+    if (document.getElementById('remoteVideo')) {
+      console.log("document.getElementById('remoteVideo').srcObject", document.getElementById('remoteVideo').srcObject)
+      document.getElementById('remoteVideo').srcObject = remoteStream;
+  } else {
+      console.error("Element with ID 'remoteVideo' does not exist.");
+  }
+  
 
     // var remoteVideo = document.getElementById('remoteVideo');
     // if (remoteVideo) remoteVideo.srcObject = remoteStream;
     console.log('<== remote Stream Audio Track:', remoteStream.getAudioTracks());
     console.log('<== remote Video Tag:', document.getElementById('remoteVideo'));
     console.log('<== remote Stream Video Track:', remoteStream.getVideoTracks());
-  }, 2000)
+  }, 4000)
 
 
   // var remoteVideo = document.getElementById('remoteVideo');
@@ -3859,6 +3865,18 @@ function setupRemoteMedia(session, callback) {
   if (localVideo) localVideo.srcObject = localStream_1;
   local_stream = localStream_1;
 }
+
+// function testing(dialogId, callback) {
+//   console.log("dialogueID is coming into the SDK now", dialogId)
+//   var index = getCallIndex(dialogId);
+//   console.log("here is the index in testing>>>>>>", index)
+//   var sessionall = null
+//   if (index !== -1) {
+//     sessionall = calls[index].session;
+//   }
+//   console.log("here is the sessionll", sessionall)
+//   callback(sessionall);
+// }
 
 function registrationFailed(response) {
   //console.log('helo ',msg);

@@ -135,7 +135,7 @@
         <!-- Video Call Screen -->
         <ng-container *ngIf="isWebRtcVideoCallActive">
           <div class="widget-video-section">
-            <video autoplay="autoplay" class="remoteVideo" id="remoteVideo">
+            <video #remoteVideo id="remoteVideo" autoplay="autoplay" class="remoteVideo">
               Your browser does not support HTML5 video.
             </video>
             <div class="localVideoView">
@@ -147,10 +147,7 @@
               >
               </span>
             </div>
-            <video
-              autoplay="autoplay"
-              class="localVideo"
-              id="localVideo"
+            <video autoplay="autoplay" class="localVideo" id="localVideo"
               innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}"
             >
               Your browser does not support HTML5 video.
@@ -887,7 +884,7 @@
           >
             call
           </span>
-          <span
+          <span 
             class="widget-navbar-icon material-symbols-outlined"
             (click)="changeView('chat')"
             [ngClass]="{
@@ -1570,9 +1567,7 @@
           </div>
         </ng-container>
 
-        <ng-container
-          *ngIf="activeAudioView || activeVideoView || activeScreenShareView"
-        >
+        <ng-container *ngIf="activeAudioView || activeVideoView || activeScreenShareView || isVideoCallActive || isAudioCallActive">
           <div
             class="widget-section"
             [ngClass]="{
@@ -1582,20 +1577,8 @@
           >
             <!-- <video *ngIf="remoteVideoActive" #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
             <video *ngIf="localVideoActive" #localVideo id="localVideo" autoplay playsinline class="localVideo"></video> -->
-            <video
-              #remoteVideo
-              id="remoteVideo"
-              autoplay
-              playsinline
-              class="remoteVideo"
-            ></video>
-            <video
-              #localVideo
-              id="localVideo"
-              autoplay
-              playsinline
-              class="localVideo"
-            ></video>
+            <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
+            <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
 
             <div class="audio-agent" *ngIf="activeAudioView">
               <img

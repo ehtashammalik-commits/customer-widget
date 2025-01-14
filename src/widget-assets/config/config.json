@@ -1,14 +1,14 @@
 {
-  "SOCKET_URL": "https://efcx4-dev.expertflow.com/web-channel-manager",
-  "FILE_SERVER_URL": "https://efcx4-dev.expertflow.com/file-engine",
-  "BOT_FRAMEWORK_URL": "https://efcx4-dev.expertflow.com/bot-framework",
-  "CCM_URL": "https://efcx4-dev.expertflow.com/ccm",
-  "CONVERSATIONAL_URL": "https://efcx4-dev.expertflow.com/conversation-manager/customer-topics",
-  "FORM_URL": "https://efcx4-dev.expertflow.com/unified-admin",
-  "AUTHENTICATOR_URL": "https://efcx4-dev.expertflow.com/secure-link",
+  "SOCKET_URL": "https://cim.expertflow.com/web-channel-manager",
+  "FILE_SERVER_URL": "https://cim.expertflow.com/file-engine",
+  "BOT_FRAMEWORK_URL": "https://cim.expertflow.com/bot-framework",
+  "CCM_URL": "https://cim.expertflow.com/ccm",
+  "CONVERSATIONAL_URL": "https://cim.expertflow.com/conversation-manager/customer-topics",
+  "FORM_URL": "https://cim.expertflow.com/unified-admin",
+  "AUTHENTICATOR_URL": "https://cim.expertflow.com/secure-link",
   "CHANNEL_IDENTIFIER": "phone",
-  "ENABLE_LOGO": false,
+  "ENABLE_LOGO": true,
   "ADDITIONAL_PANEL": true,
-  "VIDEO": true ,
+  "VIDEO": false ,
   "USERNAME_ENABLED": true
 }

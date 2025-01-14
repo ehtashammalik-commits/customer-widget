@@ -16,6 +16,8 @@ declare var widgetConfigs: any,
   postMessages: any,
   callbackRequest: any,
   authenticateRequest: any,
+  // testing:any,
+  // setupRemoteMedia:any,
   getBrowserInfo: any;
 
 type formAttributeMappings = {
@@ -66,12 +68,20 @@ export class SdkService implements OnInit {
   public onCallbackRequestResponse$: Observable<any> =
     this.onCallbackRequestSubject.asObservable();
 
+  // private onDataRequest: Subject<any> = new Subject<any>();
+  // public onDataResponses$: Observable<any> =
+  //   this.onDataRequest.asObservable();
+
+  // private setupRemoteMediaRequest: Subject<any> = new Subject<any>();
+  // public setupRemoteMediaResponse$: Observable<any> =
+  // this.setupRemoteMediaRequest.asObservable();
+
   constructor(private _ConfigService: ConfigService) {
     this.ConfigData = this._ConfigService.appConfig;
     this.loadSdk();
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {}
 
   receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
     this.widgetIdentifier = widgetIdentifier;
@@ -111,8 +121,8 @@ export class SdkService implements OnInit {
   getFormValidation(callback: any) {
     formValidation(this.ConfigData.FORM_URL, (res: any) => {
       this.preChatFormValidationSubject.next(res);
-      callback()
-    })
+      callback();
+    });
   }
 
   renderCallbackForm(form_id: any) {
@@ -136,6 +146,21 @@ export class SdkService implements OnInit {
       },
     );
   }
+
+
+  // testingData(dialogueId: string) {
+  //   console.log("dialogueId is coming", dialogueId)
+  //   testing(dialogueId, (res: any) => {
+  //     console.log("dialogueId is coming in the testing in testing", dialogueId)
+  //     this.onDataRequest.next(res); // Push SDK response to subject
+  //   });
+  // }
+
+  // remoteMediaStream(session: string) {
+  //   setupRemoteMedia(session, (res: any) => {
+  //     this.setupRemoteMediaRequest.next(res); // Push SDK response to subject
+  //   });
+  // }
 
   setConversationDataAgainstCustomerIdentifier(
     customerChannelIdentifier: any,
@@ -165,7 +190,7 @@ export class SdkService implements OnInit {
 
   createStandardFormObj(attributes: Attribute[]): Record<string, any> {
     const resultObject: Record<string, any> = {};
-    attributes.forEach(attribute => {
+    attributes.forEach((attribute) => {
       if (attribute.key && attribute.value !== undefined) {
         resultObject[attribute.key] = attribute.value;
       }
@@ -174,11 +199,13 @@ export class SdkService implements OnInit {
   }
 
   sendWebhookNotification(webhook_url: any, payload: any) {
-    let notificationObj = this.createStandardFormObj(payload.data.formData.attributes);
+    let notificationObj = this.createStandardFormObj(
+      payload.data.formData.attributes,
+    );
     let additionalData = {
       icon: '/customer-widget/widget-assets/images/favicon.ico',
-      agent_url: this.ConfigData.FORM_URL
-    }
+      agent_url: this.ConfigData.FORM_URL,
+    };
     console.log('Form Object to send webhook notification: ', notificationObj);
     webhookNotifications(webhook_url, additionalData, notificationObj);
   }
@@ -258,6 +285,7 @@ export class SdkService implements OnInit {
    * @param webRtc
    *************************/
 
+  // Once the video call is clicked then this function will trigger and register the user in freeswitch. 
   loginSipWebRtc(webRtc: any) {
     const login = {
       action: 'login',
@@ -294,6 +322,20 @@ export class SdkService implements OnInit {
     console.log('handle end call in sdk service: ===> ', sessionDialogId);
     const endCall = {
       action: 'releaseCall',
+      parameter: {
+        dialogId: sessionDialogId,
+        clientCallbackFunction: (res: any) => {
+          this.onWebRtcCallSubject.next(res);
+        },
+      },
+    };
+    postMessages(endCall);
+  }
+
+  handleLogOutAgent(sessionDialogId: any) {
+    console.log('Logout in the sdk service: ===> ', sessionDialogId);
+    const endCall = {
+      action: 'logout',
       parameter: {
         dialogId: sessionDialogId,
         clientCallbackFunction: (res: any) => {
@@ -343,23 +385,19 @@ export class SdkService implements OnInit {
   convertCall(streamStatus: any, streamType: any, sessionDialogId: any) {
     try {
       const callConvertPayload = {
-        action: "convertCall", //audio/video/screenshare/onlyviewscreenshare
+        action: 'convertCall', //audio/video/screenshare/onlyviewscreenshare
         parameter: {
-
           dialogId: sessionDialogId,
           clientCallbackFunction: (res: any) => {
             this.onWebRtcCallSubject.next(res);
           },
           streamStatus: streamStatus, ////on , off
-          streamType: streamType  //screenshare, video
-        }
-
-      }
-      console.log("convertCall==>", callConvertPayload);
+          streamType: streamType, //screenshare, video
+        },
+      };
+      console.log('convertCall==>', callConvertPayload);
       postMessages(callConvertPayload);
-
-    }
-    catch (e) {
+    } catch (e) {
       console.error(e);
     }
   }

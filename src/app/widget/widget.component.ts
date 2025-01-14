@@ -42,6 +42,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private onChatResumedSubject: Subscription = new Subscription();
   private onWebRtcCallSubject: Subscription = new Subscription();
   private onCallbackRequestSubject: Subscription = new Subscription();
+  private onDataRequest:Subscription = new Subscription();
   @ViewChild('autosize')
   autosize!: CdkTextareaAutosize;
   @ViewChild('myFileInput')
@@ -225,6 +226,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   composer_input_disabled: boolean = false;
   isTyping: boolean = true;
   surveyTitle: any = 'Survey Form';
+  remoteStream:any = [];
+  localStream:any =[];
 
   @Input() formData!: any[];
   @Input() callbackFormData!: any[];
@@ -233,6 +236,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   preChatFormLoader = false;
   callbackLoader = false;
   callbackConfig: any;
+
 
   webhookUrl: any;
 
@@ -562,7 +566,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       if (formType === 'preChatForm') {
 
-        console.log("===============================================> control ", controlName)
         this.preChatFormGroup.addControl(
           controlName,
           this.fb.control('', validators),
@@ -631,20 +634,29 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (this.webRTCConfig !== null) {
       this.enableWebRtc = configs.webRtc.enableWebRtc;
       console.log('List of webRTC Configs: ', this.webRTCConfig);
+
       // Check if the input string contains a hyphen
-      if (this.webRTCConfig.sipExtension.includes('-')) {
-        let selectedSipExtension = this.pickSipExtension(
-          this.webRTCConfig.sipExtension,
-        );
-        this.webRTCConfig.sipExtension = selectedSipExtension.toString();
-        console.log(
-          'sipExtension range: <==',
-          selectedSipExtension,
-          this.webRTCConfig,
-        );
-      }
-      if (this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
-    }
+      // for extention ranges purposes...
+
+
+      // if (this.webRTCConfig.sipExtension.includes('-')) {
+      //   let selectedSipExtension = this.pickSipExtension(
+      //     this.webRTCConfig.sipExtension,
+      //   );
+
+      //   if (this.webRTCConfig.sipExtension) {
+      //     let selectedSipExtension = this.webRTCConfig.sipExtension
+      //   this.webRTCConfig.sipExtension = selectedSipExtension.toString();
+      //   console.log(
+      //     'sipExtension range: <==',
+      //     selectedSipExtension,
+      //     this.webRTCConfig,
+      //   );
+      // }
+      // if (this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
+    
+  }
+
     this.callbackConfig = configs.callback;
     if (this.callbackConfig !== null) {
       this.enabledCallback = configs.callback.enableCallback;
@@ -966,7 +978,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   changeView(view: any) {
-    console.log('Change Screen:', view);
     switch (view) {
       case 'chat':
         this.activeChatView = true;
@@ -976,11 +987,29 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
-        if (this.enableEmoji) {
-          setTimeout(() => {
-            new EmojiPicker();
-          }, 500)
-        }
+        // if(this.isAudioCallActive || this.isVideoCallActive) {
+        //   console.log("AUDIO / VIDEO CALL IS ACTIVE NOW")
+        // }
+        // this.sendDataToService(this.dialogId);
+        // if (this.enableEmoji) {
+        //   setTimeout(() => {
+        //     new EmojiPicker();
+        //   }, 500)
+        // }
+
+        // this.onDataRequest = this.sdk.onDataResponses$.subscribe(
+        //   (response: any) => {
+        //     if (response) {
+        //       console.log("here is the response now", response)
+        //       this.sendRemoteData(response)
+        //     }
+        //   },
+        // );
+
+        // this.onDataRequest = this.sdk.setupRemoteMediaResponse$.subscribe((res) => {
+        //   console.log("here are the response from the setupRemoteMediaResponses now", res)
+        // })
+        // this.assignStreams();
         break;
       case 'callback':
         this.activeChatView = false;
@@ -1002,6 +1031,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         break;
       case 'audio':
         if (this.isAudioCallActive) {
+          //this.assignStreams()
           this.activeChatView = false;
           this.activeAudioView = true;
           this.activeVideoView = false;
@@ -1017,6 +1047,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeScreenShareView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
+          this.logInToFreeSwitch();
           this.initiateWebRtcCall(view);
         }
         break;
@@ -1029,6 +1060,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.callPopUpView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
+          //this.convertCallView('video');
         } else {
           this.callPopUpView = true;
           this.activeVideoView = true;
@@ -1037,6 +1069,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeScreenShareView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
+          this.logInToFreeSwitch();
           this.initiateWebRtcCall(view);
         }
         break;
@@ -1057,6 +1090,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeScreenShareView = true;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
+          this.logInToFreeSwitch();
           this.initiateWebRtcCall(view);
         }
         break;
@@ -1074,8 +1108,28 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.cdRef.detectChanges()
   }
 
+  // assignStreams() {
+  //   if (document.getElementById('localVideo')) {
+  //   this.localStream = document.getElementById('localVideo')
+  //   console.log("here is the localStream")
+  //   } 
+
+  //   if(document.getElementById('remoteVide')) {
+  //   this.remoteStream = document.getElementById('localVideo')
+  //   console.log("here is the remoteStream")
+  //   }
+  // }
+  // sendDataToService(dialogueId: string) {
+  //   console.log("sending dialogueId from .ts to service",dialogueId)
+  //   this.sdk.testingData(dialogueId);
+  // }
+
+  // sendRemoteData(session:any) {
+  //   this.sdk.remoteMediaStream(session)
+  // }
+
   convertCallView(view: any) {
-    console.log('Change Screen:', view);
+    console.log('convertCallView:', view);
     switch (view) {
       case 'audio':
         // if (this.isAudioCallActive) {
@@ -1087,13 +1141,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         //   this.activeCallbackView = false;
         //   this.activeCallbackResponseView = false;
         // } else {
-        this.callPopUpView = true;
+        //this.callPopUpView = true;
         this.activeChatView = false;
         this.activeAudioView = true;
         this.activeVideoView = false;
         this.activeScreenShareView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
+        this.callPopUpView = true;
         this.convertCallRequest(view);
         // }
         break;
@@ -1153,9 +1208,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   eventListener(event: any) {
     try {
       let lastMessage = this.cimMessage[this.cimMessage.length - 1];
-      let messageType = lastMessage?.body?.subType?.toLowerCase();
-      console.log("mesage type ================>", messageType)
-      console.log("event.type", event.type)
+      let messageType = lastMessage?.body?.type?.toLowerCase();
       if (event.id !== undefined || event.id !== '' || event.id !== null) {
         switch (event.type) {
           case 'CHANNEL_SESSION_ENDED':
@@ -1675,6 +1728,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   clearMessageData() {
+    console.log("this.elementView.native", this.elementView)
     this.elementView.nativeElement.value = ''
     this.composer_input_disabled = false;
     this.text = '';
@@ -2134,6 +2188,28 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+
+  logInToFreeSwitch() {
+      // Check if the input string contains a hyphen
+      // for extention ranges purposes...
+
+
+      //if (this.webRTCConfig.sipExtension.includes('-')) {
+        // let selectedSipExtension = this.pickSipExtension(
+        //   this.webRTCConfig.sipExtension,
+        // );
+
+        if (this.webRTCConfig.sipExtension) {
+          let selectedSipExtension = this.webRTCConfig.sipExtension
+          this.webRTCConfig.sipExtension = selectedSipExtension.toString();
+          // console.log(
+          //   'sipExtension range: <==',
+          //   selectedSipExtension,
+          //   this.webRTCConfig,
+          // );
+      }
+      if (this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
+  }
   // Audio Functions
   toggleCallMic() {
     this.isCallMute = !this.isCallMute; // Use assignment operator and logical NOT operator
@@ -2143,7 +2219,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   convertCallRequest(view: any) {
-    console.log('this function is called ', this.activeVideoView);
     this.callText = view;
     console.log('convertCallRequest ==>', view);
     if (view === 'video') {
@@ -2164,7 +2239,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   toggleCallVideo() {
     this.isVideoHide = !this.isVideoHide;
     const cameraStatus = this.isVideoHide ? 'off' : 'on';
-    console.log(this.isVideoHide);
     this.sdk.convertCall(cameraStatus, 'video', this.dialogId);
   }
 
@@ -2176,6 +2250,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   initiateWebRtcCall(callType: any) {
+
+    if(callType === "video" || callType === "audio") {
+      this.isVideoHide = false;
+      this.isCallMute = false;
+    }
     this.callText = callType;
     this.startCountdown();
 
@@ -2314,11 +2393,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             if (this.standaloneWebRtc) {
               this.changeView('standaloneVideo');
             } else if (this.isAudioCallActive) {
+              console.log("this.changeView('audio');")
               this.changeView('audio');
             } else if (this.isVideoCallActive) {
               this.changeView('video');
             } else if (this.isScreenShareActive) {
               this.changeView('screenshare');
+            } else if(this.isChatActive) {
+              this.changeView('chat')
             }
             break;
           case 'FAILED':
@@ -2411,6 +2493,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   callEnd() {
     this.endCountdown();
     this.sdk.handleCallEnd(this.dialogId);
+    this.sdk.handleLogOutAgent(this.dialogId);
   }
 
   changeFont() {
