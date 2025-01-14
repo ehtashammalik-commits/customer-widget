@@ -9,6 +9,6 @@
   "CHANNEL_IDENTIFIER": "phone",
   "ENABLE_LOGO": true,
   "ADDITIONAL_PANEL": true,
-  "VIDEO": false ,
+  "VIDEO": true ,
   "USERNAME_ENABLED": true
 }

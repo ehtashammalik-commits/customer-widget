@@ -1751,8 +1751,13 @@ mat-spinner {
     }
   }
 }
+.widget-section {
+  display: none;
+  visibility: hidden;
 
-.widget-audio-section {
+&.widget-audio-section {
+  visibility: visible;
+  display: block;
   width: 315px;
   position: absolute;
   top: 75px;
@@ -1778,11 +1783,13 @@ mat-spinner {
   .agent-detail {
     position: absolute;
     top: 40%;
-    right: 0px;
+    // right: 0px;
     text-align: center;
     line-height: 10px;
     font-style: normal;
     color: #ffffff;
+    left: 0;
+    width: 100%;
 
     .name {
       text-align: center;
@@ -1808,7 +1815,9 @@ mat-spinner {
   }
 }
 
-.widget-video-section {
+&.widget-video-section {
+  visibility: visible;
+  display: block;
   width: 315px;
   position: absolute;
   top: 75px;
@@ -1883,6 +1892,7 @@ mat-spinner {
       font-style: normal;
     }
   }
+}
 }
 
 .widget-call-controls {
