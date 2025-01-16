@@ -1133,7 +1133,7 @@
 
                     <span class="message" *ngIf="message.body.type == 'PLAIN'" innerHTML="{{
                         enableDynamicLink
-                          ? (message.body.markdownText | linkify | tagFormat)
+                          ? (message.body.markdownText | tagFormat)
                           : (message.body.markdownText | tagFormat)
                       }}" [ngStyle]="{
                         'font-size': fontSize.value + 'px',
