@@ -526,6 +526,23 @@ function callbackRequest(url, payload, callback) {
     callback(error);
   }
 }
+
+function getCalendarId(url, serviceIdentifier, callback) {
+  fetch(`${url}/channels/service-identifier/${serviceIdentifier}`)
+    .then(response => response.json())
+    .then((data) => {
+      callback(data);
+    });
+}
+
+function getCalendarEvents(calendarId,url, startTime,endTime,callback) {
+  fetch(`${url}/calendars/events?&calendarId=${calendarId}&startTime=${startTime}&endTime=${endTime}`)
+    .then(response => response.json())
+    .then((data) => {
+      callback(data);
+    });
+}
+
 /**
  * Webhook Notifications Functions
  * @param {*} data
