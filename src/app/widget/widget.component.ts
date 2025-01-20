@@ -262,6 +262,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   browserInfoData: any;
   // Handle Composer Field
   isComposerDisable: boolean = false;
+  isSecureLinkExpired: boolean = false;
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,

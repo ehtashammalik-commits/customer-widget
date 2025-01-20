@@ -926,6 +926,16 @@
         </div>
 
         <ng-container *ngIf="activeChatView">
+
+          <!-- If secure link is expired -->
+          <div class="call-session-expired" *ngIf="isSecureLinkExpired">
+            <mat-icon class="discard-error-notify" (click)="isSecureLinkExpired = false">cancel</mat-icon>
+            <div class="call-session-expired-inner">
+              <span class="icon-error"><mat-icon>priority_high</mat-icon></span>
+            <h3>Link has been expired</h3>
+            <span class="expire-reason">Video call link has been expired, with reason.</span>
+          </div>
+          </div>
           <!-- Widget Chat Content -->
           <div class="widget-chat-content" #scrollMe>
             <div *ngFor="let message of cimMessage">
@@ -1280,6 +1290,7 @@
                             : '18px'
                       }">
                     </span>
+
                     <div class="surveyDiv">
                       <span *ngIf="message.body?.subType == 'SURVEY'"
                         class="material-symbols-outlined surveyicon">description</span>
@@ -1296,6 +1307,16 @@
                         {{ surveyTitle }}
                       </a>
                     </div>
+                              <!--              Securelink -->
+                                            
+                    <div class="s-link quoted-message-url" (click)="isSecureLinkExpired = true">
+                      <span class="video-call-detail"><mat-icon>videocam</mat-icon> Video Call</span>
+                      <span class="video-call-link">join video call
+                      <span class="call-link">https://webrtc.link.com/88901a</span>
+                    </span>
+                    </div>
+
+                    <!--              /Securelink -->
                     <!-- Message Type Button -->
                     <div class="structured-message-area" [ngClass]="{ 'custom-theme': theme !== '' }"
                       *ngIf="message.body.type == 'BUTTON'">
