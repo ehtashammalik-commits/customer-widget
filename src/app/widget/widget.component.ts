@@ -252,7 +252,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   callbackLoader = false;
   callbackConfig: any;
   todayShifts: { eventId: string, shiftName: string | null, startTime: string, endTime: string }[] = [];
-  events: EventData[] = []; 
+  events: EventData[] = [];
   orderedEvents: any[] = [];
   daySummary: { startOfDay: Date | null; endOfDay: Date | null } | null = null;
 
@@ -281,6 +281,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   browserInfoData: any;
   // Handle Composer Field
   isComposerDisable: boolean = false;
+  source: any;
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -325,6 +326,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
       this.widgetIdentifier = params['widgetIdentifier'];
+      this.source = params['Source'] ? params['Source'] : 'Web';
 
       // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
       const rawEncryptedKey = params['encryptedKey']
@@ -502,7 +504,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   async getCalendarEvents() {
     this.sdk
       .fetchBusinessCalendarId()
-      .then((calendarId:string) => {
+      .then((calendarId: string) => {
 
         return this.sdk.getCalendarEvents(calendarId);
       })
@@ -518,7 +520,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getTodayEvent(): Promise<any[]> {
     return new Promise((resolve, reject) => {
       try {
-        
+
         const today = new Date();
         const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Start of today in local time
         const todayEnd = new Date(todayStart);
@@ -550,7 +552,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             endTime: shift.endTime,
           }))
         );
-  
+
         // If no shifts are available, handle accordingly
         if (!allShifts.length) {
           this.daySummary = null;
@@ -569,27 +571,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               .map((shift) => (shift?.endTime ? new Date(shift.endTime).getTime() : -Infinity))
           )
         );
-  
+
         // Set the day summary with the minimum and maximum times
         this.daySummary = {
           startOfDay: minStartTime,
           endOfDay: maxEndTime,
         };
-        
+
         ///this.orderedEvents = allShifts;
-  
+
         resolve(this.orderedEvents);
       } catch (error) {
         reject("Error processing Business Hours events: " + error);
       }
     });
   }
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
 
   formatTime(dateTime: string): string {
     const date = new Date(dateTime);
@@ -961,6 +963,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   closeWrapper() {
     console.log('wrapper closed');
     this.additionalPanel = false;
+    this.resizeWidget('icon-view');
     sessionStorage.setItem('wrapper-hide', 'true');
   }
 
@@ -973,8 +976,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.__appConfig.appConfig.ADDITIONAL_PANEL !== true
         ) {
           this.additionalPanel = false;
+          this.resizeWidget('icon-view');
         } else {
           this.additionalPanel = true;
+          this.resizeWidget('wraper-view');
+
         }
         this.preChatFormScreen = false;
         this.callbackFormScreen = false;
@@ -988,6 +994,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
         this.fileName = ''
+        if (this.source === 'UApp') {
+          this.additionalPanel = false;
+          this.isIconWidget = false;
+        } else {
+          this.additionalPanel = false;
+          this.isIconWidget = true;
+          this.resizeWidget('icon-view');
+        }
+
         break;
       case 'chat':
         this.additionalPanel = false;
@@ -1003,6 +1018,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
         this.changeView('chat');
+        this.resizeWidget('form-view');
         break;
       case 'chatForm':
         this.preChatFormScreen = true;
@@ -1017,6 +1033,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isChatMax = true;
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
+        this.resizeWidget('form-view');
+
         break;
       case 'webRtcScreen':
         this.webRtcVideoCallScreen = true;
@@ -1271,6 +1289,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       //   }
       //   break;
     }
+  }
+
+  resizeWidget(state: string): void {
+    window.parent.postMessage({ state: state }, '*');
   }
 
   eventListener(event: any) {
