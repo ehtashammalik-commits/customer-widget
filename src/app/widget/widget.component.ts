@@ -2274,6 +2274,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       } else {
         this.isAudioCallActive = true;
       }
+
+      this.webRTCConfig.customerName = "TestingUser";
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.webRTCConfig,
