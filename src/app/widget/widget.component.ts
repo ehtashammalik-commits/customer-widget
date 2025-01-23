@@ -27,6 +27,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ActivatedRoute } from '@angular/router';
 import { TooltipPosition } from '@angular/material/tooltip';
+declare var EmojiPicker: any;
 
 @Component({
   selector: 'app-widget',
@@ -958,6 +959,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
+        if(this.enableEmoji){
+          setTimeout(() => {
+            new EmojiPicker();
+          }, 500)
+        }
         break;
       case 'callback':
         this.activeChatView = false;
@@ -1167,6 +1173,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   handleCimMessage(cimMessage: any) {
     if (
+     
       cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
       cimMessage.header.sender &&
       (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
@@ -1221,11 +1228,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           }
         }
       }
-
-      this.cimMessage.push(cimMessage);
-      this.browserNotificationService.notify(cimMessage);
-      this.scrollToBottom();
-      this.handleMessageReport(cimMessage);
+      if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
+        this.editMessage(cimMessage);
+        this.handleMessageReport(cimMessage);
+      } else {
+        this.cimMessage.push(cimMessage);
+        this.browserNotificationService.notify(cimMessage);
+        this.scrollToBottom();
+        this.handleMessageReport(cimMessage);
+      }
     } else {
       if (
         cimMessage.body.type.toLowerCase() != 'notification' &&
@@ -1266,12 +1277,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
       }
 
-      this.cimMessage.push(cimMessage);
-      this.browserNotificationService.notify(cimMessage);
-      this.scrollToBottom();
-      this.handleMessageReport(cimMessage);
+      if (cimMessage && cimMessage.header && cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
+        this.editMessage(cimMessage);
+        this.handleMessageReport(cimMessage);
+      } else {
+        this.cimMessage.push(cimMessage);
+        this.browserNotificationService.notify(cimMessage);
+        this.scrollToBottom();
+        this.handleMessageReport(cimMessage);
+      }      
     }
   }
+
+  editMessage(cimMessage: any) {
+    const messageId = cimMessage.header.originalMessageId;
+  
+    // Find the message by messageId
+    const existingMessageIndex = this.cimMessage.findIndex(msg => msg.id === messageId);
+
+    if (existingMessageIndex !== -1) {
+      const newContent = cimMessage.body.markdownText
+      this.cimMessage[existingMessageIndex].body.markdownText = newContent;
+      this.cimMessage[existingMessageIndex].isEdited = true;
+
+    }
+  }
+  
 
   composerDisable() {
     console.log("message element is ", this.messageElement)
@@ -1309,8 +1340,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             }
           });
         }
-
-        this.cimMessage.push(cimMessage);
+        if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
+          this.editMessage(cimMessage);
+        } else {
+          this.cimMessage.push(cimMessage);
+        }
         this.isChatActive = true;
         this.processSeenMessages();
         this.scrollToBottom();
@@ -1322,7 +1356,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           clearTimeout(this.typingIndicatorTimer);
           this.typingIndicatorTimer = null;
         }
-        this.cimMessage.push(cimMessage);
+        if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
+          this.editMessage(cimMessage);
+        } else {
+          this.cimMessage.push(cimMessage);
+        }
         this.isChatActive = true;
         this.processSeenMessages();
         this.scrollToBottom();
@@ -1509,7 +1547,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.scrollContainer = this.scrollContainer?.nativeElement.scrollHeight;
   }
 
-  onSendMessage() {
+  onSendMessage(replyInputValue: any) {
     if (this.isComposerDisable) return;
     this.cdRef.detectChanges();
     this.scrollToBottom();
@@ -1517,16 +1555,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (this.imageUrls.length > 0) {
       this.fileLoading = true;
       let additionalText = '';
-      if (this.text.trim() !== '') {
-        additionalText = this.text.trim();
+      if (replyInputValue.trim() !== '') {
+        additionalText = replyInputValue.trim();
         this.clearMessageData();
       }
       this.uploadFile(this.selectedFile, additionalText);
     } else {
-      if (this.text.trim() !== '') {
-        console.log('Customer message: ', this.text.trim());
+      if (replyInputValue.trim() !== '') {
+        console.log('Customer message: ', replyInputValue.trim());
 
-        this.constructCimMessage('PLAIN', this.text.trim(), null, null);
+        this.constructCimMessage('PLAIN', replyInputValue.trim(), null, null);
         this.clearMessageData();
       }
     }
@@ -1544,6 +1582,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   clearMessageData() {
+    this.elementView.nativeElement.value = ''
     this.composer_input_disabled = false;
     this.text = '';
     this.scrollToBottom();
