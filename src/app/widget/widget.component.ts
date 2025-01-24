@@ -209,6 +209,101 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     file: 'File',
   };
 
+  mockMessageObject = {
+      "id": "6a5e5391-528b-4e7e-aa05-f5dd78f6b246",
+      "header": {
+          "timestamp": 1737540305007,
+          "sender": {
+              "id": "6b189f72-5dd5-4213-8989-4426b71ff170",
+              "senderName": "csfbilal1",
+              "type": "AGENT",
+              "additionalDetail": {
+                  "firstName": "",
+                  "lastName": "CSFbilal1"
+              }
+          },
+          "channelData": {
+              "channelCustomerIdentifier": "777",
+              "serviceIdentifier": "1133",
+              "requestPriority": 0,
+              "customerFirstName": null,
+              "customerLastName": null,
+              "additionalAttributes": [
+                  {
+                      "key": "WebChannelData",
+                      "type": "WebChannelData",
+                      "value": {
+                          "browserDeviceInfo": {
+                              "browserId": null,
+                              "browserIdExpiryTime": null,
+                              "browserName": null,
+                              "deviceType": null
+                          },
+                          "queue": "",
+                          "locale": {
+                              "timezone": null,
+                              "language": null,
+                              "country": null
+                          },
+                          "formData": {
+                              "id": 0.7835791766438596,
+                              "formId": "673c8d8558db250027b8f8d2",
+                              "filledBy": "web-widget",
+                              "attributes": [
+                                  {
+                                      "value": "777",
+                                      "key": "phone",
+                                      "type": "string"
+                                  },
+                                  {
+                                      "value": "",
+                                      "key": "first_name",
+                                      "type": "string"
+                                  },
+                                  {
+                                      "value": "gfaf@gmail.com",
+                                      "key": "email",
+                                      "type": "string"
+                                  },
+                                  {
+                                      "value": "missouri",
+                                      "key": "state",
+                                      "type": "string"
+                                  }
+                              ],
+                              "createdOn": "2025-01-22T10:03:32.803Z"
+                          }
+                      }
+                  }
+              ]
+          },
+          "intent": null,
+          "additionalData": {
+              "isEncoded": true,
+              "secureWebRTCLink": true
+          },
+          "conversationId": "6790c27470ea97639e406541",
+          "roomId": "678e542570ea97639e33803e",
+          "channelSessionId": "6790c274f718dd632e319c1c",
+          "customer": {
+              "_id": "678e5425fca362924c05fddc",
+              "firstName": "hghgh",
+              "phoneNumber": [],
+              "isAnonymous": true,
+              "__v": 0,
+              "web": [
+                  "777"
+              ],
+              "urlTest2": "https://expertflow-docs.atlassian.net/wiki/spaces/CX/pages/2528142/Agent+Desk+Permissions+-+Resource+Scope+Groups+Mapping"
+          }
+      },
+      "body": {
+          "markdownText": "",
+          "type": "URL",
+          "mediaUrl": "https://cim-dev3.expertflow.com/customer-widget/#/widget?widgetIdentifier=voice&encryptedKey=gb0EcYhQgIdQKeXyxuEPvef1ST1rq0Z134trho4GoFoklUDMxitZef2fUEjDsTcnL1L3uRhCvL2Xq8Aott9yHQ=="
+      }
+  }
+
   // Widget Configuration
   title = '';
   subtitle = '';
@@ -263,6 +358,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // Handle Composer Field
   isComposerDisable: boolean = false;
   isSecureLinkExpired: boolean = false;
+  IsRegisteredInFreeSwitch:boolean = false;
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -286,6 +382,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     // Load the standalone webRtc Authentication screen or the active chat screen depending on whether the user is coming from secure link or not.
     if (this.standaloneWebRtc) {
+      this.authenticateToken(false);
       this.changeScreen('webRtcScreen');
       console.log('Secure Link webRtc View');
     } else {
@@ -303,10 +400,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
 
-    this.route.queryParams.subscribe((params: { [x: string]: any }) => {
+      this.route.queryParams.subscribe((params: { [x: string]: any }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
       this.widgetIdentifier = params['widgetIdentifier'];
+
 
       // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
       const rawEncryptedKey = params['encryptedKey']
@@ -314,11 +412,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         : null;
       if (rawEncryptedKey !== null) {
         // Directly replace spaces with '+' if you're sure there should be no spaces
-        this.webRtcSecureLink = rawEncryptedKey.replace(/ /g, '+');
+        this.webRtcSecureLink = rawEncryptedKey;
       } else {
         this.webRtcSecureLink = null;
       }
-
       if (this.webRtcSecureLink != undefined && this.webRtcSecureLink != '') {
         this.standaloneWebRtc = true;
         if (this.widgetIdentifier == undefined || this.widgetIdentifier == '') {
@@ -387,7 +484,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.sdk.validationsSubcription.subscribe((res) => {
       this.formValidations = res;
-      console.log('===========>validations', this.formValidations);
       // this.createFormControls();
     });
 
@@ -396,8 +492,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.formData = formData.sections[0].attributes.filter((item: any) => {
           return item.valueType != 'checkbox';
         });
-        console.log('Widget configurations:', formData.sections);
-        console.log('regex:', this.formValidations);
         this.createFormValidationControls(
           this.formData,
           this.formValidations,
@@ -412,8 +506,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             return item.valueType != 'checkbox';
           },
         );
-        console.log('Widget configurations:', formData.sections);
-        console.log('regex:', this.formValidations);
         this.createFormValidationControls(
           this.callbackFormData,
           this.formValidations,
@@ -563,7 +655,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
         }
       }
-      console.log('validator is ', ...validators);
 
       if (formType === 'preChatForm') {
 
@@ -893,6 +984,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
         this.changeView('chat');
+        //this.handleCimMessage(this.mockMessageObject)
         break;
       case 'chatForm':
         this.preChatFormScreen = true;
@@ -1096,6 +1188,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         break;
       case 'standaloneVideo':
+
+      console.log("Video button is being clicked or not.....")
         if (this.isWebRtcVideoCallActive) {
           this.isWebRtcVideoCallActive = true;
           this.callPopUpView = false;
@@ -1319,8 +1413,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleCimMessage(cimMessage: any) {
-    if (
+    console.log("here is the cimMessage", cimMessage)
 
+    if (
       cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
       cimMessage.header.sender &&
       (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
@@ -2073,10 +2168,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   endChat(): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent);
-
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
         this.clearSession();
+        if(this.IsRegisteredInFreeSwitch) {
+          this.callPopUpView = false;
+          this.endCountdown();
+          this.sdk.handleCallEnd(this.dialogId);
+          this.sdk.handleLogOutAgent(this.dialogId);
+          this.IsRegisteredInFreeSwitch = false;
+        }
       }
     });
   }
@@ -2191,30 +2292,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   logInToFreeSwitch() {
-      // Check if the input string contains a hyphen
-      // for extention ranges purposes...
-
-
-      //if (this.webRTCConfig.sipExtension.includes('-')) {
-        // let selectedSipExtension = this.pickSipExtension(
-        //   this.webRTCConfig.sipExtension,
-        // );
 
         if (this.webRTCConfig.sipExtension) {
           let selectedSipExtension = this.webRTCConfig.sipExtension
           this.webRTCConfig.sipExtension = selectedSipExtension.toString();
-          // console.log(
-          //   'sipExtension range: <==',
-          //   selectedSipExtension,
-          //   this.webRTCConfig,
-          // );
       }
       if (this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
   }
   // Audio Functions
   toggleCallMic() {
     this.isCallMute = !this.isCallMute; // Use assignment operator and logical NOT operator
-    console.log(this.isCallMute);
     const action = this.isCallMute ? 'mute_call' : 'unmute_call';
     this.sdk.handleCallMic(action, this.dialogId);
   }
@@ -2260,7 +2347,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.startCountdown();
 
     if (this.standaloneWebRtc) {
-      console.log('standalone webrtc call <==');
+      this.setAuthorizedResponse.customerId = `webrtc:${this.setAuthorizedResponse.customerId}`;
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.setAuthorizedResponse,
@@ -2274,9 +2361,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       } else {
         this.isAudioCallActive = true;
       }
+      //40001 extention csfbilal1
+      //40002 extenion  csfbilal2
+      //40003 extenion  csfbilal3
 
-      this.webRTCConfig.customerName = "TestingUser";
-      this.webRTCConfig.customerNumber = "00000000000";
+
+      this.webRTCConfig.agentExtension = "40001";
+      this.webRTCConfig.customerId = "abc:name";
+      this.webRTCConfig.customerNumber = "0000000000";
+      this.webRTCConfig.customerName = "TestingJunaid";
+      console.log("here are the webRTCConfig", this.webRTCConfig)
+
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.webRTCConfig,
@@ -2305,6 +2400,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleDialogStates(data: any): void {
+    this.IsRegisteredInFreeSwitch = false;
     console.log('[handleDialogStates] received dialog: ===> ', data);
 
     if (data.event === 'agentInfo') {
@@ -2313,6 +2409,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         data.response,
       );
       if (data.response.state === 'LOGIN') {
+        this.IsRegisteredInFreeSwitch = true;
         console.log(
           '[handleDialogStates] SIP Connection Established with: ===> ',
           data.response.extension,
@@ -2495,6 +2592,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   callEnd() {
+    this.callPopUpView = false;
     this.endCountdown();
     this.sdk.handleCallEnd(this.dialogId);
     this.sdk.handleLogOutAgent(this.dialogId);
@@ -2558,18 +2656,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return { intent: null, entities: null };
   }
 
-  authenticateToken(): void {
+  authenticateToken(isAuthenticated: boolean): void {
+
     const roomId = this.webRtcSecureLink;
-    const secureToken = this.sessionCode;
-    this.sdk.authenticateRoomId({ roomId, secureToken }, (res: any) => {
+    // const secureToken = this.sessionCode;
+    this.sdk.authenticateRoomId({ roomId}, (res: any) => {
       if (res.error) {
-        console.log('Authentication Response not okay: ', res);
+        this.isSecureLinkExpired = true;
         this.showAuthenticationResponseMessage = res.data.message
           ? res.data.message
           : res.message;
         this.showInvalidCodeError = true;
       } else {
-        console.log('Authentication response success:', res);
+        this.logInToFreeSwitch();
+        if(isAuthenticated) {
+          this.changeView('video')
+        }
         this.agentName = res.data.agentName;
 
         // Append diallingUri key to res.data object
@@ -2579,11 +2681,25 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.showInvalidCodeError = false;
         this.setAuthorizedResponse = res.data; // Now includes diallingUri
         console.log('<===>Auth Data:', this.setAuthorizedResponse);
-        setTimeout(() => {
-          this.changeView('standaloneVideo');
-        }, 1000);
       }
     });
+  }
+
+  processSecureLinkMessage(message : any) {
+    const mediaUrl = message.body.mediaUrl
+    const queryString = mediaUrl.split('?')[1];
+    const urlParams = new URLSearchParams(queryString);
+    const encryptedKey = urlParams.get('encryptedKey');
+    this.webRtcSecureLink = encryptedKey;
+    const widgetIdentifier = urlParams.get('widgetIdentifier')
+    if(widgetIdentifier === this.widgetIdentifier) {
+      this.authenticateToken(true)
+    }
+    else {
+      this.authenticateToken(false);
+      console.error("Widget Identifiers are not same")
+    }
+    //this.authenticateToken();
   }
 
   pickSipExtension(sipExtensions: any) {

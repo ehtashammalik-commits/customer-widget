@@ -264,7 +264,7 @@ export class SdkService implements OnInit {
   }
 
   authenticateRoomId(
-    authPayload: { roomId: string | null; secureToken: string | null },
+    authPayload: { roomId: string | null },
     callback: any,
   ) {
     authenticateRequest(

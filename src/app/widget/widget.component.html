@@ -95,7 +95,7 @@
               ></span>
             </div>
             <div class="widget-authentication-body">
-              <div class="widget-auth-text">
+              <!-- <div class="widget-auth-text">
                 <p
                   innerHTML="{{
                     showInvalidCodeError
@@ -110,9 +110,9 @@
                       : 'To join video call, please enter session code below.'
                   }}"
                 ></p>
-              </div>
+              </div> -->
               <div class="widget-auth-button">
-                <p>Session Code</p>
+                <!-- <p>Session Code</p>
                 <input
                   id="auth-token"
                   type="text"
@@ -120,14 +120,16 @@
                   class="widget-auth-input call-btn"
                   placeholder="Enter Code Here ..."
                   [(ngModel)]="sessionCode"
-                />
+                /> -->
                 <input
                   id="auth-btn"
-                  type="submit"
+                  type="button"
                   class="widget-auth-trigger call-btn"
                   value="Join"
-                  (click)="authenticateToken()"
+                  (click)="changeView('standaloneVideo')"
+
                 />
+                <!--                   [disabled]="!IsRegisteredInFreeSwitch || isSecureLinkExpired" -->
               </div>
             </div>
           </div>
@@ -928,6 +930,8 @@
         <ng-container *ngIf="activeChatView">
 
           <!-- If secure link is expired -->
+
+
           <div class="call-session-expired" *ngIf="isSecureLinkExpired">
             <mat-icon class="discard-error-notify" (click)="isSecureLinkExpired = false">cancel</mat-icon>
             <div class="call-session-expired-inner">
@@ -936,6 +940,9 @@
             <span class="expire-reason">Video call link has been expired, with reason.</span>
           </div>
           </div>
+
+           <!-- If secure link is expired -->
+            
           <!-- Widget Chat Content -->
           <div class="widget-chat-content" #scrollMe>
             <div *ngFor="let message of cimMessage">
@@ -1194,7 +1201,7 @@
                           {{ message.body.caption }}
                         </audio>
                       </a>
-                      <a *ngIf="message.body.type == 'URL'" href="{{ message.body.mediaUrl }}" target="_blank">
+                      <a *ngIf="message.body.type == 'URL' && !message.header.additionalData.secureWebRTCLink" href="{{ message.body.mediaUrl }}" target="_blank">
                         CLICK HERE
                       </a>
                       <a *ngIf="message.body.type == 'FILE'" href="{{ message.body.attachment.mediaUrl }}"
@@ -1456,9 +1463,24 @@
                           {{ message.body.caption }}
                         </audio>
                       </a>
-                      <a *ngIf="message.body.type == 'URL'" href="{{ message.body.mediaUrl }}" target="_blank">
+                      <a *ngIf="message.body.type == 'URL' && !message.header.additionalData.secureWebRTCLink" href="{{ message.body.mediaUrl }}" target="_blank">
                         CLICK HERE
                       </a>
+
+                      <!--              Securelink Message UI                -->
+
+                      <a *ngIf="message.body.type == 'URL' && message.header.additionalData.secureWebRTCLink" target="_blank">
+                        <!-- <div class="s-link quoted-message-url" (click)="isSecureLinkExpired = true"> -->
+                          <div class="s-link quoted-message-url" (click)="processSecureLinkMessage(message)">
+                          <span class="video-call-detail"><mat-icon>videocam</mat-icon> Video Call</span>
+                          <span class="video-call-link">join video call
+                          <span class="call-link">{{message.body.mediaUrl}}</span>
+                        </span>
+                        </div>
+                      </a>
+
+                      <!--              Securelink Message UI                -->
+                      
                       <a *ngIf="message.body.type == 'FILE'" href="{{ message.body.attachment.mediaUrl }}"
                         target="_blank">
                         <span class="file-name" innerHTML="{{
@@ -1598,8 +1620,8 @@
           >
             <!-- <video *ngIf="remoteVideoActive" #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
             <video *ngIf="localVideoActive" #localVideo id="localVideo" autoplay playsinline class="localVideo"></video> -->
-            <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
-            <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
+            <video #remoteVideo id="localVideo" autoplay playsinline class="localVideo"></video>
+            <video #localVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
 
             <div class="audio-agent" *ngIf="activeAudioView">
               <img

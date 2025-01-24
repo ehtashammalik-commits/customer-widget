@@ -414,7 +414,9 @@ async function getConversationData(url, conversationId) {
  * Authenticator Request for Secure Link
  */
 function authenticateRequest(authenticatorUrl, authData, callback) {
-  console.log('authenticateRequest: in sdk function:', JSON.stringify(authData));
+  // console.log("here is the authenicateRequest in SDK", authenticatorUrl, "and the authData", authData)
+  // console.log('authenticateRequest: in sdk function:', JSON.stringify(authData));
+  // const url = "https://e70a1560-fa32-4009-a6be-a27f764bcfa6.mock.pstmn.io"
   fetch(`${authenticatorUrl}/verifySecureLink`, {
     method: 'POST',
     headers: {
@@ -422,48 +424,65 @@ function authenticateRequest(authenticatorUrl, authData, callback) {
     },
     body: JSON.stringify(authData)
   })
-    .then(async (response) => {
-      const contentType = response.headers.get("content-type");
-      if (!response.ok) {
-        let errorMessage = 'Network response was not ok';
-        if (response.status === 400) {
-          // Handle the 400 Bad Request error here
-          const errorData = await response.json();
-          errorMessage = '400 Bad Request';
-          // Custom handling for the error response
-          callback({ error: true, message: errorMessage, data: errorData });
-          throw new Error(errorMessage); // Stop the promise chain
-        } else if (response.status === 500) {
-          errorMessage = '500 Internal Server Error';
-        }
-        callback({ error: true, message: errorMessage });
-        throw new Error(errorMessage); // Stop the promise chain
-      }
-      if (contentType && contentType.includes("application/json")) {
-        return response.json();
-      } else {
-        return response.text(); // Handle plain text response
-      }
-    })
-    .then((result) => {
-      // This will not be executed if an error was thrown in the previous block
-      // console.log('Authentication Api Success: ', result);
-      // Check for the presence of reasonCode and message fields
-      if ('reasonCode' in result && 'message' in result) {
-        console.log('Authentication Api Error: ', result);
-        callback({ status: 400, error: true, data: result, message: 'Something went wrong!!' });
-      } else {
-        console.log('Authentication Api Success: ', result);
-        callback({ status: 200, error: false, data: result, message: 'Authentication Successful!!!' });
-      }
-    })
-    .catch((error) => {
-      // If an error is thrown in any of the previous blocks, it will be caught here
-      console.error('Authentication Api Error: ', error);
-      // Optionally, call the callback with an error if not already done
-      // callback({ error: true, message: 'Something went wrong, please try again!' });
-      // Since we're handling specific errors earlier, this catch might only be for unexpected errors
+  .then(async (response) => {
+    const contentType = response.headers.get('content-type');
+
+    if (!response.ok) {
+      const errorData = contentType?.includes('application/json')
+        ? await response.json()
+        : await response.text();
+
+      const errorMessage =
+        response.status === 400
+          ? '400 Bad Request'
+          : response.status === 500
+          ? '500 Internal Server Error'
+          : 'An error occurred';
+
+      callback({
+        error: true,
+        status: response.status,
+        message: errorMessage,
+        data: errorData,
+      });
+      throw new Error(`${errorMessage}: ${JSON.stringify(errorData)}`);
+    }
+
+    console.log("here is the response now", response)
+    // Parse JSON response if available, fallback to text
+    return contentType?.includes('application/json') ? response.json() : response.text();
+  })
+  .then((result) => {
+
+    console.log("here I am in the result then", result)
+    // Ensure `agentExtension` and `customerId` are present and not empty
+    console.log("here is result.extension", result.extension)
+    if (result.agentExtension && result.customerId) {
+      callback({
+        error: false,
+        status: 200,
+        data: result,
+        message: 'Authentication Successful!',
+      });
+    } else {
+      console.log("Now I am in the else block of Result")
+      callback({
+        error: true,
+        status: 400,
+        data: result,
+        message: 'Invalid response: Missing required fields (agentExtension or customerId).',
+      });
+    }
+  })
+  .catch((error) => {
+    console.log("Now in the catch Block")
+    console.error('Authentication API Error:', error);
+    callback({
+      error: true,
+      status: 500,
+      message: 'An unexpected error occurred. Please try again later.',
     });
+  });
 }
 /**
  * IP Data Request
@@ -1812,11 +1831,11 @@ function initiate_call(calledNumber, DN, mediaType, authData, callback, callType
 
     // request.extraHeaders.push('X-Agent-Id:' + authData.agentId);
     // request.extraHeaders.push('X-Agent-Name:' + authData.agentName);
-    // request.extraHeaders.push('X-Agent-Extension:' + authData.agentExtension);
+    // request.extraHeaders.push('X-Customer-Name:' + authData.customerName);
+    request.extraHeaders.push('X-Agent-Extension:' + authData.agentExtension);
     request.extraHeaders.push('X-Customer-Number:' + authData.customerNumber);
-    request.extraHeaders.push('X-Customer-Name:' + authData.customerName);
     // request.extraHeaders.push('X-Channel:' + authData.channel);
-    // request.extraHeaders.push('X-Customer-Id:' + authData.customerId);
+    request.extraHeaders.push('X-Customer-Id:' + authData.customerId);
     // request.extraHeaders.push('X-Service-Identifier:' + authData.serviceIdentifier);
 
     // request.extraHeaders.push('X-Destination-Number:' + DN);
