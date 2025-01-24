@@ -2276,6 +2276,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
 
       this.webRTCConfig.customerName = "TestingUser";
+      this.webRTCConfig.customerNumber = "00000000000";
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.webRTCConfig,

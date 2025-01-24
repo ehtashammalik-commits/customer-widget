@@ -1813,7 +1813,7 @@ function initiate_call(calledNumber, DN, mediaType, authData, callback, callType
     // request.extraHeaders.push('X-Agent-Id:' + authData.agentId);
     // request.extraHeaders.push('X-Agent-Name:' + authData.agentName);
     // request.extraHeaders.push('X-Agent-Extension:' + authData.agentExtension);
-    // request.extraHeaders.push('X-Customer-Number:' + authData.customerNumber);
+    request.extraHeaders.push('X-Customer-Number:' + authData.customerNumber);
     request.extraHeaders.push('X-Customer-Name:' + authData.customerName);
     // request.extraHeaders.push('X-Channel:' + authData.channel);
     // request.extraHeaders.push('X-Customer-Id:' + authData.customerId);
