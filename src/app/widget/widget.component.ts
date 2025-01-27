@@ -406,8 +406,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.serviceIdentifier = params['serviceIdentifier'];
       this.widgetIdentifier = params['widgetIdentifier'];
 
-
-      console.log("here are params", params)
       // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
       const rawEncryptedKey = params['encryptedKey']
         ? params['encryptedKey']
@@ -1204,6 +1202,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         break;
       case 'secureWebVideoCall':
         if (this.isSecureWebCall) {
+          console.log(">>>>>>>>>>phase 1")
           this.activeChatView = false;
           this.activeAudioView = false;
           this.activeVideoView = true;
@@ -2518,6 +2517,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             // this.callPopUpView = false;
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
+
             if (this.standaloneWebRtc) {
               this.changeView('standaloneVideo');
             } 
@@ -2625,6 +2625,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.endCountdown();
     this.sdk.handleCallEnd(this.dialogId);
     this.sdk.handleLogOutAgent(this.dialogId);
+    this.changeView("chat");
   }
 
   changeFont() {
@@ -2708,7 +2709,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.changeView('secureWebVideoCall');
         }
         else {
-          this.changeView('standaloneVideo');
+          // this.changeView('standaloneVideo');
           this.standaloneWebRtc = true;
         }
       }
@@ -2717,7 +2718,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   processSecureLinkMessage(message : any) {
     this.isSecureWebCall = false;
-    console.log("here is the message", message)
     const mediaUrl = message.body.mediaUrl
     const queryString = mediaUrl.split('?')[1];
     const urlParams = new URLSearchParams(queryString);
