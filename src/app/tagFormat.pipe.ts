@@ -9,18 +9,15 @@ export class tagFormatPipe implements PipeTransform {
     console.log(value);
     value = ibsFormat(value,
       [
+        ["em", "`"],
         ["b", "*"],
         ["i", "_"],
         ["strike", "~"],
-        ["mark", "!"],
-        ["em", "```"],
-        ["em", "`"]
+        ["mark", "!"]
       ],
       { detectLinks: false, target: "_blank" },
       { allowXssEscaping: false }
     );
-
-    console.log(value);
     return value;
   }
 }
