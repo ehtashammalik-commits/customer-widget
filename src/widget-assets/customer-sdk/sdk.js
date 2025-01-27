@@ -447,16 +447,12 @@ function authenticateRequest(authenticatorUrl, authData, callback) {
       });
       throw new Error(`${errorMessage}: ${JSON.stringify(errorData)}`);
     }
-
-    console.log("here is the response now", response)
     // Parse JSON response if available, fallback to text
     return contentType?.includes('application/json') ? response.json() : response.text();
   })
   .then((result) => {
 
-    console.log("here I am in the result then", result)
     // Ensure `agentExtension` and `customerId` are present and not empty
-    console.log("here is result.extension", result.extension)
     if (result.agentExtension && result.customerId) {
       callback({
         error: false,
@@ -1079,7 +1075,6 @@ var myMediaStreamFactory = async (constraints, sessionDescriptionHandler) => {
 // For the communication with freeswitch >>>>> Centralized function for all webRTC related stuff. 
 
 function postMessages(obj, callback) {
-  console.log("here is the sipConfig in the postMessages", sipconfig)
   if (Object.keys(sipconfig).length === 0) sipconfig = obj.parameter.sipConfig;
   switch (obj.action) {
     case 'login':

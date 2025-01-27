@@ -210,101 +210,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     file: 'File',
   };
 
-  mockMessageObject = {
-      "id": "6a5e5391-528b-4e7e-aa05-f5dd78f6b246",
-      "header": {
-          "timestamp": 1737540305007,
-          "sender": {
-              "id": "6b189f72-5dd5-4213-8989-4426b71ff170",
-              "senderName": "csfbilal1",
-              "type": "AGENT",
-              "additionalDetail": {
-                  "firstName": "",
-                  "lastName": "CSFbilal1"
-              }
-          },
-          "channelData": {
-              "channelCustomerIdentifier": "777",
-              "serviceIdentifier": "1133",
-              "requestPriority": 0,
-              "customerFirstName": null,
-              "customerLastName": null,
-              "additionalAttributes": [
-                  {
-                      "key": "WebChannelData",
-                      "type": "WebChannelData",
-                      "value": {
-                          "browserDeviceInfo": {
-                              "browserId": null,
-                              "browserIdExpiryTime": null,
-                              "browserName": null,
-                              "deviceType": null
-                          },
-                          "queue": "",
-                          "locale": {
-                              "timezone": null,
-                              "language": null,
-                              "country": null
-                          },
-                          "formData": {
-                              "id": 0.7835791766438596,
-                              "formId": "673c8d8558db250027b8f8d2",
-                              "filledBy": "web-widget",
-                              "attributes": [
-                                  {
-                                      "value": "777",
-                                      "key": "phone",
-                                      "type": "string"
-                                  },
-                                  {
-                                      "value": "",
-                                      "key": "first_name",
-                                      "type": "string"
-                                  },
-                                  {
-                                      "value": "gfaf@gmail.com",
-                                      "key": "email",
-                                      "type": "string"
-                                  },
-                                  {
-                                      "value": "missouri",
-                                      "key": "state",
-                                      "type": "string"
-                                  }
-                              ],
-                              "createdOn": "2025-01-22T10:03:32.803Z"
-                          }
-                      }
-                  }
-              ]
-          },
-          "intent": null,
-          "additionalData": {
-              "isEncoded": true,
-              "secureWebRTCLink": true
-          },
-          "conversationId": "6790c27470ea97639e406541",
-          "roomId": "678e542570ea97639e33803e",
-          "channelSessionId": "6790c274f718dd632e319c1c",
-          "customer": {
-              "_id": "678e5425fca362924c05fddc",
-              "firstName": "hghgh",
-              "phoneNumber": [],
-              "isAnonymous": true,
-              "__v": 0,
-              "web": [
-                  "777"
-              ],
-              "urlTest2": "https://expertflow-docs.atlassian.net/wiki/spaces/CX/pages/2528142/Agent+Desk+Permissions+-+Resource+Scope+Groups+Mapping"
-          }
-      },
-      "body": {
-          "markdownText": "",
-          "type": "URL",
-          "mediaUrl": "https://cim-dev3.expertflow.com/customer-widget/#/widget?widgetIdentifier=voice&encryptedKey=gb0EcYhQgIdQKeXyxuEPvef1ST1rq0Z134trho4GoFoklUDMxitZef2fUEjDsTcnL1L3uRhCvL2Xq8Aott9yHQ=="
-      }
-  }
-
   // Widget Configuration
   title = '';
   subtitle = '';
@@ -985,7 +890,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
         this.changeView('chat');
-        //this.handleCimMessage(this.mockMessageObject)
         break;
       case 'chatForm':
         this.preChatFormScreen = true;
@@ -1435,7 +1339,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleCimMessage(cimMessage: any) {
-    console.log("here is the cimMessage", cimMessage)
 
     if (
       cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
