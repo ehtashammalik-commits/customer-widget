@@ -164,6 +164,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   standaloneCallback: boolean = false; //If true than it will enable standalone callback
   standaloneWebRtc: boolean = false; //If true than it will enable standalone webRtc Video Call and hide Chat Features
+  isSecureWebCall: boolean = false;
 
   fontDropDown = false;
   positionOptions: TooltipPosition[] = [
@@ -406,11 +407,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.widgetIdentifier = params['widgetIdentifier'];
 
 
+      console.log("here are params", params)
       // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
       const rawEncryptedKey = params['encryptedKey']
         ? params['encryptedKey']
         : null;
       if (rawEncryptedKey !== null) {
+        console.log("rawEncrypedKey", rawEncryptedKey)
         // Directly replace spaces with '+' if you're sure there should be no spaces
         this.webRtcSecureLink = rawEncryptedKey;
       } else {
@@ -1153,6 +1156,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.callPopUpView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
+          this.isSecureWebCall = false;
           //this.convertCallView('video');
         } else {
           this.callPopUpView = true;
@@ -1162,7 +1166,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeScreenShareView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
-          this.logInToFreeSwitch();
+          this.isSecureWebCall = false;
+          //this.logInToFreeSwitch();
           this.initiateWebRtcCall(view);
         }
         break;
@@ -1188,14 +1193,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         break;
       case 'standaloneVideo':
-
-      console.log("Video button is being clicked or not.....")
         if (this.isWebRtcVideoCallActive) {
           this.isWebRtcVideoCallActive = true;
           this.callPopUpView = false;
         } else {
           this.callPopUpView = true;
           this.isWebRtcVideoCallActive = false;
+          this.initiateWebRtcCall('video');
+        }
+        break;
+      case 'secureWebVideoCall':
+        if (this.isSecureWebCall) {
+          this.activeChatView = false;
+          this.activeAudioView = false;
+          this.activeVideoView = true;
+          this.activeScreenShareView = false;
+          this.callPopUpView = false;
+          this.activeCallbackView = false;
+          this.activeCallbackResponseView = false;
+        } else {
+          this.callPopUpView = true;
+          this.activeChatView = false;
+          this.activeAudioView = false;
+          this.activeVideoView = true;
+          this.isSecureWebCall = true;
+          this.activeCallbackView = false;
+          this.activeCallbackResponseView = false;
           this.initiateWebRtcCall('video');
         }
         break;
@@ -2338,40 +2361,44 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   initiateWebRtcCall(callType: any) {
-
     if(callType === "video" || callType === "audio") {
       this.isVideoHide = false;
       this.isCallMute = false;
     }
-    this.callText = callType;
-    this.startCountdown();
 
+    this.callText = callType;
+    // standAlone Web RTC Call when the link is clicked other than web.
     if (this.standaloneWebRtc) {
-      this.setAuthorizedResponse.customerId = `webrtc:${this.setAuthorizedResponse.customerId}`;
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.setAuthorizedResponse,
       });
       this.isWebRtcVideoCallActive = true;
-    } else {
-      if (callType === 'video') {
+      this.startCountdown();
+    } 
+    
+    // standAlone Web RTC Call when the link is given in active chat / web session as a message..
+     if (this.isSecureWebCall) {
+
+      this.sdk.handleCallStart({
+        type: callType,
+        authConfigs: this.setAuthorizedResponse,
+      });
+      this.isSecureWebCall = true;
+      this.isVideoCallActive = true;
+      this.startCountdown();
+    }
+    
+    // In case of simple webRTC call
+
+    else {
+      if (callType === 'video' && !this.isSecureWebCall) {
         this.isVideoCallActive = true;
       } else if (callType === 'screenshare') {
         this.isScreenShareActive = true;
       } else {
         this.isAudioCallActive = true;
       }
-      //40001 extention csfbilal1
-      //40002 extenion  csfbilal2
-      //40003 extenion  csfbilal3
-
-
-      this.webRTCConfig.agentExtension = "40001";
-      this.webRTCConfig.customerId = "abc:name";
-      this.webRTCConfig.customerNumber = "0000000000";
-      this.webRTCConfig.customerName = "TestingJunaid";
-      console.log("here are the webRTCConfig", this.webRTCConfig)
-
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.webRTCConfig,
@@ -2493,8 +2520,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.dialogId = data.response.dialog.id;
             if (this.standaloneWebRtc) {
               this.changeView('standaloneVideo');
-            } else if (this.isAudioCallActive) {
-              console.log("this.changeView('audio');")
+            } 
+            if (this.isAudioCallActive) {
               this.changeView('audio');
             } else if (this.isVideoCallActive) {
               this.changeView('video');
@@ -2502,6 +2529,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               this.changeView('screenshare');
             } else if(this.isChatActive) {
               this.changeView('chat')
+            } else if(this.isSecureWebCall) {
+              this.changeView('secureWebVideoCall');
             }
             break;
           case 'FAILED':
@@ -2659,7 +2688,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   authenticateToken(isAuthenticated: boolean): void {
 
     const roomId = this.webRtcSecureLink;
-    // const secureToken = this.sessionCode;
     this.sdk.authenticateRoomId({ roomId}, (res: any) => {
       if (res.error) {
         this.isSecureLinkExpired = true;
@@ -2668,35 +2696,40 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           : res.message;
         this.showInvalidCodeError = true;
       } else {
+
+
         this.logInToFreeSwitch();
-        if(isAuthenticated) {
-          this.changeView('video')
-        }
         this.agentName = res.data.agentName;
-
-        // Append diallingUri key to res.data object
         res.data.diallingUri = this.webRTCConfig.diallingUri;
-
         this.showAuthenticationResponseMessage = res.message;
         this.showInvalidCodeError = false;
         this.setAuthorizedResponse = res.data; // Now includes diallingUri
-        console.log('<===>Auth Data:', this.setAuthorizedResponse);
+        if(isAuthenticated) {
+          this.changeView('secureWebVideoCall');
+        }
+        else {
+          this.changeView('standaloneVideo');
+          this.standaloneWebRtc = true;
+        }
       }
     });
   }
 
   processSecureLinkMessage(message : any) {
+    this.isSecureWebCall = false;
+    console.log("here is the message", message)
     const mediaUrl = message.body.mediaUrl
     const queryString = mediaUrl.split('?')[1];
     const urlParams = new URLSearchParams(queryString);
     const encryptedKey = urlParams.get('encryptedKey');
+    
     this.webRtcSecureLink = encryptedKey;
     const widgetIdentifier = urlParams.get('widgetIdentifier')
     if(widgetIdentifier === this.widgetIdentifier) {
       this.authenticateToken(true)
     }
     else {
-      this.authenticateToken(false);
+      // this.authenticateToken(false);
       console.error("Widget Identifiers are not same")
     }
     //this.authenticateToken();
