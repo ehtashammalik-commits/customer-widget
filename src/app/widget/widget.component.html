@@ -136,11 +136,11 @@
         </ng-container>
         <!-- Video Call Screen -->
         <ng-container *ngIf="isWebRtcVideoCallActive">
-          <div class="widget-video-section">
+          <div class="widget-section widget-video-section">
             <video #remoteVideo id="remoteVideo" autoplay="autoplay" class="remoteVideo">
               Your browser does not support HTML5 video.
             </video>
-            <div class="localVideoView">
+            <!-- <div class="localVideoView">
               <span
                 class="material-symbols-outlined localVideoIcon"
                 [ngClass]="{ iconHide: isVideoHide === true }"
@@ -148,7 +148,7 @@
                 (click)="toggleCallVideo()"
               >
               </span>
-            </div>
+            </div> -->
             <video autoplay="autoplay" class="localVideo" id="localVideo"
               innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}"
             >
@@ -1658,18 +1658,21 @@
                     'focus-icon-video ': isScreenShareActive === true
                   }"
                 >
-                  <span
-                    class="material-symbols-outlined"
-                    (click)="
-                      activeScreenShareView ||
-                      activeAudioView ||
-                      activeVideoView
-                        ? convertCallView('screenshare')
-                        : changeView('screenshare')
-                    "
-                  >
-                    present_to_all
-                  </span>
+                <span
+                [ngClass]="{
+                  'disable-icon-callControl': isSecureWebCall
+                }"
+                class="material-symbols-outlined"
+                [attr.aria-disabled]="isSecureWebCall"
+                (click)="
+                  !isSecureWebCall &&
+                  (activeScreenShareView || activeAudioView || activeVideoView
+                    ? convertCallView('screenshare')
+                    : changeView('screenshare'))
+                "
+              >
+                present_to_all
+              </span>
                 </div>
                 <!-- <div class="control-btn">
                   <span class="material-symbols-outlined">

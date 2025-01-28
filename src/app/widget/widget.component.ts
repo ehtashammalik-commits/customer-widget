@@ -1058,7 +1058,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.callPopUpView = false;
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
-          this.isSecureWebCall = false;
+          if(!this.isSecureWebCall) {
+            this.isSecureWebCall = false;
+          }
           //this.convertCallView('video');
         } else {
           this.callPopUpView = true;
@@ -2433,6 +2435,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             } else if(this.isChatActive) {
               this.changeView('chat')
             } else if(this.isSecureWebCall) {
+
+              console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.")
               this.changeView('secureWebVideoCall');
             }
             break;
@@ -2635,7 +2639,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       // this.authenticateToken(false);
       console.error("Widget Identifiers are not same")
     }
-    //this.authenticateToken();
+    // this.authenticateToken();
   }
 
   pickSipExtension(sipExtensions: any) {
