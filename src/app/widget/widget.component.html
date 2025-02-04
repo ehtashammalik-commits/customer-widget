@@ -936,11 +936,11 @@
             <mat-icon class="discard-error-notify" (click)="isSecureLinkExpired = false">cancel</mat-icon>
             <div class="call-session-expired-inner">
               <span class="icon-error"><mat-icon>priority_high</mat-icon></span>
-              <h3>Call cannot be initiated</h3>
+              <h3>Link has been expired</h3>
               <span class="expire-reason">
                 {{ showInvalidCodeError ? showAuthenticationResponseMessage : '' }}
               </span>
-          </div>
+            </div>
           </div>
 
            <!-- If secure link is expired -->

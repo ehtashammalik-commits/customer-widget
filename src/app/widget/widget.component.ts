@@ -95,7 +95,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   // This Popup Screen will only be visible when every any webRTC Call is initiated and call is not connected end-to-end
   callPopUpView = false;
-
   // Main Screen Views
   // function changeView()
   // (this variables will help us to navigate between views while having active chat session)
@@ -210,6 +209,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     file: 'File',
   };
 
+  
+
   // Widget Configuration
   title = '';
   subtitle = '';
@@ -305,7 +306,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-
       this.route.queryParams.subscribe((params: { [x: string]: any }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
@@ -2334,6 +2334,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.IsRegisteredInFreeSwitch = false;
     console.log('[handleDialogStates] received dialog: ===> ', data);
 
+    if(data.reasonCode === "NO_ANSWER") {
+      this.snackBar.open("Call is not picked up", 'X', {
+        duration: 2000,  // 5 seconds
+        panelClass: ['error-snackbar'],
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      });
+    }
     if (data.event === 'agentInfo') {
       console.log(
         '[handleDialogStates] Inside Agent Info Event: ===> ',
@@ -2624,6 +2632,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   processSecureLinkMessage(message : any) {
+    console.log(message)
     this.isSecureWebCall = false;
     const mediaUrl = message.body.mediaUrl
     const queryString = mediaUrl.split('?')[1];
@@ -2639,7 +2648,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       // this.authenticateToken(false);
       console.error("Widget Identifiers are not same")
     }
-    // this.authenticateToken();
   }
 
   pickSipExtension(sipExtensions: any) {

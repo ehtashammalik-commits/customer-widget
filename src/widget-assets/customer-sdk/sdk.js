@@ -1580,6 +1580,7 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
       onMessage: (message) => {
         let someMessage = JSON.parse(message.request.body)
         console.log("someMessage RECEIVED ====>", someMessage)
+        callback(someMessage);
         if (!someMessage.event.includes("CONFERENCE_MEMBER")) {
           if (someMessage.event && someMessage.dialog.id) {
             var index = getCallIndex(someMessage.dialog.id);

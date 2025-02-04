@@ -10,7 +10,6 @@ export class BrowserNotificationService {
   constructor() {}
 
   notify(cimMessage: any) {
-    console.log("here is the notification message", cimMessage)
     if (
       cimMessage.body.type.toLowerCase() !== 'notification' &&
       cimMessage.body.type.toLowerCase() !== 'deliverynotification'
