@@ -20,11 +20,11 @@
             <p>{{ subtitle }}</p>
             <div *ngIf="daySummary">
               <p>Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date: 'shortTime' }}</p>
-            </div>  
-        </div>  
+            </div>
+        </div>
         </div>
         <div class="widget-wrapper-content">
-          <p>Ask us a question, our support team is pleased to help you.</p>    
+          <p>Ask us a question, our support team is pleased to help you.</p>
           <button class="widget-color" (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
             Connect with us
           </button>
@@ -1336,7 +1336,7 @@
                       message.header.timestamp | date: "h:mm a"
                       }} </span>
                   </div>
-                  
+
                 </div>
               </div>
             </div>
@@ -1395,17 +1395,18 @@
             <span>Max Limit Reached</span>
           </div>
           <div class="widget-composer">
-            <!-- <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined emoji-btn" 
+            <!-- <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined emoji-btn"
               *ngIf="enableEmoji">
               add_reaction
             </span> -->
-            <textarea class="widget-chat-composer" 
+            <textarea class="widget-chat-composer"
             #messageComposer
               [attr.data-emoji-picker]="enableEmoji" matInput id="messageTextarea"
               cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
               placeholder="Type Message Here ..." #message maxlength="{{ messageLimit }}" [(ngModel)]="text"
               (change)="textChanged()" (focus)="onTextAreaFocus()" (keyup)="onKeyPress($event)"
-              (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)" (keyup.enter)="onEnterKey($event)" [ngClass]="{
+              (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)"  (keydown.enter)="onEnterKey($event)"
+                      [ngClass]="{
                 'error-border': text.length == messageLimit,
                 'resize-left': enableEmoji === false,
                 'resize-right': enableFileTransfer === false
@@ -1423,7 +1424,7 @@
                 accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp,.pptx,.ppt"
                 id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
             </div>
-            <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined send-btn" 
+            <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined send-btn"
               *ngIf="isTyping" (click)="onSendMessage(messageComposer.value);">
               send
             </span>
