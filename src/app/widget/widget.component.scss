@@ -1040,7 +1040,9 @@ button.close-widget-wrapper {
       color: #000000;
       width: auto;
       max-width: 225px;
-      line-break: anywhere;
+      //line-break: anywhere;
+      word-break: break-word;
+      white-space: pre-line;
     }
 
     .message-option {
@@ -1121,7 +1123,7 @@ button.close-widget-wrapper {
     background: #f2f2f2;
     border-radius: 0px 3px 3px 10px;
     padding: 0px 10px;
-    word-break: break-word;
+    //word-break: break-word;
 
     .header {
       display: inline-flex;
@@ -1135,7 +1137,7 @@ button.close-widget-wrapper {
       font-style: normal;
       text-align: left;
       color: #3e3e3e;
-      word-break: break-word;
+      //word-break: break-word;
     }
 
     .message {
@@ -1148,7 +1150,9 @@ button.close-widget-wrapper {
       color: #000000;
       width: auto;
       max-width: 215px;
-      line-break: anywhere;
+      //line-break: anywhere;
+      word-break: break-word;
+      white-space: pre-line;
     }
 
     .message-option {
@@ -2187,9 +2191,9 @@ mat-spinner {
   color: #000000;
   width: auto;
   max-width: 215px;
-  line-break: normal;
+  //line-break: normal;
   word-break: break-word;
-  white-space: normal;
+  white-space: pre-line;
 }
 
 .validation-msg {
