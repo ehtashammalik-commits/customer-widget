@@ -41,7 +41,6 @@ node-test:
     - /^.+_b-.+$/
     - merge_requests
     - develop
-
   allow_failure: false
   cache:
     key: ${CI_COMMIT_REF_SLUG}
@@ -51,7 +50,6 @@ node-test:
   artifacts:
     paths:
         - coverage
-        - node_modules/
 
 
 # #+==================Runs on Every Commit and merge requests========================+
