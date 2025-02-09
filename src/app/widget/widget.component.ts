@@ -2580,12 +2580,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   callEnd() {
+    if (!this.dialogId) {
+      console.warn("Call cannot be ended because dialogId is missing.");
+      return; 
+    }
+  
     this.callPopUpView = false;
     this.endCountdown();
     this.sdk.handleCallEnd(this.dialogId);
     this.sdk.handleLogOutAgent(this.dialogId);
     this.changeView("chat");
-  }
+  }  
 
   changeFont() {
     console.log('font dropdown clicked');

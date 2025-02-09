@@ -2143,7 +2143,11 @@
         <div class="agent-detail">
           <p class="name">{{ agentName }}</p>
         </div>
-        <div class="end-call-btn" (click)="callEnd()">
+        <div 
+          class="end-call-btn" 
+          [class.disabled]="!dialogId" 
+          (click)="callEnd()"
+        >
           <div class="end-call-btn-sm">
             <span class="material-symbols-outlined"> call_end </span>
           </div>
