@@ -1114,13 +1114,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         break;
       case 'standaloneVideo':
-        if (this.isWebRtcVideoCallActive) {
-          this.isWebRtcVideoCallActive = true;
-          this.callPopUpView = false;
+        if(!this.showInvalidCodeError) {
+          if (this.isWebRtcVideoCallActive) {
+            this.callPopUpView = false;
+          } else {
+            this.callPopUpView = true;
+            this.initiateWebRtcCall('video');
+          }
         } else {
-          this.callPopUpView = true;
-          this.isWebRtcVideoCallActive = false;
-          this.initiateWebRtcCall('video');
+          console.warn("Error : Some Issues in initiating Stand alone Call")
         }
         break;
       case 'secureWebVideoCall':
@@ -2294,8 +2296,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         type: callType,
         authConfigs: this.setAuthorizedResponse,
       });
-      this.isWebRtcVideoCallActive = true;
-      this.startCountdown();
+
+      if(!this.showInvalidCodeError) {
+        this.isWebRtcVideoCallActive = true;
+        this.startCountdown();
+      }
     } 
     
     // standAlone Web RTC Call when the link is given in active chat / web session as a message..
@@ -2562,13 +2567,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log(`[Error] Unknown:', ${data.response.description}`);
           errorMessage = 'An unknown error occurred.';
       }
+      console.log("this standalone webRTc", this.standaloneWebRtc)
       this.showAuthenticationResponseMessage = errorMessage;
       this.activeVideoView = false;
       if(this.standaloneWebRtc) {
-        console.log("hi")
+        this.showInvalidCodeError = true;
         this.callPopUpView = false;
         this.activeVideoView = false;
-        this.changeView('chat');
+        this.isWebRtcVideoCallActive = false;
+        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'right',
+        });
     } 
     else {
           this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
@@ -2678,7 +2689,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.changeView('secureWebVideoCall');
         }
         else {
-          // this.changeView('standaloneVideo');
           this.standaloneWebRtc = true;
         }
       }
@@ -2692,7 +2702,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const queryString = mediaUrl.split('?')[1];
     const urlParams = new URLSearchParams(queryString);
     const encryptedKey = urlParams.get('encryptedKey');
-    
+    console.log("here is enctypted key", encryptedKey)
     this.webRtcSecureLink = encryptedKey;
     const widgetIdentifier = urlParams.get('widgetIdentifier')
     if (widgetIdentifier === this.widgetIdentifier && !this.errorDuringWebRTCCall) {
