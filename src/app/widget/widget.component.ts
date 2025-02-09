@@ -2693,7 +2693,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       } 
       else {
 
-        // this.logInToFreeSwitch();
+        this.logInToFreeSwitch();
         this.agentName = res.data.agentName;
         res.data.diallingUri = this.webRTCConfig.diallingUri;
         this.showAuthenticationResponseMessage = res.message;
