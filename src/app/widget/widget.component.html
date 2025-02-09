@@ -127,9 +127,9 @@
                   class="widget-auth-trigger call-btn"
                   value="Join"
                   (click)="changeView('standaloneVideo')"
+                  [disabled]="isSecureLinkExpired"
 
                 />
-                <!--                   [disabled]="!IsRegisteredInFreeSwitch || isSecureLinkExpired" -->
               </div>
             </div>
           </div>
@@ -931,12 +931,11 @@
 
           <!-- If secure link is expired -->
 
-
           <div class="call-session-expired" *ngIf="isSecureLinkExpired">
             <mat-icon class="discard-error-notify" (click)="isSecureLinkExpired = false">cancel</mat-icon>
             <div class="call-session-expired-inner">
               <span class="icon-error"><mat-icon>priority_high</mat-icon></span>
-              <h3>Link has been expired</h3>
+              <h3>The link has expired</h3>
               <span class="expire-reason">
                 {{ showInvalidCodeError ? showAuthenticationResponseMessage : '' }}
               </span>
@@ -1612,7 +1611,7 @@
           </div>
         </ng-container>
 
-        <ng-container *ngIf="activeAudioView || activeVideoView || activeScreenShareView || isVideoCallActive || isAudioCallActive">
+        <ng-container *ngIf="(activeAudioView || activeVideoView || activeScreenShareView || isVideoCallActive || isAudioCallActive) && !this.errorDuringWebRTCCall">
           <div
             class="widget-section"
             [ngClass]="{

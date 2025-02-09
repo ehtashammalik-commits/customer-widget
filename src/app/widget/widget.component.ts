@@ -164,6 +164,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   standaloneCallback: boolean = false; //If true than it will enable standalone callback
   standaloneWebRtc: boolean = false; //If true than it will enable standalone webRtc Video Call and hide Chat Features
   isSecureWebCall: boolean = false;
+  errorDuringWebRTCCall: boolean = false;
+  errorMessage:string = "";
 
   fontDropDown = false;
   positionOptions: TooltipPosition[] = [
@@ -976,6 +978,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   changeView(view: any) {
+    if(this.showInvalidCodeError && this.standaloneWebRtc) {
+      this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+        horizontalPosition: 'right',
+      });
+
+      return;
+    }
+
     switch (view) {
       case 'chat':
         this.activeChatView = true;
@@ -1103,12 +1115,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         } else {
           this.callPopUpView = true;
           this.isWebRtcVideoCallActive = false;
+          //this.logInToFreeSwitch();
           this.initiateWebRtcCall('video');
         }
         break;
       case 'secureWebVideoCall':
         if (this.isSecureWebCall) {
-          console.log(">>>>>>>>>>phase 1")
           this.activeChatView = false;
           this.activeAudioView = false;
           this.activeVideoView = true;
@@ -1152,7 +1164,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // }
 
   convertCallView(view: any) {
-    console.log('convertCallView:', view);
     switch (view) {
       case 'audio':
         // if (this.isAudioCallActive) {
@@ -2288,9 +2299,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         type: callType,
         authConfigs: this.setAuthorizedResponse,
       });
-      this.isSecureWebCall = true;
+      if(!this.errorDuringWebRTCCall) {
+        this.isSecureWebCall = true;
       this.isVideoCallActive = true;
       this.startCountdown();
+      }
     }
     
     // In case of simple webRTC call
@@ -2444,7 +2457,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               this.changeView('chat')
             } else if(this.isSecureWebCall) {
 
-              console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.")
               this.changeView('secureWebVideoCall');
             }
             break;
@@ -2524,13 +2536,45 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     if (data.event === 'Error') {
+      // this.errorDuringWebRTCCall = true;
+      let errorMessage = '';
+  
       switch (data.response.type) {
         case 'generalError':
-          console.log(
-            '[Error] Call terminated by customer: ===>',
-            `Error Type: ${data.response.type} with description: ${data.response.description}`,
-          );
+          errorMessage = `Error: ${data.response.description}`;
+          console.log('[Error] Call terminated:', errorMessage);
           break;
+        case 'subscriptionFailed':
+          errorMessage = `Subscription Failed: ${data.response.description}`;
+          console.log('[Error] Call terminated:', errorMessage);
+          break;
+        case 'invalidState':
+          errorMessage = `Invalid State: User is not registered`;
+          console.log('[Error] Call terminated:', errorMessage);
+          break;
+        default:
+          console.log(`[Error] Unknown:', ${data.response.description}`);
+          errorMessage = 'An unknown error occurred.';
+      }
+      this.showAuthenticationResponseMessage = errorMessage;
+      this.activeVideoView = false;
+      if(this.standaloneWebRtc) {
+        console.log("hi")
+        this.callPopUpView = false;
+        this.activeVideoView = false;
+        this.changeView('chat');
+    } 
+    else {
+          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'right',
+        });
+        this.isSecureWebCall = false;
+        this.isVideoCallActive = false;
+        this.activeVideoView = false;
+        this.errorDuringWebRTCCall = true;
+        this.changeView('chat')
       }
     }
   }
@@ -2602,7 +2646,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   authenticateToken(isAuthenticated: boolean): void {
-
     const roomId = this.webRtcSecureLink;
     this.sdk.authenticateRoomId({ roomId}, (res: any) => {
       if (res.error) {
@@ -2611,8 +2654,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           ? res.data.message
           : res.message;
         this.showInvalidCodeError = true;
-      } else {
-
+      } 
+      else {
 
         this.logInToFreeSwitch();
         this.agentName = res.data.agentName;
@@ -2632,7 +2675,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   processSecureLinkMessage(message : any) {
-    console.log(message)
+
     this.isSecureWebCall = false;
     const mediaUrl = message.body.mediaUrl
     const queryString = mediaUrl.split('?')[1];
@@ -2641,13 +2684,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     
     this.webRtcSecureLink = encryptedKey;
     const widgetIdentifier = urlParams.get('widgetIdentifier')
-    if(widgetIdentifier === this.widgetIdentifier) {
-      this.authenticateToken(true)
+    if (widgetIdentifier === this.widgetIdentifier && !this.errorDuringWebRTCCall) {
+      this.authenticateToken(true);
+    } else {
+      console.warn('[Warning] Widget Identifiers do not match or there was an error during WebRTC call.');
+      
+      this.snackBar.open(
+        this.showAuthenticationResponseMessage || 'Authentication failed!',
+        'Dismiss',
+        {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'right',
+        }
+      );
     }
-    else {
-      // this.authenticateToken(false);
-      console.error("Widget Identifiers are not same")
-    }
+    return;
   }
 
   pickSipExtension(sipExtensions: any) {

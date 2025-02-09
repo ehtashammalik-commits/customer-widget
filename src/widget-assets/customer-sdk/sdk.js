@@ -461,7 +461,6 @@ function authenticateRequest(authenticatorUrl, authData, callback) {
         message: 'Authentication Successful!',
       });
     } else {
-      console.log("Now I am in the else block of Result")
       callback({
         error: true,
         status: 400,
@@ -471,7 +470,6 @@ function authenticateRequest(authenticatorUrl, authData, callback) {
     }
   })
   .catch((error) => {
-    console.log("Now in the catch Block")
     console.error('Authentication API Error:', error);
     callback({
       error: true,
