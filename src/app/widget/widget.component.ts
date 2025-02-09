@@ -293,7 +293,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (this.standaloneWebRtc) {
       this.authenticateToken(false);
       this.changeScreen('webRtcScreen');
-      console.log('Secure Link webRtc View');
     } else {
       this.customerChatResumed();
       console.log('Not Secure Chat View');
@@ -1084,7 +1083,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
           this.isSecureWebCall = false;
-          //this.logInToFreeSwitch();
+          this.logInToFreeSwitch();
           this.initiateWebRtcCall(view);
         }
         break;
@@ -2366,6 +2365,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         verticalPosition: 'top'
       });
     }
+
+    if(data.event === "MEDIA_SERVER_CALL_END") {
+      const reasonCode = data.reasonCode ? data.reasonCode : "Unknown Error"
+      this.snackBar.open(reasonCode, 'Dismiss', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+        horizontalPosition: 'right',
+      });
+    }
     if (data.event === 'agentInfo') {
       console.log(
         '[handleDialogStates] Inside Agent Info Event: ===> ',
@@ -2548,8 +2556,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     if (data.event === 'Error') {
       // this.errorDuringWebRTCCall = true;
+      // This dialoguId we got in reponse once the call starts ringing on agent side 
+      // If share end / mute / hold / unhold events on the basis of this Id. 
+      // If we do not have this id, we might face unexpected errors / behavour. 
+      // That is why it is necessary that if an error occurs while initiating a call we make this Id undefined 
+      // so that while initiating a new call it is overridden easily. 
+      this.dialogId = undefined;
       let errorMessage = '';
-  
       switch (data.response.type) {
         case 'generalError':
           errorMessage = `Error: ${data.response.description}`;
@@ -2567,7 +2580,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log(`[Error] Unknown:', ${data.response.description}`);
           errorMessage = 'An unknown error occurred.';
       }
-      console.log("this standalone webRTc", this.standaloneWebRtc)
       this.showAuthenticationResponseMessage = errorMessage;
       this.activeVideoView = false;
       if(this.standaloneWebRtc) {
@@ -2603,6 +2615,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   
     this.callPopUpView = false;
+    this.isSecureWebCall = false;
     this.endCountdown();
     this.sdk.handleCallEnd(this.dialogId);
     this.sdk.handleLogOutAgent(this.dialogId);
@@ -2668,18 +2681,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   authenticateToken(isAuthenticated: boolean): void {
+    this.dialogId = undefined;
     const roomId = this.webRtcSecureLink;
     this.sdk.authenticateRoomId({ roomId}, (res: any) => {
       if (res.error) {
         this.isSecureLinkExpired = true;
         this.showAuthenticationResponseMessage = res.data.message
-          ? res.data.message
+          ? "The link has expired"
           : res.message;
         this.showInvalidCodeError = true;
       } 
       else {
 
-        this.logInToFreeSwitch();
+        // this.logInToFreeSwitch();
         this.agentName = res.data.agentName;
         res.data.diallingUri = this.webRTCConfig.diallingUri;
         this.showAuthenticationResponseMessage = res.message;
