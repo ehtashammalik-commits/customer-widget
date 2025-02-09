@@ -776,7 +776,7 @@
             </span>
           </div>
         </div>
-        <!-- Widget Chat Control Toolbar -->
+        <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
           <span class="material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
             [ngClass]="{ btnOne: enableFontResize === true }" matTooltip="Change Font Size"
@@ -826,17 +826,16 @@
             "
             *ngIf="enableWebRtc && __appConfig.appConfig.VIDEO"
             [ngClass]="{
-              'focus-icon':
-                isScreenShareActive === true && activeVideoView === true,
-              'away-call-icon':
-                isScreenShareActive === true && activeVideoView === false
+              'focus-icon': isScreenShareActive && activeVideoView,
+              'away-call-icon': isScreenShareActive && !activeVideoView,
+              'disabled': isSecureWebCall
             }"
             matTooltip="Screen Share"
             [matTooltipPosition]="matToolTipPosition!"
             [ngStyle]="{
               right: __appConfig.appConfig.VIDEO ? '70px' : ''
             }"
-          >
+           >
             present_to_all
           </span>
           <span

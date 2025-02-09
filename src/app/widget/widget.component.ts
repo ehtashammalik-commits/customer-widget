@@ -876,7 +876,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isChatMax = false;
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
-        this.fileName = ''
+        this.fileName = '';
         break;
       case 'chat':
         this.additionalPanel = false;
@@ -887,6 +887,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.widgetChatScreen = true;
         this.isIconWidget = true;
         this.chatError = false;
+        this.isSecureWebCall = false;
         this.chatEndScreen = false;
         this.isChatMax = true;
         this.isCallbackMax = false;
@@ -1088,24 +1089,28 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         break;
       case 'screenshare':
-        if (this.isScreenShareActive) {
-          this.activeChatView = false;
-          this.activeAudioView = false;
-          this.activeVideoView = true;
-          this.activeScreenShareView = true;
-          this.callPopUpView = false;
-          this.activeCallbackView = false;
-          this.activeCallbackResponseView = false;
+        if(!this.isSecureWebCall) {
+          if (this.isScreenShareActive) {
+            this.activeChatView = false;
+            this.activeAudioView = false;
+            this.activeVideoView = true;
+            this.activeScreenShareView = true;
+            this.callPopUpView = false;
+            this.activeCallbackView = false;
+            this.activeCallbackResponseView = false;
+          } else {
+            this.callPopUpView = true;
+            this.activeChatView = false;
+            this.activeAudioView = false;
+            this.activeVideoView = false;
+            this.activeScreenShareView = true;
+            this.activeCallbackView = false;
+            this.activeCallbackResponseView = false;
+            this.logInToFreeSwitch();
+            this.initiateWebRtcCall(view);
+          }
         } else {
-          this.callPopUpView = true;
-          this.activeChatView = false;
-          this.activeAudioView = false;
-          this.activeVideoView = false;
-          this.activeScreenShareView = true;
-          this.activeCallbackView = false;
-          this.activeCallbackResponseView = false;
-          this.logInToFreeSwitch();
-          this.initiateWebRtcCall(view);
+          console.warn("WebRTC Call Is GOING ON")
         }
         break;
       case 'standaloneVideo':
@@ -1115,7 +1120,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         } else {
           this.callPopUpView = true;
           this.isWebRtcVideoCallActive = false;
-          //this.logInToFreeSwitch();
           this.initiateWebRtcCall('video');
         }
         break;
@@ -1196,6 +1200,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         //   this.activeCallbackView = false;
         //   this.activeCallbackResponseView = false;
         // } else {
+        if(!this.isSecureWebCall){
         this.callPopUpView = true;
         this.activeVideoView = true;
         this.activeChatView = false;
@@ -1204,6 +1209,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
         this.convertCallRequest(view);
+        }
         // }
         break;
       case 'screenshare':
