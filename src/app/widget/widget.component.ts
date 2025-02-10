@@ -2702,6 +2702,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         else {
           if(this.setAuthorizedResponse) {
+            this.standaloneWebRtc = true;
             this.changeScreen('webRtcScreen');
           }
         }
@@ -2716,12 +2717,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const queryString = mediaUrl.split('?')[1];
     const urlParams = new URLSearchParams(queryString);
     const encryptedKey = urlParams.get('encryptedKey');
-    console.log("here is enctypted key", encryptedKey)
     this.webRtcSecureLink = encryptedKey;
     const widgetIdentifier = urlParams.get('widgetIdentifier')
     if (widgetIdentifier === this.widgetIdentifier && !this.errorDuringWebRTCCall) {
-      // this.authenticateToken(true);
-      this.changeScreen('webRtcScreen');
+      this.authenticateToken(true);
     } else {
       console.warn('[Warning] Widget Identifiers do not match or there was an error during WebRTC call.');
       
