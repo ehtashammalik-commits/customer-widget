@@ -292,7 +292,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // Load the standalone webRtc Authentication screen or the active chat screen depending on whether the user is coming from secure link or not.
     if (this.standaloneWebRtc) {
       this.authenticateToken(false);
-      this.changeScreen('webRtcScreen');
     } else {
       this.customerChatResumed();
       console.log('Not Secure Chat View');
@@ -2692,7 +2691,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.showInvalidCodeError = true;
       } 
       else {
-
         this.logInToFreeSwitch();
         this.agentName = res.data.agentName;
         res.data.diallingUri = this.webRTCConfig.diallingUri;
@@ -2703,7 +2701,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.changeView('secureWebVideoCall');
         }
         else {
-          this.standaloneWebRtc = true;
+          if(this.setAuthorizedResponse) {
+            this.changeScreen('webRtcScreen');
+          }
         }
       }
     });
@@ -2720,7 +2720,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.webRtcSecureLink = encryptedKey;
     const widgetIdentifier = urlParams.get('widgetIdentifier')
     if (widgetIdentifier === this.widgetIdentifier && !this.errorDuringWebRTCCall) {
-      this.authenticateToken(true);
+      // this.authenticateToken(true);
+      this.changeScreen('webRtcScreen');
     } else {
       console.warn('[Warning] Widget Identifiers do not match or there was an error during WebRTC call.');
       
