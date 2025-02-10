@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 // @ts-ignore
-import { ibsFormat } from '../lib/ibs-format.js';
+import { ibsFormat } from 'ibs-format';
+
 @Pipe({
   name: 'tagFormat',
 })
