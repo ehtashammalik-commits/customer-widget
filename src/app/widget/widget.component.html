@@ -817,7 +817,7 @@
           >
             perm_phone_msg
           </span>
-          <span
+<!--           <span
             class="widget-navbar-icon material-symbols-outlined btnFive"
             (click)="
               activeScreenShareView || activeAudioView || activeVideoView
@@ -837,7 +837,7 @@
             }"
            >
             present_to_all
-          </span>
+          </span> -->
           <span
             class="widget-navbar-icon material-symbols-outlined"
             (click)="
@@ -845,7 +845,7 @@
                 ? convertCallView('video')
                 : changeView('video')
             "
-            *ngIf="enableWebRtc && __appConfig.appConfig.VIDEO"
+            *ngIf=" (__appConfig.appConfig.isCXVoiceEnabled || isVideoCallActive === true) && enableWebRtc && __appConfig.appConfig.VIDEO"
             [ngClass]="{
               btnOne: enabledCallback === false && enableFontResize === false,
               btnThree: enabledCallback === true && enableFontResize === true,
@@ -915,9 +915,9 @@
             [matTooltipPosition]="matToolTipPosition!"
             [ngStyle]="{
               right:
-                enableWebRtc && __appConfig.appConfig.VIDEO
+                enableWebRtc && __appConfig.appConfig.VIDEO && (__appConfig.appConfig.isCXVoiceEnabled)
                   ? '100px'
-                  : !__appConfig.appConfig.VIDEO
+                  : (!__appConfig.appConfig.VIDEO || isVideoCallActive === true)
                   ? '66px'
                   : '36px'
             }"
@@ -1473,7 +1473,7 @@
                         <!-- <div class="s-link quoted-message-url" (click)="isSecureLinkExpired = true"> -->
                           <div class="s-link quoted-message-url" (click)="processSecureLinkMessage(message)">
                           <span class="video-call-detail"><mat-icon>videocam</mat-icon> Video Call</span>
-                          <span class="video-call-link">join video call
+                          <span class="video-call-link">Join Video Call
                           <span class="call-link">{{message.body.mediaUrl}}</span>
                         </span>
                         </div>
