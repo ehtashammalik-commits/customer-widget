@@ -11,5 +11,6 @@
     "ENABLE_LOGO" : ${ENABLE_LOGO},
     "ADDITIONAL_PANEL" : ${ADDITIONAL_PANEL},
     "VIDEO" : ${VIDEO},
-    "USERNAME_ENABLED" : ${USERNAME_ENABLED}
+    "USERNAME_ENABLED" : ${USERNAME_ENABLED},
+    "isCXVoiceEnabled" : ${isCXVoiceEnabled}
 }
