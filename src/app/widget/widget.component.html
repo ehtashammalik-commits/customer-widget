@@ -845,7 +845,7 @@
                 ? convertCallView('video')
                 : changeView('video')
             "
-            *ngIf=" (__appConfig.appConfig.isCXVoiceEnabled || isVideoCallActive === true) && enableWebRtc && __appConfig.appConfig.VIDEO"
+            *ngIf=" (__appConfig.appConfig.isDirectWebRTCCallEnabled || isVideoCallActive === true) && enableWebRtc && __appConfig.appConfig.VIDEO"
             [ngClass]="{
               btnOne: enabledCallback === false && enableFontResize === false,
               btnThree: enabledCallback === true && enableFontResize === true,
@@ -915,7 +915,7 @@
             [matTooltipPosition]="matToolTipPosition!"
             [ngStyle]="{
               right:
-                enableWebRtc && __appConfig.appConfig.VIDEO && (__appConfig.appConfig.isCXVoiceEnabled)
+                enableWebRtc && __appConfig.appConfig.VIDEO && (__appConfig.appConfig.isDirectWebRTCCallEnabled)
                   ? '100px'
                   : (!__appConfig.appConfig.VIDEO || isVideoCallActive === true)
                   ? '66px'

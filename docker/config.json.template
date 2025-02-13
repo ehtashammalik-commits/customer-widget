@@ -12,5 +12,5 @@
     "ADDITIONAL_PANEL" : ${ADDITIONAL_PANEL},
     "VIDEO" : ${VIDEO},
     "USERNAME_ENABLED" : ${USERNAME_ENABLED},
-    "isCXVoiceEnabled" : ${isCXVoiceEnabled}
+    "isDirectWebRTCCallEnabled" : ${isDirectWebRTCCallEnabled}
 }
