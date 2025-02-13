@@ -824,13 +824,9 @@
                       message.body.notificationData.data.agentParticipant
                         .role == 'PRIMARY'
                     " innerHTML="{{
-                      enableDynamicLink
-                        ? (message.body.notificationData.data.agentParticipant
+                       (message.body.notificationData.data.agentParticipant
                             .participant.keycloakUser.username
-                          | linkify
-                          | tagFormat)
-                        : (message.body.notificationData.data.agentParticipant
-                            .participant.keycloakUser.username | tagFormat)
+                          | tagFormat:enableDynamicLink)
                     }} joined the chat">
                   </span>
 
@@ -840,15 +836,10 @@
                       message.body.notificationData.data.conversationParticipant
                         .role == 'PRIMARY'
                     " innerHTML="{{
-                      enableDynamicLink
-                        ? (message.body.notificationData.data
+                      (message.body.notificationData.data
                             .conversationParticipant.participant.keycloakUser
                             .username
-                          | linkify
-                          | tagFormat)
-                        : (message.body.notificationData.data
-                            .conversationParticipant.participant.keycloakUser
-                            .username | tagFormat)
+                          | tagFormat:enableDynamicLink)
                     }} joined the chat">
                   </span>
 
@@ -858,15 +849,10 @@
                       message.body.notificationData.data.conversationParticipant
                         .role == 'WRAP_UP'
                     " innerHTML="{{
-                      enableDynamicLink
-                        ? (message.body.notificationData.data
+                      (message.body.notificationData.data
                             .conversationParticipant.participant.keycloakUser
                             .username
-                          | linkify
-                          | tagFormat)
-                        : (message.body.notificationData.data
-                            .conversationParticipant.participant.keycloakUser
-                            .username | tagFormat)
+                          | tagFormat:enableDynamicLink)
                     }} has left the chat">
                   </span>
 
@@ -875,13 +861,9 @@
                       message.body.notificationData.data.agentParticipant
                         .role == 'PRIMARY'
                     " innerHTML="{{
-                      enableDynamicLink
-                        ? (message.body.notificationData.data.agentParticipant
+                      (message.body.notificationData.data.agentParticipant
                             .participant.keycloakUser.username
-                          | linkify
-                          | tagFormat)
-                        : (message.body.notificationData.data.agentParticipant
-                            .participant.keycloakUser.username | tagFormat)
+                          | tagFormat:enableDynamicLink)
                     }} left the chat">
                   </span>
 
@@ -890,9 +872,7 @@
                   message.body.notificationData.data.requestType
                     .direction != 'CONSULT'
                 " innerHTML="{{
-                      enableDynamicLink
-                        ? 'No agents are available at the moment'
-                        : 'No agents are available at the moment'
+                  'No agents are available at the moment'
                     }}">
                   </span>
                   <div *ngIf="
@@ -941,9 +921,7 @@
                     </div>
 
                     <span class="message msg-1" *ngIf="message.body.type == 'PLAIN'" innerHTML="{{
-                        enableDynamicLink
-                          ? (message.body.markdownText | linkify | tagFormat)
-                          : (message.body.markdownText | tagFormat)
+                        (message.body.markdownText | tagFormat:enableDynamicLink)
                       }}" [ngStyle]="{
                         'font-size': fontSize.value + 'px',
                         'line-height':
@@ -958,11 +936,8 @@
                     <div *ngFor="let contact of message.body.contacts">
                       <div *ngIf="message.body.type == 'CONTACT'" class="file-message">
                         <span class="message" innerHTML="{{
-                            enableDynamicLink
-                              ? (contact.name.formattedName
-                                | linkify
-                                | tagFormat)
-                              : (contact.name.formattedName | tagFormat)
+                          (contact.name.formattedName
+                                | tagFormat:enableDynamicLink)
                           }}" [ngStyle]="{
                             'font-size': fontSize.value + 'px',
                             'line-height':
@@ -983,11 +958,8 @@
                     <!-- Message Type Location -->
                     <div *ngIf="message.body.type == 'LOCATION'" class="file-message">
                       <span class="message" innerHTML="{{
-                          enableDynamicLink
-                            ? (message.body.additionalDetails.name
-                              | linkify
-                              | tagFormat)
-                            : (message.body.additionalDetails.name | tagFormat)
+                        (message.body.additionalDetails.name
+                              | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1013,13 +985,9 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                          enableDynamicLink
-                            ? message.body.markdownText
+                        message.body.markdownText
                               ? message.body.markdownText
-                              : ('' | linkify | tagFormat)
-                            : message.body.markdownText
-                            ? message.body.markdownText
-                            : ('' | tagFormat)
+                              : ('' | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1055,12 +1023,8 @@
                       <a *ngIf="message.body.type == 'FILE'" href="{{ message.body.attachment.mediaUrl }}"
                         target="_blank">
                         <span class="file-name" innerHTML="{{
-                            enableDynamicLink
-                              ? (message.body.additionalDetails.fileName
-                                | linkify
-                                | tagFormat)
-                              : (message.body.additionalDetails.fileName
-                                | tagFormat)
+                          (message.body.additionalDetails.fileName
+                                | tagFormat:enableDynamicLink)
                           }}" [ngStyle]="{
                             'font-size': fontSize.value + 'px',
                             'line-height':
@@ -1132,9 +1096,7 @@
                     </div>
 
                     <span class="message" *ngIf="message.body.type == 'PLAIN'" innerHTML="{{
-                        enableDynamicLink
-                          ? (message.body.markdownText | tagFormat)
-                          : (message.body.markdownText | tagFormat)
+                      (message.body.markdownText | tagFormat:enableDynamicLink)
                       }}" [ngStyle]="{
                         'font-size': fontSize.value + 'px',
                         'line-height':
@@ -1165,13 +1127,9 @@
                     <div class="structured-message-area" [ngClass]="{ 'custom-theme': theme !== '' }"
                       *ngIf="message.body.type == 'BUTTON'">
                       <span class="structured-btn-heading" innerHTML="{{
-                          enableDynamicLink
-                            ? (message.body.additionalDetails.interactive.header
+                        (message.body.additionalDetails.interactive.header
                                 .text
-                              | linkify
-                              | tagFormat)
-                            : (message.body.additionalDetails.interactive.header
-                                .text | tagFormat)
+                              | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1183,13 +1141,9 @@
                         }">
                       </span>
                       <span class="message" innerHTML="{{
-                          enableDynamicLink
-                            ? (message.body.additionalDetails.interactive.body
+                        (message.body.additionalDetails.interactive.body
                                 .text
-                              | linkify
-                              | tagFormat)
-                            : (message.body.additionalDetails.interactive.body
-                                .text | tagFormat)
+                              | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1209,11 +1163,8 @@
                     <div *ngFor="let contact of message.body.contacts">
                       <div *ngIf="message.body.type == 'CONTACT'" class="file-message">
                         <span class="message" innerHTML="{{
-                            enableDynamicLink
-                              ? (contact.name.formattedName
-                                | linkify
-                                | tagFormat)
-                              : (contact.name.formattedName | tagFormat)
+                          (contact.name.formattedName
+                                | tagFormat:enableDynamicLink)
                           }}" [ngStyle]="{
                             'font-size': fontSize.value + 'px',
                             'line-height':
@@ -1234,11 +1185,8 @@
                     <!-- Message Type Location -->
                     <div *ngIf="message.body.type == 'LOCATION'" class="file-message">
                       <span class="message" innerHTML="{{
-                          enableDynamicLink
-                            ? (message.body.additionalDetails.name
-                              | linkify
-                              | tagFormat)
-                            : (message.body.additionalDetails.name | tagFormat)
+                        (message.body.additionalDetails.name
+                              | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1264,13 +1212,9 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                          enableDynamicLink
-                            ? message.body.markdownText
+                        message.body.markdownText
                               ? message.body.markdownText
-                              : ('' | linkify | tagFormat)
-                            : message.body.markdownText
-                            ? message.body.markdownText
-                            : ('' | tagFormat)
+                              : ('' | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1306,12 +1250,8 @@
                       <a *ngIf="message.body.type == 'FILE'" href="{{ message.body.attachment.mediaUrl }}"
                         target="_blank">
                         <span class="file-name" innerHTML="{{
-                            enableDynamicLink
-                              ? (message.body.additionalDetails.fileName
-                                | linkify
-                                | tagFormat)
-                              : (message.body.additionalDetails.fileName
-                                | tagFormat)
+                          (message.body.additionalDetails.fileName
+                                | tagFormat:enableDynamicLink)
                           }}" [ngStyle]="{
                             'font-size': fontSize.value + 'px',
                             'line-height':

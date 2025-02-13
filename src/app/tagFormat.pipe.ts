@@ -6,8 +6,7 @@ import { ibsFormat } from 'ibs-format';
   name: 'tagFormat',
 })
 export class tagFormatPipe implements PipeTransform {
-  transform(value: string): string {
-    console.log(value);
+  transform(value: string, enableDynamicLink: boolean): string {
     value = ibsFormat(value,
       [
         ["em", "`"],
@@ -16,8 +15,8 @@ export class tagFormatPipe implements PipeTransform {
         ["strike", "~"],
         ["mark", "!"]
       ],
-      { detectLinks: false, target: "_blank" },
-      { allowXssEscaping: false }
+      { detectLinks: enableDynamicLink, target: "_blank"},
+      { allowXssEscaping: true }
     );
     return value;
   }
