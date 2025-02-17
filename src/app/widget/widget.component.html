@@ -94,7 +94,7 @@
                 [ngClass]="{ 'error-text': showInvalidCodeError === true }"
               ></span>
             </div>
-            <div *ngIf="!isSecureLinkExpired" class="widget-authentication-body">
+            <div class="widget-authentication-body">
               <!-- <div class="widget-auth-text">
                 <p
                   innerHTML="{{
@@ -127,6 +127,7 @@
                   class="widget-auth-trigger call-btn"
                   value="Join"
                   (click)="changeView('standaloneVideo')"
+                  [ngClass]="{ 'disabled': isSecureLinkExpired }"
                   [disabled]="isSecureLinkExpired"
 
                 />
