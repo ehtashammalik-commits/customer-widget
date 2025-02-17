@@ -2691,6 +2691,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.showAuthenticationResponseMessage = res.data.message
           ? "The link has expired"
           : res.message;
+          this.isSecureLinkExpired=true;
         this.showInvalidCodeError = true;
       }
       else {

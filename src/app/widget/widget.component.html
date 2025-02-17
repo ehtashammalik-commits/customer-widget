@@ -94,7 +94,7 @@
                 [ngClass]="{ 'error-text': showInvalidCodeError === true }"
               ></span>
             </div>
-            <div class="widget-authentication-body">
+            <div *ngIf="!isSecureLinkExpired" class="widget-authentication-body">
               <!-- <div class="widget-auth-text">
                 <p
                   innerHTML="{{
@@ -195,11 +195,18 @@
                   >
                   </span>
                 </div>
-                <div class="control-btn disable-icon-callControl">
-                  <span 
-                  matTooltip="Pause"
-                  [matTooltipPosition]="this.positionOptions[2]" 
-                  class="material-symbols-outlined"> pause </span>
+                <div
+                  class="control-btn"
+                  [ngClass]="{ 'end-call': isCallOnHold }"
+                >
+                  <span
+                    class="material-symbols-outlined"
+                    [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
+                    [matTooltipPosition]="this.positionOptions[2]"
+                    [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
+                    (click)="toggleCallHold()"
+                  >
+                  </span>
                 </div>
                 <div class="control-btn disable-icon-callControl">
                   <span                   
