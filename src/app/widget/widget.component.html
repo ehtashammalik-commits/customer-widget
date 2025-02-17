@@ -162,7 +162,10 @@
             <div class="widget-composer">
               <div class="widget-call-controls">
                 <div class="control-btn disable-icon-callControl">
-                  <span class="material-symbols-outlined">
+                  <span
+                  matTooltip="Screen Share"
+                  [matTooltipPosition]="this.positionOptions[2]" 
+                  class="material-symbols-outlined">
                     present_to_all
                   </span>
                 </div>
@@ -172,6 +175,8 @@
                 >
                   <span
                     class="material-symbols-outlined"
+                    [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
+                    [matTooltipPosition]="this.positionOptions[2]" 
                     innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}"
                     (click)="toggleCallVideo()"
                   >
@@ -183,19 +188,30 @@
                 >
                   <span
                     class="material-symbols-outlined"
+                    [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
+                    [matTooltipPosition]="this.positionOptions[2]" 
                     innerHTML="{{ isCallMute ? 'mic_off' : 'mic' }}"
                     (click)="toggleCallMic()"
                   >
                   </span>
                 </div>
                 <div class="control-btn disable-icon-callControl">
-                  <span class="material-symbols-outlined"> pause </span>
+                  <span 
+                  matTooltip="Pause"
+                  [matTooltipPosition]="this.positionOptions[2]" 
+                  class="material-symbols-outlined"> pause </span>
                 </div>
                 <div class="control-btn disable-icon-callControl">
-                  <span class="material-symbols-outlined"> more_horiz </span>
+                  <span                   
+                  matTooltip="More Options"
+                  [matTooltipPosition]="this.positionOptions[2]"
+                  class="material-symbols-outlined"> more_horiz </span>
                 </div>
                 <div class="control-btn end-call" (click)="callEnd()">
-                  <span class="material-symbols-outlined"> call_end </span>
+                  <span
+                  matTooltip="End Call"
+                  [matTooltipPosition]="this.positionOptions[2]" 
+                   class="material-symbols-outlined"> call_end </span>
                 </div>
               </div>
             </div>
@@ -1643,7 +1659,7 @@
             <div class="agent-detail">
               <p class="name">Expertflow Agent</p>
               <p id="call_status" class="text">Call in Progress</p>
-              <p class="timer">{{ callTime }}</p>
+              <p *ngIf="counterVar" class="timer">{{ callTime }}</p>
             </div>
 
             <div class="widget-composer">
@@ -1660,6 +1676,8 @@
                 [ngClass]="{
                   'disable-icon-callControl': isSecureWebCall
                 }"
+                matTooltip="Screen Share"
+                [matTooltipPosition]="this.positionOptions[2]" 
                 class="material-symbols-outlined"
                 [attr.aria-disabled]="isSecureWebCall"
                 (click)="
@@ -1687,6 +1705,8 @@
                 >
                   <span
                     class="material-symbols-outlined"
+                    [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
+                    [matTooltipPosition]="this.positionOptions[2]"
                     [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'"
                     (click)="
                       isVideoCallActive
@@ -1699,6 +1719,8 @@
                 <div class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
                   <span
                     class="material-symbols-outlined"
+                    [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
+                    [matTooltipPosition]="this.positionOptions[2]"
                     [innerHTML]="isCallMute ? 'mic_off' : 'mic'"
                     (click)="toggleCallMic()"
                   >
@@ -1710,15 +1732,23 @@
                 >
                   <span
                     class="material-symbols-outlined"
+                    [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
+                    [matTooltipPosition]="this.positionOptions[2]"
                     [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
                     (click)="toggleCallHold()"
                   >
                   </span>
                 </div>
                 <div class="control-btn disable-icon-callControl">
-                  <span class="material-symbols-outlined"> more_horiz </span>
+                  <span  
+                  matTooltip="More Options"
+                  [matTooltipPosition]="this.positionOptions[2]"
+                  class="material-symbols-outlined"> more_horiz </span>
                 </div>
-                <div class="control-btn end-call" (click)="callEnd()">
+                <div 
+                matTooltip="End Call"
+                [matTooltipPosition]="this.positionOptions[2]" 
+                class="control-btn end-call" (click)="callEnd()">
                   <span class="material-symbols-outlined"> call_end </span>
                 </div>
               </div>
