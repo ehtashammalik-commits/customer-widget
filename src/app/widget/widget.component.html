@@ -683,19 +683,19 @@
                                   </ng-template>
                                 </div>
 
-                                <div class="allowed-types">
 
-                                  <div>
-                                    <button [class]="'file-upload-button-'+attribute._id" class="file-upload-button"
-                                      [id]="'upload-btn-'+attribute._id" [disabled]="!isFileSelected"
-                                      (click)="uploadFileFromPrechat(i,attribute.key,FileInput,attribute._id)">
-                                      <span *ngIf="isFileUploading[attribute.key]" class="loader"></span>
-                                      <span>Upload</span>
-                                    </button>
-                                  </div>
-                                  <div [id]="attribute._id+'-error'" class="errordiv"
-                                    style="color: red; display: none;">
-                                  </div>
+                              </div>
+                              <div class="allowed-types">
+
+                                <div>
+                                  <button [class]="'file-upload-button-'+attribute._id" class="file-upload-button"
+                                    [id]="'upload-btn-'+attribute._id" [disabled]="!isFileSelected"
+                                    (click)="uploadFileFromPrechat(i,attribute.key,FileInput,attribute._id)">
+                                    <span *ngIf="isFileUploading[attribute.key]" class="loader"></span>
+                                    <span>Upload</span>
+                                  </button>
+                                </div>
+                                <div [id]="attribute._id+'-error'" class="errordiv" style="color: red; display: none;">
                                 </div>
                               </div>
 
