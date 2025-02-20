@@ -2690,6 +2690,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     
     this.dialogId = undefined;
     const roomId = this.webRtcSecureLink;
+    this.setAuthorizedResponse = undefined;
 
     this.sdk.authenticateRoomId({ roomId }, async (res: any) => {
         if (res.error) {
