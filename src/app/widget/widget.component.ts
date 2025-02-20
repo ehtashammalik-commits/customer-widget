@@ -633,6 +633,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.enableWebRtc = configs.webRtc.enableWebRtc;
       console.log('List of webRTC Configs: ', this.webRTCConfig);
 
+      if(!this.IsRegisteredInFreeSwitch && this.standaloneWebRtc) {
+        this.logInToFreeSwitch;
+      }
+
       // Check if the input string contains a hyphen
       // for extention ranges purposes...
 
