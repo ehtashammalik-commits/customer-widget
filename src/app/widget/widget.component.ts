@@ -13,6 +13,7 @@ import {
   FormBuilder,
   Validators,
   FormControl,
+  FormArray,
 } from '@angular/forms';
 import { SdkService } from '../services/sdk.service';
 import { ConfigService } from '../services/config.service';
@@ -27,6 +28,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ActivatedRoute } from '@angular/router';
 import { TooltipPosition } from '@angular/material/tooltip';
+import { HttpClient } from '@angular/common/http';
 declare var EmojiPicker: any;
 
 interface Shift {
@@ -238,6 +240,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   composer_input_disabled: boolean = false;
   isTyping: boolean = true;
   surveyTitle: any = 'Survey Form';
+  preChatformTitle: string = ''
+  preChatformDescription: string = ''
 
   @Input() formData!: any[];
   @Input() callbackFormData!: any[];
@@ -247,7 +251,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   callbackLoader = false;
   callbackConfig: any;
   todayShifts: { eventId: string, shiftName: string | null, startTime: string, endTime: string }[] = [];
-  events: EventData[] = []; 
+  events: EventData[] = [];
   orderedEvents: any[] = [];
   daySummary: { startOfDay: Date | null; endOfDay: Date | null } | null = null;
 
@@ -290,6 +294,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private browserNotificationService: BrowserNotificationService,
     private deliveryNotificationService: DeliveryNotificationService,
     private __postMessageHandlerService: PostMessageHandlerService,
+    private _http: HttpClient,
+
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
@@ -315,7 +321,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-
+    this.initPrechatform()
     this.route.queryParams.subscribe((params: { [x: string]: any }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
@@ -405,13 +411,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       // this.createFormControls();
     });
 
+
     this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
-      (formData: { sections: { attributes: any[] }[] }) => {
-        this.formData = formData.sections[0].attributes.filter((item: any) => {
-          return item.valueType != 'checkbox';
-        });
-        console.log('Widget configurations:', formData.sections);
-        console.log('regex:', this.formValidations);
+      (formData: { sections: { attributes: any[] }[], formTitle: string, formDescription: string }) => {
+        this.formData = formData.sections;
+        this.preChatformTitle = formData?.formTitle;
+        this.preChatformDescription = formData?.formDescription;
         this.createFormValidationControls(
           this.formData,
           this.formValidations,
@@ -494,10 +499,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.getCalendarEvents()
   }
 
+  initPrechatform() {
+    this.preChatFormGroup = this.fb.group({
+      sections: this.fb.array([])
+    })
+  }
+
   async getCalendarEvents() {
     this.sdk
       .fetchBusinessCalendarId()
-      .then((calendarId:string) => {
+      .then((calendarId: string) => {
 
         return this.sdk.getCalendarEvents(calendarId);
       })
@@ -513,7 +524,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getTodayEvent(): Promise<any[]> {
     return new Promise((resolve, reject) => {
       try {
-        
+
         const today = new Date();
         const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Start of today in local time
         const todayEnd = new Date(todayStart);
@@ -545,7 +556,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             endTime: shift.endTime,
           }))
         );
-  
+
         // If no shifts are available, handle accordingly
         if (!allShifts.length) {
           this.daySummary = null;
@@ -564,27 +575,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               .map((shift) => (shift?.endTime ? new Date(shift.endTime).getTime() : -Infinity))
           )
         );
-  
+
         // Set the day summary with the minimum and maximum times
         this.daySummary = {
           startOfDay: minStartTime,
           endOfDay: maxEndTime,
         };
-        
+
         ///this.orderedEvents = allShifts;
-  
+
         resolve(this.orderedEvents);
       } catch (error) {
         reject("Error processing Business Hours events: " + error);
       }
     });
   }
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
 
   formatTime(dateTime: string): string {
     const date = new Date(dateTime);
@@ -600,140 +611,141 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private createFormValidationControls(
-    formSchema: any,
-    formValidation: any,
-    formType: string,
+    formSchema: any[],
+    formValidation: any[],
+    formType: string
   ): void {
-    for (const attribute of formSchema) {
-      const matchingValidation = formValidation.find((validation: any) => {
-        return validation.type === attribute.valueType;
-      });
+    const sectionsArray: FormArray = this.fb.array([]); // Create the main sections FormArray
 
-      const validators = attribute.isRequired ? [Validators.required] : [];
-      const controlName = attribute.key;
-      let minLength = 1;
-      let maxLength = 101;
-      let extractedLength;
+    formSchema.forEach((section) => {
 
-      if (matchingValidation && matchingValidation.regex) {
-        switch (matchingValidation.type.toLowerCase()) {
-          case 'phonenumber':
-            const phoneNumberRegex = new RegExp(
-              '^(\\+\\d{1,3}[\\s-])?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,9}$',
-            );
-            validators.push(Validators.pattern(phoneNumberRegex));
-            break;
+      const sectionGroup = this.fb.group({}); // Create a FormGroup for each section
+      section.attributes.forEach((attribute: any) => {
+        const matchingValidation = formValidation.find(
+          (validation: any) => validation.type === attribute.valueType
+        );
 
-          case 'boolean':
-          case 'mcq':
-          case 'dropdown':
-            if (attribute.isRequired) {
-              validators.push(Validators.required);
-            }
-            break;
-          case 'shortanswer':
-          case 'alphanumeric':
-          case 'alphanumericspecial':
-          case 'password':
-          case 'paragraph':
-          case 'number':
-          case 'positivenumber':
-            extractedLength = this.extractMinMaxLength(
-              matchingValidation.regex,
-            );
-            validators.push(
-              Validators.minLength(extractedLength.minLength ?? minLength),
-            );
-            validators.push(
-              Validators.maxLength(extractedLength.maxLength ?? maxLength),
-            );
-            if (
-              matchingValidation.type.toLowerCase() !== 'shortanswer' &&
-              matchingValidation.type.toLowerCase() !== 'paragraph'
-            ) {
+        // Initialize validators array
+        const validators = [];
+        console.log(attribute.isRequired)
+        if (attribute.isRequired) {
+          validators.push(Validators.required);
+        }
+
+        let minLength = 1;
+        let maxLength = 101;
+        let extractedLength;
+
+        if (matchingValidation?.regex) {
+          switch (matchingValidation.type.toLowerCase()) {
+            case 'phonenumber':
               validators.push(
                 Validators.pattern(
-                  matchingValidation.type.toLowerCase() === 'password'
-                    ? new RegExp(
-                      '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_])[A-Za-z\\d\\W_]{8,256}$',
-                    )
-                    : matchingValidation.regex,
-                ),
+                  /^(?:\+?\d{1,3}[-.\s]?)?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/
+                )
               );
-            }
+              break;
 
-            break;
+            case 'boolean':
+            case 'mcq':
+            case 'dropdown':
+              break;
 
-          case 'datetime':
-          case 'date':
-          case 'time':
-            // Skip validation for date/time types
-            break;
+            case 'shortanswer':
+            case 'alphanumeric':
+            case 'alphanumericspecial':
+            case 'password':
+            case 'paragraph':
+            case 'number':
+            case 'positivenumber':
+              extractedLength = this.extractMinMaxLength(matchingValidation.regex);
+              validators.push(Validators.minLength(extractedLength.minLength ?? minLength));
+              validators.push(Validators.maxLength(extractedLength.maxLength ?? maxLength));
 
-          default:
-            const correctedRegex = new RegExp(matchingValidation.regex);
-            validators.push(Validators.pattern(correctedRegex));
-            break;
+              if (!['shortanswer', 'paragraph'].includes(matchingValidation.type.toLowerCase())) {
+                validators.push(
+                  Validators.pattern(
+                    matchingValidation.type.toLowerCase() === 'password'
+                      ? /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,256}$/
+                      : new RegExp(matchingValidation.regex)
+                  )
+                );
+              }
+              break;
+
+            case 'datetime':
+            case 'date':
+            case 'time':
+              break; // No validation needed
+
+            default:
+              validators.push(Validators.pattern(new RegExp(matchingValidation.regex)));
+              break;
+          }
         }
-      }
-      console.log('validator is ', ...validators);
 
-      if (formType === 'preChatForm') {
 
-        console.log("===============================================> control ", controlName)
-        this.preChatFormGroup.addControl(
-          controlName,
-          this.fb.control('', validators),
-        );
-      }
+        console.log('Adding control:', attribute.key, 'with validators:', validators);
+
+        // Add the control to the section group
+        sectionGroup.addControl(attribute.key, this.fb.control('', validators));
+      });
+      console.log('section', section)
+
+      // Add the section group to the sections FormArray
+      sectionsArray.push(sectionGroup);
+    });
+    if (formType === 'preChatForm') {
+      this.preChatFormGroup.setControl('sections', sectionsArray);
     }
+    // Set the sections array inside the main form grou
   }
 
-  isMaxLengthError(controlName: string, valueType: string): boolean {
-    // Check both form groups for the control
-    const controlPreChat = this.preChatFormGroup.get(controlName);
-    const controlCallback = this.callbackFormGroup.get(controlName);
+  // isMaxLengthError(controlName: string, valueType: string): boolean {
+  //   // Check both form groups for the control
+  //   const controlPreChat = this.preChatFormGroup.get(controlName);
+  //   const controlCallback = this.callbackFormGroup.get(controlName);
 
-    // Determine which control to use, prioritizing preChatFormGroup
-    const control = controlPreChat || controlCallback;
+  //   // Determine which control to use, prioritizing preChatFormGroup
+  //   const control = controlPreChat || controlCallback;
 
-    if (control) {
-      // Determine max length based on control type
-      let maxLength: number | null = null;
+  //   if (control) {
+  //     // Determine max length based on control type
+  //     let maxLength: number | null = null;
 
-      if (valueType === 'shortAnswer') {
-        maxLength = 101;
-      } else if (valueType === 'paragraph') {
-        maxLength = 2001;
-      } else if (valueType === 'alphaNumeric') {
-        maxLength = 101;
-      } else if (valueType === 'alphaNumericSpecial') {
-        maxLength = 101;
-      } else if (valueType === 'number') {
-        maxLength = 101;
-      } else if (valueType === 'positiveNumber') {
-        maxLength = 101;
-      } else if (valueType === 'password') {
-        maxLength = 256;
-      }
-      else if (valueType === 'email') {
-        maxLength = 101;
-      }
+  //     if (valueType === 'shortAnswer') {
+  //       maxLength = 101;
+  //     } else if (valueType === 'paragraph') {
+  //       maxLength = 2001;
+  //     } else if (valueType === 'alphaNumeric') {
+  //       maxLength = 101;
+  //     } else if (valueType === 'alphaNumericSpecial') {
+  //       maxLength = 101;
+  //     } else if (valueType === 'number') {
+  //       maxLength = 101;
+  //     } else if (valueType === 'positiveNumber') {
+  //       maxLength = 101;
+  //     } else if (valueType === 'password') {
+  //       maxLength = 256;
+  //     }
+  //     else if (valueType === 'email') {
+  //       maxLength = 101;
+  //     }
 
-      // Ensure maxLength is set
-      if (maxLength !== null) {
-        // Ensure control value is a string and check length
-        const value = control.value as string;
+  //     // Ensure maxLength is set
+  //     if (maxLength !== null) {
+  //       // Ensure control value is a string and check length
+  //       const value = control.value as string;
 
-        // Check if the control value length exceeds the maximum length
-        return value.length == maxLength; // Ensure strict comparison to identify the issue
-      }
-    } else {
-      console.log('Control does not exist for name:', controlName);
-    }
+  //       // Check if the control value length exceeds the maximum length
+  //       return value.length == maxLength; // Ensure strict comparison to identify the issue
+  //     }
+  //   } else {
+  //     console.log('Control does not exist for name:', controlName);
+  //   }
 
-    return false;
-  }
+  //   return false;
+  // }
 
   setWidgetConfigs(configs: any) {
     this.title = configs.title;
@@ -859,24 +871,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  checkFieldValue(
-    data: { [x: string]: any; hasOwnProperty: (arg0: any) => any },
-    field: any,
-  ) {
-    if (data.hasOwnProperty(field)) {
-      const value = data[field];
-      // Check if the value is not null, empty, or undefined
-      if (value !== null && value !== undefined && value !== '') {
-        return { error: false, data: value };
-      } else {
-        const err = `This Field "${field}" is required.`;
-        return { error: true, data: err };
+  checkFieldValue(formData: any, field: string) {
+    console.log('formData--------->', formData.sections);
+
+    for (const section of formData.sections) {
+      if (Object.prototype.hasOwnProperty.call(section, field) && section[field] !== null) {
+        return { error: false, data: true }; // Field is found in at least one section with a non-null value
       }
-    } else {
-      const err = `Error: The field "${field}" does not exist in the pre-chat form.`;
-      return { error: true, data: err };
     }
+
+    return { error: true, data: `Error: The field "${field}" is required or does not exist in the pre-chat form.` };
   }
+
 
   getEventPayload(preChatFormData: any) {
     const channelIdentifierData = this.checkFieldValue(
@@ -933,13 +939,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     };
   }
 
-  convertJsonToArray(jsonObject: any): any {
-    return Object.entries(jsonObject).map(([key, value]) => ({
-      value: value,
-      key: key,
-      type: typeof value === 'string' ? 'string' : typeof value,
-    }));
+  convertJsonToArray(jsonObject: any): any[] {
+    const attributesArray: any[] = [];
+
+    jsonObject.sections.forEach((section: any) => {
+      const attributes = Object.entries(section).map(([key, value]) => ({
+        value: value,
+        key: key,
+        type: typeof value === 'string' ? 'string' : typeof value,
+      }));
+      attributesArray.push(...attributes); // Corrected: using push instead of concat
+    });
+
+    console.log(attributesArray);
+    return attributesArray;
   }
+
 
   closeWrapper() {
     console.log('wrapper closed');
@@ -1082,7 +1097,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
-        if(this.enableEmoji){
+        if (this.enableEmoji) {
           setTimeout(() => {
             new EmojiPicker();
           }, 500)
@@ -1296,7 +1311,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   handleCimMessage(cimMessage: any) {
     if (
-     
+
       cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
       cimMessage.header.sender &&
       (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
@@ -1408,13 +1423,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.browserNotificationService.notify(cimMessage);
         this.scrollToBottom();
         this.handleMessageReport(cimMessage);
-      }      
+      }
     }
   }
 
   editMessage(cimMessage: any) {
     const messageId = cimMessage.header.originalMessageId;
-  
+
     // Find the message by messageId
     const existingMessageIndex = this.cimMessage.findIndex(msg => msg.id === messageId);
 
@@ -1425,7 +1440,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     }
   }
-  
+
 
   composerDisable() {
     console.log("message element is ", this.messageElement)
@@ -1705,7 +1720,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   clearMessageData() {
-    this.elementView.nativeElement.value = ''
+
+    if (this.elementView?.nativeElement) {
+      this.elementView.nativeElement.value = ''
+    }
     this.composer_input_disabled = false;
     this.text = '';
     this.scrollToBottom();
@@ -1955,6 +1973,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
     fileControl.updateValueAndValidity()
   }
+
+
+  isFileSelected: any;
+
   uploadFile(files: any, additionalText: string) {
     let availableExtensions = [
       'txt',
@@ -2026,6 +2048,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
   }
+
+
 
   removeUploadFile() {
     this.imageUrls = [];
@@ -2480,4 +2504,659 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getLabel(valueType: string): string {
     return this.dictionary[valueType] || valueType; // Return the  to valueType matchinf value from the dict
   }
+
+
+
+  isMaxLengthError(sectionIndex: number, controlName: string, valueType: string): boolean {
+    // Get the sections array from preChatFormGroup
+    const sections = this.preChatFormGroup.get('sections') as FormArray;
+
+    // Validate section existence
+    if (!sections || !sections.at(sectionIndex)) {
+      console.error(`Section at index ${sectionIndex} does not exist.`);
+      return false;
+    }
+
+    // Get the control from the specified section in preChatFormGroup
+    const controlPreChat = sections.at(sectionIndex).get(controlName);
+
+
+    // Prioritize the preChatFormGroup control
+    const control = controlPreChat;
+
+    if (control && control.value) {
+      // Define max length for each value type
+      const maxLengthMap: { [key: string]: number } = {
+        shortAnswer: 101,
+        paragraph: 2001,
+        alphaNumeric: 101,
+        alphaNumericSpecial: 101,
+        number: 101,
+        positiveNumber: 101,
+        password: 256,
+        email: 101,
+      };
+
+      const maxLength = maxLengthMap[valueType] || null;
+
+      if (maxLength !== null) {
+        // Ensure control value is a string before checking length
+        const value = String(control.value);
+        return value.length > maxLength;
+      }
+    }
+
+    return false;
+  }
+
+
+  Selected5starOption(
+    controlName: string,
+    sectionIndex: number,
+    attributeIndex: number,
+    itemIndex: number,
+    type: string,
+    value: string
+  ) {
+    console.log('controlName:', controlName);
+
+    // Get the sections array from preChatFormGroup
+    const sections = this.preChatFormGroup.get('sections') as FormArray;
+
+    // Validate section existence
+    if (!sections || !sections.at(sectionIndex)) {
+      console.error(`Section at index ${sectionIndex} does not exist.`);
+      return;
+    }
+    // Get the form control from the specific section
+    const control = sections.at(sectionIndex).get(controlName);
+    if (!control) {
+      console.error(`Control "${controlName}" not found in section ${sectionIndex}.`);
+      return;
+    }
+
+    // Update the star rating UI
+    const svgElements = document.querySelectorAll(
+      `.option-${sectionIndex}-${attributeIndex}-${type}`
+    );
+
+    if (type === "star") {
+      svgElements.forEach((svg, index) => {
+        const paths = svg.getElementsByTagName("path");
+        const fillColor = index <= itemIndex ? "#FFB100" : "#E6E6E6";
+        for (let i = 0; i < paths.length; i++) {
+          paths[i].setAttribute("fill", fillColor);
+        }
+      });
+    } else {
+      svgElements.forEach((svg: any, index: number) => {
+        const paths = svg.getElementsByTagName("path");
+
+        if (!svg?.dataset.originalColors) {
+          // Store original colors if not already stored
+          const originalColors = [];
+          for (let i = 0; i < paths.length; i++) {
+            originalColors.push(paths[i].getAttribute("fill"));
+          }
+          svg.dataset.originalColors = JSON.stringify(originalColors);
+        }
+
+        if (index === itemIndex) {
+          // Restore the original colors for the clicked SVG
+          const originalColors = JSON.parse(svg.dataset.originalColors);
+          for (let i = 0; i < paths.length; i++) {
+            paths[i].setAttribute("fill", originalColors[i]);
+          }
+        } else {
+          const fillColor = "gray"; // Change to gray for SVGs that are not clicked
+          for (let i = 0; i < paths.length; i++) {
+            paths[i].setAttribute("fill", fillColor);
+          }
+        }
+      });
+    }
+
+    control.setValue(value);
+    console.log(`Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`);
+  }
+
+  selectedIndices: { [key: number]: number } = {};
+
+  changeNpsColor(controlName: any, sectionIndex: number, attributeIndex: number, currentIndex: number, value: string): void {
+    const sections = this.preChatFormGroup.get('sections') as FormArray;
+
+    if (!sections || !sections.at(sectionIndex)) {
+      console.error(`Section at index ${sectionIndex} does not exist.`);
+      return;
+    }
+
+    const control = sections.at(sectionIndex).get(controlName);
+
+    if (!control) {
+      console.error(`Control "${controlName}" not found in section ${sectionIndex}.`);
+      return;
+    }
+
+    // Create a new object reference to trigger change detection
+    this.selectedIndices = { ...this.selectedIndices, [attributeIndex]: currentIndex };
+
+    control.setValue(value);
+    console.log(`Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`);
+  }
+
+
+  ChangeScaleStyle(
+    controlName: string,
+    sectionIndex: number,
+    attributeIndex: number,
+    itemIndex: number,
+    type: string,
+    value: string
+  ) {
+    // Get the sections array from preChatFormGroup
+    const sections = this.preChatFormGroup.get('sections') as FormArray;
+
+    // Validate section existence
+    if (!sections || !sections.at(sectionIndex)) {
+      console.error(`Section at index ${sectionIndex} does not exist.`);
+      return;
+    }
+
+    // Get the form control from the specific section
+    const control = sections.at(sectionIndex).get(controlName);
+
+    if (!control) {
+      console.error(`Control "${controlName}" not found in section ${sectionIndex}.`);
+      return;
+    }
+
+    // Update the scale UI (NPS style)
+    const svgElements = document.querySelectorAll(
+      `.npsOption-${sectionIndex}-${attributeIndex}-${type}`
+    );
+
+    svgElements.forEach((svg, index) => {
+      const paths = svg.getElementsByTagName("path");
+      const fillColor = index === itemIndex ? "#E57032" : "gray";
+      for (let i = 0; i < paths.length; i++) {
+        paths[i].setAttribute("fill", fillColor);
+      }
+    });
+    control.setValue(value);
+    console.log(`Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`);
+  }
+
+  ChangeBarColor(controlName: any, sectionIndex: number, attributeIndex: number, buttonIndex: number, attributeKey: string, value: string) {
+
+    const sections = this.preChatFormGroup.get('sections') as FormArray;
+
+    // Validate section existence
+    if (!sections || !sections.at(sectionIndex)) {
+      console.error(`Section at index ${sectionIndex} does not exist.`);
+      return;
+    }
+
+    // Get the form control from the specific section
+    const control = sections.at(sectionIndex).get(controlName);
+
+    if (!control) {
+      console.error(`Control "${controlName}" not found in section ${sectionIndex}.`);
+      return;
+    }
+
+    const iconElements = document.querySelectorAll(`#arrow-${attributeIndex}`);
+
+    // Selecting all radio input elements for the given attributeKey
+    const radioInputs = document.querySelectorAll(
+      `input[name="${attributeKey}"]`
+    );
+
+    // Loop through all icon elements
+    iconElements.forEach((iconElement: any) => {
+      // Check if the data-bar-index matches the buttonIndex
+      if (parseInt(iconElement.getAttribute("data-bar-index")) === buttonIndex) {
+        // Show the matching icon element
+        iconElement.classList.remove("bar-icon-hide");
+        iconElement.classList.add("bar-icon-show");
+      } else {
+        // Hide all other icon elements
+        iconElement.classList.remove("bar-icon-show");
+        iconElement.classList.add("bar-icon-hide");
+      }
+    });
+
+    // Set the corresponding radio input as checked
+    radioInputs.forEach((radioInput: any, index) => {
+      if (index === buttonIndex) {
+        radioInput.checked = true;
+      } else {
+        radioInput.checked = false;
+      }
+    });
+
+    control.setValue(value);
+    console.log(`Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`);
+  }
+
+  onCheckboxChange(
+    controlName: string,
+    sectionIndex: number,
+    optionValue: string | null,
+    categoryLabel: string,
+    hasCategory: boolean
+  ): void {
+    // Ensure optionValue is valid
+    if (!optionValue) return;
+
+    // Get the form control path dynamically
+    const controlPath = `sections.${sectionIndex}.${controlName}`;
+    let control = this.preChatFormGroup.get(controlPath);
+
+    if (!control) {
+      console.warn(`Control '${controlPath}' not found.`);
+      return;
+    }
+
+    // Get the current value or initialize an empty structure
+    let selectedValues: { [category: string]: string[] } = {};
+
+    if (control.value) {
+      // Convert existing comma-separated value to structured data
+      const parts = control.value.split(',');
+      let currentCategory: any = null;
+
+      parts.forEach((part: any) => {
+        part = part.trim();
+        if (!part) return;
+        if (part.startsWith('Category')) {
+          currentCategory = part;
+          if (!selectedValues[currentCategory]) {
+            selectedValues[currentCategory] = [];
+          }
+        } else if (currentCategory) {
+          // Otherwise, it's an option under the last category
+          selectedValues[currentCategory].push(part);
+        }
+      });
+    }
+
+    // Add or remove the option under the correct category
+    if (!selectedValues[categoryLabel]) {
+      selectedValues[categoryLabel] = [];
+    }
+
+    if (selectedValues[categoryLabel].includes(optionValue)) {
+      // Remove if already selected
+      selectedValues[categoryLabel] = selectedValues[categoryLabel].filter(
+        (val) => val !== optionValue
+      );
+
+      // If category is empty now, remove it
+      if (selectedValues[categoryLabel].length === 0) {
+        delete selectedValues[categoryLabel];
+      }
+    } else {
+      // Add if not already selected
+      selectedValues[categoryLabel].push(optionValue);
+    }
+
+    // Convert structured data back to comma-separated string
+    let formattedValue = Object.entries(selectedValues)
+      .map(([category, options]) => [category, ...options].join(','))
+      .join(',');
+
+    // Update the form control value
+    control.setValue(formattedValue, { emitEvent: true });
+  }
+
+
+  isChecked(controlName: string, sectionIndex: number, optionValue: string, categoryLabel: string): boolean {
+    const controlPath = `sections.${sectionIndex}.${controlName}`;
+    const control = this.preChatFormGroup.get(controlPath);
+
+    if (!control) return false;
+
+    const selectedValues: string[] = control.value ? control.value.split(',') : [];
+    const fullOptionValue = categoryLabel ? `${categoryLabel},${optionValue}` : optionValue;
+
+    return selectedValues.includes(fullOptionValue);
+  }
+
+
+  booleanEmojiSet(sectionIndex: number, attributeIndex: number, itemIndex: number) {
+    console.log("boooean emoji set", itemIndex);
+    // Select all SVG elements within the booleanOption container
+    const svgElements = document.querySelectorAll(
+      `#booleanOption-${sectionIndex}-${attributeIndex} svg`
+    );
+
+    console.log('svgElements', svgElements)
+    // Iterate through all SVG elements
+    svgElements.forEach((svg: any, index) => {
+      const paths = svg.getElementsByTagName("path");
+
+      if (!svg.dataset.originalColors) {
+        // Store original colors in data attribute if not already stored
+        const originalColors = [];
+        for (let i = 0; i < paths.length; i++) {
+          originalColors.push(paths[i].getAttribute("fill"));
+        }
+        svg.dataset.originalColors = JSON.stringify(originalColors);
+      }
+
+      if (index === itemIndex) {
+        // Restore the original colors for the clicked SVG
+        const originalColors = JSON.parse(svg.dataset.originalColors);
+        for (let i = 0; i < paths.length; i++) {
+          paths[i].setAttribute("fill", originalColors[i]);
+        }
+      } else {
+        // Change to gray for SVGs that are not clicked
+        const fillColor = "gray";
+        for (let i = 0; i < paths.length; i++) {
+          paths[i].setAttribute("fill", fillColor);
+        }
+      }
+    });
+  }
+
+  handleFileChange(input: any, sectionIndex: number, attributeIndex: number, fileSize: any, id: any, allowed: any, attribute: any
+  ) {
+    const file = input.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    console.log('file', file)
+    // const displayElement = document.getElementById(`file-name-display-${id}`);
+    const errorDiv: any = document.getElementById(`${id}-error`);
+    // const previewDiv = document.getElementById(`preview-${sectionIndex}-${attributeIndex}`);
+    // const previewContent = document.getElementById(`preview-content-${sectionIndex}-${attributeIndex}`);
+    const uploadBtn: any = document.getElementById(`upload-btn-${id}`);
+    console.log(allowed)
+    // Reset states
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+    // previewDiv.style.display = 'none';
+    // previewContent.innerHTML = '';
+    uploadBtn.disabled = true;
+
+
+    if (file) {
+      console.log('file', file)
+      const allowedTypesString: any[] = allowed;
+      const allowedTypes = allowedTypesString.map(ext => ext.trim().toLowerCase());
+
+      const fileExtension = file.name.slice(file.name.lastIndexOf(".") + 1).toLowerCase(); // Improved extension extraction
+      console.log('allowedTypes', allowedTypes)
+      console.log('fileExtension', fileExtension)
+
+      if (allowedTypes.length > 0 && !allowedTypes.includes(fileExtension)) {
+
+        console.log('fileExtension not allowed', fileExtension)
+        this.snackBar.open("File extension not allowed'", 'X', {
+          panelClass: 'custom-snackbar',
+        });
+
+        return;
+      }
+    }
+    const fileName = file.name;
+    console.log('fileName', fileName)
+    const truncatedName = fileName.length > 10
+      ? fileName.substring(0, 7) + '...' + fileName.split('.').pop()
+      : fileName;
+    // displayElement.textContent = truncatedName;
+
+
+    // Validate file size
+    const maxSize = fileSize * 1024 * 1024; // Convert to bytes
+    if (file.size > maxSize) {
+      errorDiv.textContent = `File size exceeds ${fileSize}MB limit`;
+      errorDiv.style.display = 'block';
+      // displayElement.textContent = '';
+      input.value = '';
+      return;
+    }
+
+    // Enable upload button
+    console.log('fileName')
+    console.log(fileName)
+    this.setFileControl(sectionIndex, fileName, attribute.key)
+    this.previewFileForm(file, sectionIndex, attributeIndex)
+    uploadBtn.disabled = false;
+  }
+
+  setFileControl(sectionIndex: number, fileName: string, controlName: string) {
+    const sections = this.preChatFormGroup.get('sections') as FormArray;
+    if (!sections || !sections.at(sectionIndex)) {
+      console.error(`Section at index ${sectionIndex} does not exist.`);
+      return;
+    }
+
+    // Get the form control from the specific section
+    const control: any = sections.at(sectionIndex).get(controlName);
+    control.setValue(fileName);
+
+
+  }
+  getFileName(sectionIndex: number, controlName: any) {
+    const sections = this.preChatFormGroup.get('sections') as FormArray;
+    const currentSection = sections.at(sectionIndex);
+    return currentSection.get(controlName)?.value || ''
+
+  }
+  isFileUploading: any = {};
+  uploadFileFromPrechat(sectionIndex: number, controlName: any, fileInput: any, id: any) {
+    this.isFileUploading[`${controlName}`] = true
+    if (fileInput.files && fileInput.files.length > 0) {
+      const file = fileInput.files[0]
+      const formData = new FormData();
+      formData.append('file', file);
+
+      this._http.post(`${this.__appConfig.appConfig?.FILE_SERVER_URL}/api/uploadFileStream`, formData).subscribe((res: any) => {
+        const fileName = `${this.__appConfig.appConfig?.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
+        this.setFileControl(sectionIndex, fileName, controlName)
+        // this.snackBar.("success-snackbar", 'file uploaded successfully', 3)
+        this.snackBar.open('file uploaded successfully', 'X', {
+          panelClass: 'custom-snackbar',
+        });
+        console.log(res)
+        this.isFileUploading[`${controlName}`] = false
+        this.disableUploadBtn(id);
+      }, (error) => {
+        console.log(error)
+        // this.snackBar.snackbarMessage("error-snackbar", error.message, 3)
+        this.snackBar.open(error.message, 'X', {
+          panelClass: 'custom-snackbar',
+        });
+        this.isFileUploading[`${controlName}`] = false
+      })
+    }
+  }
+  disableUploadBtn(buttonId: any) {
+    const uploadedBtn = document.querySelector(`#upload-btn-${buttonId}`);
+    // uploadedBtn.textContent = 'Uploaded'
+    console.log('uploadedBtn', uploadedBtn)
+    this.renderer.setAttribute(uploadedBtn, 'disabled', 'true'); // Correct way
+
+
+  }
+  filePreviewUrl: { [key: string]: any } = {};
+  fileHistory: { [key: string]: { isImage: boolean } } = {}
+  // Add a new property to store text content
+  fileContent: { [key: string]: string } = {};
+  previewFileForm(file: File, sectionIndex: number, attributeIndex: number) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    const key = `${sectionIndex}-${attributeIndex}`;
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    const isTextOrJson = !fileExtension || ['txt', 'json'].includes(fileExtension);
+
+
+    if (isTextOrJson) {
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        let content = e.target?.result as string;
+
+        if (!this.fileContent) this.fileContent = {};
+
+        // If JSON, parse it before saving
+        if (fileExtension === 'json') {
+          try {
+            content = JSON.stringify(content);
+          } catch (error) {
+            console.error('Error parsing JSON:', error);
+            return;
+          }
+        }
+
+        this.fileContent[key] = content;
+        this.filePreviewUrl[key] = content;
+        console.log('File content:', this.fileContent[key]);
+        console.log('filePreviewUrl:', this.filePreviewUrl);
+      };
+      reader.readAsText(file);
+    } else {
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const fileResult = e.target?.result as string;
+        const isImage = file.type.startsWith('image/');
+
+        if (!this.fileHistory) this.fileHistory = {};
+        if (!this.filePreviewUrl) this.filePreviewUrl = {};
+
+        this.fileHistory[key] = { isImage };
+
+        if (isImage) {
+          this.filePreviewUrl[key] = this.sanitizer.bypassSecurityTrustUrl(fileResult);
+        } else {
+          this.filePreviewUrl[key] = this.sanitizeFileContent(file, fileResult);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  sanitizeFileContent(file: File, fileResult: string): SafeUrl {
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+
+    // All data URLs use bypassSecurityTrustUrl
+    return this.sanitizer.bypassSecurityTrustUrl(fileResult);
+  }
+
+
+  clearFile(sectionIndex: number, attributeIndex: number, controlName: string) {
+    const key = `${sectionIndex}-${attributeIndex}`;
+    delete this.filePreviewUrl[key];
+    delete this.fileHistory[key];
+    this.setFileControl(sectionIndex, '', controlName)
+  }
+  filePreviewOpener(fileName: string, sectionIndex: number, attributeIndex: number) {
+
+    // const key = `${sectionIndex}-${attributeIndex}`;
+    // console.log('file preview ', this.fileContent[key])
+    // const dialogRef = this.dialog.open(FilePreviewComponent, {
+    //   data: {
+    //     fileName: fileName,
+    //     url: this.filePreviewUrl[key],
+    //     content: this.fileContent[key],
+    //     type: this.getFileType(fileName)
+    //   },
+
+    //   maxHeight: "100vh",
+    //   maxWidth: "100%",
+    //   height: "auto",
+    //   width: "auto",
+
+    // });
+  }
+  getFileType(fileName: string): string {
+    const extension = fileName.split('.').pop()?.toLowerCase() || '';
+    switch (extension) {
+      case 'txt': return 'text';
+      case 'json': return 'json';
+      case 'pdf':
+      case 'doc':
+      case 'docx': return 'document';
+      case 'mp3':
+      case 'wav': return 'audio';
+      case 'mp4':
+      case 'webm': return 'video';
+      case 'png':
+      case 'jpg':
+      case 'jpeg': return 'image';
+      default: return 'unknown';
+    }
+  }
+
+  sanitizeFileUrl(fileName: string, fileUrl: string): SafeUrl {
+    const fileExtension = fileName.split('.').pop()?.toLowerCase();
+
+    if (!fileExtension) {
+      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Default sanitization
+    }
+
+    const imageExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'svg'];
+    const documentExtensions = ['pdf', 'doc', 'docx', 'ppt', 'txt', 'json'];
+    const audioExtensions = ['mp3', 'wav', 'ogg'];
+    const videoExtensions = ['mp4', 'webm', 'avi'];
+    const textExtensions = ['txt', 'log', 'csv']; // For text file previews
+    const zipExtensions = ['zip', 'rar', 'tar', '7z']; // Zip or archive files
+    const executableExtensions = ['exe', 'bat', 'sh']; // Executable or script files
+
+    // Check for image file
+    if (imageExtensions.includes(fileExtension)) {
+      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for image URLs
+    }
+
+    // Check for document file
+    if (documentExtensions.includes(fileExtension)) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(fileUrl); // Safe for document resource URLs
+    }
+
+    // Check for audio file
+    if (audioExtensions.includes(fileExtension)) {
+      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for audio URLs
+    }
+
+    // Check for video file
+    if (videoExtensions.includes(fileExtension)) {
+      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for video URLs
+    }
+
+    // Handle text files (e.g. .txt, .log)
+    if (textExtensions.includes(fileExtension)) {
+      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for text files, or display them
+    }
+
+    // Handle zip or archive files
+    if (zipExtensions.includes(fileExtension)) {
+      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Offer for download instead
+    }
+
+    // Handle executable files (don't show them)
+    if (executableExtensions.includes(fileExtension)) {
+      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Return safe URL, but don't open them in browser
+    }
+
+    // If no match, just return as a normal URL (fallback)
+    return this.sanitizer.bypassSecurityTrustUrl(fileUrl);
+  }
+  isErrorExist(sectionIndex: number, attributeIndex: number, controlName: string) {
+    const sections: any = this.preChatFormGroup.get('sections');
+    const control = sections.at(sectionIndex).get(controlName);
+    console.log('error control ', control)
+
+  }
+  disableTooltip(titleElement: any): boolean {
+    if (!titleElement) return true; // Ensure the element exists to avoid errors
+    return titleElement.scrollWidth <= titleElement.clientWidth;
+  }
+
+  openFileInNewTab(fileUrl: string) {
+    if (!fileUrl) return;
+    window.open(fileUrl, '_blank');
+  }
+  
 }

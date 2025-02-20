@@ -16,6 +16,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatRadioModule } from '@angular/material/radio';
 
 import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
 import { tagFormatPipe } from './tagFormat.pipe';
@@ -25,6 +26,9 @@ import { AppRoutingModule, routingComponents } from './app-routing.module';
 import { ConfigService } from './services/config.service';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { getMediaFromTask } from './getMediaFromTask.pipe';
+import { NpsColorPipe } from './npsColor.pipe';
+import { SvgNpsFormatPipe } from './svgFormat.pipe';
+import { IsEllipsisActiveDirective } from './isEllipsisActive.directive';
 
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
@@ -45,6 +49,9 @@ export function initializeApp1(appConfigService: ConfigService) {
     ConfirmDialogComponent,
     tagFormatPipe,
     getMediaFromTask,
+    NpsColorPipe,
+    SvgNpsFormatPipe,
+    IsEllipsisActiveDirective
   ],
   imports: [
     NgxLinkifyjsModule.forRoot({
@@ -68,6 +75,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatSnackBarModule,
     MatDialogModule,
     MatChipsModule,
+    MatRadioModule
   ],
   exports: [getMediaFromTask],
   providers: [
@@ -86,4 +94,4 @@ export function initializeApp1(appConfigService: ConfigService) {
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

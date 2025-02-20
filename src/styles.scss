@@ -14,3 +14,42 @@ body {
   font-size: 12px;
   font-weight: 400;
 }
+
+
+// .preChatForm {
+
+//   .mat-form-field {
+//     font-size: 12px;
+//     height: 50px;
+//     width: 100%;
+//   }
+
+//   .mat-input-element {
+//     height: 100% !important;
+//     width: 100% !important;
+//   }
+
+
+// }
+
+.mat-radio-button {
+
+  &.mat-accent.mat-radio-checked .mat-radio-outer-circle {
+    border-color: #000000;
+  }
+
+  &.mat-accent .mat-radio-inner-circle,
+  .mat-radio-ripple .mat-ripple-element:not(.mat-radio-persistent-ripple),
+  &.mat-radio-checked .mat-radio-persistent-ripple,
+  &.mat-accent:active .mat-radio-persistent-ripple {
+    background-color: #000000;
+  }
+
+
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px !important;
+}

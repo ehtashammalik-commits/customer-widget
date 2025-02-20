@@ -19,18 +19,19 @@
             <strong>{{ title }}</strong>
             <p>{{ subtitle }}</p>
             <div *ngIf="daySummary">
-              <p>Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date: 'shortTime' }}</p>
-            </div>  
-        </div>  
+              <p>Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date:
+                'shortTime' }}</p>
+            </div>
+          </div>
         </div>
         <div class="widget-wrapper-content">
-          <p>Ask us a question, our support team is pleased to help you.</p>    
+          <p>Ask us a question, our support team is pleased to help you.</p>
           <button class="widget-color" (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
             Connect with us
           </button>
         </div>
       </div>
-  </div>
+    </div>
   </ng-container>
 
   <!---------------------------------------->
@@ -256,6 +257,7 @@
                         : ''
                     " [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
                       border: isMaxLengthError(
+                        0,
                         attribute.key,
                         attribute.valueType
                       )
@@ -275,6 +277,7 @@
                     [placeholder]="attribute.helpText" class="widget-form-control" [required]="attribute?.isRequired"
                     [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
                       border: isMaxLengthError(
+                        0,
                         attribute.key,
                         attribute.valueType
                       )
@@ -289,6 +292,7 @@
                     class="widget-form-control" [required]="attribute?.isRequired" minlength="8" maxlength="256"
                     [ngStyle]="{
                       border: isMaxLengthError(
+                        0,
                         attribute.key,
                         attribute.valueType
                       )
@@ -305,6 +309,7 @@
                         : ''
                     " [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
                       border: isMaxLengthError(
+                        0,
                         attribute.key,
                         attribute.valueType
                       )
@@ -347,6 +352,7 @@
                     [placeholder]="attribute.helpText" class="widget-form-control" [required]="attribute?.isRequired"
                     [attr.maxlength]="2001" [attr.minlength]="1" [ngStyle]="{
                       border: isMaxLengthError(
+                        0,
                         attribute.key,
                         attribute.valueType
                       )
@@ -385,7 +391,7 @@
                     required format
                   </span>
 
-                  <span *ngIf="isMaxLengthError(attribute.key, attribute.valueType)" class="field-error">
+                  <span *ngIf="isMaxLengthError(0,attribute.key, attribute.valueType)" class="field-error">
                     Maximum limit reached
                   </span>
                 </div>
@@ -409,9 +415,11 @@
   <ng-container *ngIf="preChatFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-color" [ngClass]="{'exist-calendar':daySummary}" (click)="changeScreen('widget')">
-          <h5 id="headerHeading">{{ title }}</h5>
-            <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date: 'shortTime' }}</p>
+        <div class="widget-form-header widget-color" [ngClass]="{'exist-calendar':daySummary}"
+          (click)="changeScreen('widget')">
+          <h5 id="headerHeading">{{ preChatformTitle }}</h5>
+          <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
+            | date: 'shortTime' }}</p>
           <span class="widget-header-icon">
             <span class="topbar-icon material-symbols-outlined" matTooltip="Minimize"
               [matTooltipPosition]="matToolTipPosition!">minimize</span>
@@ -419,247 +427,719 @@
         </div>
 
         <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
-          <div class="widget-form-content">
-            <p>
-              Please fill out the form below to start chatting with an agent
-              now!
-            </p>
+          <div class="formContent">
+            <div class="widget-form-content preChatFormArea" formArrayName="sections">
+              <p *ngIf="preChatformDescription">
+                {{preChatformDescription}}
+              </p>
 
-            <!-- Custom Widget logo -->
-            <img *ngIf="logoEnabled" class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg"
-              alt="Live Chat" />
+              <!-- Custom Widget logo -->
+              <img *ngIf="logoEnabled" class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg"
+                alt="Live Chat" />
 
-            <!-- Global error message for the form -->
-            <div>
-              <span class="field-error error_text_for_filling"
-                *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
-                Please fill in all the required fields
-              </span>
-            </div>
+              <!-- Global error message for the form -->
+              <div>
+                <span class="field-error error_text_for_filling"
+                  *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
+                  Please fill in all the required fields
+                </span>
+              </div>
 
-            <!-- Dynamic form fields -->
-            <div class="widget-form-group" *ngFor="let attribute of formData; let i = index">
-              <div [ngSwitch]="attribute.attributeType" [style.display]="
-                  attribute.key === 'channel_customer_identifier'
-                    ? 'none'
-                    : 'block'
-                ">
-                <!-- INPUT Fields -->
-                <ng-container *ngSwitchCase="'INPUT'">
-                  <label>
-                    <ng-container *ngIf="attribute.valueType === 'file'">
-                      <span id="{{ attribute.key }}">{{
-                        attribute.label
-                        }}</span>
-                      <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
-                      <span class="fileType">
-                        <span class="info-icon tooltip-sm">
-                          <img src="widget-assets/images/info.png" alt="Info Tag" width="10" height="10">
-                          <span class="tooltip">
-                            {{
-                            attribute.fileData.restrictFile
-                            ? attribute.fileData.fileExtension.join(", ")
-                            : "PNG, JPEG, JPG, PDF, PPT, DOC, DOCX, XLS, XLSX, TXT, SVG, PPTX, CSS, OGA, MPGA, WEBP,
-                            MP3, MP4, GIF"
-                            }}
+              <!-- Dynamic form prechat form fields -->
+              <!-- widget-form-group -->
+              <div class="preChatForm section-area preChat-widget-form-group "
+                [ngClass]="formData.length == 1 ? 'noSection':''" *ngFor="let section of formData; let i = index"
+                [formGroupName]="i">
+                <div class="preChatFormInfo" *ngIf="formData.length > 1">
+
+                  <span class="sectionTitle">{{section.sectionName}}</span>
+                  <span class="sectionDescription">{{section.sectionDescription}}</span>
+
+                </div>
+                <div [class]="formData.length > 1 ? 'attribute-area':''">
+                  <div class="main-attributes">
+                    <ng-container *ngFor="let attribute of section.attributes; let j = index">
+                      <div [ngSwitch]="attribute.attributeType" [style.display]="
+                    attribute.key === 'channel_customer_identifier'
+                      ? 'none'
+                      : 'block'
+                  ">
+                        <!-- INPUT Fields -->
+                        <ng-container *ngSwitchCase="'INPUT'">
+                          <label class="questionLabel">
+                            <ng-container *ngIf="attribute.valueType === 'file'">
+                              <span class="dot-icon"></span>
+                              <span class="attributeName filetypeAttribute" id="{{ attribute.key }}">
+                                <span>
+                                  {{ attribute.label }}
+                                </span>
+                                <!-- <span class="tooltip-sm">
+                                  <img [src]="__appConfig.appConfig?.FORM_URL + '/assets/images/info.png'"
+                                    alt="Info Tag" />
+                                  <span class="tooltip">{{
+                                    attribute.fileData.fileExtension.length
+                                    > 0 ?
+                                    attribute.fileData.fileExtension.length
+                                    :'All supported file types
+                                    allowed'
+                                    }}</span>
+                                </span> -->
+                              </span>
+                              <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+
+                            </ng-container>
+                            <ng-container *ngIf="attribute?.valueType !== 'file'">
+                              <span class="dot-icon"></span>
+                              <span class="attributeName" id="{{ attribute.key }}">{{
+                                attribute.label
+                                }}</span>
+                              <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                            </ng-container>
+                          </label>
+                          <!-- Regular Input Fields -->
+                          <ng-container
+                            *ngIf="!['file', 'dateTime','time', 'paragraph', 'shortAnswer', 'Password', 'password', 'alphaNumeric', 'alphaNumericSpecial', 'number', 'positiveNumber'].includes(attribute.valueType)">
+
+                            <input matInput id="{{ attribute.key }}" type="{{ attribute.valueType }}"
+                              class="widget-form-control" [formControlName]="attribute.key"
+                              [placeholder]="attribute.helpText" [required]="attribute?.isRequired" [maxlength]="101"
+                              [minlength]="1" />
+                            <!-- <mat-error *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.errors as errors">
+                              {{ errors['required'] ? 'Required field' :
+                              (attribute.valueType.charAt(0).toUpperCase() +
+                              attribute.valueType.slice(1)) + ' is not
+                              correct' }}
+                            </mat-error> -->
+
+                          </ng-container>
+                          <!-- Alphanumeric / Number Fields -->
+                          <ng-container *ngIf="
+                           [
+                             'alphaNumeric',
+                             'alphaNumericSpecial',
+                             'number',
+                             'positiveNumber'
+                           ].includes(attribute.valueType)
+                         ">
+
+                            <input matInput id="{{ attribute.key }}" type="text" [formControlName]="attribute.key"
+                              [placeholder]="attribute.helpText" class="widget-form-control"
+                              [required]="attribute?.isRequired" [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
+  border: isMaxLengthError(
+  i,
+  attribute.key,
+  attribute.valueType
+  )
+  ? '1px solid red'
+  : 'none'
+  }" />
+                            <!-- <mat-error *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.errors as errors">
+                              {{ errors['required'] ? 'Required field' :
+                              (attribute.valueType.charAt(0).toUpperCase() +
+                              attribute.valueType.slice(1)) + ' is not
+                              correct' }}
+                            </mat-error> -->
+
+
+                          </ng-container>
+                          <ng-container *ngIf="
+              ['Password', 'password'].includes(attribute.valueType)
+            ">
+                            <!-- Password Field -->
+
+
+                            <input matInput type="password" id="{{ attribute.key }}" [formControlName]="attribute.key"
+                              class="widget-form-control" [required]="attribute?.isRequired" minlength="8"
+                              maxlength="256" [ngStyle]="{
+  border: isMaxLengthError(i, attribute.key, attribute.valueType)
+  ? '1px solid red'
+  : 'none'
+  }" />
+                            <!-- <mat-error *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.errors as errors">
+                              {{ errors['required'] ? 'Required field' :
+                              (attribute.valueType.charAt(0).toUpperCase() +
+                              attribute.valueType.slice(1)) + ' is not
+                              correct' }}
+                            </mat-error> -->
+
+
+                          </ng-container>
+                          <!-- Short Answer Field -->
+                          <ng-container *ngIf="attribute.valueType === 'shortAnswer'">
+
+                            <input matInput id="{{ attribute.key }}" type="text" [formControlName]="attribute.key"
+                              [placeholder]="attribute.helpText" class="widget-form-control"
+                              [required]="attribute?.isRequired" [ngModel]="
+  attribute.key === 'channel_customer_identifier'
+  ? customerIdentifier
+  : ''
+  " [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
+  border: isMaxLengthError(
+  i,
+  attribute.key,
+  attribute.valueType
+  )
+  ? '1px solid red'
+  : 'none'
+  }" />
+                            <!-- <mat-error *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.errors as errors">
+                              {{ errors['required'] ? 'Required field' :
+                              (attribute.valueType.charAt(0).toUpperCase() +
+                              attribute.valueType.slice(1)) + ' is not
+                              correct' }}
+                            </mat-error> -->
+
+
+                          </ng-container>
+                          <!-- File Input -->
+                          <div class="file-upload-wrapper" *ngIf="attribute.valueType === 'file'">
+                            <!-- <div class="file-input-container">
+                                  <input type="file"
+                                      [required]="attribute?.isRequired" (change)="
+  uploadFileFromForm(
+  $event,
+  attribute.key,
+  attribute.fileData.restrictFile,
+  attribute.fileData.fileExtension
+  )
+  " class="file-input" />
+                                  <span class="input-label">Choose File</span>
+                              </div>
+                              <div *ngIf="fileName" class="file-link-container">
+                                  <a target="_blank" [href]="fileUrl">{{
+                                      fileName || ""
+                                      }}</a>
+                              </div> -->
+
+                            <div class="file-upload-container" *ngIf="attribute.valueType === 'file'">
+                              <!-- <div class="file-header">
+                                    <div class="file-label">
+                                      <label [for]="attributeIndex" class="label2">
+                                        {{ attribute.label }} <span *ngIf="attribute.isRequired">*</span>
+                                      </label>
+                                    </div>
+                                    <div class="file-size">
+                                      <span class="file-size-limit">Max file size: {{ attribute.fileData.fileSize }}MB</span>
+                                    </div>
+                                  </div>
+                                 -->
+                              <div class="file-upload-box"
+                                [ngClass]="filePreviewUrl[i + '-' + j]?'file-upload-box-sm':'file-upload-box-lg' ">
+                                <div class="file-input-div">
+                                  <label [for]="attribute._id" class="custom-file-upload">
+                                    <span isEllipsisActive class="text-wrap">
+                                      {{ preChatFormGroup.get(['sections',i,attribute.key])?.value
+                                      }}
+                                    </span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                      class="bi bi-upload" viewBox="0 0 16 16">
+                                      <path
+                                        d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
+                                      <path
+                                        d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z" />
+                                    </svg>
+                                    <!-- <span *ngIf="!isFileSelected">Choose a
+                                                  file</span> -->
+                                    <!-- <span
+                                                  *ngIf="preChatFormGroup.get(attribute.key)?.value">{{
+                                                  preChatFormGroup.get(attribute.key)?.value
+                                                  }}</span> -->
+
+                                  </label>
+                                  <input [id]="attribute._id" #FileInput class="file-input" type="file"
+                                    [accept]="attribute.fileData.fileExtension" [attr.placeholder]="attribute.helpText"
+                                    [required]="attribute.isRequired"
+                                    (change)="handleFileChange(FileInput, i, j,attribute.fileData.fileSize,attribute._id,attribute.fileData.fileExtension,attribute)" />
+                                </div>
+                                <div [id]="'preview-'+i+'-'+j" class="file-preview" style="display: none;">
+                                  <div [id]="'preview-content-'+ i +'-'+j" class="preview-div"></div>
+                                </div>
+
+                                <div *ngIf="filePreviewUrl[i + '-' + j]" class="file-preview">
+                                  <!-- Close button to remove the preview -->
+                                  <button type="button" class="preview-close" (click)="clearFile(i, j, attribute.key)">
+                                    <mat-icon>cancel</mat-icon>
+                                  </button>
+
+                                  <!-- Image preview -->
+                                  <div *ngIf="fileHistory[i + '-' + j]?.isImage; else fileIcon"
+                                    class="preview-image-container"
+                                    (click)="openFileInNewTab(preChatFormGroup.get(['sections', i, attribute.key])?.value)">
+                                    <img [src]="filePreviewUrl[i + '-' + j]" alt="Preview" class="preview-image">
+                                  </div>
+
+                                  <!-- File icon preview (Download file on click) -->
+                                  <ng-template #fileIcon>
+                                    <div class="preview-file-container"
+                                      (click)="openFileInNewTab(preChatFormGroup.get(['sections', i, attribute.key])?.value)">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M14 2v6h6" />
+                                      </svg>
+                                    </div>
+                                  </ng-template>
+                                </div>
+
+                                <div class="allowed-types">
+
+                                  <div>
+                                    <button [class]="'file-upload-button-'+attribute._id" class="file-upload-button"
+                                      [id]="'upload-btn-'+attribute._id" [disabled]="!isFileSelected"
+                                      (click)="uploadFileFromPrechat(i,attribute.key,FileInput,attribute._id)">
+                                      <span *ngIf="isFileUploading[attribute.key]" class="loader"></span>
+                                      <span>Upload</span>
+                                    </button>
+                                  </div>
+                                  <div [id]="attribute._id+'-error'" class="errordiv"
+                                    style="color: red; display: none;">
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- <div *ngIf="!isFileSelected" class="errordiv"
+                                      style="color: red;">
+                                      Please select a file before uploading.
+                                  </div> -->
+                            </div>
+
+                          </div>
+
+                          <!-- DateTime Input -->
+                          <ng-container *ngIf="attribute.valueType === 'dateTime'">
+                            <!-- <mat-form-field style="width: 100%;"
+                                  appearance="outline"> -->
+                            <div class="dateTime">
+                              <span class="dateTime-icon" (click)="dateTimeInput.showPicker()">
+                                <img src="widget-assets/images/date_time_icon.svg" alt="dateTime-icon">
+                              </span>
+                              <input #dateTimeInput id="dateTime" matInput type="datetime-local"
+                                [formControlName]="attribute.key" class="widget-form-control custom-date-input"
+                                [required]="attribute?.isRequired" />
+                            </div>
+
+
+                            <!-- </mat-form-field> -->
+                          </ng-container>
+                          <ng-container *ngIf="attribute.valueType === 'time'">
+                            <!-- <mat-form-field style="width: 100%;"
+                                  appearance="outline"> -->
+                            <div class="dateTime">
+                              <span class="dateTime-icon" (click)="timeInput.showPicker()">
+                                <mat-icon>access_time</mat-icon>
+                              </span>
+                              <input #timeInput id="time" matInput type="time" [formControlName]="attribute.key"
+                                class="widget-form-control custom-date-input" [required]="attribute?.isRequired" />
+                            </div>
+
+
+                            <!-- </mat-form-field> -->
+                          </ng-container>
+                        </ng-container>
+                        <!-- TEXTAREA Fields -->
+                        <ng-container *ngSwitchCase="'TEXTAREA'">
+                          <label class="questionLabel">
+                            <span class="dot-icon"></span>
+                            <span class="attributeName" id="{{ attribute.key }}">{{
+                              attribute.label
+                              }}</span>
+                            <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                          </label>
+                          <textarea matInput id="{{ attribute.key }}" [formControlName]="attribute.key"
+                            [placeholder]="attribute.helpText" class="widget-form-control"
+                            [required]="attribute?.isRequired" [attr.maxlength]="2001" [attr.minlength]="1" [ngStyle]="{
+  border: isMaxLengthError(
+  i,
+  attribute.key,
+  attribute.valueType
+  )
+  ? '1px solid red'
+  : 'none'
+  }"></textarea>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'OPTIONS'">
+                          <ng-container [ngSwitch]="attribute.valueType">
+                            <ng-container *ngSwitchCase="'mcq'">
+                              <label class="questionLabel">
+                                <span class="dot-icon"></span>
+                                <span class="attributeName" id="{{ attribute.key }}">{{
+                                  attribute.label
+                                  }}</span>
+                                <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                              </label>
+                              <div style="width: 100%;">
+                                <mat-radio-group class="radioGroup" [formControlName]="attribute.key">
+                                  <ng-container
+                                    *ngFor="let option of attribute.attributeOptions.attributeData[0].values; let optionIndex = index">
+                                    <div class="radioWrapper">
+                                      <mat-radio-button [disableRipple]="true" [value]="option.label">
+                                        {{ option.label }}
+                                      </mat-radio-button>
+                                      <div class="optionDivider"
+                                        *ngIf="attribute.attributeOptions.attributeData[0].values.length - 1 != optionIndex">
+                                      </div>
+                                    </div>
+                                  </ng-container>
+                                </mat-radio-group>
+
+                                <!-- <mat-error class="mat-error" *ngIf="
+                    preChatFormGroup.get('section_' + i).get(attribute.key)?.hasError('required') &&
+                    (preChatFormGroup.get('section_' + i).get(attribute.key)?.touched || preChatFormGroup.get('section_' + i).get(attribute.key)?.dirty)
+                  ">
+                                              *Required field
+                                          </mat-error> -->
+
+                              </div>
+
+
+                            </ng-container>
+                            <!-- DROPDOWN Question ValueType -->
+                            <ng-container *ngSwitchCase="'dropdown'">
+                              <label class="questionLabel">
+                                <span class="dot-icon"></span>
+                                <span class="attributeName" id="{{ attribute.key }}">{{
+                                  attribute.label
+                                  }}</span>
+                                <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                              </label>
+
+                              <!-- <br /> -->
+
+                              <mat-select [formControlName]="attribute.key" name="questionnaire">
+                                <!-- <mat-option [value]="null">None</mat-option> -->
+                                <mat-option #optionLabel style="width:100%" [matTooltip]="option.label"
+                                  [matTooltipDisabled]="disableTooltip(optionLabel)" mdTooltipClass="customToolTip"
+                                  *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
+                                  [value]="option.label"><span>{{option.label}}</span></mat-option>
+                              </mat-select>
+                              <!-- <mat-error> *Required field</mat-error> -->
+
+                            </ng-container>
+
+                            <ng-container *ngSwitchCase="'checkbox'">
+                              <label class="questionLabel">
+                                <span class="dot-icon"></span>
+                                <span class="attributeName" id="{{ attribute.key }}">{{
+                                  attribute.label
+                                  }}</span>
+                                <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                              </label>
+                              <div class="checkbox-container">
+                                <div class="checkbox-box">
+                                  <div
+                                    *ngFor="let category of attribute.attributeOptions.attributeData; let categoryIndex = index"
+                                    class="category-group">
+
+                                    <!-- Category Label (Only shown if categories are enabled) -->
+                                    <h3 *ngIf="attribute.attributeOptions.enableCategory" class="category-label">
+                                      {{ category.label }}
+                                    </h3>
+
+                                    <!-- <span *ngIf="attribute?.isRequired" class="widget-required">*</span> -->
+                                    <div class="option_field" [attr.data-required]="attribute.isRequired">
+                                      <label *ngFor="let option of category.values; let optionIndex = index"
+                                        class="checkbox-label">
+                                        <input type="checkbox" class="input-checkbox"
+                                          [checked]="isChecked(attribute.key, i, option.value, category.label)"
+                                          (change)="onCheckboxChange(attribute.key, i, option.label, category.label, attribute.attributeOptions.enableCategory)" />
+                                        <span>{{ option.label }}</span>
+                                      </label>
+                                    </div>
+
+                                  </div>
+                                </div>
+                              </div>
+                            </ng-container>
+
+                            <ng-container *ngSwitchCase="'boolean'">
+                              <label class="questionLabel">
+                                <span class="dot-icon"></span>
+                                <span class="attributeName" id="{{ attribute.key }}">{{
+                                  attribute.label
+                                  }}</span>
+                                <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                              </label>
+                              <div class="options-container option_field" [id]="'booleanOption-' + i + '-' + j"
+                                [attr.data-required]="attribute.isRequired">
+                                <ng-container *ngIf="attribute.attributeOptions.enableStyle; else simpleBoolean">
+                                  <label class="radio-label"
+                                    *ngFor="let option of attribute.attributeOptions.attributeData[0].values; let index = index"
+                                    (click)="booleanEmojiSet(i, j, index)">
+                                    <input class="radio-icon" type="radio" [formControlName]="attribute.key"
+                                      [name]="attribute.key" [value]="option.value" hidden>
+                                    <!-- <img [src]="option.optionStyle.media"
+                                                  alt="boolean-option" width="35"
+                                                  height="35"> -->
+                                    <div
+                                      [innerHtml]="option.optionStyle.media | svgFormat:'imageSvg':'32px':'32px':('option-' + 0 + '-' + i + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type) | async ">
+                                    </div>
+
+
+                                    <span>{{ option.label }}</span>
+                                  </label>
+                                </ng-container>
+                                <ng-template #simpleBoolean>
+                                  <label *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
+                                    class="radio-label">
+                                    <input class="input-radio" type="radio" [formControlName]="attribute.key"
+                                      [name]="attribute.key" [value]="option.value">
+                                    <span>{{ option.label }}</span>
+                                  </label>
+                                </ng-template>
+                              </div>
+                            </ng-container>
+
+
+
+                            <ng-container *ngSwitchCase="'5-star-rating'">
+                              <ng-container
+                                *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type=='star' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'filled' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'outlined'">
+                                <label class="questionLabel">
+                                  <span class="dot-icon"></span>
+                                  <span class="attributeName" id="{{ attribute.key }}">{{
+                                    attribute.label
+                                    }}</span>
+                                  <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                                </label>
+                                <div class="emojiTypeQuestions" id="optionStar"
+                                  [attr.data-required]="attribute.isRequired ? true : false">
+                                  <label
+                                    *ngFor="let option of attribute.attributeOptions.attributeData[0].values; let index = index"
+                                    class="rating-label radio-label five-star-label ">
+                                    <input type="radio" [name]="attribute._id" [value]="option.value"
+                                      style="display: none;">
+                                    <!--  svgFormat:'imageSvg':'25px':'25px':('option-' + 0 + '-' + i + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type):'#E6E6E6' | async -->
+
+                                    <ng-container
+                                      *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type == 'star'; else normalImage">
+                                      <div #starOption
+                                        (click)="Selected5starOption(attribute.key, i, j, index, attribute.attributeOptions.attributeData[0].values[0].optionStyle.type, option.label)"
+                                        [innerHtml]="option.optionStyle.media | svgFormat:'imageSvg':'32px':'32px':('option-' + i + '-' + j + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type):'#E6E6E6' | async">
+                                      </div>
+                                    </ng-container>
+
+                                    <ng-template #normalImage>
+                                      <div
+                                        (click)="Selected5starOption(attribute.key, i, j, index, attribute.attributeOptions.attributeData[0].values[0].optionStyle.type, option.label)"
+                                        [innerHtml]="option.optionStyle.media | svgFormat:'imageSvg':'32px':'32px':('option-' + i + '-' + j + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type) | async">
+                                        >
+                                      </div>
+                                    </ng-template>
+
+
+
+                                    <span class="optionLabel">{{ option.label }}</span>
+                                  </label>
+                                </div>
+                              </ng-container>
+
+                              <ng-container
+                                *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type == 'scale'">
+                                <label class="questionLabel">
+                                  <span class="dot-icon"></span>
+                                  <span class="attributeName" id="{{ attribute.key }}">{{
+                                    attribute.label
+                                    }}</span>
+                                  <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                                </label>
+                                <div class="scale-options-area">
+                                  <div class='scaleTypeQuestions'
+                                    [attr.data-required]="attribute.isRequired ? true : false">
+                                    <label class="scaleBoxes"
+                                      *ngFor="let option of attribute.attributeOptions.attributeData[0].values; let index = index">
+                                      <div class="scale-options-area">
+                                        <input type="radio" [name]="attribute.key" [value]="option.value"
+                                          style="display: none;">
+
+                                        <div
+                                          (click)="ChangeScaleStyle(attribute.key,i, j, index, attribute.attributeOptions.attributeData[0].values[0].optionStyle.type,option.label)"
+                                          [innerHtml]="(option.optionStyle.media | svgFormat:'imageSvg': '32px' : '32px' : ('npsOption-' + i + '-' + j + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type) : 'gray':index+1) | async">
+                                        </div>
+                                        <div
+                                          *ngIf="index !== attribute.attributeOptions.attributeData[0].values.length - 1"
+                                          class="scale_line"></div>
+                                      </div>
+
+                                      <span class="optionLabel">{{ option.label }}</span>
+                                    </label>
+
+                                  </div>
+                                </div>
+                              </ng-container>
+                              <div
+                                *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type == 'bar'"
+                                class="rating-container  option_field for-linearscale-only ratingbar-attribute"
+                                id="optionBar" [attr.data-required]="attribute.isRequired">
+                                <label class="questionLabel">
+                                  <span class="dot-icon"></span>
+                                  <span class="attributeName" id="{{ attribute.key }}">{{
+                                    attribute.label
+                                    }}</span>
+                                  <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                                </label>
+                                <div class="ratingbar-area">
+                                  <div
+                                    *ngFor="let option of attribute.attributeOptions.attributeData[0].values; let index = index"
+                                    class="bar-area bar-rating-item">
+                                    <input type="radio" [formControlName]="attribute.key" [name]="attribute.key"
+                                      [value]="option.value" hidden>
+                                    <button type="button" class="bar-button"
+                                      [style.backgroundColor]="option.optionStyle.color"
+                                      (click)="ChangeBarColor(attribute.key,i,j, index, attribute._id,option.label )"></button>
+                                    <div class="arrow bar-icon-hide" [attr.data-bar-index]="index" [id]="'arrow-' + j">
+                                      <div class="line"></div>
+                                      <div class="point "></div>
+                                    </div>
+
+                                    <p class="bar-info">{{ option.label }}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                              <ng-container
+                                *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type == 'checkbox'">
+                                <!-- <label>
+                                          <span id="{{ attribute.key }}">{{
+                                              attribute.label }}</span>
+                                          <span *ngIf="attribute?.isRequired"
+                                              class="widget-required">*</span>
+                                      </label>
+                                      <div *ngFor="
+                            let option of attribute.attributeOptions.attributeData[0]
+                              .values
+                          ">
+                                          <input class="radio-btn" type="radio"
+                                              [id]="option" [name]="attribute.key"
+                                              [formControlName]="attribute.key"
+                                              [value]="option.label"
+                                              [required]="attribute?.isRequired" />
+                                          <label [for]="option">{{ option.label
+                                              }}</label>
+                                      </div> -->
+                                <label class="questionLabel">
+                                  <span class="dot-icon"></span>
+                                  <span class="attributeName" id="{{ attribute.key }}">{{
+                                    attribute.label
+                                    }}</span>
+                                  <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                                </label>
+                                <div>
+                                  <div style="width: 100%;">
+                                    <mat-radio-group class="radio_option" [formControlName]="attribute.key" required>
+                                      <mat-radio-button
+                                        *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
+                                        [value]="option.label">
+                                        {{ option.label }}
+                                      </mat-radio-button>
+                                    </mat-radio-group>
+                                    <!-- <mat-error class="mat-error" *ngIf="
+                    preChatFormGroup.get('section_' + i).get(attribute.key)?.hasError('required') &&
+                    (preChatFormGroup.get('section_' + i).get(attribute.key)?.touched || preChatFormGroup.get('section_' + i).get(attribute.key)?.dirty)
+                  ">
+                                              *Required field
+                                          </mat-error> -->
+
+                                  </div>
+
+                                </div>
+                              </ng-container>
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'nps'">
+                              <label class="questionLabel">
+                                <span class="dot-icon"></span>
+                                <span class="attributeName" id="{{ attribute.key }}">{{
+                                  attribute.label
+                                  }}</span>
+                                <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                              </label>
+                              <div class="nps-box">
+                                <div class="nps-container" [attr.data-required]="attribute.isRequired">
+                                  <div
+                                    *ngFor="let option of attribute.attributeOptions.attributeData[0].values; let index = index">
+                                    <label class="radio-label">
+                                      <input type="radio" [required]="attribute.isRequired" [name]="attribute.key"
+                                        [value]="option.value" [formControlName]="attribute.key" style="display: none;">
+
+                                      <div class="nps-option"
+                                        [style.background]="j | npsColor : index : selectedIndices"
+                                        (click)="changeNpsColor(attribute.key, i, j, index, option.value)">
+                                        {{ option.value }}
+                                      </div>
+
+                                    </label>
+                                  </div>
+                                </div>
+
+                                <div class="nps-label">
+                                  <div>
+                                    <p class="nps-side-label nps-p-right scale-info optionLabel ">
+                                      {{
+                                      attribute?.attributeOptions?.attributeData[0]?.values[0].label
+                                      }}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <p class="nps-side-label nps-p-left scale-info optionLabel">
+                                      {{
+                                      attribute?.attributeOptions?.attributeData[0]?.values[10]?.label
+                                      }}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </ng-container>
+
+
+
+                          </ng-container>
+                        </ng-container>
+                        <div class="divider" *ngIf="section.attributes.length-1 != j ">
+
+                        </div>
+                        <!-- Validation Error Messages -->
+                        <!-- <h1>:form {{preChatFormGroup.get(['sections',j,attribute.key])?.touched}}</h1> -->
+                        <div class="validation-msg" *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.touched">
+                          <span *ngIf="
+                          preChatFormGroup.get(['sections',i,attribute.key])?.hasError('required')
+                      " class="field-error">
+                            {{ getLabel(attribute.valueType) }} is required
                           </span>
-                        </span>
+                          <span *ngIf="
+                      !isMaxLengthError(i,attribute.key, attribute.valueType) &&  preChatFormGroup.get(['sections',i,attribute.key])?.hasError('pattern')&& attribute.valueType.toLowerCase()!='password'
+                      " class="field-error">
+                            {{ getLabel(attribute.valueType) }} does not match the
+                            required format
+                          </span>
+                          <span *ngIf="
+                    !isMaxLengthError(i,attribute.key, attribute.valueType) && preChatFormGroup.get(['sections',j,attribute.key])?.hasError('pattern') && !preChatFormGroup.get(['sections',j,attribute.key])?.hasError('minlength') && attribute.valueType.toLowerCase()=='password'
+                      " class="field-error">
+                            Password must include uppercase, lowercase, number, and special character
+                          </span>
+                          <span *ngIf="
+    preChatFormGroup.get(attribute.key)?.hasError('minlength') &&
+    attribute.valueType.toLowerCase() == 'password'
+  " class="field-error">
+                            Password must be at least 8 characters long
+                          </span>
 
-                      </span>
-                    </ng-container>
-                    <ng-container *ngIf="attribute?.valueType !== 'file'">
-                      <span id="{{ attribute.key }}">{{
-                        attribute.label
-                        }}</span>
-                      <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
-                    </ng-container>
-                  </label>
-
-                  <!-- Regular Input Fields -->
-                  <input *ngIf="
-                      ![
-                        'file',
-                        'dateTime',
-                        'paragraph',
-                        'shortAnswer',
-                        'Password',
-                        'password',
-                        'alphaNumeric',
-                        'alphaNumericSpecial',
-                        'number',
-                        'positiveNumber'
-                      ].includes(attribute.valueType)
-                    " matInput id="{{ attribute.key }}" type="{{ attribute.valueType }}"
-                    [formControlName]="attribute.key" [placeholder]="attribute.helpText" class="widget-form-control"
-                    autocomplete="on" [required]="attribute?.isRequired" [ngModel]="
-                      attribute.key === 'channel_customer_identifier'
-                        ? customerIdentifier
-                        : ''
-                    " [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
-                      border: isMaxLengthError(
-                        attribute.key,
-                        attribute.valueType
-                      )
-                        ? '1px solid red'
-                        : 'none'
-                    }" />
-
-                  <!-- Alphanumeric / Number Fields -->
-                  <input *ngIf="
-                      [
-                        'alphaNumeric',
-                        'alphaNumericSpecial',
-                        'number',
-                        'positiveNumber'
-                      ].includes(attribute.valueType)
-                    " matInput id="{{ attribute.key }}" type="text" [formControlName]="attribute.key"
-                    [placeholder]="attribute.helpText" class="widget-form-control" [required]="attribute?.isRequired"
-                    [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
-                      border: isMaxLengthError(
-                        attribute.key,
-                        attribute.valueType
-                      )
-                        ? '1px solid red'
-                        : 'none'
-                    }" />
-
-                  <!-- Password Field -->
-                  <input *ngIf="
-                      ['Password', 'password'].includes(attribute.valueType)
-                    " type="password" id="{{ attribute.key }}" [formControlName]="attribute.key"
-                    class="widget-form-control" [required]="attribute?.isRequired" minlength="8" maxlength="256"
-                    [ngStyle]="{
-                      border: isMaxLengthError(
-                        attribute.key,
-                        attribute.valueType
-                      )
-                        ? '1px solid red'
-                        : 'none'
-                    }" />
-
-                  <!-- Short Answer Field -->
-                  <input *ngIf="attribute.valueType === 'shortAnswer'" matInput id="{{ attribute.key }}" type="text"
-                    [formControlName]="attribute.key" [placeholder]="attribute.helpText" class="widget-form-control"
-                    [required]="attribute?.isRequired" [ngModel]="
-                      attribute.key === 'channel_customer_identifier'
-                        ? customerIdentifier
-                        : ''
-                    " [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
-                      border: isMaxLengthError(
-                        attribute.key,
-                        attribute.valueType
-                      )
-                        ? '1px solid red'
-                        : 'none'
-                    }" />
-
-                  <!-- File Input -->
-                  <div class="file-upload-wrapper" *ngIf="attribute.valueType === 'file'">
-                    <div class="file-input-container">
-                      <input type="file" value="" [required]="attribute?.isRequired" (change)="
-                          uploadFileFromForm(
-                            $event,
-                            attribute.key,
-                            attribute.fileData.restrictFile,
-                            attribute.fileData.fileExtension
-                          )
-                        " class="file-input" />
-                      <span class="input-label">Choose File</span>
-                    </div>
-                    <div *ngIf="fileName" class="file-link-container">
-                      <a target="_blank" [href]="fileUrl">{{
-                        fileName || ""
-                        }}</a>
-                    </div>
-                  </div>
-
-                  <!-- DateTime Input -->
-                  <input *ngIf="attribute.valueType === 'dateTime'" type="datetime-local" id="{{ attribute.key }}"
-                    [formControlName]="attribute.key" class="widget-form-control" [required]="attribute?.isRequired" />
-                </ng-container>
-
-                <!-- TEXTAREA Fields -->
-                <ng-container *ngSwitchCase="'TEXTAREA'">
-                  <label>
-                    <span id="{{ attribute.key }}">{{ attribute.label }}</span>
-                    <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
-                  </label>
-                  <textarea matInput id="{{ attribute.key }}" [formControlName]="attribute.key"
-                    [placeholder]="attribute.helpText" class="widget-form-control" [required]="attribute?.isRequired"
-                    [attr.maxlength]="2001" [attr.minlength]="1" [ngStyle]="{
-                      border: isMaxLengthError(
-                        attribute.key,
-                        attribute.valueType
-                      )
-                        ? '1px solid red'
-                        : 'none'
-                    }"></textarea>
-                </ng-container>
-                <!-- OPTIONS Fields -->
-                <ng-container *ngSwitchCase="'OPTIONS'">
-                  <ng-container [ngSwitch]="attribute.valueType">
-                    <ng-container *ngSwitchCase="'dropdown'">
-                      <label>
-                        <span id="{{ attribute.key }}">{{ attribute.label }}</span>
-                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
-                      </label>
-                      <select class="custom-dropdown" [formControlName]="attribute.key"
-                        [required]="attribute?.isRequired">
-                        <option value="">{{attribute.helpText || 'Select an option'}}</option>
-                        <option *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
-                          [value]="option.label">
-                          {{ option.label }}
-                        </option>
-                      </select>
-                    </ng-container>
-                    <ng-container *ngSwitchDefault>
-                      <label>
-                        <span id="{{ attribute.key }}">{{ attribute.label }}</span>
-                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
-                      </label>
-                      <div *ngFor="
-                      let option of attribute.attributeOptions.attributeData[0]
-                        .values
-                    ">
-                        <input class="radio-btn" type="radio" [id]="option" [name]="attribute.key"
-                          [formControlName]="attribute.key" [value]="option.label" [required]="attribute?.isRequired" />
-                        <label [for]="option">{{ option.label }}</label>
+                          <span *ngIf="isMaxLengthError(i,attribute.key, attribute.valueType)" class="field-error">
+                            Maximum limit reached
+                          </span>
+                        </div>
                       </div>
                     </ng-container>
-                  </ng-container>
-                </ng-container>
-                <!-- Validation Error Messages -->
-                <div class="validation-msg" *ngIf="preChatFormGroup.get(attribute.key)?.touched">
-                  <span *ngIf="
-                      preChatFormGroup.get(attribute.key)?.hasError('required')
-                    " class="field-error">
-                    {{ getLabel(attribute.valueType) }} is required
-                  </span>
-                  <span *ngIf="
-                    !isMaxLengthError(attribute.key, attribute.valueType) &&  preChatFormGroup.get(attribute.key)?.hasError('pattern')&& attribute.valueType.toLowerCase()!='password'
-                    " class="field-error">
-                    {{ getLabel(attribute.valueType) }} does not match the
-                    required format
-                  </span>
-                  <span *ngIf="
-                  !isMaxLengthError(attribute.key, attribute.valueType) && preChatFormGroup.get(attribute.key)?.hasError('pattern') && !preChatFormGroup.get(attribute.key)?.hasError('minlength') && attribute.valueType.toLowerCase()=='password'
-                    " class="field-error">
-                    Password must include uppercase, lowercase, number, and special character
-                  </span>
-                  <span *ngIf="
-  preChatFormGroup.get(attribute.key)?.hasError('minlength') &&
-  attribute.valueType.toLowerCase() == 'password'
-" class="field-error">
-                    Password must be at least 8 characters long
-                  </span>
-
-                  <span *ngIf="isMaxLengthError(attribute.key, attribute.valueType)" class="field-error">
-                    Maximum limit reached
-                  </span>
+                  </div>
                 </div>
               </div>
+
+
+
             </div>
           </div>
+
+
           <!-- Form Submit Button -->
           <div class="widget-form-button">
             <button id="formTrigger" type="submit" [ngClass]="{ 'disable-btn': preChatFormGroup.invalid }"
@@ -667,6 +1147,7 @@
               Start Chat
             </button>
           </div>
+
         </form>
       </div>
     </div>
@@ -1336,7 +1817,7 @@
                       message.header.timestamp | date: "h:mm a"
                       }} </span>
                   </div>
-                  
+
                 </div>
               </div>
             </div>
@@ -1399,13 +1880,12 @@
               *ngIf="enableEmoji">
               add_reaction
             </span> -->
-            <textarea class="widget-chat-composer" 
-            #messageComposer
-              [attr.data-emoji-picker]="enableEmoji" matInput id="messageTextarea"
-              cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
-              placeholder="Type Message Here ..." #message maxlength="{{ messageLimit }}" [(ngModel)]="text"
-              (change)="textChanged()" (focus)="onTextAreaFocus()" (keyup)="onKeyPress($event)"
-              (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)" (keyup.enter)="onEnterKey($event)" [ngClass]="{
+            <textarea class="widget-chat-composer" #messageComposer [attr.data-emoji-picker]="enableEmoji" matInput
+              id="messageTextarea" cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
+              cdkAutosizeMaxRows="4" placeholder="Type Message Here ..." #message maxlength="{{ messageLimit }}"
+              [(ngModel)]="text" (change)="textChanged()" (focus)="onTextAreaFocus()" (keyup)="onKeyPress($event)"
+              (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)" (keyup.enter)="onEnterKey($event)"
+              [ngClass]="{
                 'error-border': text.length == messageLimit,
                 'resize-left': enableEmoji === false,
                 'resize-right': enableFileTransfer === false
@@ -1423,7 +1903,7 @@
                 accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp,.pptx,.ppt"
                 id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
             </div>
-            <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined send-btn" 
+            <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined send-btn"
               *ngIf="isTyping" (click)="onSendMessage(messageComposer.value);">
               send
             </span>
@@ -1554,6 +2034,7 @@
                         : ''
                     " [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
                       border: isMaxLengthError(
+                        0,
                         attribute.key,
                         attribute.valueType
                       )
@@ -1573,6 +2054,7 @@
                       [placeholder]="attribute.helpText" class="widget-form-control" [required]="attribute?.isRequired"
                       [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
                       border: isMaxLengthError(
+                        0,
                         attribute.key,
                         attribute.valueType
                       )
@@ -1587,6 +2069,7 @@
                       class="widget-form-control" [required]="attribute?.isRequired" minlength="8" maxlength="256"
                       [ngStyle]="{
                       border: isMaxLengthError(
+                        0,
                         attribute.key,
                         attribute.valueType
                       )
@@ -1603,6 +2086,7 @@
                         : ''
                     " [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
                       border: isMaxLengthError(
+                        0,
                         attribute.key,
                         attribute.valueType
                       )
@@ -1613,14 +2097,15 @@
                     <div class="file-upload-wrapper" *ngIf="attribute.valueType === 'file'">
                       <div class="file-input-container">
                         <input type="file" [required]="attribute?.isRequired" (change)="
-                          uploadFileFromForm(
-                            $event,
-                            attribute.key,
-                            attribute.fileData.restrictFile,
-                            attribute.fileData.fileExtension
-                          )
+                        uploadFileFromForm(
+                          $event,
+                          attribute.key,
+                          attribute.fileData.restrictFile,
+                          attribute.fileData.fileExtension
+                        )
+
                         " class="file-input" />
-                        <span class="input-label">Choose File</span>
+                        <!-- <span class="input-label">Choose File</span> -->
                       </div>
                       <div *ngIf="fileName" class="file-link-container">
                         <a target="_blank" [href]="fileUrl">{{
@@ -1645,6 +2130,7 @@
                       [placeholder]="attribute.helpText" class="widget-form-control" [required]="attribute?.isRequired"
                       [attr.maxlength]="2001" [attr.minlength]="1" [ngStyle]="{
                       border: isMaxLengthError(
+                        0,
                         attribute.key,
                         attribute.valueType
                       )
@@ -1682,7 +2168,7 @@
                       {{ getLabel(attribute.valueType) }} does not match the
                       required format
                     </span>
-                    <span *ngIf="isMaxLengthError(attribute.key, attribute.valueType)" class="field-error">
+                    <span *ngIf="isMaxLengthError(0,attribute.key, attribute.valueType)" class="field-error">
                       Maximum limit reached
                     </span>
                   </div>
@@ -1962,6 +2448,7 @@
         </button>
       </div>
     </div>
+
   </ng-container>
 </div>
 

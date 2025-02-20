@@ -22,7 +22,7 @@ function widgetConfigs(ccmUrl, widgetIdentifier, callback) {
  * @param {*} callback
  */
 function getPreChatForm(formUrl, formId, callback) {
-  fetch(`${formUrl}/forms/${formId}`)
+  fetch(`${formUrl}/forms/getFormById/${formId}`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
