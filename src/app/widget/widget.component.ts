@@ -289,12 +289,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async ngAfterViewInit(): Promise<void> {
+    // console.log("ngAfterViewInit....webRTCConfig ", this.webRTCConfig)
     // Load the standalone WebRTC Authentication screen or the active chat screen depending on whether the user is coming from a secure link or not.
-    if (this.standaloneWebRtc) {
-        await this.authenticateToken(false);
-        this.changeScreen('webRtcScreen');
-    } else {
-        this.customerChatResumed();
+    // if (this.standaloneWebRtc) {
+    //     await this.authenticateToken(false);
+    //     this.changeScreen('webRtcScreen');
+    // } else {
+    //     this.customerChatResumed();
+    //     console.log('Not Secure Chat View');
+    // }
+
+    if(!this.standaloneWebRtc) {
+      this.customerChatResumed();
         console.log('Not Secure Chat View');
     }
 
@@ -618,7 +624,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return false;
   }
 
-  setWidgetConfigs(configs: any) {
+  async setWidgetConfigs(configs: any) {
     this.title = configs.title;
     this.subtitle = configs.subTitle;
     this.theme = configs.theme;
@@ -633,29 +639,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.enableWebRtc = configs.webRtc.enableWebRtc;
       console.log('List of webRTC Configs: ', this.webRTCConfig);
 
-      if(!this.IsRegisteredInFreeSwitch && this.standaloneWebRtc) {
-        this.logInToFreeSwitch;
+      if(this.standaloneWebRtc) {
+        await this.authenticateToken(false);
+        this.changeScreen('webRtcScreen');
       }
-
-      // Check if the input string contains a hyphen
-      // for extention ranges purposes...
-
-
-      // if (this.webRTCConfig.sipExtension.includes('-')) {
-      //   let selectedSipExtension = this.pickSipExtension(
-      //     this.webRTCConfig.sipExtension,
-      //   );
-
-      //   if (this.webRTCConfig.sipExtension) {
-      //     let selectedSipExtension = this.webRTCConfig.sipExtension
-      //   this.webRTCConfig.sipExtension = selectedSipExtension.toString();
-      //   console.log(
-      //     'sipExtension range: <==',
-      //     selectedSipExtension,
-      //     this.webRTCConfig,
-      //   );
-      // }
-      // if (this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
 
     }
 
@@ -980,7 +967,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.cdRef.detectChanges()
   }
 
-  changeView(view: any) {
+  async changeView(view: any) {
     if (this.showInvalidCodeError && this.standaloneWebRtc) {
       this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
         duration: 3000,
@@ -1086,7 +1073,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
           this.isSecureWebCall = false;
-          this.logInToFreeSwitch();
+          if(!this.IsRegisteredInFreeSwitch) {
+            await this.logInToFreeSwitch();
+          }
           this.initiateWebRtcCall(view);
         }
         break;
@@ -2702,18 +2691,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             return;
         }
 
-        try {
-          await this.logInToFreeSwitch();
-      } catch (error) {
-          console.error("Error logging into FreeSwitch:", error);
-          return;
-      }
         this.agentName = res.data.agentName;
         res.data.diallingUri = this.webRTCConfig.diallingUri;
         this.showAuthenticationResponseMessage = res.message;
         this.showInvalidCodeError = false;
         this.setAuthorizedResponse = res.data; // Now includes diallingUri
 
+        try {
+          if(this.webRTCConfig && !this.IsRegisteredInFreeSwitch) {
+            await this.logInToFreeSwitch();
+          }
+      } catch (error) {
+          console.error("Error logging into FreeSwitch:", error);
+          return;
+      } 
         if (isAuthenticated) {
             this.changeView('secureWebVideoCall');
             return;
@@ -2736,9 +2727,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const urlParams = new URLSearchParams(queryString);
     const encryptedKey = urlParams.get('encryptedKey');
     this.webRtcSecureLink = encryptedKey;
+
+    // Just for Debugging
+    // const baseUrl = "http://localhost:4000/#/widget?widgetIdentifier=voice";
+    // const fullUrl = `${baseUrl}&encryptedKey=${(encryptedKey)}`;
+    // window.open(fullUrl, '_blank');
+
     const widgetIdentifier = urlParams.get('widgetIdentifier')
     if (widgetIdentifier === this.widgetIdentifier && !this.errorDuringWebRTCCall) {
-      this.authenticateToken(true);
+        this.authenticateToken(true);
     } else {
       console.warn('[Warning] Widget Identifiers do not match or there was an error during WebRTC call.');
 
