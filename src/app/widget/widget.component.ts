@@ -288,22 +288,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.isUsernameEnabled = __appConfig.appConfig.USERNAME_ENABLED
   }
 
-  ngAfterViewInit(): void {
-    // Load the standalone webRtc Authentication screen or the active chat screen depending on whether the user is coming from secure link or not.
+  async ngAfterViewInit(): Promise<void> {
+    // Load the standalone WebRTC Authentication screen or the active chat screen depending on whether the user is coming from a secure link or not.
     if (this.standaloneWebRtc) {
-      this.authenticateToken(false);
+        await this.authenticateToken(false);
+        this.changeScreen('webRtcScreen');
     } else {
-      this.customerChatResumed();
-      console.log('Not Secure Chat View');
+        this.customerChatResumed();
+        console.log('Not Secure Chat View');
     }
-    // Set the Customer widget Theme Color based on Configurations coming from unified admin's web widget settings
+
+    // Set the Customer Widget Theme Color based on Configurations from Unified Admin's Web Widget settings
     setTimeout(() => {
-      (this.el.nativeElement as HTMLElement).style.setProperty(
-        '--main-color',
-        this.theme,
-      );
+        (this.el.nativeElement as HTMLElement).style.setProperty('--main-color', this.theme);
     }, 1000);
-  }
+}
+
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params: { [x: string]: any }) => {
@@ -2142,8 +2142,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.channelCustomerIdentifier,
       );
     } else {
-      localStorage.removeItem('widget-error');
-      this.changeScreen('widget');
+        localStorage.removeItem('widget-error');
+        this.changeScreen('widget');
     }
   }
 
@@ -2237,11 +2237,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   logInToFreeSwitch() {
 
-    if (this.webRTCConfig.sipExtension) {
+    if (!this.IsRegisteredInFreeSwitch && this.webRTCConfig.sipExtension) {
       let selectedSipExtension = this.webRTCConfig.sipExtension
       this.webRTCConfig.sipExtension = selectedSipExtension.toString();
     }
-    if (this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
+    if (!this.IsRegisteredInFreeSwitch && this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
   }
   // Audio Functions
   toggleCallMic() {
@@ -2682,36 +2682,46 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return { intent: null, entities: null };
   }
 
-  authenticateToken(isAuthenticated: boolean): void {
+  async authenticateToken(isAuthenticated: boolean): Promise<void> {
+    
     this.dialogId = undefined;
     const roomId = this.webRtcSecureLink;
-    this.sdk.authenticateRoomId({ roomId }, (res: any) => {
-      if (res.error) {
-        this.isSecureLinkExpired = true;
-        this.showAuthenticationResponseMessage = res.data.message
-          ? "The link has expired"
-          : res.message;
-        this.showInvalidCodeError = true;
+
+    this.sdk.authenticateRoomId({ roomId }, async (res: any) => {
+        if (res.error) {
+            this.isSecureLinkExpired = true;
+            this.showAuthenticationResponseMessage = res.data.message
+                ? "The link has expired"
+                : res.message;
+            this.showInvalidCodeError = true;
+            return;
+        }
+
+        try {
+          await this.logInToFreeSwitch();
+      } catch (error) {
+          console.error("Error logging into FreeSwitch:", error);
+          return;
       }
-      else {
-        this.logInToFreeSwitch();
         this.agentName = res.data.agentName;
         res.data.diallingUri = this.webRTCConfig.diallingUri;
         this.showAuthenticationResponseMessage = res.message;
         this.showInvalidCodeError = false;
         this.setAuthorizedResponse = res.data; // Now includes diallingUri
+
         if (isAuthenticated) {
-          this.changeView('secureWebVideoCall');
+            this.changeView('secureWebVideoCall');
+            return;
         }
-        else {
-          if (this.setAuthorizedResponse) {
-            this.standaloneWebRtc = true;
-            this.changeScreen('webRtcScreen');
-          }
+
+        if (!this.setAuthorizedResponse) {
+            return;
         }
-      }
+
+        this.standaloneWebRtc = true;
     });
-  }
+}
+
 
   processSecureLinkMessage(message: any) {
 
@@ -2740,12 +2750,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return;
   }
 
-  pickSipExtension(sipExtensions: any) {
-    const [startExt, endExt] = sipExtensions.split('-');
-    const minExt = parseInt(startExt, 10);
-    const maxExt = parseInt(endExt, 10);
-    return Math.floor(Math.random() * (maxExt - minExt)) + minExt;
-  }
+  // pickSipExtension(sipExtensions: any) {
+  //   const [startExt, endExt] = sipExtensions.split('-');
+  //   const minExt = parseInt(startExt, 10);
+  //   const maxExt = parseInt(endExt, 10);
+  //   return Math.floor(Math.random() * (maxExt - minExt)) + minExt;
+  // }
   getLabel(valueType: string): string {
     return this.dictionary[valueType] || valueType; // Return the  to valueType matchinf value from the dict
   }
