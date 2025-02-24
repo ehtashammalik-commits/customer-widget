@@ -8,12 +8,11 @@ declare var widgetConfigs: any,
   establishConnection: any,
   setConversationDataByCustomerIdentifier: any,
   chatRequest: any,
-  sendMessage: any,
+  sendChatMessage: any,
   uploadToFileEngine: any,
   chatEnd: any,
   resumeChat: any,
   webhookNotifications: any,
-  videoControl: any,
   postMessages: any,
   callbackRequest: any,
   authenticateRequest: any,
@@ -271,8 +270,7 @@ export class SdkService implements OnInit {
 
   sendChatMessage(payload: any) {
     console.log('Customer Message Payload:', payload);
-    sendMessage(payload);
-
+    sendChatMessage(payload);
   }
 
   moveToFileServer(filePayload: any, callback: any) {
@@ -395,9 +393,28 @@ export class SdkService implements OnInit {
     postMessages(callStatePayload);
   }
 
-  handleCallVideo() {
-    console.log('handle video show/hide in sdk service');
-    videoControl();
+  convertCall(streamStatus: any, streamType: any, sessionDialogId: any) {
+    try {
+      const callConvertPayload = {
+        action: "convertCall", //audio/video/screenshare/onlyviewscreenshare
+        parameter: {
+
+          dialogId: sessionDialogId,
+          clientCallbackFunction: (res: any) => {
+            this.onWebRtcCallSubject.next(res);
+          },
+          streamStatus: streamStatus, ////on , off
+          streamType: streamType  //screenshare, video
+        }
+
+      }
+      console.log("convertCall==>", callConvertPayload);
+      postMessages(callConvertPayload);
+
+    }
+    catch (e) {
+      console.error(e);
+    }
   }
 }
 

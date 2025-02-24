@@ -1,4 +1,4 @@
-const { customerWidgetUrl, serviceIdentifier, widgetIdentifier } = __cim;
+const { customerWidgetUrl, serviceIdentifier, widgetIdentifier, Source } = __cim;
 const priorityCookies = ['mtc_id', '_ga']; // Add any other cookies you want to prioritize
 window.dataLayer = window.dataLayer || [];
 function getCookieValue(cookieName) {
@@ -30,8 +30,12 @@ params.append('widgetIdentifier', encodeURIComponent(widgetIdentifier));
 params.append('serviceIdentifier', encodeURIComponent(serviceIdentifier));
 params.append('channelCustomerIdentifier', channelCustomerIdentifier);
 
-const URL = `${customerWidgetUrl}/#/widget?${params.toString()}`;
+params.append('Source', Source);
+if (Source == 'UApp') {
+  params.append('msisdn', __cim.msisdn);
+}
 
+const URL = `${customerWidgetUrl}/#/widget?${params.toString()}`;
 var parentSection = document.createElement('div');
 parentSection.setAttribute('id', 'init_widget_main');
 parentSection.style.border = '0';
@@ -39,8 +43,10 @@ parentSection.style.float = 'right';
 parentSection.style.position = 'fixed';
 parentSection.style.bottom = '0';
 parentSection.style.right = '0';
-parentSection.style.width = '355px';
-parentSection.style.height = '665px';
+// parentSection.style.width = '355px';
+// parentSection.style.height = '665px';
+parentSection.style.width = '100px';
+parentSection.style.height = '80px';
 parentSection.style.background = 'transparent';
 parentSection.style.maxWidth = '100%';
 parentSection.style.maxHeight = 'calc(100% - 0px)';
@@ -65,6 +71,7 @@ chatIframe.style.minWidth = '0px';
 chatIframe.style.background = 'transparent';
 document.body.appendChild(parentSection);
 parentSection.appendChild(chatIframe);
+
 
 function browserInfoDataToIframe() {
   const data = __cim;
@@ -96,5 +103,31 @@ window.addEventListener('message', (event) => {
     }
     window.dataLayer.push(dataLayerObj);
     console.log('Received Message for GTM', event.data.data);
+    return;
+  }
+
+  // if (`${event.origin}/customer-widget` !== __cim.customerWidgetUrl) {
+  //   // Ignore messages from unknown origins
+  //   return;
+  // }
+  console.log("message call ", event.data)
+  if (event.data.state == 'icon-view') {
+    parentSection.style.width = '100px';
+    parentSection.style.height = '80px';
+  }
+  if (event.data.state == 'wraper-view') {
+    parentSection.style.width = '312px';
+    parentSection.style.height = '290px';
+  }
+  if (event.data.state == 'form-view') {
+    if (Source == 'UApp') {
+      parentSection.style.width = '100%';
+      parentSection.style.height = '100%';
+    }
+    else {
+      parentSection.style.width = (currentWindowWidth > 440) ? '360px' : 'calc(100% - 5vw)';
+      parentSection.style.height = '665px';
+    }
+
   }
 }, false);
