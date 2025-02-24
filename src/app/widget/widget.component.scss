@@ -2417,7 +2417,7 @@ mat-spinner {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 25px;
   margin-top: $emoji-margin;
   margin-right: 10px;
 }
@@ -2571,17 +2571,17 @@ mat-spinner {
 
 .category-label {
   font-size: 12px;
-  font-weight: 550;
+  font-weight: 500;
   color: #374151;
   margin-bottom: 0 !important;
-  margin-top: 5px;
+  margin-top: 0 !important;
 }
 
 .checkbox-label {
   display: flex !important;
   align-items: center;
   gap: 8px;
-  padding: 4px 0;
+  // padding: 4px 0;
   cursor: pointer;
   width: 35%;
 }
@@ -2613,6 +2613,16 @@ mat-spinner {
     align-items: center;
   }
 
+}
+
+
+.optionLabelStyle {
+  font-family: 'Roboto' !important;
+  font-size: 12px !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  text-align: left !important;
+  color: #454545 !important;
 }
 
 .input-radio {
@@ -2798,7 +2808,7 @@ mat-spinner {
   position: relative;
   width: 34px;
   // height: 60px;
-  background: #000000;
+  background: transparent;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   margin: 0px 0 0 12px;
@@ -2853,7 +2863,7 @@ mat-spinner {
 .preview-image {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;
+  // object-fit: contain;
   border-radius: 4px;
 
 }
@@ -2971,7 +2981,7 @@ mat-spinner {
   flex-direction: column;
 
   .sectionTitle {
-    color: #555555 !important;
+    color: #454545 !important;
     font-size: 16px !important;
     font-weight: 500 !important;
     font-family: 'Roboto' !important;
@@ -2979,12 +2989,12 @@ mat-spinner {
   }
 
   .sectionDescription {
-
-    color: #555555 !important;
-    font-size: 16px !important;
-    font-weight: 400 !important;
     font-family: 'Roboto' !important;
     font-size: 12px !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    text-align: left !important;
+    color: #454545 !important;
 
   }
 }
@@ -3005,10 +3015,16 @@ mat-spinner {
   padding-top: 5px;
 
   .attributeName {
-    font-weight: 400 !important;
-    font-family: 'Roboto' !important;
-    font-size: 14px !important;
-    color: #555555 !important;
+    // font-weight: 400 !important;
+    // font-family: 'Roboto' !important;
+    // font-size: 14px !important;
+    // color: #555555 !important;
+    font-family: 'Roboto';
+    font-size: 12px;
+    font-weight: 500;
+    font-style: normal;
+    text-align: left;
+    color: #454545;
   }
 }
 
@@ -3066,19 +3082,38 @@ input[type='radio'] {
   height: 96% !important;
   overflow-y: scroll;
 
-  .divider {
-    display: none !important;
-  }
+  // .divider {
+  //   display: none !important;
+  // }
 }
 
 .optionLabel {
-  font-family: 'Roboto';
-  font-weight: 500;
-  font-size: 11px;
-  color: #555555;
+  font-family: 'Roboto' !important;
+  font-size: 12px !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  text-align: left !important;
+  color: #454545 !important;
 }
 
 .mcqAttribute {
   // width: 100%;
   margin-left: 15px;
+}
+
+
+
+:host ::ng-deep .mat-radio-container {
+  height: 14px;
+  width: 14px;
+}
+
+:host ::ng-deep .mat-radio-outer-circle {
+  height: 14px;
+  width: 14px;
+}
+
+:host ::ng-deep .mat-radio-inner-circle {
+  height: 14px;
+  width: 14px;
 }

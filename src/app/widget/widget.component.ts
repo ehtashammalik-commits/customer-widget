@@ -1378,7 +1378,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               'conversationId',
               event.data.header.conversationId,
             );
-            console.log('this.preChatFormData============>', this.preChatFormData)
+            console.log('this.preChatFormData==============>', this.preChatFormData)
             this.sdk.setConversationDataAgainstCustomerIdentifier(
               this.customerData.channelCustomerIdentifier,
               this.preChatFormData,
@@ -3132,7 +3132,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         const fileName = `${this.__appConfig.appConfig?.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
         this.setFileControl(sectionIndex, fileName, controlName)
         // this.snackBar.("success-snackbar", 'file uploaded successfully', 3)
-        this.snackBar.open('file uploaded successfully', 'X', {
+        this.snackBar.open('File uploaded successfully', 'X', {
           panelClass: 'custom-snackbar',
         });
         console.log(res)

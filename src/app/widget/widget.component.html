@@ -247,6 +247,7 @@
                       ![
                         'file',
                         'dateTime',
+                        'date',
                         'paragraph',
                         'shortAnswer',
                         'Password',
@@ -454,9 +455,9 @@
 
               <!-- Dynamic form prechat form fields -->
               <!-- widget-form-group -->
-              <div class="preChatForm preChat-widget-form-group "
-                [ngClass]="formData.length == 1 ? 'noSection':'section-area'"
-                *ngFor="let section of formData; let i = index" [formGroupName]="i">
+              <div class="preChatForm preChat-widget-form-group section-area "
+                [ngClass]="formData.length == 1 ? 'noSection':''" *ngFor="let section of formData; let i = index"
+                [formGroupName]="i">
                 <div class="preChatFormInfo" *ngIf="formData.length > 1">
 
                   <span class="sectionTitle">{{section.sectionName}}</span>
@@ -475,7 +476,7 @@
                         <ng-container *ngSwitchCase="'INPUT'">
                           <label class="questionLabel">
                             <ng-container *ngIf="attribute.valueType === 'file'">
-                              <span class="dot-icon"></span>
+                              <!-- <span class="dot-icon"></span> -->
                               <span class="attributeName filetypeAttribute" id="{{ attribute.key }}">
                                 <span>
                                   {{ attribute.label }}
@@ -496,7 +497,7 @@
 
                             </ng-container>
                             <ng-container *ngIf="attribute?.valueType !== 'file'">
-                              <span class="dot-icon"></span>
+                              <!-- <span class="dot-icon"></span> -->
                               <span class="attributeName" id="{{ attribute.key }}">{{
                                 attribute.label
                                 }}</span>
@@ -505,7 +506,7 @@
                           </label>
                           <!-- Regular Input Fields -->
                           <ng-container
-                            *ngIf="!['file', 'dateTime','time', 'paragraph', 'shortAnswer', 'Password', 'password', 'alphaNumeric', 'alphaNumericSpecial', 'number', 'positiveNumber'].includes(attribute.valueType)">
+                            *ngIf="!['file', 'dateTime','date','time', 'paragraph', 'shortAnswer', 'Password', 'password', 'alphaNumeric', 'alphaNumericSpecial', 'number', 'positiveNumber'].includes(attribute.valueType)">
 
                             <input matInput id="{{ attribute.key }}" type="{{ attribute.valueType }}"
                               class="widget-form-control" [formControlName]="attribute.key"
@@ -714,6 +715,21 @@
 
                           </div>
 
+                          <!-- Date Input -->
+                          <ng-container *ngIf="attribute.valueType === 'date'">
+                            <!-- <mat-form-field style="width: 100%;"
+                                  appearance="outline"> -->
+                            <div class="dateTime">
+                              <span class="dateTime-icon" (click)="dateInput.showPicker()">
+                                <mat-icon>date_range</mat-icon>
+                              </span>
+                              <input #dateInput id="date" matInput type="date" [formControlName]="attribute.key"
+                                class="widget-form-control custom-date-input" [required]="attribute?.isRequired" />
+                            </div>
+
+
+                            <!-- </mat-form-field> -->
+                          </ng-container>
                           <!-- DateTime Input -->
                           <ng-container *ngIf="attribute.valueType === 'dateTime'">
                             <!-- <mat-form-field style="width: 100%;"
@@ -748,7 +764,7 @@
                         <!-- TEXTAREA Fields -->
                         <ng-container *ngSwitchCase="'TEXTAREA'">
                           <label class="questionLabel">
-                            <span class="dot-icon"></span>
+                            <!-- <span class="dot-icon"></span> -->
                             <span class="attributeName" id="{{ attribute.key }}">{{
                               attribute.label
                               }}</span>
@@ -770,7 +786,7 @@
                           <ng-container [ngSwitch]="attribute.valueType">
                             <ng-container *ngSwitchCase="'mcq'">
                               <label class="questionLabel">
-                                <span class="dot-icon"></span>
+                                <!-- <span class="dot-icon"></span> -->
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -784,9 +800,9 @@
                                       <mat-radio-button [disableRipple]="true" [value]="option.label">
                                         {{ option.label }}
                                       </mat-radio-button>
-                                      <div class="optionDivider"
+                                      <!-- <div class="optionDivider"
                                         *ngIf="attribute.attributeOptions.attributeData[0].values.length - 1 != optionIndex">
-                                      </div>
+                                      </div> -->
                                     </div>
                                   </ng-container>
                                 </mat-radio-group>
@@ -805,7 +821,7 @@
                             <!-- DROPDOWN Question ValueType -->
                             <ng-container *ngSwitchCase="'dropdown'">
                               <label class="questionLabel">
-                                <span class="dot-icon"></span>
+                                <!-- <span class="dot-icon"></span> -->
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -827,7 +843,7 @@
 
                             <ng-container *ngSwitchCase="'checkbox'">
                               <label class="questionLabel">
-                                <span class="dot-icon"></span>
+                                <!-- <span class="dot-icon"></span> -->
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -862,7 +878,7 @@
 
                             <ng-container *ngSwitchCase="'boolean'">
                               <label class="questionLabel">
-                                <span class="dot-icon"></span>
+                                <!-- <span class="dot-icon"></span> -->
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -880,11 +896,11 @@
                                                   alt="boolean-option" width="35"
                                                   height="35"> -->
                                     <div
-                                      [innerHtml]="option.optionStyle.media | svgFormat:'imageSvg':'28px':'28px':('option-' + 0 + '-' + i + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type) | async ">
+                                      [innerHtml]="option.optionStyle.media | svgFormat:'imageSvg':'32px':'32px':('option-' + 0 + '-' + i + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type) | async ">
                                     </div>
 
 
-                                    <span>{{ option.label }}</span>
+                                    <span class="optionLabelStyle">{{ option.label }}</span>
                                   </label>
                                 </ng-container>
                                 <ng-template #simpleBoolean>
@@ -892,7 +908,7 @@
                                     class="radio-label">
                                     <input class="input-radio" type="radio" [formControlName]="attribute.key"
                                       [name]="attribute.key" [value]="option.value">
-                                    <span>{{ option.label }}</span>
+                                    <span class="optionLabelStyle">{{ option.label }}</span>
                                   </label>
                                 </ng-template>
                               </div>
@@ -904,7 +920,7 @@
                               <ng-container
                                 *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type=='star' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'filled' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'outlined'">
                                 <label class="questionLabel">
-                                  <span class="dot-icon"></span>
+                                  <!-- <span class="dot-icon"></span> -->
                                   <span class="attributeName" id="{{ attribute.key }}">{{
                                     attribute.label
                                     }}</span>
@@ -937,7 +953,7 @@
 
 
 
-                                    <span class="optionLabel">{{ option.label }}</span>
+                                    <span class="optionLabel optionLabelStyle">{{ option.label }}</span>
                                   </label>
                                 </div>
                               </ng-container>
@@ -945,7 +961,7 @@
                               <ng-container
                                 *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type == 'scale'">
                                 <label class="questionLabel">
-                                  <span class="dot-icon"></span>
+                                  <!-- <span class="dot-icon"></span> -->
                                   <span class="attributeName" id="{{ attribute.key }}">{{
                                     attribute.label
                                     }}</span>
@@ -969,7 +985,7 @@
                                           class="scale_line"></div>
                                       </div>
 
-                                      <span class="optionLabel">{{ option.label }}</span>
+                                      <span class="optionLabel optionLabelStyle">{{ option.label }}</span>
                                     </label>
 
                                   </div>
@@ -980,7 +996,7 @@
                                 class="rating-container  option_field for-linearscale-only ratingbar-attribute"
                                 id="optionBar" [attr.data-required]="attribute.isRequired">
                                 <label class="questionLabel">
-                                  <span class="dot-icon"></span>
+                                  <!-- <span class="dot-icon"></span> -->
                                   <span class="attributeName" id="{{ attribute.key }}">{{
                                     attribute.label
                                     }}</span>
@@ -1000,7 +1016,7 @@
                                       <div class="point "></div>
                                     </div>
 
-                                    <p class="bar-info">{{ option.label }}
+                                    <p class="bar-info optionLabelStyle">{{ option.label }}
                                     </p>
                                   </div>
                                 </div>
@@ -1026,7 +1042,7 @@
                                               }}</label>
                                       </div> -->
                                 <label class="questionLabel">
-                                  <span class="dot-icon"></span>
+                                  <!-- <span class="dot-icon"></span> -->
                                   <span class="attributeName" id="{{ attribute.key }}">{{
                                     attribute.label
                                     }}</span>
@@ -1035,7 +1051,7 @@
                                 <div>
                                   <div class="mcqAttribute"> <mat-radio-group class="radio_option"
                                       [formControlName]="attribute.key" required>
-                                      <mat-radio-button
+                                      <mat-radio-button [disableRipple]="true"
                                         *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
                                         [value]="option.label">
                                         {{ option.label }}
@@ -1055,7 +1071,7 @@
                             </ng-container>
                             <ng-container *ngSwitchCase="'nps'">
                               <label class="questionLabel">
-                                <span class="dot-icon"></span>
+                                <!-- <span class="dot-icon"></span> -->
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -1081,14 +1097,14 @@
 
                                 <div class="nps-label">
                                   <div>
-                                    <p class="nps-side-label nps-p-right scale-info optionLabel ">
+                                    <p class="nps-side-label nps-p-right scale-info optionLabel optionLabelStyle">
                                       {{
                                       attribute?.attributeOptions?.attributeData[0]?.values[0].label
                                       }}
                                     </p>
                                   </div>
                                   <div>
-                                    <p class="nps-side-label nps-p-left scale-info optionLabel">
+                                    <p class="nps-side-label nps-p-left scale-info optionLabel optionLabelStyle">
                                       {{
                                       attribute?.attributeOptions?.attributeData[0]?.values[10]?.label
                                       }}
