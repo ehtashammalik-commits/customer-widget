@@ -1,5 +1,6 @@
 const { customerWidgetUrl, serviceIdentifier, widgetIdentifier, Source } = __cim;
 const priorityCookies = ['mtc_id', '_ga']; // Add any other cookies you want to prioritize
+var currentWindowWidth = window.innerWidth;
 window.dataLayer = window.dataLayer || [];
 function getCookieValue(cookieName) {
   const cookies = document.cookie.split('; ');

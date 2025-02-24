@@ -454,9 +454,9 @@
 
               <!-- Dynamic form prechat form fields -->
               <!-- widget-form-group -->
-              <div class="preChatForm section-area preChat-widget-form-group "
-                [ngClass]="formData.length == 1 ? 'noSection':''" *ngFor="let section of formData; let i = index"
-                [formGroupName]="i">
+              <div class="preChatForm preChat-widget-form-group "
+                [ngClass]="formData.length == 1 ? 'noSection':'section-area'"
+                *ngFor="let section of formData; let i = index" [formGroupName]="i">
                 <div class="preChatFormInfo" *ngIf="formData.length > 1">
 
                   <span class="sectionTitle">{{section.sectionName}}</span>
@@ -776,7 +776,7 @@
                                   }}</span>
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                               </label>
-                              <div style="width: 100%;">
+                              <div class="mcqAttribute">
                                 <mat-radio-group class="radioGroup" [formControlName]="attribute.key">
                                   <ng-container
                                     *ngFor="let option of attribute.attributeOptions.attributeData[0].values; let optionIndex = index">
@@ -880,7 +880,7 @@
                                                   alt="boolean-option" width="35"
                                                   height="35"> -->
                                     <div
-                                      [innerHtml]="option.optionStyle.media | svgFormat:'imageSvg':'32px':'32px':('option-' + 0 + '-' + i + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type) | async ">
+                                      [innerHtml]="option.optionStyle.media | svgFormat:'imageSvg':'28px':'28px':('option-' + 0 + '-' + i + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type) | async ">
                                     </div>
 
 
@@ -1033,8 +1033,8 @@
                                   <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                                 </label>
                                 <div>
-                                  <div style="width: 100%;">
-                                    <mat-radio-group class="radio_option" [formControlName]="attribute.key" required>
+                                  <div class="mcqAttribute"> <mat-radio-group class="radio_option"
+                                      [formControlName]="attribute.key" required>
                                       <mat-radio-button
                                         *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
                                         [value]="option.label">

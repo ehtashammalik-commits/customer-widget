@@ -912,6 +912,7 @@ button.close-widget-wrapper {
   color: $white-color !important;
   background: var(--main-color) !important;
 }
+
 .focus-icon-video {
   color: $white-color !important;
   background: var(--main-color) !important;
@@ -2193,6 +2194,7 @@ mat-spinner {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+
   span {
     display: inline-block;
   }
@@ -2417,6 +2419,7 @@ mat-spinner {
   justify-content: center;
   gap: 18px;
   margin-top: $emoji-margin;
+  margin-right: 10px;
 }
 
 .scaleTypeQuestions {
@@ -3073,4 +3076,9 @@ input[type='radio'] {
   font-weight: 500;
   font-size: 11px;
   color: #555555;
+}
+
+.mcqAttribute {
+  // width: 100%;
+  margin-left: 15px;
 }
