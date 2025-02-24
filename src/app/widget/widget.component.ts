@@ -1263,7 +1263,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               'conversationId',
               event.data.header.conversationId,
             );
-
+            console.log('this.preChatFormData============>', this.preChatFormData)
             this.sdk.setConversationDataAgainstCustomerIdentifier(
               this.customerData.channelCustomerIdentifier,
               this.preChatFormData,
@@ -3158,5 +3158,5 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (!fileUrl) return;
     window.open(fileUrl, '_blank');
   }
-  
+
 }

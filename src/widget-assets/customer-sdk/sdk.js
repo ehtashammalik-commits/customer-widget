@@ -22,7 +22,7 @@ function widgetConfigs(ccmUrl, widgetIdentifier, callback) {
  * @param {*} callback
  */
 function getPreChatForm(formUrl, formId, callback) {
-  fetch(`${formUrl}/forms/getFormById/${formId}`)
+  fetch(`${formUrl}/forms/${formId}`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
@@ -536,7 +536,7 @@ function getCalendarId(url, serviceIdentifier, callback) {
     });
 }
 
-function getCalendarEvents(calendarId,url, startTime,endTime,callback) {
+function getCalendarEvents(calendarId, url, startTime, endTime, callback) {
   fetch(`${url}/calendars/events?&calendarId=${calendarId}&startTime=${startTime}&endTime=${endTime}`)
     .then(response => response.json())
     .then((data) => {
