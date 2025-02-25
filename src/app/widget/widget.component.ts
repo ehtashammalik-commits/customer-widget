@@ -323,8 +323,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         : null;
       if (rawEncryptedKey !== null) {
         console.log("rawEncrypedKey", rawEncryptedKey)
-        // Directly replace spaces with '+' if you're sure there should be no spaces
-        this.webRtcSecureLink = rawEncryptedKey;
+        // Replace spaces with '+' signs
+        this.webRtcSecureLink = rawEncryptedKey ? rawEncryptedKey.replace(/\s/g, '+') : null;
       } else {
         this.webRtcSecureLink = null;
       }
