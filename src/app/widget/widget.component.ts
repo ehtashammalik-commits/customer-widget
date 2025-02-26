@@ -318,16 +318,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.widgetIdentifier = params['widgetIdentifier'];
 
       // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
-      const rawEncryptedKey = params['encryptedKey']
-        ? params['encryptedKey']
-        : null;
-      if (rawEncryptedKey !== null) {
-        console.log("rawEncrypedKey", rawEncryptedKey)
-        // Replace spaces with '+' signs
-        this.webRtcSecureLink = rawEncryptedKey ? rawEncryptedKey.replace(/\s/g, '+') : null;
-      } else {
-        this.webRtcSecureLink = null;
-      }
+      const rawEncryptedKey = params['encryptedKey']? params['encryptedKey']: null;
+      this.webRtcSecureLink = rawEncryptedKey ? decodeURIComponent(rawEncryptedKey) : null;
+      console.log("rawEncryptedKey:", this.webRtcSecureLink);
       if (this.webRtcSecureLink != undefined && this.webRtcSecureLink != '') {
         this.standaloneWebRtc = true;
         if (this.widgetIdentifier == undefined || this.widgetIdentifier == '') {
@@ -335,11 +328,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             'Error: Please check with Administrator. Widget identifier is missing!!!',
           );
         }
-        console.log(
-          'Secure Link:',
-          this.webRtcSecureLink,
-          this.widgetIdentifier,
-        );
       } else {
         this.standaloneWebRtc = false;
         if (
