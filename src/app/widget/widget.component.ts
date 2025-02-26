@@ -323,9 +323,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       if (rawEncryptedKey !== null) {
         const preservedKey = decodeURIComponent(rawEncryptedKey).replace(/\s/g, "+");
-        this.webRtcSecureLink = preservedKey ? decodeURIComponent(preservedKey) : null;
+        this.webRtcSecureLink = preservedKey
         console.log("EncryptedKey",this.webRtcSecureLink);
-        this.webRtcSecureLink = rawEncryptedKey ? rawEncryptedKey.replace(/\s/g, '+') : null;
       } else {
         this.webRtcSecureLink = null;
       }
@@ -2722,7 +2721,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const queryString = mediaUrl.split('?')[1];
     const urlParams = new URLSearchParams(queryString);
     const encryptedKey = urlParams.get('encryptedKey');
-    this.webRtcSecureLink = encryptedKey;
+    const preservedKey = decodeURIComponent(encryptedKey ?? "").replace(/\s/g, "+");
+    this.webRtcSecureLink = preservedKey;
 
     // Just for Debugging
     // const baseUrl = "http://localhost:4000/#/widget?widgetIdentifier=voice";
