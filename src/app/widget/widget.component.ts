@@ -318,10 +318,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.widgetIdentifier = params['widgetIdentifier'];
 
       // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
+
       const rawEncryptedKey = params['encryptedKey']? params['encryptedKey']: null;
-      const preservedKey = decodeURIComponent(rawEncryptedKey).replace(/\s/g, "+");
-      this.webRtcSecureLink = preservedKey ? decodeURIComponent(preservedKey) : null;
-      console.log("EncryptedKey",this.webRtcSecureLink);
+
+      if (rawEncryptedKey !== null) {
+        const preservedKey = decodeURIComponent(rawEncryptedKey).replace(/\s/g, "+");
+        this.webRtcSecureLink = preservedKey ? decodeURIComponent(preservedKey) : null;
+        console.log("EncryptedKey",this.webRtcSecureLink);
+        this.webRtcSecureLink = rawEncryptedKey ? rawEncryptedKey.replace(/\s/g, '+') : null;
+      } else {
+        this.webRtcSecureLink = null;
+      }
       if (this.webRtcSecureLink != undefined && this.webRtcSecureLink != '') {
         this.standaloneWebRtc = true;
         if (this.widgetIdentifier == undefined || this.widgetIdentifier == '') {
