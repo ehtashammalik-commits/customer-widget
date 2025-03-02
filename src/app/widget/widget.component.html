@@ -770,7 +770,7 @@
                             <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                           </label>
                           <textarea matInput id="{{ attribute.key }}" [formControlName]="attribute.key"
-                            [placeholder]="attribute.helpText" class="widget-form-control"
+                            [placeholder]="attribute.helpText" class="widget-form-control textAreaField"
                             [required]="attribute?.isRequired" [attr.maxlength]="2001" [attr.minlength]="1" [ngStyle]="{
   border: isMaxLengthError(
   i,

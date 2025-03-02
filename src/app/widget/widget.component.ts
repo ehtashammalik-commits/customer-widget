@@ -692,7 +692,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
 
 
-        console.log('Adding control:', attribute.key, 'with validators:', validators);
+        // console.log('Adding control:', attribute.key, 'with validators:', validators);
 
         // Add the control to the section group
         sectionGroup.addControl(attribute.key, this.fb.control('', validators));
@@ -895,7 +895,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     for (const section of formData.sections) {
       if (Object.prototype.hasOwnProperty.call(section, field) && section[field] !== null) {
-        return { error: false, data: true }; // Field is found in at least one section with a non-null value
+        return { error: false, data: section[field] }; // Field is found in at least one section with a non-null value
       }
     }
 
@@ -946,6 +946,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         },
       };
     }
+  }
+
+  getFormDataAsConversationData(jsonObject: any) {
+    const attributesArray: any[] = [];
+
+    jsonObject.sections.forEach((section: any) => {
+      const attributes = Object.entries(section).map(([key, value]) => ({
+        [key]: value,
+      }));
+      attributesArray.push(...attributes);
+    });
+
+    console.log(attributesArray);
+    return attributesArray;
   }
 
   getFormDataByPreChatForm(preChatFormData: any[]): any {
@@ -1378,10 +1392,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               'conversationId',
               event.data.header.conversationId,
             );
-            console.log('this.preChatFormData==============>', this.preChatFormData)
+            // console.log('this.preChatFormData==============>', this.preChatFormData)
+            console.log('this.preChatFormData==============>', this.getFormDataAsConversationData(this.preChatFormData))
             this.sdk.setConversationDataAgainstCustomerIdentifier(
               this.customerData.channelCustomerIdentifier,
-              this.preChatFormData,
+              this.getFormDataAsConversationData(this.preChatFormData),
             );
 
             // this.composerDisable()
