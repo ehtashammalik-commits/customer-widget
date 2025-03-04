@@ -27,6 +27,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ActivatedRoute } from '@angular/router';
 import { TooltipPosition } from '@angular/material/tooltip';
+import { TranslateService } from '@ngx-translate/core';
 declare var EmojiPicker: any;
 
 @Component({
@@ -267,10 +268,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private browserNotificationService: BrowserNotificationService,
     private deliveryNotificationService: DeliveryNotificationService,
     private __postMessageHandlerService: PostMessageHandlerService,
+    private translate: TranslateService,
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
     this.isUsernameEnabled = __appConfig.appConfig.USERNAME_ENABLED
+
+    translate.setDefaultLang('en');
+    translate.use('en');
   }
 
   ngAfterViewInit(): void {

@@ -35,9 +35,9 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')" *ngIf="!isWebRtcVideoCallActive">
-            <span class="material-symbols-outlined minimize" matTooltip="Minimize"
+            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
               [matTooltipPosition]="matToolTipPosition!">
-              minimize
+              {{'button.minimize' | translate}}
             </span>
           </div>
         </div>
@@ -175,8 +175,8 @@
         <div class="widget-form-header widget-color" (click)="changeScreen('widget')">
           <h5 id="headerHeading">{{ title }}</h5>
           <span class="widget-header-icon">
-            <span class="topbar-icon material-symbols-outlined" matTooltip="Minimize"
-              [matTooltipPosition]="matToolTipPosition!">minimize</span>
+            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"
+              [matTooltipPosition]="matToolTipPosition!">{{'button.minimize' | translate}}</span>
           </span>
         </div>
         <div class="widget-form-content">
@@ -185,13 +185,13 @@
           <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
             <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
             <!-- Custom Widget logo -->
-            <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg" alt="Live Chat"
+            <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg" alt="{{ 'button.live-chat' | translate }}"
               *ngIf="logoEnabled" />
             <!-- Global error message for the form -->
             <div>
               <span class="field-error error_text_for_filling"
                 *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
-                Please fill in all the required fields
+                {{ 'error.incomplete-required-fields' | translate }}
               </span>
             </div>
             <!-- Dynamic form fields -->
@@ -404,27 +404,26 @@
         <div class="widget-form-header widget-color" (click)="changeScreen('widget')">
           <h5 id="headerHeading">{{ title }}</h5>
           <span class="widget-header-icon">
-            <span class="topbar-icon material-symbols-outlined" matTooltip="Minimize"
-              [matTooltipPosition]="matToolTipPosition!">minimize</span>
+            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"
+              [matTooltipPosition]="matToolTipPosition!">{{'button.minimize' | translate}}</span>
           </span>
         </div>
 
         <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
           <div class="widget-form-content">
             <p>
-              Please fill out the form below to start chatting with an agent
-              now!
+              {{ 'fill-widget-form-to-start-conversation-with-agent' | translate }}
             </p>
 
             <!-- Custom Widget logo -->
             <img *ngIf="logoEnabled" class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg"
-              alt="Live Chat" />
+              alt="{{ 'button.live-chat' | translate }}" />
 
             <!-- Global error message for the form -->
             <div>
               <span class="field-error error_text_for_filling"
                 *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
-                Please fill in all the required fields
+                {{ 'error.incomplete-required-fields' | translate }}
               </span>
             </div>
 
@@ -655,7 +654,7 @@
           <div class="widget-form-button">
             <button id="formTrigger" type="submit" [ngClass]="{ 'disable-btn': preChatFormGroup.invalid }"
               [disabled]="preChatFormGroup.invalid" class="widget-btn widget-form-trigger widget-color">
-              Start Chat
+              {{ 'button.start-chat' | translate }}
             </button>
           </div>
         </form>
@@ -674,13 +673,13 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon iconTwo" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="Minimize"
+            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
               [matTooltipPosition]="matToolTipPosition!">
-              minimize
+              {{'button.minimize' | translate}}
             </span>
           </div>
           <div class="widget-header-icon iconOne" mat-raised-button (click)="endChat()">
-            <span class="material-symbols-outlined close-icon" matTooltip="End Conversation"
+            <span class="material-symbols-outlined close-icon" matTooltip="{{ 'button.end-conversation' | translate }}"
               [matTooltipPosition]="matToolTipPosition!">
               close
             </span>
@@ -689,7 +688,7 @@
         <!-- Widget Chat Control Toolbar -->
         <div class="widget-chat-navbar">
           <span class="material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
-            [ngClass]="{ btnOne: enableFontResize === true }" matTooltip="Change Font Size"
+            [ngClass]="{ btnOne: enableFontResize === true }" matTooltip="{{ 'button.change-font-size' | translate }}"
             [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
             text_fields
           </span>
@@ -777,7 +776,7 @@
               'focus-icon': isChatActive === true && activeChatView === true,
               'away-chat-icon':
                 isChatActive === true && activeChatView === false
-            }" matTooltip="Web Chat" [matTooltipPosition]="matToolTipPosition!">
+            }" matTooltip="{{ 'button.web-chat' | translate }}" [matTooltipPosition]="matToolTipPosition!">
             forum
           </span>
         </div>
@@ -1346,7 +1345,7 @@
                 enableFileTransfer && text.length < 1 && imageUrls?.length == 0
               ">
               <label for="file-upload">
-                <span class="material-symbols-outlined file-btn" matTooltip="File Transfer"
+                <span class="material-symbols-outlined file-btn" matTooltip="{{ 'button.file-transfer' | translate }}"
                   [ngClass]="{'chat-disable':isComposerDisable}" [matTooltipPosition]="matToolTipPosition!">
                   attach_file
                 </span>
@@ -1429,7 +1428,7 @@
               <div>
                 <span class="field-error error_text_for_filling"
                   *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
-                  Please fill in all the required fields
+                  {{ 'error.incomplete-required-fields' | translate }}
                 </span>
               </div>
               <!-- Dynamic form fields -->
@@ -1686,9 +1685,9 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="Minimize"
+            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
               [matTooltipPosition]="matToolTipPosition!">
-              minimize
+              {{'button.minimize' | translate}}
             </span>
           </div>
         </div>
@@ -1700,16 +1699,16 @@
             <span innerHTML="{{
                 standaloneWebRtc === true
                   ? 'Thanks for calling us!'
-                  : 'Thank you!'
+                  : ('thankyou' | translate)
               }}"></span>
           </div>
           <div class="error-message">
-            <p>It was our pleasure assisting you with your query.</p>
+            <p>{{ 'pleasureful-feedback' | translate }}</p>
           </div>
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger" value="Download Transcript"
+            <input id="formTrigger" type="submit" class="widget-error-trigger" value="{{ 'button.download-transcript' | translate }}"
               *ngIf="enableDownloadTranscript && !standaloneWebRtc" (click)="chatTranscript()" />
           </div>
         </div>
@@ -1727,9 +1726,9 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="Minimize"
+            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
               [matTooltipPosition]="matToolTipPosition!">
-              minimize
+              {{'button.minimize' | translate}}
             </span>
           </div>
         </div>
@@ -1788,9 +1787,9 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="Minimize"
+            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
               [matTooltipPosition]="matToolTipPosition!">
-              minimize
+              {{'button.minimize' | translate}}
             </span>
           </div>
         </div>
@@ -1854,7 +1853,7 @@
             close
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="Live Chat"
+          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="{{ 'button.live-chat' | translate }}"
             *ngIf="logoEnabled" />
         </button>
       </div>
@@ -1867,7 +1866,7 @@
             video_call
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="Live Chat"
+          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="{{ 'button.live-chat' | translate }}"
             *ngIf="logoEnabled" />
         </button>
       </div>
@@ -1876,20 +1875,20 @@
     <!-- Chat Widget Icon -->
     <div class="widget-icon widget-icon-chat" *ngIf="!standaloneWebRtc">
       <div class="widget-icon-content" *ngIf="isChatMax">
-        <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
+        <button id="chatIconBtn" title="{{ 'button.live-chat' | translate }}" class="widget-bar-trigger widget-chat-trigger widget-color"
           (click)="changeScreen('widget')">
           <span class="chat-icon material-symbols-outlined"> close </span>
         </button>
       </div>
 
       <div class="widget-icon-content" *ngIf="!isChatMax">
-        <button id="chatIconBtn" title="Live Chat" class="widget-bar-trigger widget-chat-trigger widget-color"
+        <button id="chatIconBtn" title="{{ 'button.live-chat' | translate }}" class="widget-bar-trigger widget-chat-trigger widget-color"
           (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
           <span class="chat-icon material-symbols-outlined" *ngIf="!logoEnabled">
             sms
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="Live Chat"
+          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="{{ 'button.live-chat' | translate }}"
             *ngIf="logoEnabled" />
         </button>
       </div>
