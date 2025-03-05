@@ -11,15 +11,15 @@
     <div class="widget-wrapper">
       <div class="widget-wrapper-header widget-color">
         <button class="close-widget-wrapper" (click)="closeWrapper()">
-          <span class="material-symbols-outlined"> close </span>
+          <span class="material-symbols-outlined">close</span>
         </button>
         <strong>{{ title }}</strong>
         <p>{{ subtitle }}</p>
       </div>
       <div class="widget-wrapper-content">
-        <p>Ask us a question, our support team is pleased to help you.</p>
+        <p>{{ 'tagline' | translate }}</p>
         <button class="widget-color" (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
-          Connect with us
+          {{ 'button.connect-with-us' | translate }}
         </button>
       </div>
     </div>
@@ -37,7 +37,7 @@
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')" *ngIf="!isWebRtcVideoCallActive">
             <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
               [matTooltipPosition]="matToolTipPosition!">
-              {{'button.minimize' | translate}}
+              minimize
             </span>
           </div>
         </div>
@@ -47,7 +47,7 @@
               'focus-icon': isWebRtcVideoCallActive === true,
               'away-call-icon': isWebRtcVideoCallActive === true
             }" matTooltip="Video Call" [matTooltipPosition]="matToolTipPosition!">
-            videocam
+            {{ 'videocam' | translate }}
           </span>
         </div>
         <ng-container *ngIf="!isWebRtcVideoCallActive">
@@ -56,7 +56,7 @@
             <div class="widget-authentication-header">
               <span class="material-symbols-outlined header-emoji"
                 [ngClass]="{ 'error-text': showInvalidCodeError === true }"
-                innerHTML="{{ showInvalidCodeError ? 'videocam' : 'videocam' }}">
+                innerHTML="{{ showInvalidCodeError ? ('videocam' | translate): ('videocam' | translate) }}">
               </span>
               <span innerHTML="{{
                   showInvalidCodeError
@@ -80,7 +80,7 @@
                   }}"></p>
               </div>
               <div class="widget-auth-button">
-                <p>Session Code</p>
+                <p>{{ 'session-code' | translate }}</p>
                 <input id="auth-token" type="text" [ngClass]="{ 'error-field': showInvalidCodeError === true }"
                   class="widget-auth-input call-btn" placeholder="Enter Code Here ..." [(ngModel)]="sessionCode" />
                 <input id="auth-btn" type="submit" class="widget-auth-trigger call-btn" value="Join"
@@ -93,7 +93,7 @@
         <ng-container *ngIf="isWebRtcVideoCallActive">
           <div class="widget-video-section">
             <video autoplay="autoplay" class="remoteVideo" id="remoteVideo">
-              Your browser does not support HTML5 video.
+              {{ 'error.html5-not-supported' | translate }}
             </video>
             <div class="localVideoView">
               <span class="material-symbols-outlined localVideoIcon" [ngClass]="{ iconHide: isVideoHide === true }"
@@ -102,7 +102,7 @@
             </div>
             <video autoplay="autoplay" class="localVideo" id="localVideo"
               innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}">
-              Your browser does not support HTML5 video.
+              {{ 'error.html5-not-supported' | translate }}
             </video>
 
             <div class="agent-detail">
@@ -176,12 +176,12 @@
           <h5 id="headerHeading">{{ title }}</h5>
           <span class="widget-header-icon">
             <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">{{'button.minimize' | translate}}</span>
+              [matTooltipPosition]="matToolTipPosition!">minimize</span>
           </span>
         </div>
         <div class="widget-form-content">
-          <h4 class="callback-title">Request Callback</h4>
-          <p>Please fill out the form below to setup a callback request.</p>
+          <h4 class="callback-title">{{ 'callback.request' | translate }}</h4>
+          <p>{{ 'callback.request-description' | translate }}</p>
           <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
             <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
             <!-- Custom Widget logo -->
@@ -213,8 +213,7 @@
                         ({{
                         attribute.fileData.restrictFile
                         ? attribute.fileData.fileExtension.join(", ")
-                        : "All
-                        supported file types allowed"
+                        : ( 'notification.supported-file-types-allowed' | translate )
                         }})
                       </span>
                     </ng-container>
@@ -315,7 +314,7 @@
                             attribute.fileData.fileExtension
                           )
                         " class="file-input" />
-                      <span class="input-label">Choose File</span>
+                      <span class="input-label">{{ 'label.choose-file' | translate }}</span>
                     </div>
                     <div *ngIf="fileName" class="file-link-container">
                       <a target="_blank" [href]="fileUrl">{{
@@ -405,7 +404,7 @@
           <h5 id="headerHeading">{{ title }}</h5>
           <span class="widget-header-icon">
             <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">{{'button.minimize' | translate}}</span>
+              [matTooltipPosition]="matToolTipPosition!">minimize</span>
           </span>
         </div>
 
@@ -623,28 +622,27 @@
                   <span *ngIf="
                       preChatFormGroup.get(attribute.key)?.hasError('required')
                     " class="field-error">
-                    {{ getLabel(attribute.valueType) }} is required
+                    {{ getLabel(attribute.valueType) }} {{ 'error.is-required' | translate}}
                   </span>
                   <span *ngIf="
                     !isMaxLengthError(attribute.key, attribute.valueType) &&  preChatFormGroup.get(attribute.key)?.hasError('pattern')&& attribute.valueType.toLowerCase()!='password'
                     " class="field-error">
-                    {{ getLabel(attribute.valueType) }} does not match the
-                    required format
+                    {{ getLabel(attribute.valueType) }} {{ 'error.invalid-format' | translate}}
                   </span>
                   <span *ngIf="
                   !isMaxLengthError(attribute.key, attribute.valueType) && preChatFormGroup.get(attribute.key)?.hasError('pattern') && !preChatFormGroup.get(attribute.key)?.hasError('minlength') && attribute.valueType.toLowerCase()=='password'
                     " class="field-error">
-                    Password must include uppercase, lowercase, number, and special character
+                    {{ 'error.invalid-password' | translate }}
                   </span>
                   <span *ngIf="
   preChatFormGroup.get(attribute.key)?.hasError('minlength') &&
   attribute.valueType.toLowerCase() == 'password'
 " class="field-error">
-                    Password must be at least 8 characters long
+                    {{ 'error.required-password-format' | translate }}
                   </span>
 
                   <span *ngIf="isMaxLengthError(attribute.key, attribute.valueType)" class="field-error">
-                    Maximum limit reached
+                    {{ 'error.maximum-limit' | translate}}
                   </span>
                 </div>
               </div>
@@ -675,7 +673,7 @@
           <div class="widget-header-icon iconTwo" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
               [matTooltipPosition]="matToolTipPosition!">
-              {{'button.minimize' | translate}}
+              minimize
             </span>
           </div>
           <div class="widget-header-icon iconOne" mat-raised-button (click)="endChat()">
@@ -817,7 +815,7 @@
                        (message.body.notificationData.data.agentParticipant
                             .participant.keycloakUser.username
                           | tagFormat:enableDynamicLink)
-                    }} joined the chat">
+                    }} {{ ('notification.participant-joined' | translate) }}">
                   </span>
 
                   <span *ngIf="
@@ -830,7 +828,7 @@
                             .conversationParticipant.participant.keycloakUser
                             .username
                           | tagFormat:enableDynamicLink)
-                    }} joined the chat">
+                    }} {{ ('notification.participant-joined' | translate) }}">
                   </span>
 
                   <span *ngIf="
@@ -843,7 +841,7 @@
                             .conversationParticipant.participant.keycloakUser
                             .username
                           | tagFormat:enableDynamicLink)
-                    }} has left the chat">
+                    }} {{ ('notification.participant-left' | translate) }}">
                   </span>
 
                   <span *ngIf="
@@ -854,7 +852,7 @@
                       (message.body.notificationData.data.agentParticipant
                             .participant.keycloakUser.username
                           | tagFormat:enableDynamicLink)
-                    }} left the chat">
+                    }} {{ ('notification.participant-left' | translate) }}">
                   </span>
 
                   <span *ngIf="
@@ -862,7 +860,7 @@
                   message.body.notificationData.data.requestType
                     .direction != 'CONSULT'
                 " innerHTML="{{
-                  'No agents are available at the moment'
+                  ('notification.agents-not-available' | translate)
                     }}">
                   </span>
                   <div *ngIf="
@@ -870,10 +868,10 @@
                       (message.body.notificationData.data.task
                         | getMediaFromTask: 'direction') == 'DIRECT_TRANSFER'
                     ">
-                    <span innerHTML="Your request is being transferred to '{{
+                    <span innerHTML="{{ 'notification.transfering-request-to' | translate }} '{{
                         message.body.notificationData.data.task
                           | getMediaFromTask: 'queueName'
-                      }}' queue, please wait!">
+                      }}' {{ 'notification.queue-please-wait' | translate }}">
                     </span>
                   </div>
                   <div *ngIf="
@@ -881,10 +879,10 @@
                       (message.body.notificationData.data.task
                         | getMediaFromTask: 'direction') == 'DIRECT_TRANSFER'
                     ">
-                    <span innerHTML="Your request is being transferred to '{{
+                    <span innerHTML="{{ 'notification.transfering-request-to' | translate }} '{{
                         message.body.notificationData.data.task
                           | getMediaFromTask: 'queueName'
-                      }}' queue, please wait!">
+                      }}' {{ 'notification.queue-please-wait' | translate }}">
                     </span>
                   </div>
                 </div>
@@ -963,7 +961,7 @@
                       <a href="http://maps.google.com/?q={{
                           message.body.location.latitude
                         }},{{ message.body.location.longitude }}" target="_blank">
-                        CLICK HERE
+                        {{ 'button.click-here' | translate }}
                       </a>
                     </div>
                     <!-- Message Type Image, File, Video, Url -->
@@ -1008,7 +1006,7 @@
                         </audio>
                       </a>
                       <a *ngIf="message.body.type == 'URL'" href="{{ message.body.mediaUrl }}" target="_blank">
-                        CLICK HERE
+                        {{ 'button.click-here' | translate }}
                       </a>
                       <a *ngIf="message.body.type == 'FILE'" href="{{ message.body.attachment.mediaUrl }}"
                         target="_blank">
@@ -1190,7 +1188,7 @@
                       <a href="http://maps.google.com/?q={{
                           message.body.location.latitude
                         }},{{ message.body.location.longitude }}" target="_blank">
-                        CLICK HERE
+                        {{ 'button.click-here' | translate }}
                       </a>
                     </div>
                     <!-- Message Type Image, File, Video, Url -->
@@ -1235,7 +1233,7 @@
                         </audio>
                       </a>
                       <a *ngIf="message.body.type == 'URL'" href="{{ message.body.mediaUrl }}" target="_blank">
-                        CLICK HERE
+                        {{ 'button.click-here' | translate }}
                       </a>
                       <a *ngIf="message.body.type == 'FILE'" href="{{ message.body.attachment.mediaUrl }}"
                         target="_blank">
@@ -1333,7 +1331,7 @@
             #messageComposer
               [attr.data-emoji-picker]="enableEmoji" matInput id="messageTextarea"
               cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
-              placeholder="Type Message Here ..." #message maxlength="{{ messageLimit }}" [(ngModel)]="text"
+              placeholder="{{ 'composer-placeholder' | translate }}" #message maxlength="{{ messageLimit }}" [(ngModel)]="text"
               (change)="textChanged()" (focus)="onTextAreaFocus()" (keyup)="onKeyPress($event)"
               (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)"  (keydown.enter)="onEnterKey($event)"
                       [ngClass]="{
@@ -1645,7 +1643,7 @@
                     ? 'Success!'
                     : callbackResponseStatus === 'conflict'
                     ? 'Conflict!'
-                    : 'Sorry!'
+                    : ('label.sorry' | translate)
                 }}"></span>
             </div>
             <div class="response-message">
@@ -1687,7 +1685,7 @@
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
               [matTooltipPosition]="matToolTipPosition!">
-              {{'button.minimize' | translate}}
+              minimize
             </span>
           </div>
         </div>
@@ -1699,7 +1697,7 @@
             <span innerHTML="{{
                 standaloneWebRtc === true
                   ? 'Thanks for calling us!'
-                  : ('thankyou' | translate)
+                  : ('label.thankyou' | translate)
               }}"></span>
           </div>
           <div class="error-message">
@@ -1728,7 +1726,7 @@
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
               [matTooltipPosition]="matToolTipPosition!">
-              {{'button.minimize' | translate}}
+              minimize
             </span>
           </div>
         </div>
@@ -1747,7 +1745,7 @@
                   ? 'Success!'
                   : callbackResponseStatus === 'conflict'
                   ? 'Conflict!'
-                  : 'Sorry!'
+                  : ('label.sorry' | translate)
               }}"></span>
           </div>
           <div class="error-message">
@@ -1789,7 +1787,7 @@
           <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
             <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
               [matTooltipPosition]="matToolTipPosition!">
-              {{'button.minimize' | translate}}
+              minimize
             </span>
           </div>
         </div>
@@ -1798,15 +1796,14 @@
             <span class="material-symbols-outlined error-emoji">
               sentiment_dissatisfied
             </span>
-            <span>Sorry!</span>
+            <span>{{ 'label.sorry' | translate }}</span>
           </div>
           <div class="error-message">
             <p>
-              We are experiencing some technical problem with our server. Your
-              chat with agent / BOT has been disabled.
+              {{ 'error.server-down' | translate}}
             </p>
-            <p><b>However, you can view your chat session.</b></p>
-            <p>We will get back to you as soon as issue is resolved.</p>
+            <p><b>{{ 'error.suggestion-when-server-down' | translate }}</b></p>
+            <p>{{ 'error.get-back-to-you' | translate }}.</p>
           </div>
         </div>
         <div class="widget-composer">
@@ -1814,7 +1811,7 @@
             <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number"
               *ngIf="enableWebRtc" />
 
-            <input id="formTrigger" type="submit" class="widget-error-trigger" value="Send me transcript"
+            <input id="formTrigger" type="submit" class="widget-error-trigger" value="{{ 'button.send-me-transcript' | translate }}"
               *ngIf="enableDownloadTranscript" />
           </div>
         </div>
