@@ -58,7 +58,7 @@
 
     },
     "label": {
-        "Choose-file": "Choose File",
+        "choose-file": "Choose File",
         "sorry": "Sorry!",
         "thankyou": "Thank You!"
     }
