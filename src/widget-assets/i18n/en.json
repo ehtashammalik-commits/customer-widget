@@ -33,7 +33,9 @@
         "end-conversation": "End Conversation",
         "click-here": "CLICK HERE",
         "close": "Close",
-        "send-me-transcript": "Send me Transcript"
+        "send-me-transcript": "Send me Transcript",
+        "request-callback": "Request Callback",
+        "video-call": "Video Call"
     },
     "callback": {
         "title": "Callback",

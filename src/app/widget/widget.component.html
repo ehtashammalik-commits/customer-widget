@@ -46,8 +46,8 @@
           <span class="material-symbols-outlined widget-navbar-icon btnOne" *ngIf="enableWebRtc" [ngClass]="{
               'focus-icon': isWebRtcVideoCallActive === true,
               'away-call-icon': isWebRtcVideoCallActive === true
-            }" matTooltip="Video Call" [matTooltipPosition]="matToolTipPosition!">
-            {{ 'videocam' | translate }}
+            }" matTooltip="{{ 'button.video-call' | translate }}" [matTooltipPosition]="matToolTipPosition!">
+            videocam
           </span>
         </div>
         <ng-container *ngIf="!isWebRtcVideoCallActive">
@@ -385,7 +385,7 @@
             <div class="widget-form-button">
               <button id="formTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
                 class="widget-btn widget-form-trigger widget-color">
-                Request Callback
+                {{ 'button.request-callback' | translate }}
               </button>
             </div>
           </form>
@@ -710,7 +710,7 @@
             </div>
           </ng-container>
           <span class="widget-navbar-divider">|</span>
-          <span class="widget-navbar-icon material-symbols-outlined" matTooltip="Request Callback" [ngClass]="{
+          <span class="widget-navbar-icon material-symbols-outlined" matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
               btnTwo: enableFontResize === true,
               btnOne: enableFontResize === false,
               'focus-icon':
@@ -1418,8 +1418,8 @@
         <!-- Callback View Screen -->
         <ng-container *ngIf="activeCallbackView">
           <div class="widget-callback-form-content">
-            <h4 class="callback-title">Request Callback</h4>
-            <p>Please fill out the form below to setup a callback request.</p>
+            <h4 class="callback-title">{{ 'callback.request' | translate }}</h4>
+            <p>{{ 'callback.request-description' | translate }}</p>
             <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
               <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
               <!-- Global error message for the form -->
@@ -1448,8 +1448,7 @@
                           ({{
                           attribute.fileData.restrictFile
                           ? attribute.fileData.fileExtension.join(", ")
-                          : "All
-                          supported file types allowed"
+                          : ( 'notification.supported-file-types-allowed' | translate)
                           }})
                         </span>
                       </ng-container>
@@ -1620,7 +1619,7 @@
               <div class="widget-form-button">
                 <button id="formTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
                   class="widget-btn widget-form-trigger widget-color">
-                  Request Callback
+                  {{ 'button.request-callback' | translate }}
                 </button>
               </div>
             </form>
