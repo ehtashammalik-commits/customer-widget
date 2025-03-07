@@ -2232,10 +2232,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (!this.IsRegisteredInFreeSwitch && this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
   }
   // Audio Functions
-  toggleCallMic() {
-    this.isCallMute = !this.isCallMute; // Use assignment operator and logical NOT operator
-    const action = this.isCallMute ? 'mute_call' : 'unmute_call';
+  async toggleCallMic(tooltip: any) {
+    this.updateTooltip(tooltip);
+    const action = !this.isCallMute ? 'mute_call' : 'unmute_call';
     this.sdk.handleCallMic(action, this.dialogId);
+        // Short delay to ensure proper state transition
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Update the control state that affects the tooltip text
+    this.isCallMute = !this.isCallMute; 
   }
 
   convertCallRequest(view: any) {
@@ -2256,17 +2262,42 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  toggleCallVideo() {
-    this.isVideoHide = !this.isVideoHide;
-    const cameraStatus = this.isVideoHide ? 'off' : 'on';
+  async toggleCallVideo(tooltip: any) {
+    if(tooltip)
+    this.updateTooltip(tooltip);
+    const cameraStatus = !this.isVideoHide ? 'off' : 'on';
     this.sdk.convertCall(cameraStatus, 'video', this.dialogId);
+    // Short delay to ensure proper state transition
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Update the control state that affects the tooltip text
+    this.isVideoHide = !this.isVideoHide;
   }
 
-  toggleCallHold() {
-    this.isCallOnHold = !this.isCallOnHold; // Use assignment operator and logical NOT operator
-    console.log(this.isCallOnHold);
-    const action = this.isCallOnHold ? 'holdCall' : 'retrieveCall';
+  async updateTooltip(tooltip: any) {
+    if (tooltip) {
+      // Hide the tooltip first
+      tooltip.hide();
+    
+      
+      // Small delay before showing the new tooltip
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
+      tooltip.show();
+    }
+  }
+
+  async toggleCallHold(tooltip:any) {
+    // Call updateTooltip with the new desired state
+    this.updateTooltip(tooltip);
+    
+    // Handle the call action
+    const action = !this.isCallOnHold ? 'holdCall' : 'retrieveCall';
     this.sdk.handleCallHoldState(action, this.dialogId);
+    // Short delay to ensure proper state transition
+    await new Promise(resolve => setTimeout(resolve, 100));
+    // Update the control state that affects the tooltip text
+    this.isCallOnHold =  !this.isCallOnHold;
   }
 
   initiateWebRtcCall(callType: any) {
@@ -2757,4 +2788,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getLabel(valueType: string): string {
     return this.dictionary[valueType] || valueType; // Return the  to valueType matchinf value from the dict
   }
+
+
 }

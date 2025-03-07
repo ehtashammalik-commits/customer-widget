@@ -179,7 +179,8 @@
                     [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
                     [matTooltipPosition]="this.positionOptions[2]" 
                     innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}"
-                    (click)="toggleCallVideo()"
+                    (click)="toggleCallVideo(tooltip1);"
+                    #tooltip1="matTooltip"
                   >
                   </span>
                 </div>
@@ -192,7 +193,8 @@
                     [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
                     [matTooltipPosition]="this.positionOptions[2]" 
                     innerHTML="{{ isCallMute ? 'mic_off' : 'mic' }}"
-                    (click)="toggleCallMic()"
+                    (click)="toggleCallMic(tooltip)"
+                    #tooltip="matTooltip"
                   >
                   </span>
                 </div>
@@ -205,7 +207,9 @@
                     [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
                     [matTooltipPosition]="this.positionOptions[2]"
                     [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
-                    (click)="toggleCallHold()"
+                    (click)="toggleCallHold(tooltip6)"
+
+                    #tooltip6="matTooltip"
                   >
                   </span>
                 </div>
@@ -1659,7 +1663,7 @@
                 class="material-symbols-outlined localVideoIcon"
                 [ngClass]="{ iconHide: isVideoHide }"
                 [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'"
-                (click)="toggleCallVideo()"
+                (click)="toggleCallVideo(null)"
               >
               </span>
             </div>
@@ -1716,11 +1720,10 @@
                     [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
                     [matTooltipPosition]="this.positionOptions[2]"
                     [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'"
-                    (click)="
-                      isVideoCallActive
-                        ? toggleCallVideo()
-                        : convertCallRequest('video')
-                    "
+                    (click)="isVideoCallActive
+                    ? toggleCallVideo(tooltip5)
+                    : convertCallRequest('video');"
+                    #tooltip5="matTooltip"
                   >
                   </span>
                 </div>
@@ -1730,7 +1733,8 @@
                     [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
                     [matTooltipPosition]="this.positionOptions[2]"
                     [innerHTML]="isCallMute ? 'mic_off' : 'mic'"
-                    (click)="toggleCallMic()"
+                    (click)="toggleCallMic(tooltip3);"
+                    #tooltip3="matTooltip"
                   >
                   </span>
                 </div>
@@ -1743,7 +1747,8 @@
                     [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
                     [matTooltipPosition]="this.positionOptions[2]"
                     [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
-                    (click)="toggleCallHold()"
+                    (click)="toggleCallHold(tooltip2);"
+                    #tooltip2="matTooltip"
                   >
                   </span>
                 </div>
