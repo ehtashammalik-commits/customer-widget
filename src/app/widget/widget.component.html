@@ -24,9 +24,9 @@
         </div>
         </div>
         <div class="widget-wrapper-content">
-          <p>Ask us a question, our support team is pleased to help you.</p>
+          <p>{{ 'tagline' | translate }}.</p>
           <button class="widget-color" (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
-            Connect with us
+            {{ 'button.connect-with-us' | translate }}
           </button>
         </div>
       </div>
