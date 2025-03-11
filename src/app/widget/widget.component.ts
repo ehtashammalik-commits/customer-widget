@@ -312,9 +312,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const rawEncryptedKey = params['encryptedKey']? params['encryptedKey']: null;
 
       if (rawEncryptedKey !== null) {
-        const preservedKey = decodeURIComponent(rawEncryptedKey).replace(/\s/g, "+");
+        const preservedKey = decodeURIComponent(rawEncryptedKey);
         this.webRtcSecureLink = preservedKey
-        console.log("EncryptedKey",this.webRtcSecureLink);
       } else {
         this.webRtcSecureLink = null;
       }
@@ -2313,7 +2312,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     // standAlone Web RTC Call when the link is given in active chat / web session as a message..
-    if (this.isSecureWebCall) {
+    if (this.isSecureWebCall && !this.errorDuringWebRTCCall) {
 
       this.sdk.handleCallStart({
         type: callType,
@@ -2568,6 +2567,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     if (data.event === 'Error') {
+      console.log("hello bosss....data.response.type", data.response)
       // this.errorDuringWebRTCCall = true;
       // This dialoguId we got in reponse once the call starts ringing on agent side 
       // If share end / mute / hold / unhold events on the basis of this Id. 
@@ -2588,48 +2588,50 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             case 'Session.getOffer unknown error.':
                 errorMessage = `Please check Audio / Video permissions in your browser.`;
                 break;
-            default:
-                console.log(`An unexpected error occurred: ', ${data.response.description}`);
-                break;
         }
         console.log('[Error] Call terminated:', errorMessage);
         break;
         case 'subscriptionFailed':
-          errorMessage = `Subscription Failed: ${data.response.description}`;
+          errorMessage = `Certificates Issues: Please contact with your supervisor`;
           console.log('[Error] Call terminated:', errorMessage);
           break;
         case 'invalidState':
-          errorMessage = `Invalid State: User is not registered`;
+          errorMessage = `Invalid State: Session not found`;
           console.log('[Error] Call terminated:', errorMessage);
           break;
         default:
           console.log(`[Error] Unknown:', ${data.response.description}`);
           errorMessage = 'An unknown error occurred.';
       }
-      this.showAuthenticationResponseMessage = errorMessage;
-      this.activeVideoView = false;
-      if (this.standaloneWebRtc) {
-        this.showInvalidCodeError = true;
-        this.callPopUpView = false;
-        this.activeVideoView = false;
-        this.isWebRtcVideoCallActive = false;
-        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-          horizontalPosition: 'right',
-        });
-      }
-      else {
-        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-          horizontalPosition: 'right',
-        });
-        this.isSecureWebCall = false;
-        this.isVideoCallActive = false;
-        this.activeVideoView = false;
-        this.errorDuringWebRTCCall = true;
-        this.changeView('chat')
+
+      if(errorMessage) {
+       this.showAuthenticationResponseMessage = errorMessage;
+       this.activeVideoView = false;
+
+        if (this.standaloneWebRtc) {
+            this.showInvalidCodeError = true;
+            this.callPopUpView = false;
+            this.activeVideoView = false;
+            this.isWebRtcVideoCallActive = false;
+            this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+              duration: 3000,
+              panelClass: ['error-snackbar'],
+              horizontalPosition: 'right',
+            });
+
+        } else {
+
+            this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+              duration: 3000,
+              panelClass: ['error-snackbar'],
+              horizontalPosition: 'right',
+            });
+            this.isSecureWebCall = false;
+            this.isVideoCallActive = false;
+            this.activeVideoView = false;
+            this.errorDuringWebRTCCall = true;
+            this.changeView('chat')
+        }
       }
     }
   }
@@ -2757,7 +2759,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const queryString = mediaUrl.split('?')[1];
     const urlParams = new URLSearchParams(queryString);
     const encryptedKey = urlParams.get('encryptedKey');
-    const preservedKey = decodeURIComponent(encryptedKey ?? "").replace(/\s/g, "+");
+    const preservedKey = decodeURIComponent(encryptedKey ?? "");
     this.webRtcSecureLink = preservedKey;
 
     // Just for Debugging
@@ -2766,7 +2768,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // window.open(fullUrl, '_blank');
 
     const widgetIdentifier = urlParams.get('widgetIdentifier')
-    if (widgetIdentifier === this.widgetIdentifier && !this.errorDuringWebRTCCall) {
+    if (widgetIdentifier === this.widgetIdentifier) {
         this.authenticateSecureLinkKey(true);
     } else {
       console.warn('[Warning] Widget Identifiers do not match or there was an error during WebRTC call.');
