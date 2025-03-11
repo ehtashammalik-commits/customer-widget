@@ -16,9 +16,9 @@ declare var widgetConfigs: any,
   postMessages: any,
   callbackRequest: any,
   authenticateRequest: any,
-  // testing:any,
-  // setupRemoteMedia:any,
-  getBrowserInfo: any;
+  getBrowserInfo: any,
+  getCalendarId: any,
+  getCalendarEvents:any;
 
 type formAttributeMappings = {
   name: string[];
@@ -106,12 +106,57 @@ export class SdkService implements OnInit {
     });
   }
 
+
   loadWidget(ccm_url: any, widget_identifier: any) {
     widgetConfigs(ccm_url, widget_identifier, (res: any) => {
       this.widgetConfigsSubject.next(res);
     });
   }
 
+  fetchBusinessCalendarId(): Promise<string> {
+    const url = this.ConfigData.CCM_URL;
+    const serviceIdentifier = this.serviceIdentifier;
+
+    return new Promise((resolve, reject) => {
+      getCalendarId(url, serviceIdentifier, (response: any) => {
+        if (response && response.calendarId) {
+          resolve(response.calendarId);
+        } else {
+          reject('Failed to fetch calendar ID.');
+        }
+      });
+    });
+  }
+
+  getCalendarEvents(calendarId: string): Promise<any> {
+    const calendarUrl = this.ConfigData.BUSINESSCALENDAR_URL;
+    const currentDate = new Date();
+
+    const startDate = new Date(currentDate);
+    startDate.setDate(startDate.getDate() - 1);
+
+    const endDate = new Date(currentDate);
+    endDate.setDate(endDate.getDate() + 1);
+
+    const formattedStartDate = startDate.toISOString();
+    const formattedEndDate = endDate.toISOString();
+
+    return new Promise((resolve, reject) => {
+      getCalendarEvents(
+        calendarId,
+        calendarUrl,
+        formattedStartDate,
+        formattedEndDate,
+        (response: any) => {
+          if (response) {
+            resolve(response);
+          } else {
+            reject('Failed to fetch calendar events.');
+          }
+        }
+      );
+    });
+  }
   renderPreChatForm(form_id: any) {
     getPreChatForm(this.ConfigData.FORM_URL, form_id, (res: any) => {
       this.preChatFormSubject.next(res);
@@ -279,6 +324,12 @@ export class SdkService implements OnInit {
   handleChatEnd(customerPayload: any) {
     chatEnd(customerPayload);
   }
+
+   /**************************
+   *  BUSINESS CALENDARS
+   * @param calendarId
+   *************************/
+
 
   /**************************
    *  WEB RTC CALL FUNCTIONS

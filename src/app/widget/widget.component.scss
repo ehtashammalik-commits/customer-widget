@@ -108,26 +108,32 @@ $text-color: #464646;
   // box-shadow: 45px 55px 100px #efefef;
   transition: all 0.3s;
   max-width: 300px;
-  position: absolute;
+  position: fixed;
   z-index: 10000;
   width: 300px;
-  height: 200px;
+  height: 230px;
   border: none;
   right: 15px;
   bottom: 92px;
+  .wrapper-inner{
+    position: absolute;
+    bottom: 0;
+  }
 }
 
 .widget-wrapper-header {
   background: var(--main-color);
   color: $white-color;
   text-align: center;
-  padding: 10px;
-  border-radius: 10px;
-  position: relative;
-  top: 6px;
-  width: 96%;
-  left: 6px;
-  height: 100px;
+    padding: 10px;
+    border-radius: 10px;
+    position: relative;
+    bottom: -12px;
+    width: 288px;
+    margin-left: auto;
+    /* max-height: 150px; */
+    margin-right: auto;
+    border-bottom: 12px solid var(--main-color);
 }
 
 .widget-wrapper-header p {
@@ -148,6 +154,10 @@ $text-color: #464646;
   font-family: "Roboto";
   font-weight: 500;
   font-style: normal;
+  max-width: 30ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
   color: $white-color;
 }
 
@@ -155,12 +165,13 @@ $text-color: #464646;
   padding: 10px;
   text-align: center;
   background: $white-color;
-  position: absolute;
-  top: 70px;
+  position: relative;
+  // top: 70px;
   width: 96%;
   height: 125px;
   left: 6px;
   border-radius: 10px;
+  bottom: 5px;
 }
 
 .widget-wrapper-content p {
@@ -186,17 +197,27 @@ $text-color: #464646;
 }
 
 button.close-widget-wrapper {
-  background: transparent;
-  border: 0;
-  position: absolute;
-  right: 5px;
-  top: 15px;
-  opacity: 0.8;
-  color: $white-color;
-  display: block;
-  transition: all 0.3s;
-  cursor: pointer;
-  outline: none;
+  background: #2889e9;
+    border: 1px solid #d8d8da;
+    position: absolute;
+    right: -10px;
+    top: -13px;
+    /* opacity: .8; */
+    color: #fff;
+    display: block;
+    transition: all .3s;
+    cursor: pointer;
+    outline: none;
+    /* padding: 0px; */
+    font-size: 18px;
+    border-radius: 100%;
+    width: 30px;
+    height: 30px;
+    line-height: 10px;
+    padding: 0;
+    .close-trigger{
+      font-size: 22px;
+    }
 }
 
 .widget-wrapper:hover button.close-widget-wrapper {
@@ -363,17 +384,28 @@ button.close-widget-wrapper {
 }
 
 .widget-form-header {
-  padding: 0 5px;
+  padding: 0 10px;
   height: 50px;
   border-radius: 10px;
   cursor: pointer;
+  &.exist-calendar{
+    h5{
+      line-height: 25px;
+    }
+  }
+  p{
+    font-size: 10px;
+    margin: 0;
+    position: relative;
+    line-height: 10px;
+  }
 }
 
 .widget-form-header h5 {
-  line-height: 36px;
+  line-height: 40px;
   margin: 0;
   display: inline-block;
-  position: absolute;
+  // position: absolute;
   left: 10px;
   height: 15px;
   font-family: "Roboto";
@@ -1012,7 +1044,9 @@ button.close-widget-wrapper {
       color: #000000;
       width: auto;
       max-width: 225px;
-      line-break: anywhere;
+      //line-break: anywhere;
+      word-break: break-word;
+      white-space: pre-line;
     }
 
     .message-option {
@@ -1093,7 +1127,7 @@ button.close-widget-wrapper {
     background: #f2f2f2;
     border-radius: 0px 3px 3px 10px;
     padding: 0px 10px;
-    word-break: break-word;
+    //word-break: break-word;
 
     .header {
       display: inline-flex;
@@ -1107,7 +1141,7 @@ button.close-widget-wrapper {
       font-style: normal;
       text-align: left;
       color: #3e3e3e;
-      word-break: break-word;
+      //word-break: break-word;
     }
 
     .message {
@@ -1120,7 +1154,9 @@ button.close-widget-wrapper {
       color: #000000;
       width: auto;
       max-width: 215px;
-      line-break: anywhere;
+      //line-break: anywhere;
+      word-break: break-word;
+      white-space: pre-line;
     }
 
     .message-option {
@@ -2178,9 +2214,9 @@ mat-spinner {
   color: #000000;
   width: auto;
   max-width: 215px;
-  line-break: normal;
+  //line-break: normal;
   word-break: break-word;
-  white-space: normal;
+  white-space: pre-line;
 }
 
 .validation-msg {

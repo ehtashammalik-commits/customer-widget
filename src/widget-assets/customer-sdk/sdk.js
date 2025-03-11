@@ -539,6 +539,23 @@ function callbackRequest(url, payload, callback) {
     callback(error);
   }
 }
+
+function getCalendarId(url, serviceIdentifier, callback) {
+  fetch(`${url}/channels/service-identifier/${serviceIdentifier}`)
+    .then(response => response.json())
+    .then((data) => {
+      callback(data);
+    });
+}
+
+function getCalendarEvents(calendarId,url, startTime,endTime,callback) {
+  fetch(`${url}/calendars/events?&calendarId=${calendarId}&startTime=${startTime}&endTime=${endTime}`)
+    .then(response => response.json())
+    .then((data) => {
+      callback(data);
+    });
+}
+
 /**
  * Webhook Notifications Functions
  * @param {*} data
@@ -1825,7 +1842,7 @@ function initiate_call(calledNumber, DN, mediaType, authData, callback, callType
 
     // request.extraHeaders.push('X-Agent-Id:' + authData.agentId);
     // request.extraHeaders.push('X-Agent-Name:' + authData.agentName);
-    // request.extraHeaders.push('X-Customer-Name:' + authData.customerName);
+    request.extraHeaders.push('X-Customer-Name:' + authData.customerName);
     request.extraHeaders.push('X-Agent-Extension:' + authData.agentExtension);
     request.extraHeaders.push('X-Customer-Number:' + authData.customerNumber);
     // request.extraHeaders.push('X-Channel:' + authData.channel);
