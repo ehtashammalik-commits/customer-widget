@@ -1638,7 +1638,7 @@
           </div>
         </ng-container>
 
-        <ng-container *ngIf="(activeAudioView || activeVideoView || activeScreenShareView || isVideoCallActive || isAudioCallActive) && !this.errorDuringWebRTCCall">
+        <ng-container *ngIf="(activeAudioView || activeVideoView || activeScreenShareView || isVideoCallActive || isAudioCallActive) && !this.errorDuringWebRTCCall || __appConfig.appConfig.isDirectWebRTCCallEnabled">
           <div
             class="widget-section"
             [ngClass]="{

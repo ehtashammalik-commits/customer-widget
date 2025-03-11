@@ -289,16 +289,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async ngAfterViewInit(): Promise<void> {
-    // console.log("ngAfterViewInit....webRTCConfig ", this.webRTCConfig)
-    // Load the standalone WebRTC Authentication screen or the active chat screen depending on whether the user is coming from a secure link or not.
-    // if (this.standaloneWebRtc) {
-    //     await this.authenticateToken(false);
-    //     this.changeScreen('webRtcScreen');
-    // } else {
-    //     this.customerChatResumed();
-    //     console.log('Not Secure Chat View');
-    // }
-
     if(!this.standaloneWebRtc) {
       this.customerChatResumed();
         console.log('Not Secure Chat View');
@@ -635,7 +625,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       console.log('List of webRTC Configs: ', this.webRTCConfig);
 
       if(this.standaloneWebRtc) {
-        await this.authenticateToken(false);
+        await this.authenticateSecureLinkKey(false);
         this.changeScreen('webRtcScreen');
       }
 
@@ -1242,11 +1232,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'CHANNEL_SESSION_ENDED':
           case 'CHANNEL_SESSION_EXPIRED':
           case 'SOCKET_DISCONNECTED':
+            if (event.data == 'io server disconnect') {
             localStorage.removeItem('user');
             if (messageType !== 'survey') {
               this.clearSession();
             }
             this.composerDisable()
+          }
             break;
           case 'SOCKET_RECONNECTED':
             console.log(
@@ -2386,14 +2378,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       });
     }
 
-    if (data.event === "MEDIA_SERVER_CALL_END") {
-      const reasonCode = data.reasonCode ? data.reasonCode : "Unknown Error"
-      this.snackBar.open(reasonCode, 'Dismiss', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-        horizontalPosition: 'right',
-      });
-    }
+    // if (data.event === "MEDIA_SERVER_CALL_END") {
+    //   const reasonCode = data.reasonCode ? data.reasonCode : "Unknown Error"
+    //   this.snackBar.open(reasonCode, 'Dismiss', {
+    //     duration: 3000,
+    //     panelClass: ['error-snackbar'],
+    //     horizontalPosition: 'right',
+    //   });
+    // }
     if (data.event === 'agentInfo') {
       console.log(
         '[handleDialogStates] Inside Agent Info Event: ===> ',
@@ -2586,9 +2578,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       let errorMessage = '';
       switch (data.response.type) {
         case 'generalError':
-          errorMessage = `Error: ${data.response.description}`;
-          console.log('[Error] Call terminated:', errorMessage);
-          break;
+        switch (data.response.description) {
+            case 'Service Unavailable':
+                errorMessage = `The service is currently unavailable.Please check your network connection and try again.`;
+                break;
+            case 'Forbidden':
+                errorMessage = `Authentication failed. Please verify your SIP credentials and try again.`;
+                break;
+            case 'Session.getOffer unknown error.':
+                errorMessage = `Please check Audio / Video permissions in your browser.`;
+                break;
+            default:
+                console.log(`An unexpected error occurred: ', ${data.response.description}`);
+                break;
+        }
+        console.log('[Error] Call terminated:', errorMessage);
+        break;
         case 'subscriptionFailed':
           errorMessage = `Subscription Failed: ${data.response.description}`;
           console.log('[Error] Call terminated:', errorMessage);
@@ -2701,13 +2706,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return { intent: null, entities: null };
   }
 
-  async authenticateToken(isAuthenticated: boolean): Promise<void> {
+  async authenticateSecureLinkKey(isAuthenticated: boolean): Promise<void> {
     
     this.dialogId = undefined;
     const roomId = this.webRtcSecureLink;
     this.setAuthorizedResponse = undefined;
 
-    this.sdk.authenticateRoomId({ roomId }, async (res: any) => {
+    this.sdk.authenticateKey({ roomId }, async (res: any) => {
         if (res.error) {
             this.isSecureLinkExpired = true;
             this.showAuthenticationResponseMessage = res.data.message
@@ -2762,7 +2767,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     const widgetIdentifier = urlParams.get('widgetIdentifier')
     if (widgetIdentifier === this.widgetIdentifier && !this.errorDuringWebRTCCall) {
-        this.authenticateToken(true);
+        this.authenticateSecureLinkKey(true);
     } else {
       console.warn('[Warning] Widget Identifiers do not match or there was an error during WebRTC call.');
 
