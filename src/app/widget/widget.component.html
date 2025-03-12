@@ -1152,8 +1152,12 @@
                         }">
                       </span>
                       <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
-                        <mat-chip *ngFor="let btn of message.body.buttons" (click)="sendButtonMessage(btn, message.id)">
-                          {{ btn.title }}</mat-chip>
+                        <mat-chip *ngFor="let btn of message.body.buttons" 
+                          [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
+                          (click)="sendButtonMessage(btn, message.id)"
+                        >
+                          {{ btn.title }}
+                        </mat-chip>
                       </mat-chip-list>
                     </div>
                     <!-- Message Type Contact -->
