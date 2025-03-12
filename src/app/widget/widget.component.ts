@@ -1076,12 +1076,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   async changeView(view: any) {
     if (this.showInvalidCodeError && this.standaloneWebRtc) {
+      
+      if(!this.isSecureLinkExpired) {
       this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
         duration: 3000,
         panelClass: ['error-snackbar'],
         horizontalPosition: 'right',
       });
-
+      }
       return;
     }
 
@@ -2459,7 +2461,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isAudioCallActive = true;
       }
 
-      console.log("here are the prechat form data", this.preChatFormData);
       const phoneNumber = this.preChatFormData.phone || "";
       const name = this.preChatFormData.name || "";
 
@@ -2732,7 +2733,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log('[Error] Call terminated:', errorMessage);
           break;
         case 'invalidState':
-          errorMessage = `Invalid State: Session not found`;
+          errorMessage = `Invalid State: Session not found. Please refresh the page and try again.`;
           console.log('[Error] Call terminated:', errorMessage);
           break;
         default:
@@ -2900,7 +2901,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     // Just for Debugging
     // const baseUrl = "http://localhost:4000/#/widget?widgetIdentifier=voice";
-    // const fullUrl = `${baseUrl}&encryptedKey=${(encryptedKey)}`;
+    // const fullUrl = `${baseUrl}&encryptedKey=${(preservedKey)}`;
     // window.open(fullUrl, '_blank');
 
     const widgetIdentifier = urlParams.get('widgetIdentifier')

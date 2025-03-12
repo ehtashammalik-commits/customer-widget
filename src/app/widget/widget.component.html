@@ -907,11 +907,11 @@
               'away-call-icon':
                 isAudioCallActive === true && activeAudioView === false
             }"
-            *ngIf="enableWebRtc && !__appConfig.appConfig.VIDEO"
+            *ngIf="enableWebRtc && !__appConfig.appConfig.VIDEO && (__appConfig.appConfig.isDirectWebRTCCallEnabled || isVideoCallActive)"
             matTooltip="Audio Call"
             [matTooltipPosition]="matToolTipPosition!"
             [ngStyle]="{
-              right: !__appConfig.appConfig.VIDEO ? '37px' : '104px'
+              right: '37px'
             }"
           >
             call
@@ -947,8 +947,8 @@
             [ngStyle]="{
               right:
                 enableWebRtc && __appConfig.appConfig.VIDEO && (__appConfig.appConfig.isDirectWebRTCCallEnabled)
-                  ? '100px'
-                  : (!__appConfig.appConfig.VIDEO || isVideoCallActive === true)
+                  ? '66px'
+                  : (isAudioCallActive || isVideoCallActive)
                   ? '66px'
                   : '36px'
             }"
@@ -1407,8 +1407,8 @@
                       " class="file-message">
                       <span class="message" innerHTML="{{
                         message.body.markdownText
-                              ? message.body.markdownText
-                              : ('' | tagFormat:enableDynamicLink)
+                              ? (message.body.markdownText | tagFormat:enableDynamicLink)
+                              : ''
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
