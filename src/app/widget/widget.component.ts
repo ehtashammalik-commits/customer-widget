@@ -162,7 +162,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   password_maxLength = 0;
   password_minLength = 0;
   // Audio Screen Variables
-  counterVar: any; // will be used in count down timer
+  counterVar: any = null; // will be used in count down timer
   agentName: string = 'Expertflow Agent'; // Agent Name during Active call will be pushed in this variable to show on the screen
   callTime: string = '00:00'; //Default value on the timer is set and updated will be added in it
   callText: string = ''; // this variable will contains the value of which type call is initiated ('audio' / 'video')
@@ -1076,7 +1076,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   async changeView(view: any) {
     if (this.showInvalidCodeError && this.standaloneWebRtc) {
-      
+
       if(!this.isSecureLinkExpired) {
       this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
         duration: 3000,
@@ -2218,7 +2218,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialog.open(ConfirmDialogComponent);
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.clearSession();
         if (this.IsRegisteredInFreeSwitch) {
           this.callPopUpView = false;
           this.endCountdown();
@@ -2227,6 +2226,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.IsRegisteredInFreeSwitch = false;
         }
       }
+
+      this.clearSession();
     });
   }
 
@@ -2480,6 +2481,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   startCountdown(): void {
+    if(this.counterVar) {
+      this.endCountdown();
+    }
     const countDownDate = new Date().getTime();
     if (!this.counterVar) {
       this.counterVar = setInterval(() => {
@@ -2499,6 +2503,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   endCountdown(): void {
     this.callTime = '00:00';
     clearInterval(this.counterVar);
+    this.counterVar = null;
   }
 
   handleDialogStates(data: any): void {
@@ -2514,13 +2519,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       });
     }
 
-    // if (data.event === "MEDIA_SERVER_CALL_END") {
+    // if (data.event === "MEDIA_SERVER_CALL_END" && data.reasonCode === "NORMAL_CLEARING") {
     //   const reasonCode = data.reasonCode ? data.reasonCode : "Unknown Error"
-    //   this.snackBar.open(reasonCode, 'Dismiss', {
-    //     duration: 3000,
-    //     panelClass: ['error-snackbar'],
-    //     horizontalPosition: 'right',
-    //   });
+    //   // this.snackBar.open(reasonCode, 'Dismiss', {
+    //   //   duration: 3000,
+    //   //   panelClass: ['error-snackbar'],
+    //   //   horizontalPosition: 'right',
+    //   // });
+
+    //   console.log("this.IsRegisteredInFreeSwitch",this.IsRegisteredInFreeSwitch)
+    //   this.clearSession();
     // }
     if (data.event === 'agentInfo') {
       console.log(
@@ -2652,6 +2660,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             if (this.standaloneWebRtc) {
               this.callPopUpView = false;
               this.isWebRtcVideoCallActive = false;
+              
               this.endCountdown();
               this.changeScreen('end');
             } else {
@@ -2660,7 +2669,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               this.isVideoCallActive = false;
               this.isScreenShareActive = false;
               this.endCountdown();
-              this.changeView('chat');
+              if(this.IsRegisteredInFreeSwitch) {
+                this.callEnd();
+              }
+              if(this.isChatActive) {
+                this.clearSession();
+              } else {
+                this.changeView('chat');
+              }
             }
             break;
         }
@@ -2704,7 +2720,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     if (data.event === 'Error') {
-      console.log("hello bosss....data.response.type", data.response)
       // this.errorDuringWebRTCCall = true;
       // This dialoguId we got in reponse once the call starts ringing on agent side 
       // If share end / mute / hold / unhold events on the basis of this Id. 
@@ -2717,7 +2732,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         case 'generalError':
         switch (data.response.description) {
             case 'Service Unavailable':
-                errorMessage = `The service is currently unavailable.Please check your network connection and try again.`;
+                errorMessage = `The service is currently unavailable. Please check your network connection and try again.`;
                 break;
             case 'Forbidden':
                 errorMessage = `Authentication failed. Please verify your SIP credentials and try again.`;
@@ -2729,11 +2744,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         console.log('[Error] Call terminated:', errorMessage);
         break;
         case 'subscriptionFailed':
-          errorMessage = `Certificates Issues: Please contact with your supervisor`;
+          errorMessage = `Certificate Issues: Please contact with your administrator`;
           console.log('[Error] Call terminated:', errorMessage);
           break;
         case 'invalidState':
-          errorMessage = `Invalid State: Session not found. Please refresh the page and try again.`;
+          errorMessage = `Invalid State: Session not found`;
           console.log('[Error] Call terminated:', errorMessage);
           break;
         default:
