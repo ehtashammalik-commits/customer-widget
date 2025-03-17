@@ -27,8 +27,27 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ActivatedRoute } from '@angular/router';
 import { TooltipPosition } from '@angular/material/tooltip';
+import { TranslateService } from '@ngx-translate/core';
 declare var EmojiPicker: any;
 
+interface Shift {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+}
+
+interface EventData {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string | null;
+  type: string;
+  shifts?: Shift[];
+  validityPeriod: string;
+  calendar: string[];
+  eventColor: string;
+}
 @Component({
   selector: 'app-widget',
   templateUrl: './widget.component.html',
@@ -228,6 +247,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   preChatFormLoader = false;
   callbackLoader = false;
   callbackConfig: any;
+  todayShifts: { eventId: string, shiftName: string | null, startTime: string, endTime: string }[] = [];
+  events: EventData[] = []; 
+  orderedEvents: any[] = [];
+  daySummary: { startOfDay: Date | null; endOfDay: Date | null } | null = null;
+
 
   webhookUrl: any;
 
@@ -267,10 +291,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private browserNotificationService: BrowserNotificationService,
     private deliveryNotificationService: DeliveryNotificationService,
     private __postMessageHandlerService: PostMessageHandlerService,
+    private translate: TranslateService,
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
     this.isUsernameEnabled = __appConfig.appConfig.USERNAME_ENABLED
+
+    translate.setDefaultLang('en');
+    translate.use('en');
   }
 
   ngAfterViewInit(): void {
@@ -353,6 +381,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
       // Pass parameters to service after you have received them.
       this.passUrlParamsToServices();
+      this.getCalendarEvents()
     });
 
     this.preChatFormGroup = this.fb.group({});
@@ -467,7 +496,106 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.loadBrowserLanguage();
     this.setFontFromLocalStorage();
+    this.getCalendarEvents()
   }
+
+  async getCalendarEvents() {
+    this.sdk
+      .fetchBusinessCalendarId()
+      .then((calendarId:string) => {
+
+        return this.sdk.getCalendarEvents(calendarId);
+      })
+      .then((events) => {
+        this.events = events.events;
+        this.getTodayEvent();
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }
+
+  getTodayEvent(): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      try {
+        
+        const today = new Date();
+        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Start of today in local time
+        const todayEnd = new Date(todayStart);
+        todayEnd.setDate(todayStart.getDate() + 1); // Start of tomorrow in local time
+
+
+        // Filter events happening today and of type BUSINESS_HOURS
+        const todayEvents = this.events.filter(
+          (event) =>
+            event.type === 'BUSINESS_HOURS' &&
+            event.shifts?.some((shift) => {
+              const shiftStart = new Date(shift.startTime);
+              const shiftEnd = new Date(shift.endTime);
+
+              // Check if either start or end time falls within today's local date range
+              return (
+                (shiftStart >= todayStart && shiftStart < todayEnd) ||
+                (shiftEnd >= todayStart && shiftEnd < todayEnd)
+              );
+            })
+        );
+
+        // Flatten all shifts into a single array
+        const allShifts = todayEvents.flatMap((event) =>
+          event.shifts?.map((shift) => ({
+            type: event.type,
+            shiftName: shift.name,
+            startTime: shift.startTime,
+            endTime: shift.endTime,
+          }))
+        );
+  
+        // If no shifts are available, handle accordingly
+        if (!allShifts.length) {
+          this.daySummary = null;
+          return resolve([]);
+        }
+        const minStartTime = new Date(
+          Math.min(
+            ...allShifts
+              .map((shift) => (shift?.startTime ? new Date(shift.startTime).getTime() : Infinity))
+          )
+        );
+
+        const maxEndTime = new Date(
+          Math.max(
+            ...allShifts
+              .map((shift) => (shift?.endTime ? new Date(shift.endTime).getTime() : -Infinity))
+          )
+        );
+  
+        // Set the day summary with the minimum and maximum times
+        this.daySummary = {
+          startOfDay: minStartTime,
+          endOfDay: maxEndTime,
+        };
+        
+        ///this.orderedEvents = allShifts;
+  
+        resolve(this.orderedEvents);
+      } catch (error) {
+        reject("Error processing Business Hours events: " + error);
+      }
+    });
+  }
+  
+  
+  
+  
+  
+  
+
+  formatTime(dateTime: string): string {
+    const date = new Date(dateTime);
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+
 
   async passUrlParamsToServices() {
     await this.sdk.receiveUrlParamsValue(

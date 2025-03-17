@@ -1,7 +1,7 @@
 <div>
-  <h4>Confirm</h4>
-  <p>Are you sure to end the conversation?</p>
-  <button class="btn btn-default btn-sm" mat-button (click)="onConfirm()">Yes</button>
-  <button class="btn btn-default btn-sm"  mat-button (click)="onCancel()">No</button>
+  <h4>{{ 'dialog.confirm' | translate }}</h4>
+  <p>{{'dialog.end-conversation-confirmation' | translate}}</p>
+  <button class="btn btn-default btn-sm" mat-button (click)="onConfirm()">{{ 'dialog.yes' | translate }}</button>
+  <button class="btn btn-default btn-sm"  mat-button (click)="onCancel()">{{ 'dialog.no' | translate }}</button>
 </div>
 
