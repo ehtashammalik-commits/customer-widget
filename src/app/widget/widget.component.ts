@@ -961,6 +961,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         } else {
           this.additionalPanel = true;
         }
+        if(this.standaloneWebRtc) {
+          this.authenticateSecureLinkKey(false);
+        }
         this.preChatFormScreen = false;
         this.callbackFormScreen = false;
         this.webRtcVideoCallScreen = false;
@@ -1076,7 +1079,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   async changeView(view: any) {
     if (this.showInvalidCodeError && this.standaloneWebRtc) {
-
       if(!this.isSecureLinkExpired) {
       this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
         duration: 3000,
@@ -2462,15 +2464,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isAudioCallActive = true;
       }
 
-      const phoneNumber = this.preChatFormData.phone || "";
-      const name = this.preChatFormData.name || "";
+      if(this.preChatFormData && typeof this.preChatFormData === 'object') {
+        const phoneNumber = this.preChatFormData.phone || "";
+        const name = this.preChatFormData.name || "";
 
-      this.webRTCConfig.customerName = name;
-      this.webRTCConfig.customerNumber = phoneNumber;
-
-      if(phoneNumber || name ) {
         this.webRTCConfig.customerName = name;
-        this.webRTCConfig.customerNumber = phoneNumber
+        this.webRTCConfig.customerNumber = phoneNumber;
+
+        if(phoneNumber || name ) {
+          this.webRTCConfig.customerName = name;
+          this.webRTCConfig.customerNumber = phoneNumber
+        }
       }
 
       this.sdk.handleCallStart({
@@ -2660,7 +2664,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             if (this.standaloneWebRtc) {
               this.callPopUpView = false;
               this.isWebRtcVideoCallActive = false;
-              
+              // if(this.IsRegisteredInFreeSwitch) {
+              //   this.callEnd();
+              // }
+              // if(this.isChatActive) {
+              //   this.clearSession();
+              // }
               this.endCountdown();
               this.changeScreen('end');
             } else {
@@ -2914,9 +2923,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const preservedKey = decodeURIComponent(encryptedKey ?? "");
     this.webRtcSecureLink = preservedKey;
 
-    // Just for Debugging
-    // const baseUrl = "http://localhost:4000/#/widget?widgetIdentifier=voice";
-    // const fullUrl = `${baseUrl}&encryptedKey=${(preservedKey)}`;
+    // Just for Debugging to open url in new window. 
+    // const hashIndex = mediaUrl.indexOf('#');
+    // const hashPart = hashIndex !== -1 ? mediaUrl.substring(hashIndex) : '';
+    // const baseUrl = "http://localhost:4000";
+    // const fullUrl = `${baseUrl}${hashPart}`;
+    
+    // console.log("fullUrl", fullUrl);
     // window.open(fullUrl, '_blank');
 
     const widgetIdentifier = urlParams.get('widgetIdentifier')

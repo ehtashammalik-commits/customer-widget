@@ -67,7 +67,7 @@
         <div class="widget-chat-navbar">
           <span
             class="material-symbols-outlined widget-navbar-icon btnOne"
-            *ngIf="enableWebRtc"
+            *ngIf="enableWebRtc && isWebRtcVideoCallActive"
             [ngClass]="{
               'focus-icon': isWebRtcVideoCallActive === true,
               'away-call-icon': isWebRtcVideoCallActive === true
