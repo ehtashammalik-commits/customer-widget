@@ -2245,8 +2245,10 @@ function blind_transfer_queue(numberToTransfer, queue, queuetype, callback, dial
  * @returns {void}
  */
 function phone_hold(callback, dialogId) {
-  var res = lockFunction("phone_hold", 500); // --- seconds cooldown
+  var res = lockFunction("phone_hold", 1500); // --- seconds cooldown
   if (!res) return;
+  var res = lockFunction("phone_unhold", 1500); // --- seconds cooldown
+  if (!res) return
   var index = getCallIndex(dialogId);
   var sessionall = null
   if (index !== -1) {
@@ -2326,7 +2328,9 @@ function phone_hold(callback, dialogId) {
  * @returns {void}
  */
 function phone_unhold(callback, dialogId) {
-  var res = lockFunction("phone_unhold", 500); // --- seconds cooldown
+  var res = lockFunction("phone_unhold", 1500); // --- seconds cooldown
+  if (!res) return;
+  var res = lockFunction("phone_hold", 1500); // --- seconds cooldown
   if (!res) return;
   var index = getCallIndex(dialogId);
   var sessionall = null
