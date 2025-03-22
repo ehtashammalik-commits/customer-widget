@@ -489,7 +489,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.loadBrowserLanguage();
     this.setFontFromLocalStorage();
-    this.getCalendarEvents()
+    this.getCalendarEvents();
   }
 
   async getCalendarEvents() {
@@ -2456,13 +2456,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // In case of simple webRTC call
 
     else {
-      if (callType === 'video' && !this.isSecureWebCall) {
-        this.isVideoCallActive = true;
-      } else if (callType === 'screenshare') {
-        this.isScreenShareActive = true;
-      } else {
-        this.isAudioCallActive = true;
-      }
 
       if(this.preChatFormData && typeof this.preChatFormData === 'object') {
         const phoneNumber = this.preChatFormData.phone || "";
@@ -2481,6 +2474,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         type: callType,
         authConfigs: this.webRTCConfig,
       });
+
+      if(!this.errorDuringWebRTCCall) {
+        if (callType === 'video' && !this.isSecureWebCall) {
+          this.isVideoCallActive = true;
+        } else if (callType === 'screenshare') {
+          this.isScreenShareActive = true;
+        } else {
+          this.isAudioCallActive = true;
+        }
+      }
     }
   }
 
@@ -2787,6 +2790,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               panelClass: ['error-snackbar'],
               horizontalPosition: 'right',
             });
+            this.isAudioCallActive = false;
             this.isSecureWebCall = false;
             this.isVideoCallActive = false;
             this.activeVideoView = false;
