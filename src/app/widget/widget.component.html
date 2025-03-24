@@ -881,10 +881,8 @@
               btnOne: enabledCallback === false && enableFontResize === false,
               btnThree: enabledCallback === true && enableFontResize === true,
               btnTwo: enabledCallback === false || enableFontResize === false,
-              'focus-icon':
-                isVideoCallActive === true && activeVideoView === true,
-              'away-call-icon':
-                isVideoCallActive === true && activeVideoView === false
+              'focus-icon': isVideoCallActive === true && activeVideoView === true,
+              'away-call-icon': isVideoCallActive === true && activeVideoView === false
             }"
             matTooltip="Video Call"
             [matTooltipPosition]="matToolTipPosition!"
@@ -898,6 +896,7 @@
                 ? convertCallView('audio')
                 : changeView('audio')
             "
+            *ngIf="enableWebRtc && !__appConfig.appConfig.VIDEO && __appConfig.appConfig.isDirectWebRTCCallEnabled"
             [ngClass]="{
               btnTwo: enabledCallback === false && enableFontResize === false,
               btnFour: enabledCallback === true && enableFontResize === true,
@@ -907,11 +906,10 @@
               'away-call-icon':
                 isAudioCallActive === true && activeAudioView === false
             }"
-            *ngIf="enableWebRtc && !__appConfig.appConfig.VIDEO && (__appConfig.appConfig.isDirectWebRTCCallEnabled || isVideoCallActive)"
             matTooltip="Audio Call"
             [matTooltipPosition]="matToolTipPosition!"
             [ngStyle]="{
-              right: '37px'
+              right: !__appConfig.appConfig.VIDEO ? '37px' : '104px'
             }"
           >
             call
@@ -947,8 +945,8 @@
             [ngStyle]="{
               right:
                 enableWebRtc && __appConfig.appConfig.VIDEO && (__appConfig.appConfig.isDirectWebRTCCallEnabled)
-                  ? '66px'
-                  : (isAudioCallActive || isVideoCallActive)
+                  ? '100px'
+                  : (!__appConfig.appConfig.VIDEO)
                   ? '66px'
                   : '36px'
             }"
@@ -1630,18 +1628,13 @@
                 >
                 <span
                 [ngClass]="{
-                  'disable-icon-callControl': isSecureWebCall
+                  'disable-icon-callControl': isSecureWebCall || isAudioCallActive
                 }"
                 matTooltip="Screen Share"
                 [matTooltipPosition]="this.positionOptions[2]" 
                 class="material-symbols-outlined"
-                [attr.aria-disabled]="isSecureWebCall"
-                (click)="
-                  !isSecureWebCall &&
-                  (activeScreenShareView || activeAudioView || activeVideoView
-                    ? convertCallView('screenshare')
-                    : changeView('screenshare'))
-                "
+                [attr.aria-disabled]="isSecureWebCall || isAudioCallActive"
+                (click)="handleScreenShareClick()"
               >
                 present_to_all
               </span>
@@ -1659,17 +1652,19 @@
                     'focus-icon-video ': isVideoCallActive === true
                   }"
                 >
-                  <span
-                    class="material-symbols-outlined"
-                    [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
-                    [matTooltipPosition]="this.positionOptions[2]"
-                    [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'"
-                    (click)="isVideoCallActive
-                    ? toggleCallVideo(tooltip5)
-                    : convertCallRequest('video');"
-                    #tooltip5="matTooltip"
-                  >
-                  </span>
+                <span
+                class="material-symbols-outlined"
+                [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
+                [matTooltipPosition]="this.positionOptions[2]"
+                [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'"
+                (click)="handleVideoIconClick(tooltip5)"
+                [ngClass]="{
+                  'disable-icon-callControl': isAudioCallActive
+                }"
+                [attr.aria-disabled]="isAudioCallActive"
+                #tooltip5="matTooltip"
+              >
+              </span>
                 </div>
                 <div class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
                   <span

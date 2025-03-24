@@ -26,7 +26,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ActivatedRoute } from '@angular/router';
-import { TooltipPosition } from '@angular/material/tooltip';
+import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 declare var EmojiPicker: any;
 
 interface Shift {
@@ -2475,7 +2475,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         authConfigs: this.webRTCConfig,
       });
 
-      if(!this.errorDuringWebRTCCall) {
         if (callType === 'video' && !this.isSecureWebCall) {
           this.isVideoCallActive = true;
         } else if (callType === 'screenshare') {
@@ -2483,14 +2482,39 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         } else {
           this.isAudioCallActive = true;
         }
-      }
     }
   }
 
-  startCountdown(): void {
-    if(this.counterVar) {
-      this.endCountdown();
+
+  handleScreenShareClick() {
+    // Do not proceed if secure web call or audio call is active
+    if (this.isSecureWebCall || this.isAudioCallActive) {
+      return;
     }
+
+    // Proceed with the action
+    // if (this.activeScreenShareView || this.activeVideoView) {
+    //   this.convertCallView('screenshare');
+    // } else {
+    //   this.changeView('screenshare');
+    // }
+  }
+
+  handleVideoIconClick(tooltip: MatTooltip) {
+    // Do not proceed if audio call is active
+    if (this.isAudioCallActive) {
+      return;
+    }
+
+    if (this.isVideoCallActive) {
+      this.toggleCallVideo(tooltip);
+    } else {
+      this.convertCallRequest('video');
+    }
+  }
+
+
+  startCountdown(): void {
     const countDownDate = new Date().getTime();
     if (!this.counterVar) {
       this.counterVar = setInterval(() => {
