@@ -318,15 +318,20 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
   fetch(`${fileServerUrl}/api/uploadFileStream`, {
     method: 'POST',
     body: formData
-  })
-    .then((response) => response.json())
+  }).then(async (response) => {
+      if (!response.ok) {
+        const errorText = await response.text(); // attempt to read error body
+        throw new Error(errorText || `HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((result) => {
       console.log('Success: ', result);
       callback(result);
     })
     .catch((error) => {
       console.error('Error: ', error.message);
-      callback({ error, isFileInvalid: true, errorMesage: "The file name contains special characters. Only underscore, hyphen and space are allowed in file name." });
+      callback({ error, isFileInvalid: true, errorMesage: error.message });
     });
 }
 /**
