@@ -320,8 +320,9 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
     body: formData
   }).then(async (response) => {
       if (!response.ok) {
-        const errorText = await response.text(); // attempt to read error body
-        throw new Error(errorText || `HTTP error! Status: ${response.status}`);
+        const errorText = await response.json();
+        const messageText = JSON.stringify(errorText.message)
+        return Promise.reject(new Error(messageText || `HTTP error! Status: ${response.status}`));
       }
       return response.json();
     })
@@ -331,7 +332,7 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
     })
     .catch((error) => {
       console.error('Error: ', error.message);
-      callback({ error, isFileInvalid: true, errorMesage: error.message });
+      callback({ error, isFileInvalid: true, errorMesage: error });
     });
 }
 /**
