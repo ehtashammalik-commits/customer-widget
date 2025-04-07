@@ -10,7 +10,8 @@
   "CHANNEL_IDENTIFIER": "phone",
   "ENABLE_LOGO": false,
   "ADDITIONAL_PANEL": true,
-  "VIDEO": false,
+  "VIDEO": true,
   "USERNAME_ENABLED": true,
+  "MUTE_NOTIFICATIONS": false,
   "isDirectWebRTCCallEnabled": true
 }

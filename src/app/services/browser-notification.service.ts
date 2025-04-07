@@ -1,4 +1,5 @@
 import { ElementRef, ViewChild, Injectable } from '@angular/core';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -7,7 +8,9 @@ export class BrowserNotificationService {
   @ViewChild('myFileInput')
   myInputVariable!: ElementRef;
 
-  constructor() {}
+  constructor(
+    private appConfig: ConfigService,
+  ) {}
 
   notify(cimMessage: any) {
     if (
@@ -28,7 +31,9 @@ export class BrowserNotificationService {
         ) {
           this.openBrowserNotification(messageType, messageText);
         }
-        if (textType === 'PLAIN' || textType === 'BUTTON' || textType === 'URL') {
+        if (
+          (textType === 'PLAIN' || textType === 'BUTTON' || textType === 'URL') &&
+          !this.appConfig.appConfig.MUTE_NOTIFICATIONS) {
           this.playSound();
         }
       }

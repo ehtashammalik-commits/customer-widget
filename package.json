@@ -27,6 +27,8 @@
     "@angular/platform-browser-dynamic": "^14.0.0",
     "@angular/router": "^14.0.0",
     "@expertflow/sdk-for-customer-facing-channels": "^1.0.0",
+    "@ngx-translate/core": "^14.0.0",
+    "@ngx-translate/http-loader": "^7.0.0",
     "eslint": "^8.46.0",
     "ibs-format": "^1.4.13",
     "ngx-linkifyjs": "^1.3.0",
