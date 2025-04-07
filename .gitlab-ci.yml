@@ -83,8 +83,8 @@ time_build:
 node_artifacts:
   stage: artifacts
   when: on_success
-   image: node:18.14.1-alpine3.17
-   script:
+  image: node:18.14.1-alpine3.17
+  script:
      - npm install --legacy-peer-deps
      - npm run build
      - export TIME_TOKEN="$(cat .ci_status/ci_time)"
