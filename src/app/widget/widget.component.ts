@@ -949,18 +949,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   getFormDataAsConversationData(jsonObject: any) {
-    const attributesArray: any[] = [];
-
-    jsonObject.sections.forEach((section: any) => {
-      const attributes = Object.entries(section).map(([key, value]) => ({
-        [key]: value,
-      }));
-      attributesArray.push(...attributes);
+    const attributes: any = {};
+    jsonObject.sections.forEach((section: any, index: number) => {
+      Object.entries(section).forEach(([key, value]) => {
+        if (attributes.hasOwnProperty(key)) {
+          // Conflict: key already exists, add with index
+          attributes[`${key}_${index}`] = value;
+        } else {
+          attributes[key] = value;
+        }
+      });
     });
 
-    console.log(attributesArray);
-    return attributesArray;
+    console.log('conversation data ===========>', attributes);
+    return attributes;
   }
+
 
   getFormDataByPreChatForm(preChatFormData: any[]): any {
     return {
