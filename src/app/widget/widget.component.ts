@@ -3351,4 +3351,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     window.open(fileUrl, '_blank');
   }
 
+  passwordChecker() {
+
+  }
 }

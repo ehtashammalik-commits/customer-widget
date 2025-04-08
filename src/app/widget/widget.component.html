@@ -19,9 +19,10 @@
             <strong>{{ title }}</strong>
             <p>{{ subtitle }}</p>
             <div *ngIf="daySummary">
-              <p>Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date: 'shortTime' }}</p>
+              <p>Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date:
+                'shortTime' }}</p>
             </div>
-        </div>
+          </div>
         </div>
         <div class="widget-wrapper-content">
           <p>Ask us a question, our support team is pleased to help you.</p>
@@ -454,9 +455,9 @@
 
               <!-- Dynamic form prechat form fields -->
               <!-- widget-form-group -->
-              <div class="preChatForm preChat-widget-form-group section-area "
-                [ngClass]="formData.length == 1 ? 'noSection':''" *ngFor="let section of formData; let i = index"
-                [formGroupName]="i">
+              <div class="preChatForm preChat-widget-form-group "
+                [ngClass]="formData.length == 1 ? 'noSection':'section-area'"
+                *ngFor="let section of formData; let i = index" [formGroupName]="i">
                 <div class="preChatFormInfo" *ngIf="formData.length > 1">
 
                   <span class="sectionTitle">{{section.sectionName}}</span>
@@ -531,15 +532,7 @@
 
                             <input matInput id="{{ attribute.key }}" type="text" [formControlName]="attribute.key"
                               [placeholder]="attribute.helpText" class="widget-form-control"
-                              [required]="attribute?.isRequired" [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
-  border: isMaxLengthError(
-  i,
-  attribute.key,
-  attribute.valueType
-  )
-  ? '1px solid red'
-  : 'none'
-  }" />
+                              [required]="attribute?.isRequired" [attr.maxlength]="101" [attr.minlength]="1" />
                             <!-- <mat-error *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.errors as errors">
                               {{ errors['required'] ? 'Required field' :
                               (attribute.valueType.charAt(0).toUpperCase() +
@@ -557,11 +550,7 @@
 
                             <input matInput type="password" id="{{ attribute.key }}" [formControlName]="attribute.key"
                               class="widget-form-control" [required]="attribute?.isRequired" minlength="8"
-                              maxlength="256" [ngStyle]="{
-  border: isMaxLengthError(i, attribute.key, attribute.valueType)
-  ? '1px solid red'
-  : 'none'
-  }" />
+                              maxlength="256" (input)="passwordChecker()" />
                             <!-- <mat-error *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.errors as errors">
                               {{ errors['required'] ? 'Required field' :
                               (attribute.valueType.charAt(0).toUpperCase() +
@@ -580,15 +569,7 @@
   attribute.key === 'channel_customer_identifier'
   ? customerIdentifier
   : ''
-  " [attr.maxlength]="101" [attr.minlength]="1" [ngStyle]="{
-  border: isMaxLengthError(
-  i,
-  attribute.key,
-  attribute.valueType
-  )
-  ? '1px solid red'
-  : 'none'
-  }" />
+  " [attr.maxlength]="101" [attr.minlength]="1" />
                             <!-- <mat-error *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.errors as errors">
                               {{ errors['required'] ? 'Required field' :
                               (attribute.valueType.charAt(0).toUpperCase() +
@@ -1117,7 +1098,7 @@
 
                           </ng-container>
                         </ng-container>
-                        <div class="divider" *ngIf="section.attributes.length-1 != j ">
+                        <div class="divider" *ngIf="formData.length > 1 &&section.attributes.length-1 != j ">
 
                         </div>
                         <!-- Validation Error Messages -->
@@ -1135,12 +1116,12 @@
                             required format
                           </span>
                           <span *ngIf="
-                    !isMaxLengthError(i,attribute.key, attribute.valueType) && preChatFormGroup.get(['sections',j,attribute.key])?.hasError('pattern') && !preChatFormGroup.get(['sections',j,attribute.key])?.hasError('minlength') && attribute.valueType.toLowerCase()=='password'
+                    !isMaxLengthError(i,attribute.key, attribute.valueType) && preChatFormGroup.get(['sections',i,attribute.key])?.hasError('pattern') && !preChatFormGroup.get(['sections',i,attribute.key])?.hasError('minlength') && attribute.valueType.toLowerCase()=='password'
                       " class="field-error">
                             Password must include uppercase, lowercase, number, and special character
                           </span>
                           <span *ngIf="
-    preChatFormGroup.get(attribute.key)?.hasError('minlength') &&
+                          preChatFormGroup.get(['sections',i,attribute.key])?.hasError('minlength') &&
     attribute.valueType.toLowerCase() == 'password'
   " class="field-error">
                             Password must be at least 8 characters long
