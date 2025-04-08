@@ -186,13 +186,16 @@ gitlab_build_tag:
     - cd docker
     - apk add --no-cache git
     - echo "Checking if tag $CI_COMMIT_TAG is from master..."
+    # Get the commit that the tag points to
+    - TAG_COMMIT=$(git rev-list -n 1 "$CI_COMMIT_TAG")
     - |
-      if git merge-base --is-ancestor $(git rev-parse origin/master) $CI_COMMIT_TAG; then
+      # Check if that commit exists in the master branch history
+      if git branch --remotes --contains "$TAG_COMMIT" | grep -q "origin/master"; then
         echo "Tag $CI_COMMIT_TAG is from master."
         docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" .
         docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
       else
-        echo "Tag is not from master. Pushing to /build"
+        echo "Tag is NOT from master. Pushing to /build"
         docker build --pull -t "$CI_REGISTRY_IMAGE/build:$CI_COMMIT_TAG" .
         docker push "$CI_REGISTRY_IMAGE/build:$CI_COMMIT_TAG"
       fi
