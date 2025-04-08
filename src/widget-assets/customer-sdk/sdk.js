@@ -320,9 +320,9 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
     body: formData
   }).then(async (response) => {
       if (!response.ok) {
-        const errorText = await response.json();
-        const messageText = JSON.stringify(errorText.message)
-        return Promise.reject(new Error(messageText || `HTTP error! Status: ${response.status}`));
+        const errorText = await response.text();
+        console.log("Error: ", errorText);
+        throw new Error(errorText);
       }
       return response.json();
     })
@@ -331,8 +331,19 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
       callback(result);
     })
     .catch((error) => {
-      console.error('Error: ', error.message);
-      callback({ error, isFileInvalid: true, errorMesage: error });
+      let errorDetails = {};
+
+      try {
+        errorDetails = JSON.parse(error.message);
+      } catch (e) {
+        errorDetails.message = "Error parsing JSON response.";
+      }
+    
+      if (errorDetails.result && errorDetails.result.isInfected) {
+        callback({ errorDetails, isFileInvalid: true, errorMesage: "The file could not be uploaded due to security concerns. Please try a different file." });
+      } else {
+        callback({ errorDetails, isFileInvalid: true, errorMesage: "The file name contains special characters. Only underscore, hyphen and space are allowed in file name." });
+      }
     });
 }
 /**
