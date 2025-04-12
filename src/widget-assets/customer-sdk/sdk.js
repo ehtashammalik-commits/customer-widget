@@ -8,8 +8,22 @@ let socket = {};
  * @param {*} widgetIdentifier
  * @param {*} callback
  */
+
+
+function authorizedFetch(url, options = {}) {
+  const token = localStorage.getItem('jwt_token');
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+}
+
+
 function widgetConfigs(ccmUrl, widgetIdentifier, callback) {
-  fetch(`${ccmUrl}/widget-configs/${widgetIdentifier}`)
+  authorizedFetch(`${ccmUrl}/widget-configs/${widgetIdentifier}`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
@@ -22,7 +36,7 @@ function widgetConfigs(ccmUrl, widgetIdentifier, callback) {
  * @param {*} callback
  */
 function getPreChatForm(formUrl, formId, callback) {
-  fetch(`${formUrl}/forms/${formId}`)
+  authorizedFetch(`${formUrl}/forms/${formId}`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
@@ -33,7 +47,7 @@ function getPreChatForm(formUrl, formId, callback) {
  * @param {*} callback
  */
 function formValidation(formUrl, callback) {
-  fetch(`${formUrl}/formValidation`)
+  authorizedFetch(`${formUrl}/formValidation`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
@@ -305,7 +319,7 @@ function getInitChat(customer) {
     body: JSON.stringify(customer)
   };
 
-  fetch(`${config.ServerUrl}/api/customer/init`, requestOptions)
+  authorizedFetch(`${config.ServerUrl}/api/customer/init`, requestOptions)
     .then(response => response.json())
     .then(data => {
       onInitChat(data);
@@ -322,7 +336,7 @@ function getInitChat(customer) {
  * @param {*} callback
  */
 function uploadToFileEngine(fileServerUrl, formData, callback) {
-  fetch(`${fileServerUrl}/api/uploadFileStream`, {
+  authorizedFetch(`${fileServerUrl}/api/uploadFileStream`, {
     method: 'POST',
     body: formData
   }).then(async (response) => {
@@ -357,7 +371,7 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
  * Set Conversation Data Api
  */
 async function setConversationData(url, conversationId, data) {
-  const response = await fetch(`${url}/${conversationId}/conversation-data`, {
+  const response = await authorizedFetch(`${url}/${conversationId}/conversation-data`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -371,7 +385,7 @@ async function setConversationData(url, conversationId, data) {
  */
 async function setConversationDataByCustomerIdentifier(url, channelIdentifier, data, callback) {
   try {
-    const response = await fetch(`${url}/${channelIdentifier}/conversation-data-by-identifier`, {
+    const response = await authorizedFetch(`${url}/${channelIdentifier}/conversation-data-by-identifier`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -402,7 +416,7 @@ async function setConversationDataByCustomerIdentifier(url, channelIdentifier, d
 */
 async function getConversationDataByCustomerIdentifier(url, channelIdentifier, callback) {
   try {
-    const response = await fetch(`${url}/get/${channelIdentifier}`, {
+    const response = await authorizedFetch(`${url}/get/${channelIdentifier}`, {
       method: 'GET', // Specify the HTTP method as GET
       headers: {
         'Content-Type': 'application/json' // Set appropriate headers if needed
@@ -413,7 +427,7 @@ async function getConversationDataByCustomerIdentifier(url, channelIdentifier, c
       console.error('Forbidden: The server returned a 403 Forbidden response.');
       callback(response);
     } else if (!response.ok) {
-      console.error(`Failed to fetch data from ${url}/get/${channelIdentifier}: ${response.status} ${response.statusText}`);
+      console.error(`Failed to authorizedFetch data from ${url}/get/${channelIdentifier}: ${response.status} ${response.statusText}`);
       callback(response);
     } else {
       const data = await response.json();
@@ -428,9 +442,9 @@ async function getConversationDataByCustomerIdentifier(url, channelIdentifier, c
 * Get Conversation Data Api
 */
 async function getConversationData(url, conversationId) {
-  const response = await fetch(`${url}/${conversationId}/conversation-data`);
+  const response = await authorizedFetch(`${url}/${conversationId}/conversation-data`);
   if (!response.ok) {
-    throw new Error(`Failed to fetch data from ${url}/${conversationId}/conversation-data: ${response.status} ${response.statusText}`);
+    throw new Error(`Failed to authorizedFetch data from ${url}/${conversationId}/conversation-data: ${response.status} ${response.statusText}`);
   }
   const data = await response.json();
   return data;
@@ -440,7 +454,7 @@ async function getConversationData(url, conversationId) {
  */
 function authenticateRequest(authenticatorUrl, authData, callback) {
   console.log('authenticateRequest: in sdk function:', JSON.stringify(authData));
-  fetch(`${authenticatorUrl}/verifySecureLink`, {
+  authorizedFetch(`${authenticatorUrl}/verifySecureLink`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -496,7 +510,7 @@ function authenticateRequest(authenticatorUrl, authData, callback) {
 function getBrowserInfo(apiKey, callback) {
   // const apiKey = '5c8c5a26decc9b30da07abf360b73256faa5b00c59b32689c9860a84';
   try {
-    fetch(`https://api.ipdata.co?api-key=${apiKey}`, {
+    authorizedFetch(`https://api.ipdata.co?api-key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -528,7 +542,7 @@ function callbackRequest(url, payload, callback) {
   try {
 
     // Make an API Call
-    fetch(`${url}`, {
+    authorizedFetch(`${url}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -553,7 +567,7 @@ function callbackRequest(url, payload, callback) {
 }
 
 function getCalendarId(url, serviceIdentifier, callback) {
-  fetch(`${url}/channels/service-identifier/${serviceIdentifier}`)
+  authorizedFetch(`${url}/channels/service-identifier/${serviceIdentifier}`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
@@ -561,7 +575,7 @@ function getCalendarId(url, serviceIdentifier, callback) {
 }
 
 function getCalendarEvents(calendarId,url, startTime,endTime,callback) {
-  fetch(`${url}/calendars/events?&calendarId=${calendarId}&startTime=${startTime}&endTime=${endTime}`)
+  authorizedFetch(`${url}/calendars/events?&calendarId=${calendarId}&startTime=${startTime}&endTime=${endTime}`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
@@ -606,7 +620,7 @@ function webhookNotifications(webhookUrl, additionalData, data) {
       }
     ]
   };
-  fetch(`${webhookUrl}`, {
+  authorizedFetch(`${webhookUrl}`, {
     method: 'POST',
     body: JSON.stringify(messageObj), // Formatting as a JSON object for Google Workspace webhook
     headers: {
