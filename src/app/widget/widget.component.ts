@@ -2166,7 +2166,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       );
 
       if(newWindow) newWindow.onload = () => {
-        const sessionData = sessionStorage.getItem('jwt_token');
+        const sessionData = localStorage.getItem('jwt_token');
         newWindow.postMessage({ sessionData }, window.origin);
       };
       localStorage.removeItem('conversationId');

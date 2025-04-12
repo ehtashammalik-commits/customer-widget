@@ -102,7 +102,7 @@ function eventListeners(callback) {
   this.socket.on('TOKEN_RECEIVED', (data) => {
     if (this.socket.id != undefined) {
       console.log(`you have received the token:`, data);
-      sessionStorage.setItem('jwt_token', data);
+      localStorage.setItem('jwt_token', data);
       callback({ type: "TOKEN_RECEIVED", data: this.socket });
     }
   });

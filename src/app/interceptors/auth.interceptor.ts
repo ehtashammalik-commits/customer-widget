@@ -17,7 +17,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         // Get token from sessionStorage
-        const token = sessionStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token');
 
             const authReq = request.clone({
                 headers: request.headers.set('Authorization', `Bearer ${token}`)
@@ -26,7 +26,7 @@ export class AuthInterceptor implements HttpInterceptor {
                 catchError((error: HttpErrorResponse) => {
                     if (error.status === 401) {
                         alert('Please Check with Administrator. Unauthorized Access!');
-                        sessionStorage.removeItem('jwt_token');
+                        localStorage.removeItem('jwt_token');
                     }
                     return throwError(error);
                 })

@@ -1,5 +1,5 @@
 {
-  "SOCKET_URL": "http://localhost:7000",
+  "SOCKET_URL": "https://appsecure.expertflow.com/web-channel-manager",
   "FILE_SERVER_URL": "https://appsecure.expertflow.com/file-engine",
   "BOT_FRAMEWORK_URL": "https://appsecure.expertflow.com/bot-framework",
   "CCM_URL": "https://appsecure.expertflow.com/ccm",

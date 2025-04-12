@@ -8,14 +8,7 @@ const service_identifier = decodeURIComponent(params.get("serviceIdentifier"));
 const clickState = decodeURIComponent(params.get("state"));
 const conversation_id = decodeURIComponent(params.get("conversationId"));
 const browserLang = decodeURIComponent(params.get("browserLang"));
-let jwtToken = "";
-window.addEventListener('message', (event) => {
-  if (event.origin === window.origin) {
-    jwtToken = event.data.sessionData;
-    console.log(jwtToken);
-    // Use the session data
-  }
-});
+const jwtToken = localStorage.getItem('jwt_token');
 console.log(
   "configurations :",
   ccm_url,
@@ -49,7 +42,6 @@ request.open(
   `${ccm_url}/message?customerChannelIdentifier=${channel_customer_identifier}&serviceIdentifier=${service_identifier}&conversationId=${conversation_id}`,
 );
 request.setRequestHeader("Authorization", `Bearer ${jwtToken}`);
-
 request.send();
 request.onload = () => {
   console.log("this is the first thing to look at.... ")
