@@ -12,18 +12,10 @@ import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-    private skipUrls = ['login','assets','form','config'];
-
     constructor(
     ) { }
 
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        // Skip authentication for specific routes
-        const shouldSkip = this.skipUrls.some(url => request.url.includes(url));
-        if (shouldSkip) {
-            console.log("Skipping authentication for URL: ", request.url);
-            return next.handle(request);
-        }
         // Get token from sessionStorage
         const token = sessionStorage.getItem('jwt_token');
 

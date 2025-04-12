@@ -28,7 +28,6 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.compone
 import { ActivatedRoute } from '@angular/router';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
-import { AuthService } from '../services/auth.service'; // Add this line
 declare var EmojiPicker: any;
 
 interface Shift {
@@ -293,7 +292,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private deliveryNotificationService: DeliveryNotificationService,
     private __postMessageHandlerService: PostMessageHandlerService,
     private translate: TranslateService,
-private authService: AuthService, // Add this line
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
@@ -606,28 +604,6 @@ private authService: AuthService, // Add this line
     );
   }
 
-  private async performLogin(): Promise<boolean> {
-    try {
-      const response = await lastValueFrom(this.authService.login())
-      if (response?.success) {
-        console.log('Login successful');
-        return Promise.resolve(true); 
-      } else {
-        console.error('Login failed:', response?.message);
-        this.snackBar.open(response?.message || 'Login failed', 'Close', {
-          duration: 3000
-        });
-        return Promise.reject(false);
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      this.snackBar.open('Login failed. Please try again.', 'Close', {
-        duration: 3000
-      });
-      return Promise.reject(false);
-    }
-  }
-
   private createFormValidationControls(
     formSchema: any,
     formValidation: any,
@@ -829,14 +805,7 @@ private authService: AuthService, // Add this line
           // If Error is false than proceed with the start Chat and user data setting
           if (!eventPayload.error) {
             console.log('Event Payload:', eventPayload.data);
-            this.performLogin().then(loginSuccess => {
-              if (loginSuccess) {
-                this.setUserData(eventPayload.data, 'startChat');
-              } else {
-                this.preChatFormLoader = false;
-                alert('Please Check with Administrator. Login failed!');
-              }
-            });            
+            this.setUserData(eventPayload.data, 'startChat');           
           }
         } else {
           this.preChatFormLoader = false;
@@ -2187,7 +2156,7 @@ private authService: AuthService, // Add this line
 
   chatTranscript() {
     if (localStorage.getItem('conversationId') !== '') {
-      window.open(
+      const newWindow = window.open(
         `widget-assets/chat-transcript/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
         }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier
         }&conversationId=${localStorage.getItem(
@@ -2195,6 +2164,11 @@ private authService: AuthService, // Add this line
         )}&browserLang=${this.browserLang}`,
         '_blank',
       );
+
+      if(newWindow) newWindow.onload = () => {
+        const sessionData = sessionStorage.getItem('jwt_token');
+        newWindow.postMessage({ sessionData }, window.origin);
+      };
       localStorage.removeItem('conversationId');
     }
   }
