@@ -861,10 +861,12 @@ button.close-widget-wrapper {
   top: 32px;
   height: 36px;
   width: 100%;
+  justify-content: end;
+  display: flex;
 }
 
 .widget-navbar-icon {
-  position: absolute;
+  // position: absolute;
   width: 24px;
   height: 24px;
   border: 1px solid #eff2f7;
@@ -875,6 +877,18 @@ button.close-widget-wrapper {
   text-align: center;
   padding-top: 4px;
   margin: 6px 4px 6px 4px;
+
+  &.font-selection {
+    position: relative; 
+    margin-left: 4px;
+    &:before {
+      content: "|";
+      position: absolute;
+      left: -6px;
+      top: 0;
+      color: #ccc;
+    }
+  }
 }
 
 .focus-icon {
@@ -919,29 +933,29 @@ button.close-widget-wrapper {
   right: 40px !important;
 }
 
-.btnOne {
-  right: 5px;
-}
+// .btnOne {
+//   right: 5px;
+// }
 
-.btnTwo {
-  right: 35px;
-}
+// .btnTwo {
+//   right: 35px;
+// }
 
-.btnThree {
-  right: 75px;
-}
+// .btnThree {
+//   right: 75px;
+// }
 
-.btnFour {
-  right: 105px;
-}
+// .btnFour {
+//   right: 105px;
+// }
 
-.btnFive {
-  right: 135px;
-}
+// .btnFive {
+//   right: 135px;
+// }
 
-.btnSix {
-  right: 165px;
-}
+// .btnSix {
+//   right: 165px;
+// }
 
 .widget-navbar-icon img {
   height: 20px;

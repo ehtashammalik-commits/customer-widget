@@ -772,31 +772,8 @@
         </div>
         <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
-          <span class="material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
-            [ngClass]="{ btnOne: enableFontResize === true }" matTooltip="{{ 'button.change-font-size' | translate }}"
-            [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
-            text_fields
-          </span>
-          <ng-container *ngIf="fontDropDown">
-            <div class="font-dropdown-container">
-              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
-                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '12' }"
-                (click)="setFontSize('12')" [ngClass]="{ btnOne: enableFontResize === true }">
-                text_fields
-              </span>
-              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px"
-                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '14' }"
-                (click)="setFontSize('14')" [ngClass]="{ btnOne: enableFontResize === true }">
-                text_fields
-              </span>
-              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px"
-                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '16' }"
-                (click)="setFontSize('16')" [ngClass]="{ btnOne: enableFontResize === true }">
-                text_fields
-              </span>
-            </div>
-          </ng-container>
-          <span class="widget-navbar-divider">|</span>
+          
+          <!-- <span class="widget-navbar-divider">|</span> -->
           <span class="widget-navbar-icon material-symbols-outlined" matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
               btnTwo: enableFontResize === true,
               btnOne: enableFontResize === false,
@@ -916,6 +893,31 @@
           >
             forum
           </span>
+
+          <span class="font-selection material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
+            [ngClass]="{ btnOne: enableFontResize === true }" matTooltip="{{ 'button.change-font-size' | translate }}"
+            [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
+            text_fields
+          </span>
+          <ng-container *ngIf="fontDropDown">
+            <div class="font-dropdown-container">
+              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
+                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '12' }"
+                (click)="setFontSize('12')" [ngClass]="{ btnOne: enableFontResize === true }">
+                text_fields
+              </span>
+              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px"
+                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '14' }"
+                (click)="setFontSize('14')" [ngClass]="{ btnOne: enableFontResize === true }">
+                text_fields
+              </span>
+              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px"
+                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '16' }"
+                (click)="setFontSize('16')" [ngClass]="{ btnOne: enableFontResize === true }">
+                text_fields
+              </span>
+            </div>
+          </ng-container>
         </div>
 
         <ng-container *ngIf="activeChatView">
