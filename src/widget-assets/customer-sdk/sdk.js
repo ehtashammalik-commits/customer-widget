@@ -113,11 +113,10 @@ function eventListeners(callback) {
       }
     }
   });
-  this.socket.on('TOKEN_RECEIVED', (data) => {
+  this.socket.on('TOKEN_GENERATED', (data) => {
     if (this.socket.id != undefined) {
-      console.log(`you have received the token:`, data);
       localStorage.setItem('jwt_token', data);
-      callback({ type: "TOKEN_RECEIVED", data: this.socket });
+      callback({ type: "TOKEN_GENERATED", data: this.socket });
     }
   });
   this.socket.on('CHANNEL_SESSION_STARTED', (data) => {
@@ -444,7 +443,7 @@ async function getConversationDataByCustomerIdentifier(url, channelIdentifier, c
 async function getConversationData(url, conversationId) {
   const response = await authorizedFetch(`${url}/${conversationId}/conversation-data`);
   if (!response.ok) {
-    throw new Error(`Failed to authorizedFetch data from ${url}/${conversationId}/conversation-data: ${response.status} ${response.statusText}`);
+    throw new Error(`Failed to fetch data from ${url}/${conversationId}/conversation-data: ${response.status} ${response.statusText}`);
   }
   const data = await response.json();
   return data;

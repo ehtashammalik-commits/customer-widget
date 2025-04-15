@@ -804,7 +804,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log('Event Payload: ==>', eventPayload);
           // If Error is false than proceed with the start Chat and user data setting
           if (!eventPayload.error) {
-            console.log('Event Payload:', eventPayload.data);
             this.setUserData(eventPayload.data, 'startChat');           
           }
         } else {
@@ -2156,7 +2155,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   chatTranscript() {
     if (localStorage.getItem('conversationId') !== '') {
-      const newWindow = window.open(
+      window.open(
         `widget-assets/chat-transcript/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
         }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier
         }&conversationId=${localStorage.getItem(
@@ -2164,11 +2163,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         )}&browserLang=${this.browserLang}`,
         '_blank',
       );
-
-      if(newWindow) newWindow.onload = () => {
-        const sessionData = localStorage.getItem('jwt_token');
-        newWindow.postMessage({ sessionData }, window.origin);
-      };
       localStorage.removeItem('conversationId');
     }
   }
