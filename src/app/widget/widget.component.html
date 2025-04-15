@@ -1131,9 +1131,7 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                        message.body.markdownText
-                              ? message.body.markdownText
-                              : ('' | tagFormat:enableDynamicLink)
+                        message.body.markdownText ? '| tagFormat:enableDynamicLink' : '' 
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1373,9 +1371,7 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                        message.body.markdownText
-                            ? message.body.markdownText
-                              : ('' | tagFormat:enableDynamicLink)
+                        message.body.markdownText ? '| tagFormat:enableDynamicLink' : '' 
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
