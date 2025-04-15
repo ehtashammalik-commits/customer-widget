@@ -1996,7 +1996,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
             this.sdk.moveToFileServer(
               fd,
-              (res: { type: string; name: string; size: any }) => {
+              (res: any) => {
+                if (res?.isFileInvalid) {
+                  this.snackBar.open(res.errorMesage, 'X', {
+                    panelClass: 'custom-snackbar',
+                  });
+                  this.removeUploadFile();
+                  return;
+                }
+
                 this.constructCimMessage(
                   res.type.split('/')[0],
                   '',
@@ -2484,5 +2492,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   getLabel(valueType: string): string {
     return this.dictionary[valueType] || valueType; // Return the  to valueType matchinf value from the dict
+  }
+
+  getTextAlignment(alignment: string | undefined) {
+    // by default, the text alignment is center from scss
+    alignment = alignment?.toLowerCase();
+    switch(alignment) {
+      case 'left': return 'left';
+      case 'right': return 'right';
+      default: return null;
+    }
   }
 }
