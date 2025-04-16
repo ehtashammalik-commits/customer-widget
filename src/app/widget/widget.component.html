@@ -550,7 +550,7 @@
 
                             <input matInput type="password" id="{{ attribute.key }}" [formControlName]="attribute.key"
                               class="widget-form-control" [required]="attribute?.isRequired" minlength="8"
-                              maxlength="256" (input)="passwordChecker()" />
+                              maxlength="256" />
                             <!-- <mat-error *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.errors as errors">
                               {{ errors['required'] ? 'Required field' :
                               (attribute.valueType.charAt(0).toUpperCase() +
@@ -854,10 +854,12 @@
                                   </div>
                                 </div>
                               </div>
+                              <div>
+                              </div>
                             </ng-container>
 
                             <ng-container *ngSwitchCase="'boolean'">
-                              <label class="questionLabel">
+                              <label class=" questionLabel">
                                 <!-- <span class="dot-icon"></span> -->
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label

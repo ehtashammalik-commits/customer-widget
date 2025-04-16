@@ -965,6 +965,61 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return attributes;
   }
 
+  customerId: string = ''
+  createFormDataObject(formData: any) {
+    return {
+      // id: this.generateUUID(),
+      header: {
+        channelData: {
+          channelCustomerIdentifier: this.customerIdentifier,
+          serviceIdentifier: this.serviceIdentifier,
+          requestPriority: 0,
+          additionalAttributes: [],
+        },
+        language: {},
+        timestamp: Date.now(),
+        securityInfo: {},
+        stamps: [],
+        intent: "Widget_ACTIVITY",
+        entities: {},
+        channelSessionId: "",
+        conversationId: this.conversationId,
+        customer: {
+          _id: this.customerId
+        },
+        schedulingMetaData: null,
+        originalMessageId: null,
+        providerMessageId: null,
+        sender: {
+          id: "f1370ff7-43fa-496e-9966-e64061d35f5c",
+          type: "APP",
+          senderName: "Customer_Widget_FORM",
+          additionalDetail: null,
+        },
+      },
+      body: {
+        formId: formData?.id,
+        formTitle: formData?.formTitle,
+
+        type: "FORM_DATA",
+
+        formWeightage: formData?.formWeightage,
+        formScore: '',
+
+        additionalDetail: {
+          actor: 'customer',
+          clientApplication: 'Customer Widget',
+        },
+        sentiment: {
+          result: null,
+          color: null,
+        },
+        sections: [],
+      },
+    };
+  }
+
+
 
   getFormDataByPreChatForm(preChatFormData: any[]): any {
     return {
@@ -2694,8 +2749,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return Math.floor(Math.random() * (maxExt - minExt)) + minExt;
   }
   getLabel(valueType: string): string {
-    return this.dictionary[valueType] || valueType; // Return the  to valueType matchinf value from the dict
+    const label = this.dictionary[valueType] || valueType;
+    return label.charAt(0).toUpperCase() + label.slice(1);
   }
+
 
 
 
@@ -2929,7 +2986,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     control.setValue(value);
     console.log(`Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`);
   }
-
   onCheckboxChange(
     controlName: string,
     sectionIndex: number,
@@ -2937,82 +2993,98 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     categoryLabel: string,
     hasCategory: boolean
   ): void {
-    // Ensure optionValue is valid
     if (!optionValue) return;
 
-    // Get the form control path dynamically
     const controlPath = `sections.${sectionIndex}.${controlName}`;
-    let control = this.preChatFormGroup.get(controlPath);
+    const control = this.preChatFormGroup.get(controlPath);
 
     if (!control) {
       console.warn(`Control '${controlPath}' not found.`);
       return;
     }
 
-    // Get the current value or initialize an empty structure
-    let selectedValues: { [category: string]: string[] } = {};
+    control.markAsTouched();
 
-    if (control.value) {
-      // Convert existing comma-separated value to structured data
-      const parts = control.value.split(',');
-      let currentCategory: any = null;
+    const currentValue: string = control.value || '';
+    const parts: string[] = currentValue
+      .split(',')
+      .map((p: any) => p.trim())
+      .filter((p: any) => p);
 
-      parts.forEach((part: any) => {
-        part = part.trim();
-        if (!part) return;
-        if (part.startsWith('Category')) {
-          currentCategory = part;
-          if (!selectedValues[currentCategory]) {
-            selectedValues[currentCategory] = [];
-          }
-        } else if (currentCategory) {
-          // Otherwise, it's an option under the last category
-          selectedValues[currentCategory].push(part);
+    const selectedValues: { [category: string]: string[] } = {};
+    let currentCategory: string | null = null;
+
+    parts.forEach((part: string) => {
+      if (part.startsWith('Category')) {
+        currentCategory = part;
+        if (!selectedValues[currentCategory]) {
+          selectedValues[currentCategory] = [];
         }
-      });
-    }
+      } else if (currentCategory) {
+        selectedValues[currentCategory].push(part);
+      }
+    });
 
-    // Add or remove the option under the correct category
-    if (!selectedValues[categoryLabel]) {
-      selectedValues[categoryLabel] = [];
-    }
+    const values = selectedValues[categoryLabel] || [];
+    const valueIndex = values.indexOf(optionValue);
 
-    if (selectedValues[categoryLabel].includes(optionValue)) {
-      // Remove if already selected
-      selectedValues[categoryLabel] = selectedValues[categoryLabel].filter(
-        (val) => val !== optionValue
-      );
-
-      // If category is empty now, remove it
-      if (selectedValues[categoryLabel].length === 0) {
+    if (valueIndex > -1) {
+      
+      values.splice(valueIndex, 1);
+      if (values.length === 0) {
         delete selectedValues[categoryLabel];
+      } else {
+        selectedValues[categoryLabel] = values;
       }
     } else {
-      // Add if not already selected
+      // Add value
+      if (!selectedValues[categoryLabel]) {
+        selectedValues[categoryLabel] = [];
+      }
       selectedValues[categoryLabel].push(optionValue);
     }
 
-    // Convert structured data back to comma-separated string
-    let formattedValue = Object.entries(selectedValues)
-      .map(([category, options]) => [category, ...options].join(','))
+    const formattedValue: string = Object.entries(selectedValues)
+      .map(([category, options]: [string, string[]]) => [category, ...options].join(','))
       .join(',');
 
-    // Update the form control value
     control.setValue(formattedValue, { emitEvent: true });
   }
 
 
-  isChecked(controlName: string, sectionIndex: number, optionValue: string, categoryLabel: string): boolean {
+
+
+
+  isChecked(
+    controlName: string,
+    sectionIndex: number,
+    optionValue: string,
+    categoryLabel: string
+  ): boolean {
     const controlPath = `sections.${sectionIndex}.${controlName}`;
     const control = this.preChatFormGroup.get(controlPath);
 
-    if (!control) return false;
+    if (!control || !control.value) return false;
 
-    const selectedValues: string[] = control.value ? control.value.split(',') : [];
-    const fullOptionValue = categoryLabel ? `${categoryLabel},${optionValue}` : optionValue;
+    const parts: string[] = control.value
+      .split(',')
+      .map((p: any) => p.trim())
+      .filter((p: any) => p);
 
-    return selectedValues.includes(fullOptionValue);
+    let currentCategory: string | null = null;
+
+    for (const part of parts) {
+      if (part.startsWith('Category')) {
+        currentCategory = part;
+      } else if (currentCategory === categoryLabel && part === optionValue) {
+        return true;
+      }
+    }
+
+    return false;
   }
+
+
 
 
   booleanEmojiSet(sectionIndex: number, attributeIndex: number, itemIndex: number) {
@@ -3351,7 +3423,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     window.open(fileUrl, '_blank');
   }
 
-  passwordChecker() {
-
+  hasRequiredError(controlName: string, sectionIndex: number): boolean {
+    const control = this.preChatFormGroup.get(['sections', sectionIndex])?.get(controlName);
+    console.log('control===>', control)
+    return !!(
+      control &&
+      control.hasError('required') &&
+      (control.touched || control.dirty)
+    );
   }
+
 }
