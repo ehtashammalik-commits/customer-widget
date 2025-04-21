@@ -812,9 +812,8 @@
 
                               <mat-select [formControlName]="attribute.key" name="questionnaire">
                                 <!-- <mat-option [value]="null">None</mat-option> -->
-                                <mat-option #optionLabel style="width:100%" [matTooltip]="option.label"
-                                  [matTooltipDisabled]="disableTooltip(optionLabel)" mdTooltipClass="customToolTip"
-                                  *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
+                                <mat-option #optionLabel style="width:100%"
+                                 *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
                                   [value]="option.label"><span>{{option.label}}</span></mat-option>
                               </mat-select>
                               <!-- <mat-error> *Required field</mat-error> -->
@@ -846,7 +845,7 @@
                                         class="checkbox-label">
                                         <input type="checkbox" class="input-checkbox"
                                           [checked]="isChecked(attribute.key, i, option.value, category.label)"
-                                          (change)="onCheckboxChange(attribute.key, i, option.label, category.label, attribute.attributeOptions.enableCategory)" />
+                                          (change)="onCheckboxChange( $event,attribute.key,i, option.label,category.label,attribute.attributeOptions.enableCategory)" />
                                         <span>{{ option.label }}</span>
                                       </label>
                                     </div>
@@ -1105,7 +1104,8 @@
                         </div>
                         <!-- Validation Error Messages -->
                         <!-- <h1>:form {{preChatFormGroup.get(['sections',j,attribute.key])?.touched}}</h1> -->
-                        <div class="validation-msg" *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.touched">
+                        <div class="validation-msg"
+                          *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.touched || preChatFormGroup.get(['sections',i,attribute.key])?.dirty">
                           <span *ngIf="
                           preChatFormGroup.get(['sections',i,attribute.key])?.hasError('required')
                       " class="field-error">
@@ -2124,7 +2124,7 @@
                       [placeholder]="attribute.helpText" class="widget-form-control" [required]="attribute?.isRequired"
                       [attr.maxlength]="2001" [attr.minlength]="1" [ngStyle]="{
                       border: isMaxLengthError(
-                        0,
+                        i,
                         attribute.key,
                         attribute.valueType
                       )

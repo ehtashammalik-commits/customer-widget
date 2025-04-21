@@ -131,6 +131,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   typingIndicatorTimer: any = null;
   lastSeenMessageId: any = null;
   conversationId = '';
+  customerId: string = ''
   formValidations: any;
   // If this flag is 'true' than that's mean Chat is Active
   isChatActive = false;
@@ -247,6 +248,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   surveyTitle: any = 'Survey Form';
   preChatformTitle: string = ''
   preChatformDescription: string = ''
+  preChatFormInfo: any;
 
   @Input() formData!: any[];
   @Input() callbackFormData!: any[];
@@ -414,23 +416,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.sdk.validationsSubcription.subscribe((res) => {
       this.formValidations = res;
-      console.log('===========>validations', this.formValidations);
-      // this.createFormControls();
+      this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
+        (formData: { sections: { attributes: any[] }[], formTitle: string, formDescription: string }) => {
+          this.preChatFormInfo = formData;
+          console.log('preChatFormInfo========>', this.preChatFormInfo)
+          this.formData = formData.sections;
+          this.preChatformTitle = formData?.formTitle;
+          this.preChatformDescription = formData?.formDescription;
+          this.createFormValidationControls(
+            this.formData,
+            this.formValidations,
+            'preChatForm',
+          );
+        },
+      );
     });
 
 
-    this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
-      (formData: { sections: { attributes: any[] }[], formTitle: string, formDescription: string }) => {
-        this.formData = formData.sections;
-        this.preChatformTitle = formData?.formTitle;
-        this.preChatformDescription = formData?.formDescription;
-        this.createFormValidationControls(
-          this.formData,
-          this.formValidations,
-          'preChatForm',
-        );
-      },
-    );
     this.callbackFormSubscription = this.sdk.renderCallbackForm$.subscribe(
       (formData: { sections: { attributes: any[] }[] }) => {
         this.callbackFormData = formData.sections[0].attributes.filter(
@@ -645,19 +647,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
         if (matchingValidation?.regex) {
           switch (matchingValidation.type.toLowerCase()) {
-            case 'phonenumber':
-              validators.push(
-                Validators.pattern(
-                  /^(?:\+?\d{1,3}[-.\s]?)?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/
-                )
-              );
-              break;
 
             case 'boolean':
             case 'mcq':
             case 'dropdown':
               break;
-
             case 'shortanswer':
             case 'alphanumeric':
             case 'alphanumericspecial':
@@ -665,6 +659,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             case 'paragraph':
             case 'number':
             case 'positivenumber':
+            case 'phonenumber':
               extractedLength = this.extractMinMaxLength(matchingValidation.regex);
               validators.push(Validators.minLength(extractedLength.minLength ?? minLength));
               validators.push(Validators.maxLength(extractedLength.maxLength ?? maxLength));
@@ -676,6 +671,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
                       ? /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,256}$/
                       : new RegExp(matchingValidation.regex)
                   )
+
                 );
               }
               break;
@@ -708,51 +704,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // Set the sections array inside the main form grou
   }
 
-  // isMaxLengthError(controlName: string, valueType: string): boolean {
-  //   // Check both form groups for the control
-  //   const controlPreChat = this.preChatFormGroup.get(controlName);
-  //   const controlCallback = this.callbackFormGroup.get(controlName);
-
-  //   // Determine which control to use, prioritizing preChatFormGroup
-  //   const control = controlPreChat || controlCallback;
-
-  //   if (control) {
-  //     // Determine max length based on control type
-  //     let maxLength: number | null = null;
-
-  //     if (valueType === 'shortAnswer') {
-  //       maxLength = 101;
-  //     } else if (valueType === 'paragraph') {
-  //       maxLength = 2001;
-  //     } else if (valueType === 'alphaNumeric') {
-  //       maxLength = 101;
-  //     } else if (valueType === 'alphaNumericSpecial') {
-  //       maxLength = 101;
-  //     } else if (valueType === 'number') {
-  //       maxLength = 101;
-  //     } else if (valueType === 'positiveNumber') {
-  //       maxLength = 101;
-  //     } else if (valueType === 'password') {
-  //       maxLength = 256;
-  //     }
-  //     else if (valueType === 'email') {
-  //       maxLength = 101;
-  //     }
-
-  //     // Ensure maxLength is set
-  //     if (maxLength !== null) {
-  //       // Ensure control value is a string and check length
-  //       const value = control.value as string;
-
-  //       // Check if the control value length exceeds the maximum length
-  //       return value.length == maxLength; // Ensure strict comparison to identify the issue
-  //     }
-  //   } else {
-  //     console.log('Control does not exist for name:', controlName);
-  //   }
-
-  //   return false;
-  // }
 
   setWidgetConfigs(configs: any) {
     this.title = configs.title;
@@ -965,10 +916,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return attributes;
   }
 
-  customerId: string = ''
-  createFormDataObject(formData: any) {
+
+
+  pushPrechatDataAsActivity() {
+    let finalPayload = this.createFormDataObject();
+    finalPayload.body.sections = this.creatingSectionsforSchema();
+    this.sdk.postFormDataAsActivity(finalPayload)
+
+  }
+  createFormDataObject() {
     return {
-      // id: this.generateUUID(),
       header: {
         channelData: {
           channelCustomerIdentifier: this.customerIdentifier,
@@ -980,7 +937,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         timestamp: Date.now(),
         securityInfo: {},
         stamps: [],
-        intent: "Widget_ACTIVITY",
+        intent: "WIDGET_FORM_ACTIVITY",
         entities: {},
         channelSessionId: "",
         conversationId: this.conversationId,
@@ -993,21 +950,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         sender: {
           id: "f1370ff7-43fa-496e-9966-e64061d35f5c",
           type: "APP",
-          senderName: "Customer_Widget_FORM",
+          senderName: "WIDGET_PRECHAT_FORM",
           additionalDetail: null,
         },
       },
       body: {
-        formId: formData?.id,
-        formTitle: formData?.formTitle,
-
+        formId: this.preChatFormInfo?.id,
+        formTitle: this.preChatFormInfo?.formTitle,
         type: "FORM_DATA",
-
-        formWeightage: formData?.formWeightage,
-        formScore: '',
-
+        formWeightage: null,
+        formScore: '0',
         additionalDetail: {
-          actor: 'customer',
+          actor: 'Customer',
           clientApplication: 'Customer Widget',
         },
         sentiment: {
@@ -1020,6 +974,74 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
 
+  creatingSectionsforSchema(): any {
+    let finalSections: any = [];
+    const formValues = this.preChatFormGroup.value;
+
+
+    this.formData.forEach((section: any, sectionIndex: number) => {
+      let newSection: any = {
+        sectionId: section._id,
+        sectionName: section.sectionName,
+        sectionWeightage: null,
+        sectionScore: null,
+        attributes: []
+      };
+
+      const sectionIndexNumber = `section_${sectionIndex}`;
+      const sectionAttributes = formValues['sections'];
+      const currentSectionAttributes = sectionAttributes[sectionIndex]
+
+
+      if (currentSectionAttributes) {
+        section.attributes.forEach((attribute: any) => {
+          // console.log("ATTRIBUte", attribute);
+
+          const attributeData = attribute.attributeOptions?.attributeData || [];
+          const possibleValues = attributeData.length > 0 ? attributeData[0].values : [];
+          const selectedValue = currentSectionAttributes[attribute.key] || null;
+
+          let newAttribute: any = {
+            id: attribute._id,
+            label: attribute.label,
+            valueType: attribute.valueType,
+            attributeWeightage: attribute.attributeWeightage || null,
+            attributeScore: null,
+            attributeType: attribute.attributeType || "OPTIONS",
+            skipType: attribute.skipType || null,
+            attributeAttachment: attribute.attributeAttachment || "",
+            answer: this.getAnswerObj(attribute, possibleValues, selectedValue)
+          };
+          newSection.attributes.push(newAttribute);
+        });
+      }
+      finalSections.push(newSection);
+    });
+    return finalSections;
+  }
+  getAnswerObj(attribute: any, possibleValues: any, selectedValue: any) {
+
+    if (attribute.attributeType == 'INPUT' || attribute.attributeType == 'TEXTAREA') {
+      console.log('selected value ', selectedValue)
+      return [selectedValue]
+    }
+    else {
+      selectedValue = selectedValue ? (selectedValue.value ?? selectedValue) : null;
+
+      return possibleValues.map(
+        (option: any) => ({
+          label: option.label,
+          value: option.value || option.label, // Use `value` if available, fallback to `label`
+          isSelected: option.label === selectedValue || option.value === selectedValue,
+          additionalAttributes: {
+            optionWeightage: null,
+            enableStyle: attribute.attributeOptions?.enableStyle || false,
+            optionStyle: option.optionStyle || null,
+
+          }
+        }))
+    }
+  }
 
   getFormDataByPreChatForm(preChatFormData: any[]): any {
     return {
@@ -1447,16 +1469,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.isComposerDisable = false;
             this.preChatFormLoader = false;
             this.conversationId = event.data.header.conversationId;
+            this.customerId = event.data.header.customer._id;
             localStorage.setItem(
               'conversationId',
               event.data.header.conversationId,
             );
-            // console.log('this.preChatFormData==============>', this.preChatFormData)
-            console.log('this.preChatFormData==============>', this.getFormDataAsConversationData(this.preChatFormData))
             this.sdk.setConversationDataAgainstCustomerIdentifier(
               this.customerData.channelCustomerIdentifier,
               this.getFormDataAsConversationData(this.preChatFormData),
             );
+            this.pushPrechatDataAsActivity()
 
             // this.composerDisable()
             break;
@@ -2791,7 +2813,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (maxLength !== null) {
         // Ensure control value is a string before checking length
         const value = String(control.value);
-        return value.length > maxLength;
+        return value.length >= maxLength;
       }
     }
 
@@ -2986,7 +3008,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     control.setValue(value);
     console.log(`Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`);
   }
+
   onCheckboxChange(
+    event: Event,
     controlName: string,
     sectionIndex: number,
     optionValue: string | null,
@@ -2994,6 +3018,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     hasCategory: boolean
   ): void {
     if (!optionValue) return;
+
+    const checkbox = event.target as HTMLInputElement;
+    const isChecked = checkbox.checked;
 
     const controlPath = `sections.${sectionIndex}.${controlName}`;
     const control = this.preChatFormGroup.get(controlPath);
@@ -3005,53 +3032,38 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     control.markAsTouched();
 
-    const currentValue: string = control.value || '';
-    const parts: string[] = currentValue
-      .split(',')
-      .map((p: any) => p.trim())
-      .filter((p: any) => p);
+    // ✅ Get existing value and parse
+    let selectedValues = this.parseCheckboxValue(control.value);
 
-    const selectedValues: { [category: string]: string[] } = {};
-    let currentCategory: string | null = null;
-
-    parts.forEach((part: string) => {
-      if (part.startsWith('Category')) {
-        currentCategory = part;
-        if (!selectedValues[currentCategory]) {
-          selectedValues[currentCategory] = [];
-        }
-      } else if (currentCategory) {
-        selectedValues[currentCategory].push(part);
-      }
-    });
-
-    const values = selectedValues[categoryLabel] || [];
-    const valueIndex = values.indexOf(optionValue);
-
-    if (valueIndex > -1) {
-      
-      values.splice(valueIndex, 1);
-      if (values.length === 0) {
-        delete selectedValues[categoryLabel];
-      } else {
-        selectedValues[categoryLabel] = values;
-      }
-    } else {
+    if (isChecked) {
       // Add value
       if (!selectedValues[categoryLabel]) {
         selectedValues[categoryLabel] = [];
       }
-      selectedValues[categoryLabel].push(optionValue);
+      if (!selectedValues[categoryLabel].includes(optionValue)) {
+        selectedValues[categoryLabel].push(optionValue);
+      }
+    } else {
+      // Remove value
+      const updated = selectedValues[categoryLabel]?.filter(v => v !== optionValue) || [];
+      if (updated.length > 0) {
+        selectedValues[categoryLabel] = updated;
+      } else {
+        delete selectedValues[categoryLabel];
+      }
     }
 
-    const formattedValue: string = Object.entries(selectedValues)
-      .map(([category, options]: [string, string[]]) => [category, ...options].join(','))
-      .join(',');
-
-    control.setValue(formattedValue, { emitEvent: true });
+    // ✅ Update form control with stringified object
+    const newValue = Object.keys(selectedValues).length > 0 ? JSON.stringify(selectedValues) : '';
+    control.setValue(newValue, { emitEvent: true });
   }
-
-
+  parseCheckboxValue(val: string): { [key: string]: string[] } {
+    try {
+      return val ? JSON.parse(val) : {};
+    } catch {
+      return {};
+    }
+  }
 
 
 

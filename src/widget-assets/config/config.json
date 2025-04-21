@@ -7,6 +7,7 @@
   "FORM_URL": "https://chatsolution.expertflow.com/unified-admin",
   "AUTHENTICATOR_URL": "https://chatsolution.expertflow.com/secure-link",
   "BUSINESSCALENDAR_URL":"https://chatsolution.expertflow.com/business-calendar",
+  "CX_ACTIVITY": "https://chatsolution.expertflow.com/conversation-manager/activities",
   "CHANNEL_IDENTIFIER": "phone",
   "ENABLE_LOGO": false,
   "ADDITIONAL_PANEL": true,

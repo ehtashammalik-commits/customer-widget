@@ -373,6 +373,46 @@ async function setConversationDataByCustomerIdentifier(url, channelIdentifier, d
   }
 }
 /**
+ * Push form data as an activity 
+ */
+async function pushFormDataAsActivity(url, payload, callback) {
+  try {
+    const response = await fetch(`${url}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const responseBody = await response.text();
+    let jsonResponse;
+
+    try {
+      jsonResponse = JSON.parse(responseBody);
+    } catch (e) {
+      jsonResponse = responseBody;
+    }
+
+    if (!response.ok) {
+      callback({
+        error: true,
+        status: response.status,
+        message: jsonResponse?.message || 'Request failed.'
+      });
+      return;
+    }
+
+    callback(jsonResponse);
+  } catch (error) {
+    callback({
+      error: true,
+      message: error.message || 'An unexpected error occurred.'
+    });
+  }
+}
+
+/**
 * Get Conversation Data Api By Customer Identifier
 */
 async function getConversationDataByCustomerIdentifier(url, channelIdentifier, callback) {
@@ -994,20 +1034,20 @@ let inviteDelegate = {
         invitedata.response.dialog.callEndReason = match[1];
       }
     }
-  //   if (consultCalldata && consultCalldata.event && consultCalldata.event === "dialogState") {
-  //       const match = bye.incomingByeRequest.message.data.match(/text="([^"]+)"/);
+    //   if (consultCalldata && consultCalldata.event && consultCalldata.event === "dialogState") {
+    //       const match = bye.incomingByeRequest.message.data.match(/text="([^"]+)"/);
 
-  //       if (match && match[1]) {
-  //           consultCalldata.response.dialog.callEndReason = match[1];
-  //       }
-  //   }
+    //       if (match && match[1]) {
+    //           consultCalldata.response.dialog.callEndReason = match[1];
+    //       }
+    //   }
 
-  // onCancel(cancel ){console.log("onCancel MESSAGE  ********  ", cancel)},
-  // onInfo(info ) {console.log("onInfo MESSAGE  ********  ", info)},
-  // onInvite(reqeust , response , statusCode ){console.log("onInvite MESSAGE  ********  ", reqeust,response,statusCode)},
-  // onMessage(message ){console.log("onMessage MESSAGE  ********  ", message)},
-  // onRefer(referral){console.log("onRefer MESSAGE  ********  ", referral)},
-  // onNotify(notification){console.log("onNotify MESSAGE  ********  ", notification)}
+    // onCancel(cancel ){console.log("onCancel MESSAGE  ********  ", cancel)},
+    // onInfo(info ) {console.log("onInfo MESSAGE  ********  ", info)},
+    // onInvite(reqeust , response , statusCode ){console.log("onInvite MESSAGE  ********  ", reqeust,response,statusCode)},
+    // onMessage(message ){console.log("onMessage MESSAGE  ********  ", message)},
+    // onRefer(referral){console.log("onRefer MESSAGE  ********  ", referral)},
+    // onNotify(notification){console.log("onNotify MESSAGE  ********  ", notification)}
 
   },
 }
@@ -2974,7 +3014,7 @@ function makeConsultCall(calledNumber, callback) {
   }
 }
 
-  //sessionall.refer(consultSessioin);
+//sessionall.refer(consultSessioin);
 /**
  * Initiate a consult call with queue.
  * This function allows an agent to initiate a consult call with the specified destination number and queue.
