@@ -2260,6 +2260,36 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+  uploadPrechatFile(sectionIndex: number, controlName: any, fileInput: any, id: any) {
+    console.log('file uploading ===========>')
+    this.isFileUploading[`${controlName}`] = true
+    if (fileInput.files && fileInput.files.length > 0) {
+      const file = fileInput.files[0]
+      const formData = new FormData();
+      formData.append('file', file);
+
+      this._http.post(`${this.__appConfig.appConfig.FILE_SERVER_URL}/api/uploadFileStream`, formData).subscribe((res: any) => {
+        const fileName = `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
+        this.setFileControl(sectionIndex, fileName, controlName)
+
+        this.snackBar.open('File uploaded successfully', 'X', {
+          panelClass: 'custom-snackbar',
+        });
+
+        this.isFileUploading[`${controlName}`] = false
+        this.disableUploadBtn(id);
+      }, (error) => {
+
+
+        this.snackBar.open(error.message, 'X', {
+          panelClass: 'custom-snackbar',
+        });
+
+        this.isFileUploading[`${controlName}`] = false
+      })
+    }
+  }
+
 
 
   removeUploadFile() {
@@ -3145,17 +3175,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     console.log('file', file)
-    // const displayElement = document.getElementById(`file-name-display-${id}`);
     const errorDiv: any = document.getElementById(`${id}-error`);
-    // const previewDiv = document.getElementById(`preview-${sectionIndex}-${attributeIndex}`);
-    // const previewContent = document.getElementById(`preview-content-${sectionIndex}-${attributeIndex}`);
     const uploadBtn: any = document.getElementById(`upload-btn-${id}`);
-    console.log(allowed)
-    // Reset states
-    errorDiv.style.display = 'none';
-    errorDiv.textContent = '';
-    // previewDiv.style.display = 'none';
-    // previewContent.innerHTML = '';
     uploadBtn.disabled = true;
 
 
@@ -3214,6 +3235,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // Get the form control from the specific section
     const control: any = sections.at(sectionIndex).get(controlName);
     control.setValue(fileName);
+    control.markAsTouched();
+    control.markAsDirty();
 
 
   }
@@ -3231,7 +3254,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const formData = new FormData();
       formData.append('file', file);
 
-      this._http.post(`${this.__appConfig.appConfig?.FILE_SERVER_URL}/api/uploadFileStream`, formData).subscribe((res: any) => {
+      this._http.post(`${this.__appConfig?.appConfig?.FILE_ENGINE_URL}/api/uploadFileStream`, formData).subscribe((res: any) => {
         const fileName = `${this.__appConfig.appConfig?.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
         this.setFileControl(sectionIndex, fileName, controlName)
         // this.snackBar.("success-snackbar", 'file uploaded successfully', 3)
@@ -3322,8 +3345,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
 
-  clearFile(sectionIndex: number, attributeIndex: number, controlName: string) {
+  clearFile(sectionIndex: number, attributeIndex: number, controlName: string, id: any) {
     const key = `${sectionIndex}-${attributeIndex}`;
+    const uploadBtn: any = document.getElementById(`upload-btn-${id}`);
+    const input: any = document.getElementById(`${id}`);
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = 'Upload'
+    input.value = '';
+
     delete this.filePreviewUrl[key];
     delete this.fileHistory[key];
     this.setFileControl(sectionIndex, '', controlName)

@@ -2250,9 +2250,8 @@ mat-spinner {
   margin-left: 5px;
   color: #007bff;
   font-weight: bold;
-  bottom: 15px;
-  width: 12px !important;
-  right: 0;
+  bottom: 9px;
+  left: 100%;
 }
 
 .info-icon .tooltip {
@@ -2762,8 +2761,8 @@ mat-spinner {
 .allowed-types {
   width: 100%;
   margin-top: 12px;
-  display: flex !important;
-  justify-content: end !important;
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 12px;
   color: #666;
   font-size: 0.875rem;

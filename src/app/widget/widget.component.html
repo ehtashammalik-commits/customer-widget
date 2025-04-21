@@ -533,21 +533,12 @@
                             <input matInput id="{{ attribute.key }}" type="text" [formControlName]="attribute.key"
                               [placeholder]="attribute.helpText" class="widget-form-control"
                               [required]="attribute?.isRequired" [attr.maxlength]="101" [attr.minlength]="1" />
-                            <!-- <mat-error *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.errors as errors">
-                              {{ errors['required'] ? 'Required field' :
-                              (attribute.valueType.charAt(0).toUpperCase() +
-                              attribute.valueType.slice(1)) + ' is not
-                              correct' }}
-                            </mat-error> -->
-
 
                           </ng-container>
                           <ng-container *ngIf="
               ['Password', 'password'].includes(attribute.valueType)
             ">
                             <!-- Password Field -->
-
-
                             <input matInput type="password" id="{{ attribute.key }}" [formControlName]="attribute.key"
                               class="widget-form-control" [required]="attribute?.isRequired" minlength="8"
                               maxlength="256" />
@@ -557,8 +548,6 @@
                               attribute.valueType.slice(1)) + ' is not
                               correct' }}
                             </mat-error> -->
-
-
                           </ng-container>
                           <!-- Short Answer Field -->
                           <ng-container *ngIf="attribute.valueType === 'shortAnswer'">
@@ -581,42 +570,15 @@
                           </ng-container>
                           <!-- File Input -->
                           <div class="file-upload-wrapper" *ngIf="attribute.valueType === 'file'">
-                            <!-- <div class="file-input-container">
-                                  <input type="file"
-                                      [required]="attribute?.isRequired" (change)="
-  uploadFileFromForm(
-  $event,
-  attribute.key,
-  attribute.fileData.restrictFile,
-  attribute.fileData.fileExtension
-  )
-  " class="file-input" />
-                                  <span class="input-label">Choose File</span>
-                              </div>
-                              <div *ngIf="fileName" class="file-link-container">
-                                  <a target="_blank" [href]="fileUrl">{{
-                                      fileName || ""
-                                      }}</a>
-                              </div> -->
+                            <div class="file-upload-container">
 
-                            <div class="file-upload-container" *ngIf="attribute.valueType === 'file'">
-                              <!-- <div class="file-header">
-                                    <div class="file-label">
-                                      <label [for]="attributeIndex" class="label2">
-                                        {{ attribute.label }} <span *ngIf="attribute.isRequired">*</span>
-                                      </label>
-                                    </div>
-                                    <div class="file-size">
-                                      <span class="file-size-limit">Max file size: {{ attribute.fileData.fileSize }}MB</span>
-                                    </div>
-                                  </div>
-                                 -->
                               <div class="file-upload-box"
                                 [ngClass]="filePreviewUrl[i + '-' + j]?'file-upload-box-sm':'file-upload-box-lg' ">
                                 <div class="file-input-div">
                                   <label [for]="attribute._id" class="custom-file-upload">
                                     <span isEllipsisActive class="text-wrap">
-                                      {{ preChatFormGroup.get(['sections',i,attribute.key])?.value
+                                      {{
+                                      preChatFormGroup.get(['sections',i,attribute.key])?.value
                                       }}
                                     </span>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -626,40 +588,31 @@
                                       <path
                                         d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z" />
                                     </svg>
-                                    <!-- <span *ngIf="!isFileSelected">Choose a
-                                                  file</span> -->
-                                    <!-- <span
-                                                  *ngIf="preChatFormGroup.get(attribute.key)?.value">{{
-                                                  preChatFormGroup.get(attribute.key)?.value
-                                                  }}</span> -->
-
                                   </label>
                                   <input [id]="attribute._id" #FileInput class="file-input" type="file"
                                     [accept]="attribute.fileData.fileExtension" [attr.placeholder]="attribute.helpText"
                                     [required]="attribute.isRequired"
                                     (change)="handleFileChange(FileInput, i, j,attribute.fileData.fileSize,attribute._id,attribute.fileData.fileExtension,attribute)" />
                                 </div>
-                                <div [id]="'preview-'+i+'-'+j" class="file-preview" style="display: none;">
-                                  <div [id]="'preview-content-'+ i +'-'+j" class="preview-div"></div>
-                                </div>
-
                                 <div *ngIf="filePreviewUrl[i + '-' + j]" class="file-preview">
                                   <!-- Close button to remove the preview -->
-                                  <button type="button" class="preview-close" (click)="clearFile(i, j, attribute.key)">
+                                  <button type="button" class="preview-close"
+                                    (click)="clearFile(i, j,attribute.key, attribute._id)">
                                     <mat-icon>cancel</mat-icon>
                                   </button>
 
                                   <!-- Image preview -->
-                                  <div *ngIf="fileHistory[i + '-' + j]?.isImage; else fileIcon"
-                                    class="preview-image-container"
-                                    (click)="openFileInNewTab(preChatFormGroup.get(['sections', i, attribute.key])?.value)">
+                                  <div
+                                    (click)="filePreviewOpener(preChatFormGroup.get(['sections',i,attribute.key])?.value,i,j)"
+                                    *ngIf="fileHistory[i + '-' + j]?.isImage; else fileIcon"
+                                    class="preview-image-container">
                                     <img [src]="filePreviewUrl[i + '-' + j]" alt="Preview" class="preview-image">
                                   </div>
 
-                                  <!-- File icon preview (Download file on click) -->
+                                  <!-- File icon preview -->
                                   <ng-template #fileIcon>
                                     <div class="preview-file-container"
-                                      (click)="openFileInNewTab(preChatFormGroup.get(['sections', i, attribute.key])?.value)">
+                                      (click)="filePreviewOpener(preChatFormGroup.get(['sections',i,attribute.key])?.value,i,j)">
                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -671,26 +624,45 @@
                                   </ng-template>
                                 </div>
 
-
                               </div>
                               <div class="allowed-types">
-
+                                <div>
+                                  <label class="file-helping-label question_label">
+                                    File types allowed:
+                                    <span class="info-icon tooltip-sm">
+                                      <img [src]="'/widget-assets/images/info.png'" alt="Info Tag" width="10"
+                                        height="10" />
+                                      <span class="tooltip">
+                                        {{
+                                        !attribute.fileData.restrictFile
+                                        ? 'All supported file types
+                                        allowed'
+                                        :
+                                        attribute.fileData.fileExtension.length
+                                        > 0
+                                        ?
+                                        attribute.fileData.fileExtension.join(',
+                                        ')
+                                        : 'All supported file types
+                                        allowed'
+                                        }}
+                                      </span>
+                                    </span>
+                                  </label>
+                                </div>
                                 <div>
                                   <button [class]="'file-upload-button-'+attribute._id" class="file-upload-button"
                                     [id]="'upload-btn-'+attribute._id" [disabled]="!isFileSelected"
-                                    (click)="uploadFileFromPrechat(i,attribute.key,FileInput,attribute._id)">
+                                    (click)="uploadPrechatFile(i,attribute.key,FileInput,attribute._id)">
                                     <span *ngIf="isFileUploading[attribute.key]" class="loader"></span>
                                     <span>Upload</span>
                                   </button>
                                 </div>
-                                <div [id]="attribute._id+'-error'" class="errordiv" style="color: red; display: none;">
-                                </div>
+
+
                               </div>
 
-                              <!-- <div *ngIf="!isFileSelected" class="errordiv"
-                                      style="color: red;">
-                                      Please select a file before uploading.
-                                  </div> -->
+
                             </div>
 
                           </div>
@@ -724,7 +696,7 @@
                             </div>
 
 
-                            <!-- </mat-form-field> -->
+
                           </ng-container>
                           <ng-container *ngIf="attribute.valueType === 'time'">
                             <!-- <mat-form-field style="width: 100%;"
@@ -738,7 +710,7 @@
                             </div>
 
 
-                            <!-- </mat-form-field> -->
+
                           </ng-container>
                         </ng-container>
                         <!-- TEXTAREA Fields -->
@@ -786,17 +758,7 @@
                                     </div>
                                   </ng-container>
                                 </mat-radio-group>
-
-                                <!-- <mat-error class="mat-error" *ngIf="
-                    preChatFormGroup.get('section_' + i).get(attribute.key)?.hasError('required') &&
-                    (preChatFormGroup.get('section_' + i).get(attribute.key)?.touched || preChatFormGroup.get('section_' + i).get(attribute.key)?.dirty)
-                  ">
-                                              *Required field
-                                          </mat-error> -->
-
                               </div>
-
-
                             </ng-container>
                             <!-- DROPDOWN Question ValueType -->
                             <ng-container *ngSwitchCase="'dropdown'">
@@ -813,7 +775,7 @@
                               <mat-select [formControlName]="attribute.key" name="questionnaire">
                                 <!-- <mat-option [value]="null">None</mat-option> -->
                                 <mat-option #optionLabel style="width:100%"
-                                 *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
+                                  *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
                                   [value]="option.label"><span>{{option.label}}</span></mat-option>
                               </mat-select>
                               <!-- <mat-error> *Required field</mat-error> -->
@@ -1103,7 +1065,6 @@
 
                         </div>
                         <!-- Validation Error Messages -->
-                        <!-- <h1>:form {{preChatFormGroup.get(['sections',j,attribute.key])?.touched}}</h1> -->
                         <div class="validation-msg"
                           *ngIf="preChatFormGroup.get(['sections',i,attribute.key])?.touched || preChatFormGroup.get(['sections',i,attribute.key])?.dirty">
                           <span *ngIf="
