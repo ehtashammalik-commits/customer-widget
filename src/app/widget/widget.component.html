@@ -651,8 +651,9 @@
                                   </label>
                                 </div>
                                 <div>
-                                  <button [class]="'file-upload-button-'+attribute._id" class="file-upload-button"
-                                    [id]="'upload-btn-'+attribute._id" [disabled]="!isFileSelected"
+                                  <button type="button" [class]="'file-upload-button-'+attribute._id"
+                                    class="file-upload-button" [id]="'upload-btn-'+attribute._id"
+                                    [disabled]="!isFileSelected"
                                     (click)="uploadPrechatFile(i,attribute.key,FileInput,attribute._id)">
                                     <span *ngIf="isFileUploading[attribute.key]" class="loader"></span>
                                     <span>Upload</span>
