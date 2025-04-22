@@ -2713,7 +2713,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               if(this.IsRegisteredInFreeSwitch) {
                 this.callEnd();
               }
-              if(this.isChatActive) {
+              if(this.isChatActive && data.response.dialog.callEndReason !== "NO_ANSWER"){
                 this.clearSession();
               } else {
                 this.changeView('chat');

@@ -1875,6 +1875,10 @@ function initiate_call(calledNumber, DN, mediaType, authData, callback, callType
         onReject: (response) => {
           console.log("onReject response = ", response);
           error("generalError", loginid, response.message.reasonPhrase, callback);
+          if (response.message.data?.match(/text="([^"]+)"/)?.[1] && response.message.data.match(/text="([^"]+)"/)[1] !== "NORMAL_CLEARING") {
+            const reason = response.message.data.match(/text="([^"]+)"/)[1];
+            calls[0].response.dialog.callEndReason = reason;
+          }
         },
         onCancel: (response) => {
           console.log("onCancel response = ", response);
