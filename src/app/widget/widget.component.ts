@@ -29,6 +29,7 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.compone
 import { ActivatedRoute } from '@angular/router';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { HttpClient } from '@angular/common/http';
+import { TranslateService } from '@ngx-translate/core';
 declare var EmojiPicker: any;
 
 interface Shift {
@@ -303,11 +304,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private deliveryNotificationService: DeliveryNotificationService,
     private __postMessageHandlerService: PostMessageHandlerService,
     private _http: HttpClient,
-
+    private translate: TranslateService
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
     this.isUsernameEnabled = __appConfig.appConfig.USERNAME_ENABLED
+
+    translate.setDefaultLang('en');
+    translate.use('en');
   }
 
   ngAfterViewInit(): void {
@@ -2224,7 +2228,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
             this.sdk.moveToFileServer(
               fd,
-              (res: { type: string; name: string; size: any }) => {
+              (res: any) => {
+                if (res?.isFileInvalid) {
+                  this.snackBar.open(res.errorMesage, 'X', {
+                    panelClass: 'custom-snackbar',
+                  });
+                  this.removeUploadFile();
+                  return;
+                }
+
                 this.constructCimMessage(
                   res.type.split('/')[0],
                   '',
@@ -3474,4 +3486,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
   }
 
+
+  getTextAlignment(alignment: string | undefined) {
+    // by default, the text alignment is center from scss
+    alignment = alignment?.toLowerCase();
+    switch(alignment) {
+      case 'left': return 'left';
+      case 'right': return 'right';
+      default: return null;
+    }
+  }
 }

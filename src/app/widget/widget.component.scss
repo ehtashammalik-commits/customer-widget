@@ -200,29 +200,27 @@ $emoji-margin: 6px;
 }
 
 button.close-widget-wrapper {
-  // background: #2889e9;
-  background-color: var(--main-color);
-  border: 1px solid #d8d8da;
-  position: absolute;
-  right: -10px;
-  top: -13px;
-  /* opacity: .8; */
-  color: #fff;
-  display: block;
-  transition: all .3s;
-  cursor: pointer;
-  outline: none;
-  /* padding: 0px; */
-  font-size: 18px;
-  border-radius: 100%;
-  width: 30px;
-  height: 30px;
-  line-height: 10px;
-  padding: 0;
-
-  .close-trigger {
-    font-size: 22px;
-  }
+  background: var(--main-color);
+    border: 1px solid #d8d8da;
+    position: absolute;
+    right: -10px;
+    top: -13px;
+    /* opacity: .8; */
+    color: #fff;
+    display: block;
+    transition: all .3s;
+    cursor: pointer;
+    outline: none;
+    /* padding: 0px; */
+    font-size: 18px;
+    border-radius: 100%;
+    width: 30px;
+    height: 30px;
+    line-height: 10px;
+    padding: 0;
+    .close-trigger{
+      font-size: 22px;
+    }
 }
 
 .widget-wrapper:hover button.close-widget-wrapper {
