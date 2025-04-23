@@ -12,23 +12,13 @@ export class SvgNpsFormatPipe implements PipeTransform {
 
   constructor(private sanitizer: DomSanitizer, private http: HttpClient) { }
 
-  transform(value: any, type:'imageSvg', width?: string, height?: string, className?: string, fillColor?: string, inputText?: any): any {
+  transform(value: any, type: 'imageSvg', width?: string, height?: string, className?: string, fillColor?: string, inputText?: any): any {
     switch (type) {
       case 'imageSvg':
         return this.imageUrlToSvgTag(value, width || '', height || '', className || '', fillColor || '', inputText || '');
       default:
         return value;
     }
-  }
-
-
-  /** NPS Color Transformation **/
-  private getNpsColor(index: number): string {
-    console.log(index)
-    if (index >= 0 && index <= 6) return '#F14949'; // Red
-    if (index >= 7 && index <= 8) return '#FECB2D'; // Yellow
-    if (index >= 9 && index <= 10) return '#28C591'; // Green
-    return '#DBDBDB';
   }
 
   /** Convert Image URL to Inline SVG Using HTTP Request **/

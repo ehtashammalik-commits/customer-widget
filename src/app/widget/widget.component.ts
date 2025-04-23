@@ -289,6 +289,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // Handle Composer Field
   isComposerDisable: boolean = false;
   source: any;
+
+
+  // file preview 
+  filePreviewUrl: { [key: string]: any } = {};
+  fileHistory: { [key: string]: { isImage: boolean } } = {}
+  // Add a new property to store text content
+  fileContent: { [key: string]: string } = {};
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -3074,7 +3081,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     control.markAsTouched();
 
-    // ✅ Get existing value and parse
+    //  Get existing value and parse
     let selectedValues = this.parseCheckboxValue(control.value);
 
     if (isChecked) {
@@ -3095,7 +3102,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
 
-    // ✅ Update form control with stringified object
+    //  Update form control with stringified object
     const newValue = Object.keys(selectedValues).length > 0 ? JSON.stringify(selectedValues) : '';
     control.setValue(newValue, { emitEvent: true });
   }
@@ -3230,8 +3237,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     // Enable upload button
-    console.log('fileName')
-    console.log(fileName)
     this.setFileControl(sectionIndex, fileName, attribute.key)
     this.previewFileForm(file, sectionIndex, attributeIndex)
     uploadBtn.disabled = false;
@@ -3294,10 +3299,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   }
-  filePreviewUrl: { [key: string]: any } = {};
-  fileHistory: { [key: string]: { isImage: boolean } } = {}
-  // Add a new property to store text content
-  fileContent: { [key: string]: string } = {};
+
   previewFileForm(file: File, sectionIndex: number, attributeIndex: number) {
     if (!file) return;
 
@@ -3325,8 +3327,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
         this.fileContent[key] = content;
         this.filePreviewUrl[key] = content;
-        console.log('File content:', this.fileContent[key]);
-        console.log('filePreviewUrl:', this.filePreviewUrl);
       };
       reader.readAsText(file);
     } else {
@@ -3369,25 +3369,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     delete this.fileHistory[key];
     this.setFileControl(sectionIndex, '', controlName)
   }
-  filePreviewOpener(fileName: string, sectionIndex: number, attributeIndex: number) {
 
-    // const key = `${sectionIndex}-${attributeIndex}`;
-    // console.log('file preview ', this.fileContent[key])
-    // const dialogRef = this.dialog.open(FilePreviewComponent, {
-    //   data: {
-    //     fileName: fileName,
-    //     url: this.filePreviewUrl[key],
-    //     content: this.fileContent[key],
-    //     type: this.getFileType(fileName)
-    //   },
-
-    //   maxHeight: "100vh",
-    //   maxWidth: "100%",
-    //   height: "auto",
-    //   width: "auto",
-
-    // });
-  }
   getFileType(fileName: string): string {
     const extension = fileName.split('.').pop()?.toLowerCase() || '';
     switch (extension) {
@@ -3490,7 +3472,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getTextAlignment(alignment: string | undefined) {
     // by default, the text alignment is center from scss
     alignment = alignment?.toLowerCase();
-    switch(alignment) {
+    switch (alignment) {
       case 'left': return 'left';
       case 'right': return 'right';
       default: return null;

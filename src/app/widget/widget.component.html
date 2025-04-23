@@ -201,8 +201,8 @@
           <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
             <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
             <!-- Custom Widget logo -->
-            <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg" alt="{{ 'button.live-chat' | translate }}"
-              *ngIf="logoEnabled" />
+            <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg"
+              alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
             <!-- Global error message for the form -->
             <div>
               <span class="field-error error_text_for_filling"
@@ -601,17 +601,14 @@
                                   </button>
 
                                   <!-- Image preview -->
-                                  <div
-                                    (click)="filePreviewOpener(preChatFormGroup.get(['sections',i,attribute.key])?.value,i,j)"
-                                    *ngIf="fileHistory[i + '-' + j]?.isImage; else fileIcon"
+                                  <div *ngIf="fileHistory[i + '-' + j]?.isImage; else fileIcon"
                                     class="preview-image-container">
                                     <img [src]="filePreviewUrl[i + '-' + j]" alt="Preview" class="preview-image">
                                   </div>
 
                                   <!-- File icon preview -->
                                   <ng-template #fileIcon>
-                                    <div class="preview-file-container"
-                                      (click)="filePreviewOpener(preChatFormGroup.get(['sections',i,attribute.key])?.value,i,j)">
+                                    <div class="preview-file-container">
                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1099,10 +1096,10 @@
                   </div>
                 </div>
               </div>
-          </div>
+            </div>
 
           </div>
-          
+
 
           <!-- Form Submit Button -->
           <div class="widget-form-button">
@@ -1167,7 +1164,8 @@
             </div>
           </ng-container>
           <span class="widget-navbar-divider">|</span>
-          <span class="widget-navbar-icon material-symbols-outlined" matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
+          <span class="widget-navbar-icon material-symbols-outlined"
+            matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
               btnTwo: enableFontResize === true,
               btnOne: enableFontResize === false,
               'focus-icon':
@@ -1616,10 +1614,9 @@
                         }">
                       </span>
                       <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
-                        <mat-chip *ngFor="let btn of message.body.buttons" 
+                        <mat-chip *ngFor="let btn of message.body.buttons"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
-                          (click)="sendButtonMessage(btn, message.id)"
-                        >
+                          (click)="sendButtonMessage(btn, message.id)">
                           {{ btn.title }}
                         </mat-chip>
                       </mat-chip-list>
@@ -1804,14 +1801,12 @@
               *ngIf="enableEmoji">
               add_reaction
             </span> -->
-            <textarea class="widget-chat-composer"
-            #messageComposer
-              [attr.data-emoji-picker]="enableEmoji" matInput id="messageTextarea"
-              cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1" cdkAutosizeMaxRows="4"
-              placeholder="{{ 'composer-placeholder' | translate }}" #message maxlength="{{ messageLimit }}" [(ngModel)]="text"
-              (change)="textChanged()" (focus)="onTextAreaFocus()" (keyup)="onKeyPress($event)"
-              (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)"  (keydown.enter)="onEnterKey($event)"
-                      [ngClass]="{
+            <textarea class="widget-chat-composer" #messageComposer [attr.data-emoji-picker]="enableEmoji" matInput
+              id="messageTextarea" cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
+              cdkAutosizeMaxRows="4" placeholder="{{ 'composer-placeholder' | translate }}" #message
+              maxlength="{{ messageLimit }}" [(ngModel)]="text" (change)="textChanged()" (focus)="onTextAreaFocus()"
+              (keyup)="onKeyPress($event)" (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)"
+              (keydown.enter)="onEnterKey($event)" [ngClass]="{
                 'error-border': text.length == messageLimit,
                 'resize-left': enableEmoji === false,
                 'resize-right': enableFileTransfer === false
@@ -2215,7 +2210,8 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger" value="{{ 'button.download-transcript' | translate }}"
+            <input id="formTrigger" type="submit" class="widget-error-trigger"
+              value="{{ 'button.download-transcript' | translate }}"
               *ngIf="enableDownloadTranscript && !standaloneWebRtc" (click)="chatTranscript()" />
           </div>
         </div>
@@ -2320,8 +2316,8 @@
             <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number"
               *ngIf="enableWebRtc" />
 
-            <input id="formTrigger" type="submit" class="widget-error-trigger" value="{{ 'button.send-me-transcript' | translate }}"
-              *ngIf="enableDownloadTranscript" />
+            <input id="formTrigger" type="submit" class="widget-error-trigger"
+              value="{{ 'button.send-me-transcript' | translate }}" *ngIf="enableDownloadTranscript" />
           </div>
         </div>
       </div>
@@ -2382,8 +2378,8 @@
             close
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="{{ 'button.live-chat' | translate }}"
-            *ngIf="logoEnabled" />
+          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg"
+            alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
         </button>
       </div>
 
@@ -2395,8 +2391,8 @@
             video_call
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="{{ 'button.live-chat' | translate }}"
-            *ngIf="logoEnabled" />
+          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg"
+            alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
         </button>
       </div>
     </div>
@@ -2404,21 +2400,22 @@
     <!-- Chat Widget Icon -->
     <div class="widget-icon widget-icon-chat" *ngIf="!standaloneWebRtc">
       <div class="widget-icon-content" *ngIf="isChatMax">
-        <button id="chatIconBtn" title="{{ 'button.live-chat' | translate }}" class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="changeScreen('widget')">
+        <button id="chatIconBtn" title="{{ 'button.live-chat' | translate }}"
+          class="widget-bar-trigger widget-chat-trigger widget-color" (click)="changeScreen('widget')">
           <span class="chat-icon material-symbols-outlined"> close </span>
         </button>
       </div>
 
       <div class="widget-icon-content" *ngIf="!isChatMax">
-        <button id="chatIconBtn" title="{{ 'button.live-chat' | translate }}" class="widget-bar-trigger widget-chat-trigger widget-color"
+        <button id="chatIconBtn" title="{{ 'button.live-chat' | translate }}"
+          class="widget-bar-trigger widget-chat-trigger widget-color"
           (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
           <span class="chat-icon material-symbols-outlined" *ngIf="!logoEnabled">
             sms
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg" alt="{{ 'button.live-chat' | translate }}"
-            *ngIf="logoEnabled" />
+          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg"
+            alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
         </button>
       </div>
     </div>
