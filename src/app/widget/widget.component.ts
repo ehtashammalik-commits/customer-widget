@@ -19,7 +19,7 @@ import { ConfigService } from '../services/config.service';
 import { BrowserNotificationService } from '../services/browser-notification.service';
 import { DeliveryNotificationService } from '../services/delivery-notification.service';
 import { PostMessageHandlerService } from '../post-message-handler.service';
-import { Subscription } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -320,7 +320,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-
     this.route.queryParams.subscribe((params: { [x: string]: any }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
@@ -483,6 +482,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (response: any) => {
         console.log('Connection Response:', response);
         if (response) {
+          
           this.eventListener(response);
           console.log('event listener:', response);
         }
@@ -752,18 +752,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.preChatFormId = configs.form;
     this.webRTCConfig = configs.webRtc;
     if (this.webRTCConfig !== null) {
-      this.enableWebRtc = configs.webRtc.enableWebRtc;
+      this.enableWebRtc = configs.webRtc?.enableWebRtc;
       console.log('List of webRTC Configs: ', this.webRTCConfig);
       if (this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
     }
     this.callbackConfig = configs.callback;
     if (this.callbackConfig !== null) {
-      this.enabledCallback = configs.callback.enableCallback;
-      this.standaloneCallback = configs.callback.standaloneCallback;
+      this.enabledCallback = configs.callback?.enableCallback;
+      this.standaloneCallback = configs.callback?.standaloneCallback;
     }
     if (configs.webhook !== null) {
-      this.webhookUrl = configs.webhook.webhookUrl;
-      this.enabledWebhook = configs.webhook.enableWebhook;
+      this.webhookUrl = configs.webhook?.webhookUrl;
+      this.enabledWebhook = configs.webhook?.enableWebhook;
     }
   }
 
@@ -804,7 +804,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log('Event Payload: ==>', eventPayload);
           // If Error is false than proceed with the start Chat and user data setting
           if (!eventPayload.error) {
-            this.setUserData(eventPayload.data, 'startChat');
+            this.setUserData(eventPayload.data, 'startChat');           
           }
         } else {
           this.preChatFormLoader = false;
