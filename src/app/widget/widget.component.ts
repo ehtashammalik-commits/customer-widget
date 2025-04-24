@@ -2166,7 +2166,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
             this.sdk.moveToFileServer(
               fd,
-              (res: { type: string; name: string; size: any }) => {
+              (res: any) => {
+                if (res?.isFileInvalid) {
+                  this.snackBar.open(res.errorMesage, 'X', {
+                    panelClass: 'custom-snackbar',
+                  });
+                  this.removeUploadFile();
+                  return;
+                }
+
                 this.constructCimMessage(
                   res.type.split('/')[0],
                   '',
