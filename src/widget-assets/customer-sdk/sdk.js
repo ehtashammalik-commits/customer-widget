@@ -451,10 +451,8 @@ async function getConversationData(url, conversationId) {
  * Authenticator Request for Secure Link
  */
 function authenticateRequest(authenticatorUrl, authData, callback) {
-  // console.log("here is the authenicateRequest in SDK", authenticatorUrl, "and the authData", authData)
-  // console.log('authenticateRequest: in sdk function:', JSON.stringify(authData));
-  // const url = "https://e70a1560-fa32-4009-a6be-a27f764bcfa6.mock.pstmn.io"
-  fetch(`${authenticatorUrl}/verifySecureLink`, {
+  console.log('authenticateRequest: in sdk function:', JSON.stringify(authData));
+  authorizedFetch(`${authenticatorUrl}/verifySecureLink`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
