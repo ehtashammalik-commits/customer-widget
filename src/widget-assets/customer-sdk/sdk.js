@@ -8,8 +8,22 @@ let socket = {};
  * @param {*} widgetIdentifier
  * @param {*} callback
  */
+
+
+function authorizedFetch(url, options = {}) {
+  const token = localStorage.getItem('jwt_token');
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+}
+
+
 function widgetConfigs(ccmUrl, widgetIdentifier, callback) {
-  fetch(`${ccmUrl}/widget-configs/${widgetIdentifier}`)
+  authorizedFetch(`${ccmUrl}/widget-configs/${widgetIdentifier}`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
@@ -22,7 +36,7 @@ function widgetConfigs(ccmUrl, widgetIdentifier, callback) {
  * @param {*} callback
  */
 function getPreChatForm(formUrl, formId, callback) {
-  fetch(`${formUrl}/forms/${formId}`)
+  authorizedFetch(`${formUrl}/forms/${formId}`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
@@ -33,7 +47,7 @@ function getPreChatForm(formUrl, formId, callback) {
  * @param {*} callback
  */
 function formValidation(formUrl, callback) {
-  fetch(`${formUrl}/formValidation`)
+  authorizedFetch(`${formUrl}/formValidation`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
@@ -97,6 +111,12 @@ function eventListeners(callback) {
       } else {
         callback({ type: "SOCKET_CONNECTED", data: this.socket });
       }
+    }
+  });
+  this.socket.on('TOKEN_GENERATED', (data) => {
+    if (this.socket.id != undefined) {
+      localStorage.setItem('jwt_token', data);
+      callback({ type: "TOKEN_GENERATED", data: this.socket });
     }
   });
   this.socket.on('CHANNEL_SESSION_STARTED', (data) => {
@@ -297,7 +317,7 @@ function getInitChat(customer) {
     body: JSON.stringify(customer)
   };
 
-  fetch(`${config.ServerUrl}/api/customer/init`, requestOptions)
+  authorizedFetch(`${config.ServerUrl}/api/customer/init`, requestOptions)
     .then(response => response.json())
     .then(data => {
       onInitChat(data);
@@ -314,7 +334,7 @@ function getInitChat(customer) {
  * @param {*} callback
  */
 function uploadToFileEngine(fileServerUrl, formData, callback) {
-  fetch(`${fileServerUrl}/api/uploadFileStream`, {
+  authorizedFetch(`${fileServerUrl}/api/uploadFileStream`, {
     method: 'POST',
     body: formData
   }).then(async (response) => {
@@ -349,7 +369,7 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
  * Set Conversation Data Api
  */
 async function setConversationData(url, conversationId, data) {
-  const response = await fetch(`${url}/${conversationId}/conversation-data`, {
+  const response = await authorizedFetch(`${url}/${conversationId}/conversation-data`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -363,7 +383,7 @@ async function setConversationData(url, conversationId, data) {
  */
 async function setConversationDataByCustomerIdentifier(url, channelIdentifier, data, callback) {
   try {
-    const response = await fetch(`${url}/${channelIdentifier}/conversation-data-by-identifier`, {
+    const response = await authorizedFetch(`${url}/${channelIdentifier}/conversation-data-by-identifier`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -394,7 +414,7 @@ async function setConversationDataByCustomerIdentifier(url, channelIdentifier, d
 */
 async function getConversationDataByCustomerIdentifier(url, channelIdentifier, callback) {
   try {
-    const response = await fetch(`${url}/get/${channelIdentifier}`, {
+    const response = await authorizedFetch(`${url}/get/${channelIdentifier}`, {
       method: 'GET', // Specify the HTTP method as GET
       headers: {
         'Content-Type': 'application/json' // Set appropriate headers if needed
@@ -405,7 +425,7 @@ async function getConversationDataByCustomerIdentifier(url, channelIdentifier, c
       console.error('Forbidden: The server returned a 403 Forbidden response.');
       callback(response);
     } else if (!response.ok) {
-      console.error(`Failed to fetch data from ${url}/get/${channelIdentifier}: ${response.status} ${response.statusText}`);
+      console.error(`Failed to authorizedFetch data from ${url}/get/${channelIdentifier}: ${response.status} ${response.statusText}`);
       callback(response);
     } else {
       const data = await response.json();
@@ -420,7 +440,7 @@ async function getConversationDataByCustomerIdentifier(url, channelIdentifier, c
 * Get Conversation Data Api
 */
 async function getConversationData(url, conversationId) {
-  const response = await fetch(`${url}/${conversationId}/conversation-data`);
+  const response = await authorizedFetch(`${url}/${conversationId}/conversation-data`);
   if (!response.ok) {
     throw new Error(`Failed to fetch data from ${url}/${conversationId}/conversation-data: ${response.status} ${response.statusText}`);
   }
@@ -501,7 +521,7 @@ function authenticateRequest(authenticatorUrl, authData, callback) {
 function getBrowserInfo(apiKey, callback) {
   // const apiKey = '5c8c5a26decc9b30da07abf360b73256faa5b00c59b32689c9860a84';
   try {
-    fetch(`https://api.ipdata.co?api-key=${apiKey}`, {
+    authorizedFetch(`https://api.ipdata.co?api-key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -533,7 +553,7 @@ function callbackRequest(url, payload, callback) {
   try {
 
     // Make an API Call
-    fetch(`${url}`, {
+    authorizedFetch(`${url}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -558,7 +578,7 @@ function callbackRequest(url, payload, callback) {
 }
 
 function getCalendarId(url, serviceIdentifier, callback) {
-  fetch(`${url}/channels/service-identifier/${serviceIdentifier}`)
+  authorizedFetch(`${url}/channels/service-identifier/${serviceIdentifier}`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
@@ -566,7 +586,7 @@ function getCalendarId(url, serviceIdentifier, callback) {
 }
 
 function getCalendarEvents(calendarId,url, startTime,endTime,callback) {
-  fetch(`${url}/calendars/events?&calendarId=${calendarId}&startTime=${startTime}&endTime=${endTime}`)
+  authorizedFetch(`${url}/calendars/events?&calendarId=${calendarId}&startTime=${startTime}&endTime=${endTime}`)
     .then(response => response.json())
     .then((data) => {
       callback(data);
@@ -611,7 +631,7 @@ function webhookNotifications(webhookUrl, additionalData, data) {
       }
     ]
   };
-  fetch(`${webhookUrl}`, {
+  authorizedFetch(`${webhookUrl}`, {
     method: 'POST',
     body: JSON.stringify(messageObj), // Formatting as a JSON object for Google Workspace webhook
     headers: {
@@ -4543,679 +4563,5 @@ function mediaConversionEvent(someMessage, callback) {
         }
       }
     }
-  }
-
-  callback(_event)
-  return
-}
-
-
-/**
- * Initiates a consult conference for the given dialog.
- * 
- * @param {string} dialogId - The dialog ID associated with the consult call.
- * @param {Function} callback - Callback function to handle the initiation of the consult conference.
- */
-function initiate_consult_Conference(dialogId, callback) {
-  var res = lockFunction("initiate_consult_Conference", 500); // --- seconds cooldown
-  if (!res) return;
-  const undefinedParams = checkUndefinedParams(initiate_consult_Conference, [dialogId, callback]);
-
-  if (undefinedParams.length > 0) {
-    // console.log(`Error: The following parameter(s) are undefined or null: ${undefinedParams.join(', ')}`);
-    error("generalError", loginid, `Error: The following parameter(s) are undefined or null or empty: ${undefinedParams.join(', ')}`, callback);
-    return;
-  }
-
-  var index = getCallIndex(dialogId);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action initiate_consult_Conference", callback);
-    return;
-  }
-
-  var members = []
-  for (var i = 0; i < calls[0].response.dialog.participants.length; i++) {
-    var _member = calls[0].response.dialog.participants[i].mediaAddress
-    members.push(_member)
-  }
-  for (var i = 0; i < calls[1].response.dialog.participants.length; i++) {
-    var _member = calls[1].response.dialog.participants[i].mediaAddress
-    members.push(_member)
-  }
-
-
-  let uniqueMembers = [...new Set(members)];
-  if (uniqueMembers.length > 4) {
-    error('generalError', loginid, `Consult Conference Failed due to LIMIT REACHED of 4 unique members`, callback);
-    // alert(`Consult Conference Failed due to LIMIT REACHED of 4 unique members`)
-    return
-  }
-
-  sendDtmf("*", dialogId, callback)
-  sendDtmf("8", dialogId, callback)
-}
-
-
-/**
- * Generates a conference event like CONFERENCE_MEMBER_HOLD, CONFERENCE_MEMBER_UNHOLD,
- * CONFERENCE_MEMBER_MUTE, CONFERENCE_MEMBER_UNMUTE.
- * 
- * @param {string} Eventname - The name of the conference event.
- * @param {string} to - The destination number of the event.
- * @param {string} from - The source number of the event.
- * @param {string} conferenceName - The name of the conference.
- * @returns {Object} - The generated conference event object.
- */
-
-function generateConferenceEvent(Eventname, to, from, conferenceName) {
-  var _conferenceEvent = JSON.parse(JSON.stringify(conferenceEvent))
-  _conferenceEvent.event = Eventname
-  _conferenceEvent.additionalAttributes.conference.members[0].ext = from
-  _conferenceEvent.additionalAttributes.conference.name = conferenceName
-  _conferenceEvent.additionalAttributes.conference.count = "1"
-
-
-  const message_targetUri_value = new SIP.URI("sip", to, sipconfig.uriFs)
-  messager = new SIP.Messager(userAgent, message_targetUri_value, JSON.stringify(_conferenceEvent));
-  messager.message();
-}
-
-/**
-* Handles conference change events, such as a call being converted to a conference,
-* member being added or left, or when there are only two members left in the conference.
-*
-* @param {object} someMessage - The message containing details about the conference change event.
-* @param {Function} callback - Callback function to execute after handling the event.
-*/
-function conferenceChange(someMessage, callback) {
-  var index = getCallIndex(someMessage.dialog.id);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action conferenceChange", callback);
-    return;
-  }
-
-  var _members = someMessage.additionalAttributes.conference.members
-  if (_members.length <= 2) {
-    //conference Ended
-    // call convert to Simple Call.... Other_in or Consult or OUT??
-
-    /***
-     * Cases for know
-     * A1C1S2
-     * 
-     * 
-     * A1C1
-     * A1A2
-     * C1A2
-     * 
-     */
-
-
-    conferenceToCall(someMessage, callback)
-
-  }
-  else {
-    if (sessionall.response.dialog.callType == "CONSULT" || sessionall.response.dialog.callType == "OTHER_IN" || sessionall.response.dialog.callType == "OUT") {
-      // there was no conference and conference is created.
-      /***
-       * Cases
-       * 1. A1A2/A1C1 and Supervisor BargeIn in any call..that call is converted to conference 
-       * 2. A1A2/A1C1 and A1 press Consult Conference
-       * 
-       */
-      conferenceCreated(someMessage, callback)
-    }
-    else if (sessionall.response.dialog.callType == "CONFERENCE") {
-      // Conference is already established, this is just an update
-      conferenceUpdated(someMessage, callback)
-    }
-    else if (sessionall.response.dialog.callType == "MONITORING") {
-      // Silent Monitored call is converted to Conference
-      conferenceCreated(someMessage, callback)
-    }
-    else {
-      console.log("ERROR : unknown call type.")
-      return
-    }
-  }
-}
-
-/**
- * Handles the conferenceCreated event when a conference is created.
- *
- * @param {object} someMessage - The message containing details about the created conference.
- * @param {Function} callback - Callback function to execute after handling the event.
- */
-function conferenceCreated(someMessage, callback) {
-  var index = getCallIndex(someMessage.dialog.id);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action conferenceCreated", callback);
-    return;
-  }
-  const sysdate = new Date();
-  var datetime = sysdate.toISOString();
-  sessionall.response.dialog.callType = "CONFERENCE"
-  if (sessionall.additionalDetail) {
-    sessionall.additionalDetail.conference_name = someMessage.additionalAttributes.conference.name;
-  } else {
-    sessionall.additionalDetail = {
-      conference_name: someMessage.additionalAttributes.conference.name
-    };
-  }
-  var _members = someMessage.additionalAttributes.conference.members
-  for (var i = 0; i < someMessage.additionalAttributes.conference.members.length; i++) {
-    if (_members[i].ext !== loginid) {
-      var newMember = {
-        actions: {
-          action: [
-            "TRANSFER_SST",
-            "HOLD",
-            "SEND_DTMF",
-            "DROP"
-          ]
-        },
-        "mediaAddress": _members[i].ext,
-        "mediaAddressType": "SIP.js/0.21.2-CTI/Expertflow",
-        "startTime": datetime,
-        "state": "ACTIVE",
-        "stateCause": null,
-        "stateChangeTime": datetime,
-        'mute': false
-      }
-      sessionall.response.dialog.participants.push(newMember)
-    }
-  }
-
-  var _sessionDialog = {}
-  _sessionDialog.response = sessionall.response;
-  _sessionDialog.event = sessionall.event;
-  const eventCopy = JSON.parse(JSON.stringify(_sessionDialog))
-  callback(eventCopy)
-}
-/**
- * Handles the conferenceUpdated event when there is any change in a conference (member added or member left).
- *
- * @param {object} someMessage - The message containing details about the conference update.
- * @param {Function} callback - Callback function to execute after handling the event.
- */
-function conferenceUpdated(someMessage, callback) {
-  var index = getCallIndex(someMessage.dialog.id);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action conferenceUpdated", callback);
-    return;
-  }
-
-  const sysdate = new Date();
-  var datetime = sysdate.toISOString();
-
-  let currentActiveMembers = someMessage.additionalAttributes.conference.members;
-  let lastActiveMembers = sessionall.response.dialog.participants
-
-  let currentExts = currentActiveMembers.map(member => member.ext);
-  let lastExts = lastActiveMembers.map(member => member.mediaAddress);
-
-  console.log("CURRENT EXTS", currentExts)
-  console.log("LAST EXTS", lastExts)
-  // Check for active members and new members
-  currentActiveMembers.forEach(member => {
-    if (lastExts.includes(member.ext)) {
-      console.log(`Agent with ext ${member.ext} is Active.`);
-    } else {
-      console.log(`Agent with ext ${member.ext} is a New Member and is Active.`);
-      conferenceMemberAdded(someMessage.dialog.id, member.ext, callback)
-    }
-  });
-
-  // Check for dropped members
-  lastActiveMembers.forEach(member => {
-    if (!currentExts.includes(member.mediaAddress)) {
-      console.log(`Agent with ext ${member.mediaAddress} is a Dropped Member.`);
-      conferenceMemberLeft(someMessage.dialog.id, member.mediaAddress, callback)
-    }
-  });
-}
-/**
- * Handles the conferenceMemberAdded event when a participant is added to a conference.
- *
- * @param {string} dialogId - The ID of the conference dialog.
- * @param {string} ext - The extension of the participant who joined the conference.
- * @param {Function} callback - Callback function to execute after handling the event.
- */
-function conferenceMemberAdded(dialogId, ext, callback) {
-  var index = getCallIndex(dialogId);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action conferenceMemberAdded", callback);
-    return;
-  }
-
-  const sysdate = new Date();
-  var datetime = sysdate.toISOString();
-
-  // var _memberadded = someMessage.additionalAttributes.conference.members[0]
-  var newMember = {
-    actions: {
-      action: [
-        "TRANSFER_SST",
-        "HOLD",
-        "SEND_DTMF",
-        "DROP"
-      ]
-    },
-    "mediaAddress": ext,
-    "mediaAddressType": "SIP.js/0.21.2-CTI/Expertflow",
-    "startTime": datetime,
-    "state": "ACTIVE",
-    "stateCause": null,
-    "stateChangeTime": datetime,
-    'mute': false
-  }
-  sessionall.response.dialog.participants.push(newMember)
-
-  var _sessionDialog = {}
-  _sessionDialog.response = sessionall.response;
-  _sessionDialog.event = sessionall.event;
-  const eventCopy = JSON.parse(JSON.stringify(_sessionDialog))
-  callback(eventCopy)
-}
-/**
- * Handles the conferenceMemberLeft event when a participant leaves a conference.
- *
- * @param {string} dialogId - The ID of the conference dialog.
- * @param {string} ext - The extension of the participant who left the conference.
- * @param {Function} callback - Callback function to execute after handling the event.
- */
-function conferenceMemberLeft(dialogId, ext, callback) {
-  var index = getCallIndex(dialogId);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action conferenceMemberLeft", callback);
-    return;
-  }
-  const sysdate = new Date();
-  var datetime = sysdate.toISOString();
-
-  var _localMembers = sessionall.response.dialog.participants
-  // var _memberleft = someMessage.additionalAttributes.conference.members[0]
-  for (var i = 0; i < _localMembers.length; i++) {
-    if (ext == _localMembers[i].mediaAddress) {
-      _localMembers[i].state = "DROPPED"
-      _localMembers[i].stateChangeTime = datetime
-    }
-  }
-
-  var _sessionDialog = {}
-  _sessionDialog.response = sessionall.response;
-  _sessionDialog.event = sessionall.event;
-  const eventCopy = JSON.parse(JSON.stringify(_sessionDialog))
-  callback(eventCopy)
-
-
-  // removing participant whose state = Dropped
-  var _localMembers = sessionall.response.dialog.participants
-  for (var i = 0; i < _localMembers.length; i++) {
-    if (_localMembers[i].state == "DROPPED") {
-      sessionall.response.dialog.participants.splice(i, 1);
-    }
-  }
-
-  var _sessionDialog = {}
-  _sessionDialog.response = sessionall.response;
-  _sessionDialog.event = sessionall.event;
-  const _eventCopy = JSON.parse(JSON.stringify(_sessionDialog))
-  callback(_eventCopy)
-}
-/**
- * Handles the conferenceMemberMute event when a user mutes their conference call.
- *
- * @param {Object} someMessage - Data associated with the conferenceMemberMute event.
- * @param {Function} callback - Callback function to execute after handling the event.
- */
-function conferenceMemberMute(someMessage, callback) {
-
-  var dialogId = null
-  calls.forEach(call => {
-    if (call.additionalDetail.conference_name == someMessage.additionalAttributes.conference.name) {
-      dialogId = call.response.dialog.id
-    }
-  });
-
-  if (dialogId == null) {
-    return
-  }
-
-  var index = getCallIndex(dialogId);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action conferenceMemberMute", callback);
-    return;
-  }
-  const sysdate = new Date();
-  var datetime = sysdate.toISOString();
-
-  var _localMembers = sessionall.response.dialog.participants
-  var _muteMember = someMessage.additionalAttributes.conference.members[0].ext
-  for (var i = 0; i < _localMembers.length; i++) {
-    if (_localMembers[i].mediaAddress == _muteMember) {
-      _localMembers[i].mute = true
-      _localMembers[i].stateChangeTime = datetime
-    }
-  }
-
-  var _sessionDialog = {}
-  _sessionDialog.response = sessionall.response;
-  _sessionDialog.event = sessionall.event;
-  const _eventCopy = JSON.parse(JSON.stringify(_sessionDialog))
-  callback(_eventCopy)
-}
-/**
- * Handles the conferenceMemberUnMute event when a user unmutes their conference call.
- *
- * @param {Object} someMessage - Data associated with the conferenceMemberUnMute event.
- * @param {Function} callback - Callback function to execute after handling the event.
- */
-function conferenceMemberUnMute(someMessage, callback) {
-
-  var dialogId = null
-  calls.forEach(call => {
-    if (call.additionalDetail.conference_name == someMessage.additionalAttributes.conference.name) {
-      dialogId = call.response.dialog.id
-    }
-  });
-
-  if (dialogId == null) {
-    return
-  }
-
-  var index = getCallIndex(dialogId);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action conferenceMemberUnMute", callback);
-    return;
-  }
-  const sysdate = new Date();
-  var datetime = sysdate.toISOString();
-
-  var _localMembers = sessionall.response.dialog.participants
-  var _unMuteMember = someMessage.additionalAttributes.conference.members[0].ext
-  for (var i = 0; i < _localMembers.length; i++) {
-    if (_localMembers[i].mediaAddress == _unMuteMember) {
-      _localMembers[i].mute = false
-      _localMembers[i].stateChangeTime = datetime
-    }
-  }
-
-  var _sessionDialog = {}
-  _sessionDialog.response = sessionall.response;
-  _sessionDialog.event = sessionall.event;
-  const _eventCopy = JSON.parse(JSON.stringify(_sessionDialog))
-  callback(_eventCopy)
-}
-/**
- * Handles the conferenceMemberHold event when a user puts their conference call on hold.
- *
- * @param {Object} someMessage - Data associated with the conferenceMemberHold event.
- * @param {Function} callback - Callback function to execute after handling the event.
- */
-function conferenceMemberHold(someMessage, callback) {
-
-  var dialogId = null
-  calls.forEach(call => {
-    if (call.additionalDetail.conference_name == someMessage.additionalAttributes.conference.name) {
-      dialogId = call.response.dialog.id
-    }
-  });
-
-  if (dialogId == null) {
-    return
-  }
-
-  var index = getCallIndex(dialogId);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action conferenceMemberHold", callback);
-    return;
-  }
-
-  const sysdate = new Date();
-  var datetime = sysdate.toISOString();
-
-  var _localMembers = sessionall.response.dialog.participants
-  var _holdMember = someMessage.additionalAttributes.conference.members[0].ext
-  for (var i = 0; i < _localMembers.length; i++) {
-    if (_localMembers[i].mediaAddress == _holdMember) {
-      _localMembers[i].state = "HELD"
-      _localMembers[i].stateChangeTime = datetime
-    }
-  }
-
-  var _sessionDialog = {}
-  _sessionDialog.response = sessionall.response;
-  _sessionDialog.event = sessionall.event;
-  const _eventCopy = JSON.parse(JSON.stringify(_sessionDialog))
-  callback(_eventCopy)
-}
-/**
- * Handles the conferenceMemberUnHold event when a user removes their conference call from hold.
- *
- * @param {Object} someMessage - Data associated with the conferenceMemberUnHold event.
- * @param {Function} callback - Callback function to execute after handling the event.
- */
-function conferenceMemberUnHold(someMessage, callback) {
-
-  var dialogId = null
-  calls.forEach(call => {
-    if (call.additionalDetail.conference_name == someMessage.additionalAttributes.conference.name) {
-      dialogId = call.response.dialog.id
-    }
-  });
-
-  if (dialogId == null) {
-    return
-  }
-
-  var index = getCallIndex(dialogId);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action conferenceMemberUnHold", callback);
-    return;
-  }
-  const sysdate = new Date();
-  var datetime = sysdate.toISOString();
-
-  var _localMembers = sessionall.response.dialog.participants
-  var _holdMember = someMessage.additionalAttributes.conference.members[0].ext
-  for (var i = 0; i < _localMembers.length; i++) {
-    if (_localMembers[i].mediaAddress == _holdMember) {
-      _localMembers[i].state = "ACTIVE"
-      _localMembers[i].stateChangeTime = datetime
-    }
-  }
-
-  var _sessionDialog = {}
-  _sessionDialog.response = sessionall.response;
-  _sessionDialog.event = sessionall.event;
-  const _eventCopy = JSON.parse(JSON.stringify(_sessionDialog))
-  callback(_eventCopy)
-}
-
-function conferenceToCall(someMessage, callback) {
-  console.log(someMessage)
-  var index = getCallIndex(someMessage.dialog.id);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action conferenceToCall", callback);
-    return;
-  }
-  // handling for A1 & A2 side only for know.......
-
-
-  let currentActiveMembers = someMessage.additionalAttributes.conference.members;
-  let lastActiveMembers = sessionall.response.dialog.participants
-
-  let currentExts = currentActiveMembers.map(member => member.ext);
-  let lastExts = lastActiveMembers.map(member => member.mediaAddress);
-
-  // Check for active members and new members
-  currentActiveMembers.forEach(member => {
-    console.log(member)
-    if (lastExts.includes(member.ext)) {
-      console.log(`Agent with ext ${member.ext} is Active.`);
-    } else {
-      console.log(`Agent with ext ${member.ext} is a New Member and is Active.`);
-      conferenceMemberAdded(someMessage.dialog.id, member.ext, callback)
-    }
-  });
-
-  // Check for dropped members
-  lastActiveMembers.forEach(member => {
-    console.log(member)
-    if (!currentExts.includes(member.mediaAddress)) {
-      console.log(`Agent with ext ${member.mediaAddress} is a Dropped Member.`);
-      conferenceMemberLeft(someMessage.dialog.id, member.mediaAddress, callback)
-    }
-  });
-
-
-  // this will only work incase of Customer is in Main Call...
-  // if this get triggered on Consult call... this will fail.
-  var _members = sessionall.response.dialog.participants
-  var _customerFound = false
-  _members.forEach(member => {
-    // for customer 
-    if (member.mediaAddress === sessionall.response.dialog.customerNumber) {
-      _customerFound = true
-      console.log("CUSTOMER IS STILL ACTIVE SO NOT TERMINATING CALLS")
-      sessionall.response.dialog.callType = "OTHER_IN"
-    }
-  })
-
-  for (var i = 0; i < _members.length; i++) {
-    if (_members[i].mediaAddress != loginid) {
-      sessionall.response.dialog.participants.splice(i, 1)
-    }
-  }
-
-  var data = {}
-  data.event = sessionall.event
-  data.response = sessionall.response
-  const dataCopy = JSON.parse(JSON.stringify(data))
-  callback(dataCopy)
-
-  if (_customerFound == false) {
-    sessionall.response.dialog.callType = "CONSULT"
-    console.log("No Customer Found in Call so terminating All Calls")
-    terminateIndexZeroCall()
-    terminateIndexOneCall()
-
-  }
-}
-/**
- * Handles the conferenceEnded event when there are only two users left in the conference.
- *
- * @param {Object} someMessage - Data associated with the conferenceEnded event.
- * @param {Function} callback - Callback function to execute after handling the event.
- */
-function conferenceEnded(someMessage, callback) {
-  var index = getCallIndex(someMessage.dialog.id);
-  var sessionall = null
-  if (index !== -1) {
-    sessionall = calls[index];
-  }
-  if (!sessionall) {
-    error('invalidState', loginid, "invalid action conferenceEnded", callback);
-    return;
-  }
-
-  const sysdate = new Date();
-  var datetime = sysdate.toISOString();
-
-
-  var _members = sessionall.response.dialog.participants
-  for (var i = 0; i < _members.length; i++) {
-    _members[i].state = "DROPPED"
-    _members[i].stateChangeTime = datetime
-  }
-  sessionall.response.dialog.isCallEnded = 0
-  sessionall.additionalDetail.conference_name = null
-
-  var _sessionDialog = {}
-  _sessionDialog.response = sessionall.response;
-  _sessionDialog.event = sessionall.event;
-  const eventCopy = JSON.parse(JSON.stringify(_sessionDialog))
-  callback(eventCopy)
-}
-
-var conferenceErrors = {
-  "LIMIT_REACHED": "LIMIT REACHED of 4 unique members",
-  "ON_HOLD": "call is ON HOLD",
-  "CUSTOMER_LEFT": "CUSTOMER LEFT"
-
-}
-/**
- * Handles the conferenceFailed event when converting to conference fails, either by barge-in or consult conference.
- *
- * @param {Object} someMessage - Data associated with the conferenceFailed event.
- * @param {Function} callback - Callback function to execute after handling the event.
- */
-function conferenceFailed(someMessage, callback) {
-
-  var _errorMessage = ""
-  if (conferenceErrors.hasOwnProperty(someMessage.reasonCode)) {
-    _errorMessage = conferenceErrors[someMessage.reasonCode];
-  } else {
-    _errorMessage = "ERROR : Unknown EVENT "
-  }
-
-  if (someMessage.event == "BARGE_FAILED") {
-    error('generalError', loginid, `Bargein Failed due to ${_errorMessage}`, callback);
-    // alert(`Bargein Failed due to ${_errorMessage}`)
-    return
-  }
-  else if (someMessage.event == "CONSULT_CONFERENCE_FAILED") {
-    error('generalError', loginid, `Consult Conference Failed due to ${_errorMessage}`, callback);
-    // alert(`Consult Conference Failed due to ${_errorMessage}`)
-    return
-  }
-  else {
-    error('generalError', loginid, `ERROR : Unknown EVENT`, callback);
-    // console.log("ERROR : Unknown EVENT ")
   }
 }

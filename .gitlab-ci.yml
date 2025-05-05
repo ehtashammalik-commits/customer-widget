@@ -5,7 +5,8 @@ variables:
 include:
   - project: 'cim/ci-templates'
     ref: 'main'
-    file: 
+    file:
+
       - trivy.yaml
       - grype.yaml
       - trivy-merge.yaml
@@ -14,6 +15,7 @@ include:
 # uncomment if need to publish to dockerhub
 #      - dockerhub-publish.yaml
       - gitlab-publish.yaml
+
 stages:
   - test
   - code_format
@@ -25,8 +27,7 @@ stages:
   - publish_dockerhub
 
 
-#+==================Runs on Every Commit and merge requests========================+
-
+# #+===================Runs on Every Commit and merge requests========================+
 node-test:
   stage: test
   when: on_success
@@ -34,9 +35,13 @@ node-test:
   script:
     - npm install --legacy-peer-deps
     - npm run coverage
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^.+_f-.+$/ || $CI_COMMIT_BRANCH =~ /^.+_b-.+$/'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  only:
+   refs:
+    - /^.+_f-.+$/
+    - /^.+_b-.+$/
+    - merge_requests
+    - develop
+
   allow_failure: false
   cache:
     key: ${CI_COMMIT_REF_SLUG}
@@ -48,7 +53,9 @@ node-test:
         - coverage
         - node_modules/
 
-#+==================Runs on Every Commit and merge requests========================+
+
+# #+==================Runs on Every Commit and merge requests========================+
+
 
 node-format:
   stage: code_format
@@ -58,9 +65,11 @@ node-format:
     - npm run format:check
 
   allow_failure: false
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^.+_f-.+$/ || $CI_COMMIT_BRANCH =~ /^.+_b-.+$/'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  only:
+    - /^.+_f-.+$/
+    - /^.+_b-.+$/
+    - merge_requests
+    - develop
   cache:
       key: ${CI_COMMIT_REF_SLUG}
       paths:
@@ -68,45 +77,48 @@ node-format:
       policy: pull
 
 
-#+==================Runs everytime========================+
+#+==================Runs on merge requests only========================+
 
 time_build:
   extends: .build_time
   stage: init
   when: on_success
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^.+_f-.+$/ || $CI_COMMIT_BRANCH =~ /^.+_b-.+$/'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: $CI_COMMIT_TAG
+  only:
+      - /^.+_f-.+$/
+      - /^.+_b-.+$/
+      - merge_requests
+      - tags
 
 #+==================Runs on Every Commit ========================+
 node_artifacts:
-  stage: artifacts
-  when: on_success
-  image: node:18.14.1-alpine3.17
-  script:
+   stage: artifacts
+   when: on_success
+   image: node:18.14.1-alpine3.17
+   script:
      - npm install --legacy-peer-deps
      - npm run build
      - export TIME_TOKEN="$(cat .ci_status/ci_time)"
      - echo "${TIME_TOKEN}"
      - rm -rf node_modules/.sonar
-  artifacts:
-      name: "$CI_PROJECT_TITLE"
-      paths:
-        - dist
-        - .ci_status/
-  allow_failure: false
-  cache:
-      key: ${CI_COMMIT_REF_SLUG}
-      paths:
-          - node_modules
-      policy: pull
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^.+_f-.+$/ || $CI_COMMIT_BRANCH =~ /^.+_b-.+$/'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: $CI_COMMIT_TAG
+   artifacts:
+       name: "$CI_PROJECT_TITLE"
+       paths:
+         - dist
+         - .ci_status/
+   allow_failure: false
+   cache:
+       key: ${CI_COMMIT_REF_SLUG}
+       paths:
+           - node_modules
+       policy: pull
+   only:
+      - /^.+_f-.+$/
+      - /^.+_b-.+$/
+      - merge_requests
+      - tags
+      - develop
 
-#+==================Runs on branches and merge requests ========================+
+
 
 sonarqube-test:
   image:
@@ -116,16 +128,23 @@ sonarqube-test:
   variables:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
     GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+    #SONAR_HOST_URL: "http://122.129.75.138:9000"
+    #SONAR_HOST_URL: "http://124.29.220.135:9000"
     SONAR_HOST_URL: "http://sonarqube.expertflow.com:9000"
+    #SONAR_HOST_URL: "http://192.168.1.109:9000"
     SONAR_TOKEN: "${SONAR_PASS}"
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^.+_f-.+$/ || $CI_COMMIT_BRANCH =~ /^.+_b-.+$/'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  only:
+    - /^.+_f-.+$/
+    - /^.+_b-.+$/
+    - merge_requests
+    - develop
   cache:
     key: "${CI_JOB_NAME}"
     paths:
       - .sonar/cache
   script:
+
+
      - ls -lah coverage
      - sonar-scanner -X
         -Dsonar.projectKey=${CI_PROJECT_NAME}
@@ -140,67 +159,44 @@ sonarqube-test:
         -Dsonar.sourceEncoding=UTF-8
         -Dsonar.exclusions="test/*.spec.js,node_modules/**"
         -Dsonar.coverage.exclusions=test/*.spec.js,test/*.mock.js,node_modules/*,coverage/lcov-report/*
-  allow_failure: true
 
+
+
+   # - sonar-scanner -X -Dsonar.testExecutionReportPaths=coverage/test-report.xml -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info -Dsonar.sources=src -Dsonar.sourceEncoding=UTF-8 -Dsonar.exclusions=**/node_modules/** -Dsonar.tests=src -Dsonar.test.inclusions=**/*.spec.ts  -Dsonar.projectKey=customer-widget-cim -Dsonar.qualitygate.wait=true -Dsonar.projectName=${CI_PROJECT_NAME}
+  allow_failure: true
 
 #+==================Runs onevery commit and tags manual========================+
 gitlab_build_branch:
-  image: docker:latest
-  stage: build-gitlab
-  when: manual
-  services:
-    - docker:dind
-  before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-  dependencies:
-    - node_artifacts
-    - time_build
-  script:
-    - cp -r dist ./docker/
-    - cd docker
-    - |-
-        if [ $CI_COMMIT_BRANCH != '' ]; then 
-          docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .;
-          docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" "${CI_REGISTRY_IMAGE}/build:${CI_COMMIT_BRANCH}-${CI_COMMIT_SHA}";
-          docker push "${CI_REGISTRY_IMAGE}/build:${CI_COMMIT_BRANCH}-${CI_COMMIT_SHA}";
-        elif [ $CI_COMMIT_TAG != '' ]; then
-          docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" .;
-          docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG";
-        fi
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^.+_f-.+$/ || $CI_COMMIT_BRANCH =~ /^.+_b-.+$/'
+ image: docker:latest
+ stage: build-gitlab
+ when: manual
+ services:
+   - docker:dind
+ before_script:
+   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+ dependencies:
+   - node_artifacts
+   - time_build
+ script:
+   - cp -r dist ./docker/
+   - cd docker
+   - |-
+       if [ $CI_COMMIT_BRANCH != '' ]; then
+         docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .;
+         docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" "${CI_REGISTRY_IMAGE}/build:${CI_COMMIT_BRANCH}-${CI_COMMIT_SHA}";
+         docker push "${CI_REGISTRY_IMAGE}/build:${CI_COMMIT_BRANCH}-${CI_COMMIT_SHA}";
+       elif [ $CI_COMMIT_TAG != '' ]; then
+         docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" .;
+         docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG";
+       fi
+ only:
+   - /^.+_f-.+$/
+   - /^.+_b-.+$/
+   - tags
+   - develop
+ allow_failure: false
 
 
- #+==================Runs onevery commit and tags manual========================+
-gitlab_build_tag:
-  stage: build-gitlab
-  image: docker:latest
-  services:
-    - docker:dind
-  dependencies:
-    - node_artifacts
-  before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-  script:
-    - cp -r dist ./docker/
-    - cd docker
-    - apk add --no-cache git
-    - echo "Checking if tag $CI_COMMIT_TAG is from master..."
-    # Get the commit that the tag points to
-    - TAG_COMMIT=$(git rev-list -n 1 "$CI_COMMIT_TAG")
-    - |
-      # Check if that commit exists in the master branch history
-      if git branch --remotes --contains "$TAG_COMMIT" | grep -q "origin/master"; then
-        echo "Tag $CI_COMMIT_TAG is from master."
-        docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" .
-        docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
-      else
-        echo "Tag is NOT from master. Pushing to /build"
-        docker build --pull -t "$CI_REGISTRY_IMAGE/build:$CI_COMMIT_TAG" .
-        docker push "$CI_REGISTRY_IMAGE/build:$CI_COMMIT_TAG"
-      fi
-  rules:
-    - if: $CI_COMMIT_TAG
 #+==================Runs on merge requests only========================+
 gitlab_build_merge:
   image: docker:latest
@@ -231,42 +227,41 @@ gitlab_build_merge:
     - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
     - docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" "${CI_REGISTRY_IMAGE}/build:${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}-${TIME_TOKEN}"
     - docker push "${CI_REGISTRY_IMAGE}/build:${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}-${TIME_TOKEN}"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  only:
+    - merge_requests
   allow_failure: false
   artifacts:
     paths:
       - .ci_status/
 
-
-
-
 ##==================Trivy scan branch========================##
 trivy_scanning_branch:
   extends: .trivy_scan_template
   when: on_success
-  needs: 
+  needs:
     - job: gitlab_build_branch
-  allow_failure: false
+  allow_failure: true
   stage: scan
   variables:
-    FULL_IMAGE_NAME: "${CI_REGISTRY_IMAGE}/build:${CI_COMMIT_BRANCH}-${CI_COMMIT_SHA}"
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^.+_f-.+$/ || $CI_COMMIT_BRANCH =~ /^.+_b-.+$/'
+    FULL_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/build:${CI_COMMIT_BRANCH}-${CI_COMMIT_SHA}
+  only:
+    - /^.+_f-.+$/
+    - /^.+_b-.+$/
+    - develop
 
 
 ##==================Trivy scan merge========================##
 trivy_scanning_merge:
   stage: scan
   extends: .trivy_scan_merge
-  needs: 
+  needs:
     - job: gitlab_build_merge
     - job: time_build
       artifacts: true
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  only:
+    - merge_requests
 
-
+#================================================
 
 #+==================Runs on if docker build in branch========================+
 grype_scan_branch:
@@ -275,11 +270,13 @@ grype_scan_branch:
   needs:
     - job: gitlab_build_branch
   when: on_success
-  allow_failure: false
-  variables: 
-    SCAN_IMAGE: "${CI_REGISTRY_IMAGE}/build:${CI_COMMIT_BRANCH}-${CI_COMMIT_SHA}"
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /^.+_f-.+$/ || $CI_COMMIT_BRANCH =~ /^.+_b-.+$/'
+  allow_failure: true
+  variables:
+    SCAN_IMAGE: $CI_REGISTRY_IMAGE/build:$CI_COMMIT_BRANCH-$CI_COMMIT_SHA
+  only:
+    - /^.+_f-.+$/
+    - /^.+_b-.+$/
+    - develop
 
 
 #+==================Runs on merge requests only========================+
@@ -290,8 +287,9 @@ grype_scan_merge:
     - job: gitlab_build_merge
     - job: time_build
       artifacts: true
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  only:
+    - merge_requests
+
 
 
 # #+==================Runs on tag requests only========================+

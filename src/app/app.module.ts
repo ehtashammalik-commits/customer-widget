@@ -80,8 +80,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatChipsModule,
   ],
   exports: [getMediaFromTask],
-  providers: [
-    {
+  providers: [{
       provide: LocationStrategy,
       useClass: HashLocationStrategy,
     },
