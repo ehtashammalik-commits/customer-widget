@@ -13,5 +13,6 @@
     "ADDITIONAL_PANEL" : ${ADDITIONAL_PANEL},
     "VIDEO" : ${VIDEO},
     "USERNAME_ENABLED" : ${USERNAME_ENABLED},
+    "MUTE_NOTIFICATIONS": ${MUTE_NOTIFICATIONS},
     "isDirectWebRTCCallEnabled" : ${isDirectWebRTCCallEnabled}
 }
