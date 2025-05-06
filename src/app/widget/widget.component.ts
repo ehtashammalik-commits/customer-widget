@@ -507,7 +507,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       })
       .then((events) => {
         this.events = events.events;
-        this.getTodayEvent();
+        if (this.events?.length > 0) {
+          this.getTodayEvent();
+        }
       })
       .catch((error) => {
         console.error('Error:', error);
