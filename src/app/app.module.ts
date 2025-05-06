@@ -28,6 +28,12 @@ import { AppRoutingModule, routingComponents } from './app-routing.module';
 import { ConfigService } from './services/config.service';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { getMediaFromTask } from './getMediaFromTask.pipe';
+import {MatCardModule} from "@angular/material/card";
+import {MatDatepickerModule} from "@angular/material/datepicker";
+import {MatRadioModule} from "@angular/material/radio";
+import {MatNativeDateModule} from "@angular/material/core";
+import {MatCheckboxModule} from "@angular/material/checkbox";
+import {OwlDateTimeModule, OwlNativeDateTimeModule} from "ng-pick-datetime";
 
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
@@ -57,11 +63,11 @@ export function initializeApp1(appConfigService: ConfigService) {
     BrowserModule,
     HttpClientModule,
     TranslateModule.forRoot({
-        loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClient]
-        }
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient]
+      }
     }),
     AppRoutingModule,
     BrowserAnimationsModule,
@@ -78,6 +84,13 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatSnackBarModule,
     MatDialogModule,
     MatChipsModule,
+    MatCardModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatRadioModule,
+    MatCheckboxModule,
+    OwlDateTimeModule,
+    OwlNativeDateTimeModule,
   ],
   exports: [getMediaFromTask],
   providers: [
