@@ -280,6 +280,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   innerRichForm: FormGroup;
   stars = [1, 2, 3, 4, 5];
 
+  isStarRating = true;
+  isFormsView = true;
+  isCarouselView = true;
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -2529,17 +2532,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     {
       image: 'widget-assets/images/image1.png',
       title: 'Our new packages',
-      description: 'Now you can choose and activate our packages.'
+      description: 'Now you can choose and activate our packages.',
+      additionalLink: false,
     },
     {
       image: 'widget-assets/images/image2.png',
       title: 'Special Offer',
-      description: 'Enjoy 20% off on your first activation.'
+      description: 'Enjoy 20% off on your first activation.',
+      additionalLink: false,
     },
     {
       image: 'widget-assets/images/image1.png',
       title: 'Upgrade Now',
-      description: 'Switch to Premium for exclusive features.'
+      description: 'Switch to Premium for exclusive features.',
+      additionalLink: true,
     }
   ];
 

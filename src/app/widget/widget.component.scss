@@ -2322,6 +2322,11 @@ mat-spinner {
     background: var(--main-color);
     color: #fff;
     }
+
+  .carousel-actions a {
+    color: var(--main-color);
+    font-size: 12px;
+    }
   }
 
 .carousel-trigger-area {
@@ -2337,7 +2342,13 @@ mat-spinner {
     width: 30px;
     height: 30px;
     line-height: 30px;
+
+    &:disabled{
+      opacity: .6;
+      }
     }
+
+
   }
 
 //Forms
@@ -2411,8 +2422,8 @@ margin: 0;
   }
 
 //
-.review-form {
-  max-width: 400px;
+.star-rating {
+  max-width: 260px;
   margin: 20px auto;
   display: flex;
   flex-direction: column;
@@ -2431,7 +2442,7 @@ margin: 0;
       height: 30px;
 
       &.selected {
-        color: var(--main-color);
+        color: var(--main-color) !important;
         }
       }
     }

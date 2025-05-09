@@ -1113,6 +1113,7 @@
                         <p class="rich-inner-text">Please fill out the form below:</p>
                         <div class="message-inner-form">
                           <form class="compact-form" [formGroup]="innerRichForm">
+                            <div class="main-form" *ngIf="isFormsView">
                             <div class="form-group">
                               <label>Name</label>
                             <mat-form-field appearance="outline">
@@ -1176,6 +1177,7 @@
                               <span [owlDateTimeTrigger]="dt2"><mat-icon>calendar_month</mat-icon></span>
                               <owl-date-time  #dt2></owl-date-time>
                             </div>
+                            </div>
 
 <!--                            <div class="button-group form-inner-action mt-2">-->
 <!--                              <button mat-flat-button>Submit</button>-->
@@ -1188,7 +1190,7 @@
 <!--                          <form [formGroup]="innerRichForm"  class="review-form">-->
 <!--                            <h3>Leave a Review</h3>-->
 
-                            <div class="form-group star-rating">
+                            <div class="form-group star-rating" *ngIf="isStarRating">
                               <label>Leave a Review</label>
                               <div class="stars">
                                 <ng-container *ngFor="let star of stars">
@@ -1217,7 +1219,7 @@
 
 
 <!--                    carousel message-->
-                    <div class="carousel-container">
+                    <div *ngIf="isCarouselView" class="carousel-container">
                       <div class="carousel-wrapper">
                         <div class="carousel-track" [style.transform]="'translateX(-' + currentIndex * 100 + '%)'">
                           <mat-card class="carousel-card pt-0" *ngFor="let item of carouselItems">
@@ -1228,8 +1230,9 @@
                               <h2>{{ item.title }}</h2>
                               <p>{{ item.description }}</p>
                               <div class="carousel-actions">
-                                <button mat-stroked-button>Packages</button>
-                                <button mat-stroked-button>Buy Now</button>
+                                <button mat-stroked-button *ngIf="!item.additionalLink">Packages</button>
+                                <button mat-stroked-button *ngIf="!item.additionalLink">Buy Now</button>
+                                <a *ngIf="item.additionalLink" href="https://www.expertflow.com/" target="_blank">read more</a>
                               </div>
                             </mat-card-content>
                           </mat-card>
