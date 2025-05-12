@@ -248,7 +248,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   callbackLoader = false;
   callbackConfig: any;
   todayShifts: { eventId: string, shiftName: string | null, startTime: string, endTime: string }[] = [];
-  events: EventData[] = []; 
+  events: EventData[] = [];
   orderedEvents: any[] = [];
   daySummary: { startOfDay: Date | null; endOfDay: Date | null } | null = null;
 
@@ -277,6 +277,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   browserInfoData: any;
   // Handle Composer Field
   isComposerDisable: boolean = false;
+  innerRichForm: FormGroup;
+  stars = [1, 2, 3, 4, 5];
+
+  isStarRating = true;
+  isFormsView = true;
+  isCarouselView = true;
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -291,7 +297,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private browserNotificationService: BrowserNotificationService,
     private deliveryNotificationService: DeliveryNotificationService,
     private __postMessageHandlerService: PostMessageHandlerService,
-    private translate: TranslateService,
+    private translate: TranslateService
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
@@ -299,6 +305,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     translate.setDefaultLang('en');
     translate.use('en');
+
+    this.innerRichForm = this.fb.group({
+      text: [''],
+      url: [''],
+      email: [''],
+      radio: ['option1'],
+      checkbox: [false],
+      textarea: [''],
+      date: [''],
+      time: [''],
+      range: [50],
+      rating: [0],
+      comment: ['']
+    });
+
+
   }
 
   ngAfterViewInit(): void {
@@ -518,7 +540,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getTodayEvent(): Promise<any[]> {
     return new Promise((resolve, reject) => {
       try {
-        
+
         const today = new Date();
         const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Start of today in local time
         const todayEnd = new Date(todayStart);
@@ -550,7 +572,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             endTime: shift.endTime,
           }))
         );
-  
+
         // If no shifts are available, handle accordingly
         if (!allShifts.length) {
           this.daySummary = null;
@@ -569,27 +591,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               .map((shift) => (shift?.endTime ? new Date(shift.endTime).getTime() : -Infinity))
           )
         );
-  
+
         // Set the day summary with the minimum and maximum times
         this.daySummary = {
           startOfDay: minStartTime,
           endOfDay: maxEndTime,
         };
-        
+
         ///this.orderedEvents = allShifts;
-  
+
         resolve(this.orderedEvents);
       } catch (error) {
         reject("Error processing Business Hours events: " + error);
       }
     });
   }
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
 
   formatTime(dateTime: string): string {
     const date = new Date(dateTime);
@@ -1301,7 +1323,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   handleCimMessage(cimMessage: any) {
     if (
-     
+
       cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
       cimMessage.header.sender &&
       (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
@@ -1413,13 +1435,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.browserNotificationService.notify(cimMessage);
         this.scrollToBottom();
         this.handleMessageReport(cimMessage);
-      }      
+      }
     }
   }
 
   editMessage(cimMessage: any) {
     const messageId = cimMessage.header.originalMessageId;
-  
+
     // Find the message by messageId
     const existingMessageIndex = this.cimMessage.findIndex(msg => msg.id === messageId);
 
@@ -1430,7 +1452,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     }
   }
-  
+
 
   composerDisable() {
     console.log("message element is ", this.messageElement)
@@ -2503,4 +2525,46 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       default: return null;
     }
   }
+
+//  carousel function
+  currentIndex = 0;
+  carouselItems = [
+    {
+      image: 'widget-assets/images/image1.png',
+      title: 'Our new packages',
+      description: 'Now you can choose and activate our packages.',
+      additionalLink: false,
+    },
+    {
+      image: 'widget-assets/images/image2.png',
+      title: 'Special Offer',
+      description: 'Enjoy 20% off on your first activation.',
+      additionalLink: false,
+    },
+    {
+      image: 'widget-assets/images/image1.png',
+      title: 'Upgrade Now',
+      description: 'Switch to Premium for exclusive features.',
+      additionalLink: true,
+    }
+  ];
+
+  next() {
+    if (this.currentIndex < this.carouselItems.length - 1) {
+      this.currentIndex++;
+    }
+  }
+
+  prev() {
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+    }
+  }
+
+
+
+  setRating(value: number): void {
+    this.innerRichForm.get('rating')?.setValue(value);
+  }
+
 }

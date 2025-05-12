@@ -119,9 +119,9 @@
               emojiTrigger.style.position = "absolute";
               emojiTrigger.style.bottom = "10px";
               emojiTrigger.style.fontSize = "20px";
-              emojiTrigger.style.left = "15px";
+              emojiTrigger.style.left = "5px";
               emojiTrigger.style.zIndex = "99";
-              
+
 
               // emojiTrigger.style.position = "absolute";
               // emojiTrigger.style.top = "16px";
