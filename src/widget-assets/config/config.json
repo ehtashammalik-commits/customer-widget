@@ -13,5 +13,5 @@
   "VIDEO": true,
   "USERNAME_ENABLED": true,
   "MUTE_NOTIFICATIONS": false,
-  "isDirectWebRTCCallEnabled": true
+  "IS_DIRECT_WEBRTC_CALL_ENABLED": true
 }
