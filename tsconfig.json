@@ -18,7 +18,7 @@
     "importHelpers": true,
     "esModuleInterop": true,
     "target": "es2017",
-    "module": "es2020",
+    "module": "CommonJS",
     "types": ["jest"],
     "typeRoots": [
       "node_modules/@types"
@@ -28,6 +28,7 @@
       "dom"
     ]
   },
+  "include": ["test/**/*.ts"],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
