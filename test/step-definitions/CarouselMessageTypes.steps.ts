@@ -1,14 +1,61 @@
+import { ChangeDetectorRef } from '@angular/core';
 import { defineFeature, loadFeature } from 'jest-cucumber';
-const feature = loadFeature('./feature/MessageTypes.feature');
+
+import {WidgetComponent} from 'src/app/widget/widget.component'
+
+const feature = loadFeature('./test/features/CarouselMessageTypes.feature');
+
 defineFeature(feature, (test) => {
+    
+    let component: WidgetComponent;
+    let spy: jest.SpyInstance;
+    beforeEach(() => {
+        const mockChangeDetectorRef = {
+          detectChanges: jest.fn()
+        } as unknown as ChangeDetectorRef;
+    
+        const mockActivatedRoute = { snapshot: { params: {} } } as any;
+        const mockFormBuilder = { group: jest.fn() } as any;
+        const mockSdkService = {} as any;
+        const mockAppConfig = {
+        appConfig: {
+            ENABLE_LOGO: true,
+            ADDITIONAL_PANEL: false,
+            USERNAME_ENABLED: true,
+        },
+        } as any;
+        const mockElementRef = { nativeElement: {} } as any;
+        const mockRenderer2 = { setStyle: jest.fn() } as any;
+        const mockSanitizer = { sanitize: jest.fn(), bypassSecurityTrustHtml: jest.fn() } as any;
+        const mockSnackBar = { open: jest.fn() } as any;
+        const mockDialog = { open: jest.fn() } as any;
+        const mockBrowserNotificationService = {} as any;
+        const mockDeliveryNotificationService = {} as any;
+        const mockPostMessageHandlerService = {} as any;
+        const mockTranslateService = { instant: jest.fn() } as any;
+        component = new WidgetComponent(
+            mockActivatedRoute,
+            mockFormBuilder,
+            mockSdkService,
+            mockAppConfig,
+            mockElementRef,
+            mockRenderer2,
+            mockChangeDetectorRef,
+            mockSanitizer,
+            mockSnackBar,
+            mockDialog,
+            mockBrowserNotificationService,
+            mockDeliveryNotificationService,
+            mockPostMessageHandlerService,
+            mockTranslateService
+          );
+      });
     test('Customer selects a button from the carousel', ({ given, when, and, then }) => {
         given('the customer is in an active conversation with the bot', () => {
-
         });
 
         when('the customer receives a carousel message', () => {
-
-        });
+        })
 
         and('the customer selects a button from a carousel card', () => {
 

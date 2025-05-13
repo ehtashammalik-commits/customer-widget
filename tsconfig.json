@@ -28,6 +28,10 @@
       "dom"
     ]
   },
+  "paths": {
+      "src/*": ["src/*"],
+      "test/*": ["test/*"]
+    },
   "include": ["test/**/*.ts"],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
