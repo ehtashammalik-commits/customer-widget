@@ -813,6 +813,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   onFormSubmit(): void {
+
+    console.log("here is this.isChatActive", this.isChatActive);
     try {
       if (this.preChatFormGroup.valid) {
         this.preChatFormLoader = true;
@@ -841,6 +843,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     } catch (error) {
       alert('Error while submitting the form');
     }
+
+    console.log("here is this.isChatActive", this.isChatActive);
   }
 
   onCallbackFormSubmit(): void {
@@ -1208,6 +1212,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   eventListener(event: any) {
+    console.log("here is the event now", event);
     try {
       let lastMessage = this.cimMessage[this.cimMessage.length - 1];
       let messageType = lastMessage?.body?.subType?.toLowerCase();

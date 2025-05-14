@@ -53,10 +53,23 @@ defineFeature(feature, (test) => {
           );
       });
     test('Customer selects a button from the carousel', ({ given, when, and, then }) => {
+        let mockEvent: any;
         given('the customer is in an active conversation with the bot', () => {
+            mockEvent = {
+                type: 'CHANNEL_SESSION_STARTED',
+                data: {
+                  header: {
+                    conversationId: 'conv-123'
+                  }
+                }
+              };
+              component.eventListener(mockEvent);
+              expect(component.isChatActive).toBe(true);
+              expect(localStorage.getItem('conversationId')).toBe('conv-123');
         });
-
+        
         when('the customer receives a carousel message', () => {
+
         })
 
         and('the customer selects a button from a carousel card', () => {
@@ -68,7 +81,7 @@ defineFeature(feature, (test) => {
         });
 
         then('the selected button should be shown as a quoted reply in the conversation', () => {
-
+            pending
         });
     });
 
@@ -92,7 +105,7 @@ defineFeature(feature, (test) => {
         });
 
         then('the selected list item should be shown as a quoted reply', () => {
-
+            pending
         });
     });
 
@@ -116,7 +129,7 @@ defineFeature(feature, (test) => {
         });
 
         and('the URL should remain clickable', () => {
-
+            pending
         });
     });
 
@@ -136,7 +149,7 @@ defineFeature(feature, (test) => {
         });
 
         and('the quoted reply should be visually associated with the carousel card', () => {
-
+            pending
         });
     });
 
@@ -151,7 +164,7 @@ defineFeature(feature, (test) => {
         });
 
         then('the submitted carousel response should be displayed as non interactive', () => {
-
+            pending
         });
     });
     
