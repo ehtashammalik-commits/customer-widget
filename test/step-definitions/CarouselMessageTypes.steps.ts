@@ -2,7 +2,6 @@ import { ChangeDetectorRef } from '@angular/core';
 import { defineFeature, loadFeature } from 'jest-cucumber';
 
 import {WidgetComponent} from 'src/app/widget/widget.component'
-
 const feature = loadFeature('./test/features/CarouselMessageTypes.feature');
 
 defineFeature(feature, (test) => {
@@ -14,6 +13,10 @@ defineFeature(feature, (test) => {
           detectChanges: jest.fn()
         } as unknown as ChangeDetectorRef;
     
+        const mockTranslateService = {
+            setDefaultLang: jest.fn(),
+            use: jest.fn()
+          } as any;
         const mockActivatedRoute = { snapshot: { params: {} } } as any;
         const mockFormBuilder = { group: jest.fn() } as any;
         const mockSdkService = {} as any;
@@ -24,15 +27,14 @@ defineFeature(feature, (test) => {
             USERNAME_ENABLED: true,
         },
         } as any;
-        const mockElementRef = { nativeElement: {} } as any;
-        const mockRenderer2 = { setStyle: jest.fn() } as any;
-        const mockSanitizer = { sanitize: jest.fn(), bypassSecurityTrustHtml: jest.fn() } as any;
-        const mockSnackBar = { open: jest.fn() } as any;
-        const mockDialog = { open: jest.fn() } as any;
+        const mockElementRef = {} as any;
+        const mockRenderer2 = {} as any;
+        const mockSanitizer = {} as any;
+        const mockSnackBar = {} as any;
+        const mockDialog = {} as any;
         const mockBrowserNotificationService = {} as any;
         const mockDeliveryNotificationService = {} as any;
         const mockPostMessageHandlerService = {} as any;
-        const mockTranslateService = { instant: jest.fn() } as any;
         component = new WidgetComponent(
             mockActivatedRoute,
             mockFormBuilder,

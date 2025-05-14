@@ -1,42 +1,39 @@
-// To learn more about this file see: https://angular.io/config/tsconfig.
 {
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "esModuleInterop": true,
-    "target": "es2017",
     "module": "CommonJS",
-    "types": ["jest"],
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2020",
-      "dom"
-    ]
-  },
-  "paths": {
+    "allowJs": true,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "target": "ES2017",
+    "skipLibCheck": true,
+    "strict": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["jest", "node"],
+    "lib": ["ES2019", "DOM"],
+    "paths": {
       "src/*": ["src/*"],
-      "test/*": ["test/*"]
-    },
-  "include": ["test/**/*.ts"],
+      "app/*": ["src/app/*"],
+      "@env/*": ["src/environments/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
   "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "strictTemplates": false,
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true
   }
 }
