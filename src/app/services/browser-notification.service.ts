@@ -32,7 +32,7 @@ export class BrowserNotificationService {
           this.openBrowserNotification(messageType, messageText);
         }
         if (
-          (textType === 'PLAIN' || textType === 'BUTTON') &&
+          (textType === 'PLAIN' || textType === 'BUTTON' || textType === 'URL') &&
           !this.appConfig.appConfig.MUTE_NOTIFICATIONS) {
           this.playSound();
         }
