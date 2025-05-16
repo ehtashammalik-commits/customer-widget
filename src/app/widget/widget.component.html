@@ -1109,7 +1109,7 @@
                     <div class="rich-messages-main">
 
 <!--                      form type-->
-                      <div class="message-type-form rich-message-content pt-3 pb-3">
+                      <!-- <div class="message-type-form rich-message-content pt-3 pb-3">
                         <p class="rich-inner-text">Please fill out the form below:</p>
                         <div class="message-inner-form">
                           <form class="compact-form" [formGroup]="innerRichForm">
@@ -1177,28 +1177,26 @@
                               <span [owlDateTimeTrigger]="dt2"><mat-icon>calendar_month</mat-icon></span>
                               <owl-date-time  #dt2></owl-date-time>
                             </div>
-                            </div>
+                            </div> -->
 
-<!--                            <div class="button-group form-inner-action mt-2">-->
-<!--                              <button mat-flat-button>Submit</button>-->
-<!--                            </div>-->
-<!--                          </form>-->
+                                    <!--                            <div class="button-group form-inner-action mt-2">-->
+                                    <!--                              <button mat-flat-button>Submit</button>-->
+                                    <!--                            </div>-->
+                                    <!--                          </form>-->
 
 
-<!--                          Star rating-->
+                                    <!--                          Star rating-->
 
-<!--                          <form [formGroup]="innerRichForm"  class="review-form">-->
-<!--                            <h3>Leave a Review</h3>-->
+                                    <!--                          <form [formGroup]="innerRichForm"  class="review-form">-->
+                                    <!--                            <h3>Leave a Review</h3>-->
 
-                            <div class="form-group star-rating" *ngIf="isStarRating">
+                            <!-- <div class="form-group star-rating" *ngIf="isStarRating">
                               <label>Leave a Review</label>
                               <div class="stars">
                                 <ng-container *ngFor="let star of stars">
                                   <mat-icon
                                     (click)="setRating(star)"
-                                    [ngClass]="{
-          selected: star <= innerRichForm.get('rating')?.value
-        }"
+                                    [ngClass]="{ selected: star <= innerRichForm.get('rating')?.valu }"
                                   >{{ star <= innerRichForm.get('rating')?.value ? 'star' : 'star_border' }}</mat-icon>
                                 </ng-container>
                               </div>
@@ -1210,29 +1208,39 @@
                             <div class="button-group form-inner-action mt-2">
                               <button mat-flat-button>Submit</button>
                             </div>
-                          </form>
+                          </form> -->
 
 
-                        </div>
+                        <!-- </div> -->
 
-                      </div>
+                      <!-- </div> -->
 
 
 <!--                    carousel message-->
-                    <div *ngIf="isCarouselView" class="carousel-container">
+                    <div *ngIf="message.body.type === 'Carousel'" class="carousel-container">
                       <div class="carousel-wrapper">
                         <div class="carousel-track" [style.transform]="'translateX(-' + currentIndex * 100 + '%)'">
-                          <mat-card class="carousel-card pt-0" *ngFor="let item of carouselItems">
-                            <div class="carousel-banner" [ngStyle]="{'background-image': 'url(' + item.image + ')'}">
-<!--                            <img mat-card-image [src]="item.image" />-->
+                          <mat-card class="carousel-card pt-0" *ngFor="let item of message.body.elements">
+                            <div class="carousel-banner" [ngStyle]="{'background-image': 'url(' + item.additionalCarouselElementDetails.image_url + ')'}">
+                               <!--                            <img mat-card-image [src]="item.image" />-->
                             </div>
                             <mat-card-content>
-                              <h2>{{ item.title }}</h2>
-                              <p>{{ item.description }}</p>
+                              <h2>{{ item.additionalCarouselElementDetails.title }}</h2>
+                              <p>{{ item.text }}</p>
                               <div class="carousel-actions">
-                                <button mat-stroked-button *ngIf="!item.additionalLink">Packages</button>
-                                <button mat-stroked-button *ngIf="!item.additionalLink">Buy Now</button>
-                                <a *ngIf="item.additionalLink" href="https://www.expertflow.com/" target="_blank">read more</a>
+                                <ng-container *ngFor="let button of item.buttons">
+                                  <!-- If link type -->
+                                  <a *ngIf="button.additionalButtonDetails" 
+                                     [href]="button.additionalButtonDetails.url" 
+                                     target="{{ button.additionalButtonDetails.target }}">
+                                    <button mat-stroked-button>{{ button.title }}</button>
+                                  </a>
+                    
+                                  <!-- If normal button -->
+                                  <button mat-stroked-button *ngIf="!button.additionalButtonDetails">
+                                    {{ button.title }}
+                                  </button>
+                                </ng-container>
                               </div>
                             </mat-card-content>
                           </mat-card>
@@ -1243,7 +1251,7 @@
                         <button class="carousel-trigger" mat-icon-button (click)="prev()" [disabled]="currentIndex === 0">
                           <mat-icon>chevron_left</mat-icon>
                         </button>
-                        <button class="carousel-trigger"mat-icon-button (click)="next()" [disabled]="currentIndex === carouselItems.length - 1">
+                        <button class="carousel-trigger"mat-icon-button (click)="next(message)" [disabled]="currentIndex === message.body.elements.length - 1">
                           <mat-icon>chevron_right</mat-icon>
                         </button>
                       </div>

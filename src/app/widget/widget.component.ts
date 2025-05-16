@@ -2533,29 +2533,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 //  carousel function
   currentIndex = 0;
-  carouselItems = [
-    {
-      image: 'widget-assets/images/image1.png',
-      title: 'Our new packages',
-      description: 'Now you can choose and activate our packages.',
-      additionalLink: false,
-    },
-    {
-      image: 'widget-assets/images/image2.png',
-      title: 'Special Offer',
-      description: 'Enjoy 20% off on your first activation.',
-      additionalLink: false,
-    },
-    {
-      image: 'widget-assets/images/image1.png',
-      title: 'Upgrade Now',
-      description: 'Switch to Premium for exclusive features.',
-      additionalLink: true,
-    }
-  ];
 
-  next() {
-    if (this.currentIndex < this.carouselItems.length - 1) {
+  next(message) {
+    if (message?.body?.elements && this.currentIndex < message.body.elements.length - 1) {
       this.currentIndex++;
     }
   }
