@@ -1,10 +1,6 @@
-Feature: User Login
+Feature: Logging in
 
-  As a registered user
-  I want to log into the system
-  So that I can access protected resources
-
-  Scenario: Successful login with valid credentials
-    Given I am on the login page
-    When I enter valid credentials
-    Then I should see the dashboard
+Scenario: Entering a correct password
+    Given I have previously created a password
+    When I enter my password correctly
+    Then I should be granted access

@@ -1,16 +1,16 @@
-import { Given, When, Then } from '@cucumber/cucumber';
+import { defineFeature, loadFeature } from 'jest-cucumber';
+const feature = loadFeature('./test/features/sample.feature');
 
-Given('I am on the login page', function () {
-    // Write code here that turns the phrase above into concrete actions
+defineFeature(feature, (test) => {
+    test('Entering a correct password', ({ given, when, then }) => {
+        given('I have previously created a password', () => {
+        });
     
-});
-
-When('I enter valid credentials', function () {
-    // Write code here that turns the phrase above into concrete actions
+        when('I enter my password correctly', () => {
+        });
     
-});
-
-Then('I should see the dashboard', function () {
-    // Write code here that turns the phrase above into concrete actions
-    
+        then('I should be granted access', () => {
+            
+        });
+      });
 });
