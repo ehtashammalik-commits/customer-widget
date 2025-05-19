@@ -1882,7 +1882,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   clearMessageData() {
-    console.log("this.elementView.native", this.elementView)
     this.elementView.nativeElement.value = ''
     this.composer_input_disabled = false;
     this.text = '';
@@ -2243,9 +2242,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.sdk.handleLogOutAgent(this.dialogId);
           this.IsRegisteredInFreeSwitch = false;
         }
+        this.clearSession();
       }
-
-      this.clearSession();
     });
   }
 
