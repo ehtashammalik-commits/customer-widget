@@ -445,7 +445,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (data.isChatAvailable == true) {
           this.changeScreen('chat');
           console.log('on Chat Resumed Response:', data.data);
-          this.handleResumedMessages(data.data);
+          data.data && this.handleResumedMessages(data.data);
         } else if (data.isChatAvailable == false) {
           localStorage.removeItem('widget-error');
           this.changeScreen('end');
@@ -1776,28 +1776,21 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.imageUrls = [];
       this.selectedFile = null as any;
     } else if(messageTypesFormediaURLs.includes(messageType)){
-      const imageUrl = this.__appConfig.appConfig.FILE_SERVER_UR + "/api/downloadFileStream?filename=" + fileName;
-      this.sdk.getFileURLfromServer(imageUrl, (res: any ) => {
-        console.log(res);
-        body['attachment'] = this. buildMediaAttachment(res, fileSize || 0, fileMimeType || '', fileType || '' )
-        if (messageType == "application" || messageType == "text") {
-          body.type = 'FILE';
-          body.markdownText = additionalText || '';
-          body['caption'] = ''; // Here is the 'caption' property
-          body['additionalDetails'] = { fileName: fileName };
-        } else {
-          body.type = messageType.toUpperCase();
-          body.markdownText = additionalText || '';
-          body['caption'] = fileName;
-          body['additionalDetails'] = {};
-          body['attachment'] = {
-            mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
-            type: fileMimeType,
-            size: fileSize,
-            thumbnail: '',
-          };
-        }
-      });
+      const imageUrl = this.__appConfig.appConfig.FILE_SERVER_URL + "/api/downloadFileStream?filename=" + fileName;
+      // this.sdk.getFileURLfromServer(imageUrl, (res: any ) => {
+      body['attachment'] = this.buildMediaAttachment(imageUrl, fileSize || 0, fileMimeType || '', fileType || '' )
+      if (messageType == "application" || messageType == "text") {
+        body.type = 'FILE';
+        body.markdownText = additionalText || '';
+        body['caption'] = ''; // Here is the 'caption' property
+        body['additionalDetails'] = { fileName: fileName };
+      } else {
+        body.type = messageType.toUpperCase();
+        body.markdownText = additionalText || '';
+        body['caption'] = fileName;
+        body['additionalDetails'] = {};
+      }
+      // });
       const msgPayload = {
         type: msgType,
         header: header,

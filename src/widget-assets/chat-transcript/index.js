@@ -1,4 +1,5 @@
-const params = new URLSearchParams(window.location.search);
+async function  laodPage(){
+  const params = new URLSearchParams(window.location.search);
 
 const ccm_url = decodeURIComponent(params.get("ccmUrl"));
 const channel_customer_identifier = decodeURIComponent(
@@ -28,12 +29,41 @@ const senderIconMap = {
   "telegram-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_TELEGRAM.svg`,
   "twitter-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_TWITTER.svg`,
   "instagram-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_INSTAGRAM.svg`,
-  "email-connector": `${originURL}/file-engine/api/downloadFileStream?filename=96616_email.png`,
+  "email-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_EMAIL.svg`,
   "viber-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_VIBER.svg`,
   "smpp-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_SMS.svg`,
   // Default case
   "default": `${originURL}/file-engine/api/downloadFileStream?filename=_WEB.svg`,
 };
+const senderIconMapSafe = {};
+async function loadIcons() {
+  const entries = Object.entries(senderIconMap);
+
+  const promises = entries.map(async ([key, url]) => {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      });
+
+      if (!response.ok) throw new Error(`${key} failed: ${response.status}`);
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      senderIconMapSafe[key] = blobUrl;
+    } catch (err) {
+      console.error(`Error loading ${key}:`, err);
+      senderIconMapSafe[key] = ""; // fallback or skip
+    }
+  });
+
+  await Promise.all(promises);
+  console.log("All icons loaded:", senderIconMapSafe);
+
+  // Continue only after all icons are ready
+}
+await  loadIcons();
 
 // Chat API Call
 const request = new XMLHttpRequest();
@@ -589,5 +619,7 @@ function iconAgent(name) {
 
 // Use a function to get the icon URL based on senderName, with a default fallback
 function getIconURL(senderName, senderId) {
-  return senderIconMap[senderName] ? senderIconMap[senderName] : senderIconMap[senderId] || senderIconMap["default"];
+  return senderIconMapSafe[senderName] ? senderIconMapSafe[senderName] : senderIconMapSafe[senderId] || senderIconMapSafe["default"];
 }
+}
+laodPage();
