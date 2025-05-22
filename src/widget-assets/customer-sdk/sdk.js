@@ -29,6 +29,21 @@ function widgetConfigs(ccmUrl, widgetIdentifier, callback) {
       callback(data);
     });
 }
+
+function getFileURL(fileURL, callback) {
+  authorizedFetch(fileURL)
+    .then(response => {
+      return response.blob();  // <-- Important: get Blob, not JSON
+    })
+    .then(blob => {
+      const blobURL = URL.createObjectURL(blob);  // <-- Convert to local blob URL
+      callback(blobURL);
+    })
+    .catch(err => {
+      console.error('Error fetching file:', err);
+      callback(null);  // or handle gracefully
+    });
+}
 /**
  * Get Pre Chat Form
  * @param {*} formUrl

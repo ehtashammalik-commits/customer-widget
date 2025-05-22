@@ -444,7 +444,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (data.isChatAvailable == true) {
           this.changeScreen('chat');
           console.log('on Chat Resumed Response:', data.data);
-          this.handleResumedMessages(data.data);
+          data.data && this.handleResumedMessages(data.data);
         } else if (data.isChatAvailable == false) {
           localStorage.removeItem('widget-error');
           this.changeScreen('end');
@@ -1922,8 +1922,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       markdownText: '',
       type: '',
     };
+    const messageTypesFormediaURLs = ["application", "text", "image", "video", "audio"]
+    const messageType = msgType.toLowerCase();
 
-    if (msgType.toLowerCase() == 'plain') {
+    if (messageType == 'plain') {
       let transformedIntent = this.transformPayload(intent);
       header.originalMessageId = originalMessageId ? originalMessageId : null;
       header.intent = transformedIntent.intent
@@ -1934,71 +1936,60 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
       body.type = 'PLAIN';
       body.markdownText = text!.trim();
-    } else if (
-      msgType.toLowerCase() == 'application' ||
-      msgType.toLowerCase() == 'text'
-    ) {
-      body.type = 'FILE';
-      body.markdownText = additionalText || '';
-      body['caption'] = ''; // Here is the 'caption' property
-      body['additionalDetails'] = { fileName: fileName };
-      body['attachment'] = {
-        mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
-        type: fileMimeType || '',
-        size: fileSize || 0,
-        extType: fileType || '',
-        mimeType: fileMimeType || '',
+      const msgPayload = {
+        type: msgType,
+        header: header,
+        body: body,
+        customer: this.customerData,
       };
-    } else if (msgType.toLowerCase() == 'image') {
-      body.type = 'IMAGE';
-      body.markdownText = additionalText || '';
-      body['caption'] = fileName;
-      body['additionalDetails'] = {};
-      body['attachment'] = {
-        mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
-        type: fileMimeType,
-        size: fileSize,
-        thumbnail: '',
+      this.sdk.sendChatMessage(msgPayload);
+      this.clearMessageData();
+      this.fileLoading = false;
+      this.imageUrls = [];
+      this.selectedFile = null as any;
+    } else if(messageTypesFormediaURLs.includes(messageType)){
+      const imageUrl = this.__appConfig.appConfig.FILE_SERVER_URL + "/api/downloadFileStream?filename=" + fileName;
+      // this.sdk.getFileURLfromServer(imageUrl, (res: any ) => {
+      body['attachment'] = this.buildMediaAttachment(imageUrl, fileSize || 0, fileMimeType || '', fileType || '' )
+      if (messageType == "application" || messageType == "text") {
+        body.type = 'FILE';
+        body.markdownText = additionalText || '';
+        body['caption'] = ''; // Here is the 'caption' property
+        body['additionalDetails'] = { fileName: fileName };
+      } else {
+        body.type = messageType.toUpperCase();
+        body.markdownText = additionalText || '';
+        body['caption'] = fileName;
+        body['additionalDetails'] = {};
+      }
+      // });
+      const msgPayload = {
+        type: msgType,
+        header: header,
+        body: body,
+        customer: this.customerData,
       };
-    } else if (msgType.toLowerCase() == 'video') {
-      body.type = 'VIDEO';
-      body.markdownText = additionalText || '';
-      body['caption'] = fileName;
-      body['additionalDetails'] = {};
-      body['attachment'] = {
-        mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
-        type: fileMimeType,
-        size: fileSize,
-        thumbnail: '',
-      };
-    } else if (msgType.toLowerCase() == 'audio') {
-      body.type = 'AUDIO';
-      body.markdownText = additionalText || '';
-      body['caption'] = fileName;
-      body['additionalDetails'] = {};
-      body['attachment'] = {
-        mediaUrl: `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${fileName}`,
-        type: fileMimeType,
-        size: fileSize,
-        thumbnail: '',
-      };
+      this.sdk.sendChatMessage(msgPayload);
+      this.clearMessageData();
+      this.fileLoading = false;
+      this.imageUrls = [];
+      this.selectedFile = null as any;
     } else {
       console.log('Unable to process the file');
       this.snackBar.open('unable to process the file', 'X');
       return;
     }
+  }
+  
 
-    let msgPayload = {
-      type: msgType,
-      header: header,
-      body: body,
-      customer: this.customerData,
+  buildMediaAttachment(mediaUrl: SafeUrl, fileSize?: any , fileMimeType?: string, fileType?:any ): any {
+    return {
+      mediaUrl: mediaUrl,
+      type: fileMimeType,
+      size: fileSize,
+      extType: fileType,
+      mimeType: fileMimeType
     };
-    this.sdk.sendChatMessage(msgPayload);
-    this.clearMessageData();
-    this.fileLoading = false;
-    this.imageUrls = [];
-    this.selectedFile = null as any;
   }
 
   previewFile(event: any) {

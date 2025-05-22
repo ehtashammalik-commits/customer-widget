@@ -18,7 +18,8 @@ declare var widgetConfigs: any,
   authenticateRequest: any,
   getBrowserInfo: any,
   getCalendarId: any,
-  getCalendarEvents:any;
+  getCalendarEvents:any,
+  getFileURL: any;
 
 type formAttributeMappings = {
   name: string[];
@@ -451,6 +452,13 @@ export class SdkService implements OnInit {
     } catch (e) {
       console.error(e);
     }
+  }
+
+  getFileURLfromServer(fileURL: string, callback: any) {
+    getFileURL(fileURL, (res: any) => {
+      callback(res);
+    }
+  );
   }
 }
 
