@@ -1,8 +1,15 @@
-<div class="top-wrapper" [ngClass]="{
+<div
+  class="top-wrapper"
+  [ngClass]="{
     'right-direction': selectedLanguage == 'ar',
     'mobile-view': isMobile
-  }">
-  <mat-spinner [diameter]="50" color="primary" *ngIf="preChatFormLoader"></mat-spinner>
+  }"
+>
+  <mat-spinner
+    [diameter]="50"
+    color="primary"
+    *ngIf="preChatFormLoader"
+  ></mat-spinner>
 
   <!--------------------------->
   <!-- /Addition Panel HTML/ -->
@@ -51,7 +58,10 @@
         </div>
         <!-- Widget Chat Control Toolbar -->
         <div class="widget-chat-navbar">
-          <span class="material-symbols-outlined widget-navbar-icon btnOne" *ngIf="enableWebRtc" [ngClass]="{
+          <span
+            class="material-symbols-outlined widget-navbar-icon btnOne"
+            *ngIf="enableWebRtc && isWebRtcVideoCallActive"
+            [ngClass]="{
               'focus-icon': isWebRtcVideoCallActive === true,
               'away-call-icon': isWebRtcVideoCallActive === true
             }" matTooltip="{{ 'button.video-call' | translate }}" [matTooltipPosition]="matToolTipPosition!">
@@ -62,52 +72,78 @@
           <!-- Authentication Screen -->
           <div class="widget-authentication-content">
             <div class="widget-authentication-header">
-              <span class="material-symbols-outlined header-emoji"
+              <span
+                class="material-symbols-outlined header-emoji"
                 [ngClass]="{ 'error-text': showInvalidCodeError === true }"
                 innerHTML="{{ showInvalidCodeError ? ('videocam' | translate): ('videocam' | translate) }}">
               </span>
-              <span innerHTML="{{
+              <span
+                innerHTML="{{
                   showInvalidCodeError
                     ? showAuthenticationResponseMessage !== ''
                       ? showAuthenticationResponseMessage
                       : 'Invalid Session Code!'
-                    : 'Video Request Initiated!'
-                }}" [ngClass]="{ 'error-text': showInvalidCodeError === true }"></span>
+                    : 'Initiate Video Request'
+                }}"
+                [ngClass]="{ 'error-text': showInvalidCodeError === true }"
+              ></span>
             </div>
             <div class="widget-authentication-body">
-              <div class="widget-auth-text">
-                <p innerHTML="{{
+              <!-- <div class="widget-auth-text">
+                <p
+                  innerHTML="{{
                     showInvalidCodeError
                       ? 'You Entered an Invalid session code.'
                       : 'Video request initiated by Adam Reeds.'
-                  }}"></p>
-                <p innerHTML="{{
+                  }}"
+                ></p>
+                <p
+                  innerHTML="{{
                     showInvalidCodeError
                       ? 'Please enter code again.'
                       : 'To join video call, please enter session code below.'
-                  }}"></p>
-              </div>
+                  }}"
+                ></p>
+              </div> -->
               <div class="widget-auth-button">
-                <p>{{ 'session-code' | translate }}</p>
-                <input id="auth-token" type="text" [ngClass]="{ 'error-field': showInvalidCodeError === true }"
-                  class="widget-auth-input call-btn" placeholder="Enter Code Here ..." [(ngModel)]="sessionCode" />
-                <input id="auth-btn" type="submit" class="widget-auth-trigger call-btn" value="Join"
-                  (click)="authenticateToken()" />
+                <!-- <p>Session Code</p>
+                <input
+                  id="auth-token"
+                  type="text"
+                  [ngClass]="{ 'error-field': showInvalidCodeError === true }"
+                  class="widget-auth-input call-btn"
+                  placeholder="Enter Code Here ..."
+                  [(ngModel)]="sessionCode"
+                /> -->
+                <input
+                  id="auth-btn"
+                  type="button"
+                  class="widget-auth-trigger call-btn"
+                  value="Join"
+                  (click)="changeView('standaloneVideo')"
+                  [ngClass]="{ 'disabled': isSecureLinkExpired }"
+                  [disabled]="isSecureLinkExpired"
+
+                />
               </div>
             </div>
           </div>
         </ng-container>
         <!-- Video Call Screen -->
         <ng-container *ngIf="isWebRtcVideoCallActive">
-          <div class="widget-video-section">
-            <video autoplay="autoplay" class="remoteVideo" id="remoteVideo">
+          <div class="widget-section widget-video-section">
+            <video #remoteVideo id="remoteVideo" autoplay="autoplay" class="remoteVideo">
               {{ 'error.html5-not-supported' | translate }}
             </video>
-            <div class="localVideoView">
-              <span class="material-symbols-outlined localVideoIcon" [ngClass]="{ iconHide: isVideoHide === true }"
-                innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}" (click)="toggleCallVideo()">
+            <!-- <div class="localVideoView">
+              <span
+                class="material-symbols-outlined localVideoIcon"
+                [ngClass]="{ iconHide: isVideoHide === true }"
+                innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}"
+                (click)="toggleCallVideo()"
+              >
               </span>
-            </div>
+            </div> -->
             <video autoplay="autoplay" class="localVideo" id="localVideo"
               innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}">
               {{ 'error.html5-not-supported' | translate }}
@@ -120,28 +156,67 @@
             <div class="widget-composer">
               <div class="widget-call-controls">
                 <div class="control-btn disable-icon-callControl">
-                  <span class="material-symbols-outlined">
+                  <span
+                  matTooltip="Screen Share"
+                  [matTooltipPosition]="this.positionOptions[2]" 
+                  class="material-symbols-outlined">
                     present_to_all
                   </span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isVideoHide === true }">
-                  <span class="material-symbols-outlined" innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}"
-                    (click)="toggleCallVideo()">
+                <div
+                  class="control-btn"
+                  [ngClass]="{ 'end-call': isVideoHide === true }"
+                >
+                  <span
+                    class="material-symbols-outlined"
+                    [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
+                    [matTooltipPosition]="this.positionOptions[2]" 
+                    innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}"
+                    (click)="toggleCallVideo(tooltip1);"
+                    #tooltip1="matTooltip"
+                  >
                   </span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isCallMute === true }">
-                  <span class="material-symbols-outlined" innerHTML="{{ isCallMute ? 'mic_off' : 'mic' }}"
-                    (click)="toggleCallMic()">
+                <div
+                  class="control-btn"
+                  [ngClass]="{ 'end-call': isCallMute === true }"
+                >
+                  <span
+                    class="material-symbols-outlined"
+                    [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
+                    [matTooltipPosition]="this.positionOptions[2]" 
+                    innerHTML="{{ isCallMute ? 'mic_off' : 'mic' }}"
+                    (click)="toggleCallMic(tooltip)"
+                    #tooltip="matTooltip"
+                  >
+                  </span>
+                </div>
+                <div
+                  class="control-btn"
+                  [ngClass]="{ 'end-call': isCallOnHold }"
+                >
+                  <span
+                    class="material-symbols-outlined"
+                    [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
+                    [matTooltipPosition]="this.positionOptions[2]"
+                    [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
+                    (click)="toggleCallHold(tooltip6)"
+
+                    #tooltip6="matTooltip"
+                  >
                   </span>
                 </div>
                 <div class="control-btn disable-icon-callControl">
-                  <span class="material-symbols-outlined"> pause </span>
-                </div>
-                <div class="control-btn disable-icon-callControl">
-                  <span class="material-symbols-outlined"> more_horiz </span>
+                  <span                   
+                  matTooltip="More Options"
+                  [matTooltipPosition]="this.positionOptions[2]"
+                  class="material-symbols-outlined"> more_horiz </span>
                 </div>
                 <div class="control-btn end-call" (click)="callEnd()">
-                  <span class="material-symbols-outlined"> call_end </span>
+                  <span
+                  matTooltip="End Call"
+                  [matTooltipPosition]="this.positionOptions[2]" 
+                   class="material-symbols-outlined"> call_end </span>
                 </div>
               </div>
             </div>
@@ -154,7 +229,7 @@
   <!--------------------------------------------->
   <!------ /Call Popup for Audio/Video Call ----->
   <!--------------------------------------------->
-  <ng-container *ngIf="callPopUpView">
+  <!-- <ng-container *ngIf="callPopUpView">
     <div class="widget-call-area">
       <div class="call-popup">
         <p><span innerHTML="Initiating {{ callText }} call"></span></p>
@@ -172,7 +247,7 @@
         </div>
       </div>
     </div>
-  </ng-container>
+  </ng-container> -->
 
   <!------------------------->
   <!-- /Callback Form HTML /->
@@ -180,7 +255,10 @@
   <ng-container *ngIf="callbackFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-color" (click)="changeScreen('widget')">
+        <div
+          class="widget-form-header widget-color"
+          (click)="changeScreen('widget')"
+        >
           <h5 id="headerHeading">{{ title }}</h5>
           <span class="widget-header-icon">
             <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"
@@ -691,9 +769,131 @@
             </span>
           </div>
         </div>
-        <!-- Widget Chat Control Toolbar -->
+        <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
-          <span class="material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
+          
+          <!-- <span class="widget-navbar-divider">|</span> -->
+          <span class="widget-navbar-icon material-symbols-outlined" matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
+              btnTwo: enableFontResize === true,
+              btnOne: enableFontResize === false,
+              'focus-icon':
+                isChatActive === true && activeCallbackView === true,
+              'away-chat-icon':
+                isChatActive === true && activeCallbackView === false
+            }"
+            (click)="changeView('callback')"
+            *ngIf="enabledCallback"
+            [matTooltipPosition]="matToolTipPosition!"
+          >
+            perm_phone_msg
+          </span>
+<!--           <span
+            class="widget-navbar-icon material-symbols-outlined btnFive"
+            (click)="
+              activeScreenShareView || activeAudioView || activeVideoView
+                ? convertCallView('screenshare')
+                : changeView('screenshare')
+            "
+            *ngIf="enableWebRtc && __appConfig.appConfig.VIDEO"
+            [ngClass]="{
+              'focus-icon': isScreenShareActive && activeVideoView,
+              'away-call-icon': isScreenShareActive && !activeVideoView,
+              'disabled': isSecureWebCall
+            }"
+            matTooltip="Screen Share"
+            [matTooltipPosition]="matToolTipPosition!"
+            [ngStyle]="{
+              right: __appConfig.appConfig.VIDEO ? '70px' : ''
+            }"
+           >
+            present_to_all
+          </span> -->
+          <span
+            class="widget-navbar-icon material-symbols-outlined"
+            (click)="
+              activeScreenShareView || activeAudioView || activeVideoView
+                ? convertCallView('video')
+                : changeView('video')
+            "
+            *ngIf=" (__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED || isVideoCallActive === true) && enableWebRtc && __appConfig.appConfig.VIDEO"
+            [ngClass]="{
+              btnOne: enabledCallback === false && enableFontResize === false,
+              btnThree: enabledCallback === true && enableFontResize === true,
+              btnTwo: enabledCallback === false || enableFontResize === false,
+              'focus-icon': isVideoCallActive === true && activeVideoView === true,
+              'away-call-icon': isVideoCallActive === true && activeVideoView === false
+            }"
+            matTooltip="Video Call"
+            [matTooltipPosition]="matToolTipPosition!"
+          >
+            videocam
+          </span>
+          <span
+            class="widget-navbar-icon material-symbols-outlined"
+            (click)="
+              activeScreenShareView || activeAudioView || activeVideoView
+                ? convertCallView('audio')
+                : changeView('audio')
+            "
+            *ngIf="enableWebRtc && !__appConfig.appConfig.VIDEO && __appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED"
+            [ngClass]="{
+              btnTwo: enabledCallback === false && enableFontResize === false,
+              btnFour: enabledCallback === true && enableFontResize === true,
+              btnThree: enabledCallback === false || enableFontResize === false,
+              'focus-icon':
+                isAudioCallActive === true && activeAudioView === true,
+              'away-call-icon':
+                isAudioCallActive === true && activeAudioView === false
+            }"
+            matTooltip="Audio Call"
+            [matTooltipPosition]="matToolTipPosition!"
+            [ngStyle]="{
+              right: !__appConfig.appConfig.VIDEO ? '37px' : '104px'
+            }"
+          >
+            call
+          </span>
+          <span 
+            class="widget-navbar-icon material-symbols-outlined"
+            (click)="changeView('chat')"
+            [ngClass]="{
+              btnOne:
+                enabledCallback === false &&
+                enableFontResize === false &&
+                enableWebRtc === false,
+              btnTwo:
+                enabledCallback === false &&
+                enableFontResize === true &&
+                enableWebRtc === false,
+              btnFive:
+                enabledCallback === true &&
+                enableFontResize === true &&
+                enableWebRtc === true,
+              btnThree:
+                (enabledCallback === true && enableFontResize === true) ||
+                enableWebRtc === true,
+              btnFour:
+                (enabledCallback === true || enableFontResize === true) &&
+                enableWebRtc === true,
+              'focus-icon': isChatActive === true && activeChatView === true,
+              'away-chat-icon':
+                isChatActive === true && activeChatView === false
+            }"
+            matTooltip="{{ 'button.web-chat' | translate }}"
+            [matTooltipPosition]="matToolTipPosition!"
+            [ngStyle]="{
+              right:
+                enableWebRtc && __appConfig.appConfig.VIDEO && (__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED)
+                  ? '100px'
+                  : (!__appConfig.appConfig.VIDEO)
+                  ? '66px'
+                  : '36px'
+            }"
+          >
+            forum
+          </span>
+
+          <span class="font-selection material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
             [ngClass]="{ btnOne: enableFontResize === true }" matTooltip="{{ 'button.change-font-size' | translate }}"
             [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
             text_fields
@@ -717,76 +917,25 @@
               </span>
             </div>
           </ng-container>
-          <span class="widget-navbar-divider">|</span>
-          <span class="widget-navbar-icon material-symbols-outlined" matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
-              btnTwo: enableFontResize === true,
-              btnOne: enableFontResize === false,
-              'focus-icon':
-                isChatActive === true && activeCallbackView === true,
-              'away-chat-icon':
-                isChatActive === true && activeCallbackView === false
-            }" (click)="changeView('callback')" *ngIf="enabledCallback" [matTooltipPosition]="matToolTipPosition!">
-            perm_phone_msg
-          </span>
-          <span class="widget-navbar-icon material-symbols-outlined btnFive" (click)="changeView('screenshare')"
-            *ngIf="enableWebRtc" [ngClass]="{
-              'focus-icon':
-                isScreenShareActive === true && activeVideoView === true,
-              'away-call-icon':
-                isScreenShareActive === true && activeVideoView === false
-            }" matTooltip="Screen Share" [matTooltipPosition]="matToolTipPosition!">
-            present_to_all
-          </span>
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('video')" *ngIf="enableWebRtc"
-            [ngClass]="{
-              btnOne: enabledCallback === false && enableFontResize === false,
-              btnThree: enabledCallback === true && enableFontResize === true,
-              btnTwo: enabledCallback === false || enableFontResize === false,
-              'focus-icon':
-                isVideoCallActive === true && activeVideoView === true,
-              'away-call-icon':
-                isVideoCallActive === true && activeVideoView === false
-            }" matTooltip="Video Call" [matTooltipPosition]="matToolTipPosition!">
-            videocam
-          </span>
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('audio')" [ngClass]="{
-              btnTwo: enabledCallback === false && enableFontResize === false,
-              btnFour: enabledCallback === true && enableFontResize === true,
-              btnThree: enabledCallback === false || enableFontResize === false,
-              'focus-icon':
-                isAudioCallActive === true && activeAudioView === true,
-              'away-call-icon':
-                isAudioCallActive === true && activeAudioView === false
-            }" *ngIf="enableWebRtc" matTooltip="Audio Call" [matTooltipPosition]="matToolTipPosition!">
-            call
-          </span>
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')" [ngClass]="{
-              btnOne:
-                enabledCallback === false &&
-                enableFontResize === false &&
-                enableWebRtc === false,
-              btnTwo:
-                enabledCallback === false &&
-                enableFontResize === true &&
-                enableWebRtc === false,
-              btnFive:
-                enabledCallback === true &&
-                enableFontResize === true &&
-                enableWebRtc === true,
-              btnThree:
-                (enabledCallback === true && enableFontResize === true) ||
-                enableWebRtc === true,
-              btnFour:
-                (enabledCallback === true || enableFontResize === true) &&
-                enableWebRtc === true,
-              'focus-icon': isChatActive === true && activeChatView === true,
-              'away-chat-icon':
-                isChatActive === true && activeChatView === false
-            }" matTooltip="{{ 'button.web-chat' | translate }}" [matTooltipPosition]="matToolTipPosition!">
-            forum
-          </span>
         </div>
+
         <ng-container *ngIf="activeChatView">
+
+          <!-- If secure link is expired -->
+
+          <div class="call-session-expired" *ngIf="isSecureLinkExpired">
+            <mat-icon class="discard-error-notify" (click)="isSecureLinkExpired = false">cancel</mat-icon>
+            <div class="call-session-expired-inner">
+              <span class="icon-error"><mat-icon>priority_high</mat-icon></span>
+              <h3>The link has expired</h3>
+              <!-- <span class="expire-reason">
+                {{ showInvalidCodeError ? showAuthenticationResponseMessage : '' }}
+              </span> -->
+            </div>
+          </div>
+
+           <!-- If secure link is expired -->
+            
           <!-- Widget Chat Content -->
           <div class="widget-chat-content" #scrollMe>
             <div *ngFor="let message of cimMessage">
@@ -981,9 +1130,7 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                        message.body.markdownText
-                              ? message.body.markdownText
-                              : ('' | tagFormat:enableDynamicLink)
+                        (message.body.markdownText | tagFormat:enableDynamicLink) 
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1013,7 +1160,7 @@
                           {{ message.body.caption }}
                         </audio>
                       </a>
-                      <a *ngIf="message.body.type == 'URL'" href="{{ message.body.mediaUrl }}" target="_blank">
+                      <a *ngIf="message.body.type == 'URL' && !message.header.additionalData.secureWebRTCLink" href="{{ message.body.mediaUrl }}" target="_blank">
                         {{ 'button.click-here' | translate }}
                       </a>
                       <a *ngIf="message.body.type == 'FILE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL" [href]="srcURL"
@@ -1103,6 +1250,7 @@
                             : '18px'
                       }">
                     </span>
+
                     <div class="surveyDiv">
                       <span *ngIf="message.body?.subType == 'SURVEY'"
                         class="material-symbols-outlined surveyicon">description</span>
@@ -1119,6 +1267,16 @@
                         {{ surveyTitle }}
                       </a>
                     </div>
+                              <!--              Securelink -->
+                                            
+                    <!-- <div class="s-link quoted-message-url" (click)="isSecureLinkExpired = true">
+                      <span class="video-call-detail"><mat-icon>videocam</mat-icon> Video Call</span>
+                      <span class="video-call-link">join video call
+                      <span class="call-link">https://webrtc.link.com/88901a</span>
+                    </span>
+                    </div> -->
+
+                    <!--              /Securelink -->
                     <!-- Message Type Button -->
                     <div class="structured-message-area" [ngClass]="{ 'custom-theme': theme !== '' }"
                       *ngIf="message.body.type == 'BUTTON'">
@@ -1212,9 +1370,7 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                        message.body.markdownText
-                            ? message.body.markdownText
-                              : ('' | tagFormat:enableDynamicLink)
+                        (message.body.markdownText | tagFormat:enableDynamicLink) 
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1244,10 +1400,26 @@
                           {{ message.body.caption }}
                         </audio>
                       </a>
-                      <a *ngIf="message.body.type == 'URL'" href="{{ message.body.mediaUrl }}" target="_blank">
+                      <a *ngIf="message.body.type == 'URL' && !message.header.additionalData.secureWebRTCLink" href="{{ message.body.mediaUrl }}" target="_blank">
                         {{ 'button.click-here' | translate }}
                       </a>
-                      <a *ngIf="message.body.type == 'FILE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL" [href]="srcURL"
+
+                      <!--              Securelink Message UI                -->
+
+                      <a *ngIf="message.body.type == 'URL' && message.header.additionalData.secureWebRTCLink" target="_blank">
+                        <!-- <div class="s-link quoted-message-url" (click)="isSecureLinkExpired = true"> -->
+                          <div class="s-link quoted-message-url" (click)="processSecureLinkMessage(message)">
+                          <span class="video-call-detail"><mat-icon>videocam</mat-icon> Video Call</span>
+                          <span class="video-call-link">Join Video Call
+                          <span class="call-link">{{message.body.mediaUrl}}</span>
+                        </span>
+                        </div>
+                      </a>
+
+                      <!--              Securelink Message UI                -->
+                      
+                      <a *ngIf="message.body.type == 'FILE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL" 
+                        [href]="srcURL"
                         target="_blank">
                         <span class="file-name" innerHTML="{{
                           (message.body.additionalDetails.fileName
@@ -1328,7 +1500,9 @@
                 <span>{{ file.fileName }}</span>
               </div>
             </div>
-            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()">close</mat-icon>
+            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()"
+              >close</mat-icon
+            >
           </div>
           <!-- Widget Message Composer -->
           <div class="maxLimitError" *ngIf="text.length == messageLimit">
@@ -1370,63 +1544,135 @@
             </span>
           </div>
         </ng-container>
-        <!-- Call View Screen -->
-        <ng-container *ngIf="activeAudioView || activeVideoView || activeScreenShareView">
-          <div class="widget-section" [ngClass]="{
+
+        <ng-container *ngIf="(activeAudioView || activeVideoView || activeScreenShareView || isVideoCallActive || isAudioCallActive) && !this.errorDuringWebRTCCall || __appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED">
+          <div
+            class="widget-section"
+            [ngClass]="{
               'widget-audio-section': activeAudioView,
               'widget-video-section': activeVideoView || activeScreenShareView
-            }">
+            }"
+          >
+            <!-- <video *ngIf="remoteVideoActive" #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
+            <video *ngIf="localVideoActive" #localVideo id="localVideo" autoplay playsinline class="localVideo"></video> -->
+            <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
             <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
-            <video #localVideo id="localVideo" autoplay playsinline muted class="localVideo"></video>
 
             <div class="audio-agent" *ngIf="activeAudioView">
-              <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon" />
+              <img
+                src="../../widget-assets/images/dummy-user.svg"
+                alt="agent call icon"
+              />
             </div>
 
             <div class="localVideoView" *ngIf="activeVideoView">
-              <span class="material-symbols-outlined localVideoIcon" [ngClass]="{ iconHide: isVideoHide }"
-                [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="toggleCallVideo()">
+              <span
+                class="material-symbols-outlined localVideoIcon"
+                [ngClass]="{ iconHide: isVideoHide }"
+                [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'"
+                (click)="toggleCallVideo(null)"
+              >
               </span>
             </div>
 
             <div class="agent-detail">
               <p class="name">Expertflow Agent</p>
               <p id="call_status" class="text">Call in Progress</p>
-              <p class="timer">{{ callTime }}</p>
+              <p *ngIf="counterVar" class="timer">{{ callTime }}</p>
             </div>
 
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div class="control-btn disable-icon-callControl">
-                  <span class="material-symbols-outlined">
-                    present_to_all
-                  </span>
+                <div
+                  class="control-btn"
+                  [ngClass]="{
+                    'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
+
+                    'focus-icon-video ': isScreenShareActive === true
+                  }"
+                >
+                <span
+                [ngClass]="{
+                  'disable-icon-callControl': isSecureWebCall || isAudioCallActive
+                }"
+                matTooltip="Screen Share"
+                [matTooltipPosition]="this.positionOptions[2]" 
+                class="material-symbols-outlined"
+                [attr.aria-disabled]="isSecureWebCall || isAudioCallActive"
+                (click)="handleScreenShareClick()"
+              >
+                present_to_all
+              </span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isVideoHide }" *ngIf="activeVideoView">
-                  <span class="material-symbols-outlined" [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'"
-                    (click)="toggleCallVideo()">
+                <!-- <div class="control-btn">
+                  <span class="material-symbols-outlined">
+                    videocam
                   </span>
+                </div> -->
+                <div
+                  class="control-btn"
+                  [ngClass]="{
+                    'end-call': isVideoHide,
+                    'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
+                    'focus-icon-video ': isVideoCallActive === true
+                  }"
+                >
+                <span
+                class="material-symbols-outlined"
+                [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
+                [matTooltipPosition]="this.positionOptions[2]"
+                [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'"
+                (click)="handleVideoIconClick(tooltip5)"
+                [ngClass]="{
+                  'disable-icon-callControl': isAudioCallActive
+                }"
+                [attr.aria-disabled]="isAudioCallActive"
+                #tooltip5="matTooltip"
+              >
+              </span>
                 </div>
                 <div class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
-                  <span class="material-symbols-outlined" [innerHTML]="isCallMute ? 'mic_off' : 'mic'"
-                    (click)="toggleCallMic()">
+                  <span
+                    class="material-symbols-outlined"
+                    [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
+                    [matTooltipPosition]="this.positionOptions[2]"
+                    [innerHTML]="isCallMute ? 'mic_off' : 'mic'"
+                    (click)="toggleCallMic(tooltip3);"
+                    #tooltip3="matTooltip"
+                  >
                   </span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }">
-                  <span class="material-symbols-outlined" [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
-                    (click)="toggleCallHold()">
+                <div
+                  class="control-btn"
+                  [ngClass]="{ 'end-call': isCallOnHold }"
+                >
+                  <span
+                    class="material-symbols-outlined"
+                    [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
+                    [matTooltipPosition]="this.positionOptions[2]"
+                    [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
+                    (click)="toggleCallHold(tooltip2);"
+                    #tooltip2="matTooltip"
+                  >
                   </span>
                 </div>
-                <div class="control-btn">
-                  <span class="material-symbols-outlined"> more_horiz </span>
+                <div class="control-btn disable-icon-callControl">
+                  <span  
+                  matTooltip="More Options"
+                  [matTooltipPosition]="this.positionOptions[2]"
+                  class="material-symbols-outlined"> more_horiz </span>
                 </div>
-                <div class="control-btn end-call" (click)="callEnd()">
+                <div 
+                matTooltip="End Call"
+                [matTooltipPosition]="this.positionOptions[2]" 
+                class="control-btn end-call" (click)="callEnd()">
                   <span class="material-symbols-outlined"> call_end </span>
                 </div>
               </div>
             </div>
           </div>
         </ng-container>
+
         <!-- Callback View Screen -->
         <ng-container *ngIf="activeCallbackView">
           <div class="widget-callback-form-content">
@@ -1819,11 +2065,47 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number"
-              *ngIf="enableWebRtc" />
+            <input
+              id="formTrigger"
+              type="submit"
+              class="widget-error-trigger call-btn"
+              value="Call on my number"
+              *ngIf="enableWebRtc"
+            />
 
-            <input id="formTrigger" type="submit" class="widget-error-trigger" value="{{ 'button.send-me-transcript' | translate }}"
-              *ngIf="enableDownloadTranscript" />
+            <input
+              id="formTrigger"
+              typCall pope="submit"
+              class="widget-error-trigger"
+              value="{{ 'button.send-me-transcript' | translate }}"
+              *ngIf="enableDownloadTranscript"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!--------------------------------------------->
+  <!------ /Call Popup for Audio/Video Call ----->
+  <!--------------------------------------------->
+  <ng-container *ngIf="callPopUpView">
+    <div class="widget-call-area">
+      <div class="call-popup">
+        <p><span innerHTML="Initiating {{ callText }} call"></span></p>
+        <div class="audio-agent">
+          <div class="loader"></div>
+          <img
+            src="../../widget-assets/images/dummy-user.svg"
+            alt="agent call icon"
+          />
+        </div>
+        <div class="agent-detail">
+          <p class="name">{{ agentName }}</p>
+        </div>
+        <div class="end-call-btn" [class.disabled]="!dialogId" (click)="callEnd()">
+          <div class="end-call-btn-sm">
+            <span class="material-symbols-outlined"> call_end </span>
           </div>
         </div>
       </div>
@@ -1835,17 +2117,28 @@
   <!---------------------->
   <ng-container *ngIf="isIconWidget">
     <!-- Callback Icon -->
-    <div class="widget-icon widget-icon-callback" *ngIf="standaloneCallback && enabledCallback && !standaloneWebRtc">
+    <div
+      class="widget-icon widget-icon-callback"
+      *ngIf="standaloneCallback && enabledCallback && !standaloneWebRtc"
+    >
       <div class="widget-icon-content" *ngIf="isCallbackMax">
-        <button id="chatIconBtn" title="Callback Widget" class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="changeScreen('widget')">
+        <button
+          id="chatIconBtn"
+          title="Callback Widget"
+          class="widget-bar-trigger widget-chat-trigger widget-color"
+          (click)="changeScreen('widget')"
+        >
           <span class="chat-icon material-symbols-outlined"> close </span>
         </button>
       </div>
 
       <div class="widget-icon-content" *ngIf="!isCallbackMax">
-        <button id="chatIconBtn" title="Callback" class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="changeScreen('callbackForm')">
+        <button
+          id="chatIconBtn"
+          title="Callback"
+          class="widget-bar-trigger widget-chat-trigger widget-color"
+          (click)="changeScreen('callbackForm')"
+        >
           <span class="chat-icon material-symbols-outlined">
             perm_phone_msg
           </span>
@@ -1854,10 +2147,20 @@
     </div>
 
     <div class="widget-icon widget-icon-chat" *ngIf="standaloneWebRtc">
-      <div class="widget-icon-content" *ngIf="isWebRtcMax && !isWebRtcVideoCallActive">
-        <button id="chatIconBtn" title="Callback Widget" class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="changeScreen('widget')">
-          <span class="chat-icon material-symbols-outlined" *ngIf="!logoEnabled">
+      <div
+        class="widget-icon-content"
+        *ngIf="isWebRtcMax && !isWebRtcVideoCallActive"
+      >
+        <button
+          id="chatIconBtn"
+          title="Callback Widget"
+          class="widget-bar-trigger widget-chat-trigger widget-color"
+          (click)="changeScreen('widget')"
+        >
+          <span
+            class="chat-icon material-symbols-outlined"
+            *ngIf="!logoEnabled"
+          >
             close
           </span>
           <!-- Custom Widget logo -->
@@ -1866,11 +2169,22 @@
         </button>
       </div>
 
-      <div class="widget-icon-content" *ngIf="!isWebRtcMax || isWebRtcVideoCallActive">
-        <button id="chatIconBtn" title="Video Call" class="widget-bar-trigger widget-chat-trigger widget-color" (click)="
+      <div
+        class="widget-icon-content"
+        *ngIf="!isWebRtcMax || isWebRtcVideoCallActive"
+      >
+        <button
+          id="chatIconBtn"
+          title="Video Call"
+          class="widget-bar-trigger widget-chat-trigger widget-color"
+          (click)="
             changeScreen(chatEndScreen == true ? 'widget' : 'webRtcScreen')
-          ">
-          <span class="chat-icon material-symbols-outlined" *ngIf="!logoEnabled">
+          "
+        >
+          <span
+            class="chat-icon material-symbols-outlined"
+            *ngIf="!logoEnabled"
+          >
             video_call
           </span>
           <!-- Custom Widget logo -->
