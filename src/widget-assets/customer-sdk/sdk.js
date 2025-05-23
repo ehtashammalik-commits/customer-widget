@@ -354,7 +354,6 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
     method: 'POST',
     body: formData
   }).then(async (response) => {
-    console.log("here is the repsonse in .then ===> SDK", response)
     if (!response.ok) {
       const errorText = await response.text();
       if (response.status === 413) {
@@ -375,7 +374,6 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
       callback(result);
     })
     .catch(async (error) => {
-      console.log("error in catch block", error)
       let errorDetails = {
         message: error.message || "Unknown error occurred.",
         statusCode: error.statusCode || null,

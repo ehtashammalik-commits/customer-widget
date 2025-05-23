@@ -1997,7 +1997,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               fd,
               (res: any) => {
                 if (res?.isFileInvalid) {
-                  console.log("response in component file ==>", res)
                   if(res?.statusCode === 413) {
                     this.snackBar.open(`Error while uploading file(s) on Server. Requested Entity Too Large`, 'X', {
                       duration: 3000,
