@@ -357,12 +357,14 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
     console.log("here is the repsonse in .then ===> SDK", response)
     if (!response.ok) {
       const errorText = await response.text();
-      if(response.status === 413) {
-        return callback({
-        isFileInvalid: true,
-        errorMessage: errorText,
-        statusCode: response.status,
-        })
+      if (response.status === 413) {
+        callback({
+          isFileInvalid: true,
+          errorMessage: "File too large. Please upload a smaller file.",
+          statusCode: response.status,
+        });
+        // Prevent further .then from running
+        throw new Error("Handled 413 error");
       }
       throw new UploadError(errorText, response.status);
     }
