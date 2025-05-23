@@ -2007,7 +2007,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
                     this.removeUploadFile();
                     return;
                   } else {
-                    this.snackBar.open(res?.errorMesage, 'X', {
+                    this.snackBar.open(res?.errorMessage, 'X', {
                       duration: 3000,
                       panelClass: ['error-snackbar'],
                       horizontalPosition: 'right',

@@ -389,14 +389,14 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
         callback({
           errorDetails,
           isFileInvalid: true,
-          errorMesage: "The file could not be uploaded due to security concerns. Please try a different file.",
+          errorMessage: "The file could not be uploaded due to security concerns. Please try a different file.",
           statusCode: errorDetails.statusCode,
         });
       } else {
         callback({
           errorDetails,
           isFileInvalid: true,
-          errorMesage: errorDetails.message,
+          errorMessage: errorDetails.message,
           statusCode: errorDetails.statusCode,
         });
       }
