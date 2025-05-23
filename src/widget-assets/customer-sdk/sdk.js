@@ -364,7 +364,7 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
           statusCode: response.status,
         });
         // Prevent further .then from running
-        throw new Error("Handled 413 error");
+        throw new UploadError(errorText, response.status);
       }
       throw new UploadError(errorText, response.status);
     }
