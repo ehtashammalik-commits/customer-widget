@@ -923,7 +923,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       });
     });
 
-    console.log('conversation data ===========>', attributes);
     return attributes;
   }
 
@@ -932,8 +931,57 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   pushPrechatDataAsActivity() {
     let finalPayload = this.createFormDataObject();
     finalPayload.body.sections = this.creatingSectionsforSchema();
+
+    this.calculateAttributeScore(finalPayload);
+    this.calculateSectionScores(finalPayload);
+    this.calculateFormScore(finalPayload);
     this.sdk.postFormDataAsActivity(finalPayload)
 
+  }
+
+  calculateAttributeScore(formData: any) {
+    console.log('calculate attribute score ===========>')
+    formData.body.sections.forEach((section: any) => {
+      // console.log(section); 
+      section.attributes.forEach((attribute: any) => {
+        //  console.log(attribute);
+        let selectedOption = attribute?.answer.find((option: any) => option?.isSelected === true);
+        // console.log(selectedOption.additionalAttributes.optionWeightage, "SELECTED OPTIONS");
+        if (selectedOption) {
+          let selectedOptionWeightage = selectedOption?.additionalAttributes?.optionWeightage;
+          attribute.attributeScore = parseFloat(((selectedOptionWeightage / 100) * attribute?.attributeWeightage).toFixed(1));
+        } else {
+          attribute.attributeScore = 0
+        }
+
+        // console.log(attribute.attributeScore, "ATTRIBUTE SCORE");
+      })
+    });
+  }
+
+
+  calculateSectionScores(formData: any) {
+    formData.body.sections.forEach((section: any) => {
+      let totalAttributeWeightage = 0
+      section.attributes.forEach((attribute: any) => {
+        totalAttributeWeightage += attribute.attributeScore;
+      })
+      // console.log('totalAttributeWeightage', totalAttributeWeightage)
+      section.sectionScore = parseFloat(((totalAttributeWeightage / 100) * section.sectionWeightage).toFixed(1));
+    })
+  }
+
+  calculateFormScore(formData: any): any {
+    // console.log(sections);
+    if (!formData) return;
+
+    let totalSectionWeightages = 0
+    formData.body.sections.forEach((section: any) => {
+      console.log(section)
+      totalSectionWeightages += section.sectionScore;
+    })
+
+    formData.body.formScore = parseFloat(((totalSectionWeightages / 100) * formData?.body?.formWeightage).toFixed(1)) || null
   }
   createFormDataObject() {
     return {
@@ -969,11 +1017,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         formId: this.preChatFormInfo?.id,
         formTitle: this.preChatFormInfo?.formTitle,
         type: "FORM_DATA",
-        formWeightage: null,
-        formScore: '0',
+        formWeightage: this.preChatFormInfo?.formWeightage,
+        formScore: '',
         additionalDetail: {
-          actor: 'Customer',
-          clientApplication: 'Customer Widget',
+          actor: {
+            type: 'Customer',
+            id: this.customerId
+          },
+          submissionSource: 'Pre-chat',
+          review: null,
+          reviewer: null,
+          agentReviewed: null
+
         },
         sentiment: {
           result: null,
@@ -994,7 +1049,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       let newSection: any = {
         sectionId: section._id,
         sectionName: section.sectionName,
-        sectionWeightage: null,
+        sectionWeightage: section.sectionWeightage || null,
         sectionScore: null,
         attributes: []
       };
@@ -1033,7 +1088,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getAnswerObj(attribute: any, possibleValues: any, selectedValue: any) {
 
     if (attribute.attributeType == 'INPUT' || attribute.attributeType == 'TEXTAREA') {
-      console.log('selected value ', selectedValue)
       return [selectedValue]
     }
     else {
@@ -1045,7 +1099,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           value: option.value || option.label, // Use `value` if available, fallback to `label`
           isSelected: option.label === selectedValue || option.value === selectedValue,
           additionalAttributes: {
-            optionWeightage: null,
+            optionWeightage: option.optionWeightage || null,
             enableStyle: attribute.attributeOptions?.enableStyle || false,
             optionStyle: option.optionStyle || null,
 
