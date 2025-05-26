@@ -19,7 +19,8 @@ declare var widgetConfigs: any,
   authenticateRequest: any,
   getBrowserInfo: any,
   getCalendarId: any,
-  getCalendarEvents:any;
+  getCalendarEvents:any,
+  getFileURL: any;
 
 type formAttributeMappings = {
   name: string[];
@@ -398,6 +399,13 @@ export class SdkService implements OnInit {
   handleCallVideo() {
     console.log('handle video show/hide in sdk service');
     videoControl();
+  }
+
+  getFileURLfromServer(fileURL: string, callback: any) {
+    getFileURL(fileURL, (res: any) => {
+      callback(res);
+    }
+  );
   }
 }
 

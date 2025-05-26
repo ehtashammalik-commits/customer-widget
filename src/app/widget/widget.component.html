@@ -994,29 +994,29 @@
                               : '18px'
                         }">
                       </span>
-                      <a *ngIf="message.body.type == 'IMAGE'" href="{{ message.body.attachment.mediaUrl }}"
+                      <a *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL" [href]="srcURL"
                         target="_blank">
-                        <img class="message-image" src="{{ message.body.attachment.mediaUrl }}"
+                        <img class="message-image" *ngIf="srcURL" [src]="srcURL"
                           alt="{{ message.body.caption }}" />
                       </a>
-                      <a *ngIf="message.body.type == 'VIDEO'" href="{{ message.body.attachment.mediaUrl }}"
+                      <a *ngIf="message.body.type == 'VIDEO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL" [href]="srcURL"
                         target="_blank">
-                        <video width="238" height="120" controls>
-                          <source src="{{ message.body.attachment.mediaUrl }}" type="video/mp4" />
+                        <video *ngIf="srcURL" width="238" height="120" controls>
+                          <source [src]="srcURL" type="video/mp4" />
                           {{ message.body.caption }}
                         </video>
                       </a>
-                      <a *ngIf="message.body.type == 'AUDIO'" href="{{ message.body.attachment.mediaUrl }}"
+                      <a *ngIf="message.body.type == 'AUDIO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL" [href]="srcURL"
                         target="_blank">
-                        <audio class="audioPlayer" controls>
-                          <source src="{{ message.body.attachment.mediaUrl }}" type="audio/mpeg" />
+                        <audio *ngIf="srcURL" class="audioPlayer" controls>
+                          <source [src]="srcURL" type="audio/mpeg" />
                           {{ message.body.caption }}
                         </audio>
                       </a>
                       <a *ngIf="message.body.type == 'URL'" href="{{ message.body.mediaUrl }}" target="_blank">
                         {{ 'button.click-here' | translate }}
                       </a>
-                      <a *ngIf="message.body.type == 'FILE'" href="{{ message.body.attachment.mediaUrl }}"
+                      <a *ngIf="message.body.type == 'FILE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL" [href]="srcURL"
                         target="_blank">
                         <span class="file-name" innerHTML="{{
                           (message.body.additionalDetails.fileName
@@ -1225,29 +1225,29 @@
                               : '18px'
                         }">
                       </span>
-                      <a *ngIf="message.body.type == 'IMAGE'" href="{{ message.body.attachment.mediaUrl }}"
+                      <a *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL" [href]="srcURL"
                         target="_blank">
-                        <img class="message-image" src="{{ message.body.attachment.mediaUrl }}"
+                        <img class="message-image" *ngIf="srcURL" [src]="srcURL"
                           alt="{{ message.body.caption }}" />
                       </a>
-                      <a *ngIf="message.body.type == 'VIDEO'" href="{{ message.body.attachment.mediaUrl }}"
+                      <a *ngIf="message.body.type == 'VIDEO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL" [href]="srcURL"
                         target="_blank">
-                        <video width="225" height="120" controls>
-                          <source src="{{ message.body.attachment.mediaUrl }}" type="video/mp4" />
+                        <video *ngIf="srcURL" width="225" height="120" controls>
+                          <source [src]="srcURL" type="video/mp4" />
                           {{ message.body.caption }}
                         </video>
                       </a>
-                      <a *ngIf="message.body.type == 'AUDIO'" href="{{ message.body.attachment.mediaUrl }}"
+                      <a *ngIf="message.body.type == 'AUDIO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL" [href]="srcURL"
                         target="_blank">
-                        <audio class="audioPlayer" controls>
-                          <source src="{{ message.body.attachment.mediaUrl }}" type="audio/mpeg" />
+                        <audio *ngIf="srcURL" class="audioPlayer" controls>
+                          <source [src]="srcURL" type="audio/mpeg" />
                           {{ message.body.caption }}
                         </audio>
                       </a>
                       <a *ngIf="message.body.type == 'URL'" href="{{ message.body.mediaUrl }}" target="_blank">
                         {{ 'button.click-here' | translate }}
                       </a>
-                      <a *ngIf="message.body.type == 'FILE'" href="{{ message.body.attachment.mediaUrl }}"
+                      <a *ngIf="message.body.type == 'FILE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL" [href]="srcURL"
                         target="_blank">
                         <span class="file-name" innerHTML="{{
                           (message.body.additionalDetails.fileName
