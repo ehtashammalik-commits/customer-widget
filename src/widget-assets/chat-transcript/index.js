@@ -1,4 +1,5 @@
-const params = new URLSearchParams(window.location.search);
+async function  laodPage(){
+  const params = new URLSearchParams(window.location.search);
 
 const ccm_url = decodeURIComponent(params.get("ccmUrl"));
 const channel_customer_identifier = decodeURIComponent(
@@ -8,7 +9,7 @@ const service_identifier = decodeURIComponent(params.get("serviceIdentifier"));
 const clickState = decodeURIComponent(params.get("state"));
 const conversation_id = decodeURIComponent(params.get("conversationId"));
 const browserLang = decodeURIComponent(params.get("browserLang"));
-
+const jwtToken = localStorage.getItem('jwt_token');
 console.log(
   "configurations :",
   ccm_url,
@@ -28,12 +29,41 @@ const senderIconMap = {
   "telegram-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_TELEGRAM.svg`,
   "twitter-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_TWITTER.svg`,
   "instagram-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_INSTAGRAM.svg`,
-  "email-connector": `${originURL}/file-engine/api/downloadFileStream?filename=96616_email.png`,
+  "email-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_EMAIL.svg`,
   "viber-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_VIBER.svg`,
   "smpp-connector": `${originURL}/file-engine/api/downloadFileStream?filename=_SMS.svg`,
   // Default case
   "default": `${originURL}/file-engine/api/downloadFileStream?filename=_WEB.svg`,
 };
+const senderIconMapSafe = {};
+async function loadIcons() {
+  const entries = Object.entries(senderIconMap);
+
+  const promises = entries.map(async ([key, url]) => {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      });
+
+      if (!response.ok) throw new Error(`${key} failed: ${response.status}`);
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      senderIconMapSafe[key] = blobUrl;
+    } catch (err) {
+      console.error(`Error loading ${key}:`, err);
+      senderIconMapSafe[key] = ""; // fallback or skip
+    }
+  });
+
+  await Promise.all(promises);
+  console.log("All icons loaded:", senderIconMapSafe);
+
+  // Continue only after all icons are ready
+}
+await  loadIcons();
 
 // Chat API Call
 const request = new XMLHttpRequest();
@@ -41,6 +71,7 @@ request.open(
   "GET",
   `${ccm_url}/message?customerChannelIdentifier=${channel_customer_identifier}&serviceIdentifier=${service_identifier}&conversationId=${conversation_id}`,
 );
+request.setRequestHeader("Authorization", `Bearer ${jwtToken}`);
 request.send();
 request.onload = () => {
   console.log("this is the first thing to look at.... ")
@@ -75,9 +106,26 @@ function preProcessMessages() {
     }
   });
 }
+async function getSafeImageURL(url) {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
+
+    if (!response.ok) console.error(`failed: ${response.status}`);
+
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    return blobUrl;
+  } catch (err) {
+    console.error(`Error loading: `, err);
+  }
+}
 
 //Function for Chat Messages Of BOT , AGENT and CUSTOMER
-function messageFunction() {
+async function messageFunction() {
   let chatDiv = `<div>`;
 
 
@@ -136,6 +184,7 @@ function messageFunction() {
       }
 
       if (message.body.type == "VIDEO") {
+        const mediaURL = await getSafeImageURL(message.body.attachment.mediaUrl);
         chatDiv += `
           <div class="chat-message user-message ">
             <div class="profile-pic">
@@ -147,7 +196,7 @@ function messageFunction() {
               <p>
                 <span>
                   <video class="videoPlayer" autoplay>
-                    <source src="${message.body.attachment.mediaUrl}" type="video/mp4">
+                    <source src="${mediaURL}" type="video/mp4">
                   Your browser does not support the video tag.
                   </video>
                 </span>
@@ -160,6 +209,8 @@ function messageFunction() {
       }
 
       if (message.body.type == "IMAGE") {
+        const mediaURL = await getSafeImageURL(message.body.attachment.mediaUrl);
+
         chatDiv += `
           <div class="chat-message agent-message">
             <div class="profile-pic">
@@ -171,8 +222,8 @@ function messageFunction() {
               <p>
                 <span>${message.body.caption}</span>
                 <a target="_blank"
-                href="${message.body.attachment.mediaUrl}"><img
-                src="${message.body.attachment.mediaUrl}"
+                href="${mediaURL}"><img
+                src="${mediaURL}"
                 class="imageViewer">
               </a>
                 <span class="message-stamp">
@@ -184,6 +235,8 @@ function messageFunction() {
       }
 
       if (message.body.type == "FILE") {
+        const mediaURL = await getSafeImageURL(message.body.attachment.mediaUrl);
+        
         chatDiv += `
           <div class="chat-message agent-message">
             <div class="profile-pic">
@@ -205,7 +258,7 @@ function messageFunction() {
                 <span class="card-label">${message.body.additionalDetails.fileName
           }</span>
                 <span class="card-description">
-                    <a class="file-download" href="${message.body.attachment.mediaUrl
+                    <a class="file-download" href="${mediaURL
           }"> Download </a> </span>
             </div>
             <span class="message-stamp"><span class="chat-time">${time}</span></span>
@@ -304,6 +357,8 @@ function messageFunction() {
       }
 
       if (message.body.type == "VIDEO") {
+        const mediaURL = await getSafeImageURL(message.body.attachment.mediaUrl);
+
         chatDiv += `
           <div class="chat-message user-message ">
             <div class="profile-pic">
@@ -314,7 +369,7 @@ function messageFunction() {
               <p>
                 <span>
                   <video class="videoPlayer" autoplay="false">
-                    <source src="${message.body.attachment.mediaUrl}" type="video/mp4">
+                    <source src="${mediaURL}" type="video/mp4">
                   Your browser does not support the video tag.
                   </video>
                 </span>
@@ -327,6 +382,8 @@ function messageFunction() {
       }
 
       if (message.body.type == "AUDIO") {
+        const mediaURL = await getSafeImageURL(message.body.attachment.mediaUrl);
+
         chatDiv += `
           <div class="chat-message user-message ">
             <div class="profile-pic">
@@ -337,7 +394,7 @@ function messageFunction() {
               <p>
                 <span>
                   <audio class="audioPlayer" controls>
-                    <source src="${message.body.attachment.mediaUrl}" type="audio/mpeg">
+                    <source src="${mediaURL}" type="audio/mpeg">
                   Your browser does not support the video tag.
                   </audio>
                 </span>
@@ -350,6 +407,8 @@ function messageFunction() {
       }
 
       if (message.body.type == "IMAGE") {
+        const mediaURL = await getSafeImageURL(message.body.attachment.mediaUrl);
+
         chatDiv += `
           <div class="chat-message agent-message">
             <div class="profile-pic">
@@ -357,7 +416,7 @@ function messageFunction() {
             </div>
             <div class="chat-message-content">
               <div class="user-name"><span>${message.header.sender.senderName}</span></div>
-              <p><a target="_blank" href="${message.body.attachment.mediaUrl}"><img src="${message.body.attachment.mediaUrl}" class="imageViewer"></a>
+              <p><a target="_blank" href="${mediaURL}"><img src="${mediaURL}" class="imageViewer"></a>
               <span>${message.body.caption}</span>
               <span class="message-stamp"><span class="chat-time">${time}</span></span></p>
             </div>
@@ -365,6 +424,8 @@ function messageFunction() {
       }
 
       if (message.body.type == "FILE") {
+        const mediaURL = await getSafeImageURL(message.body.attachment.mediaUrl);
+        
         chatDiv += `
           <div class="chat-message agent-message">
           <div class="profile-pic">
@@ -386,7 +447,7 @@ function messageFunction() {
                   <span class="card-label">${message.body.additionalDetails.fileName
           }</span>
                   <span class="card-description">
-                      <a class="file-download" href="${message.body.attachment.mediaUrl
+                      <a class="file-download" href="${mediaURL
           }"> Download </a> </span>
               </div>
               <span class="message-stamp"><span class="chat-time">${time}</span></span>
@@ -417,6 +478,8 @@ function messageFunction() {
       }
 
       if (message.body.type == "VIDEO") {
+        const mediaURL = await getSafeImageURL(message.body.attachment.mediaUrl);
+
         chatDiv += `
           <div class="chat-message user-message ">
             <div class="profile-pic">
@@ -429,7 +492,7 @@ function messageFunction() {
               <p>
                 <span>
                   <video class="videoPlayer" autoplay>
-                    <source src="${message.body.attachment.mediaUrl}" type="video/mp4">
+                    <source src="${mediaURL}" type="video/mp4">
                   Your browser does not support the video tag.
                   </video>
                 </span>
@@ -442,6 +505,8 @@ function messageFunction() {
       }
 
       if (message.body.type == "AUDIO") {
+        const mediaURL = await getSafeImageURL(message.body.attachment.mediaUrl);
+
         chatDiv += `
           <div class="chat-message user-message ">
             <div class="profile-pic">
@@ -454,7 +519,7 @@ function messageFunction() {
               <p>
                 <span>
                   <audio class="audioPlayer" controls>
-                    <source src="${message.body.attachment.mediaUrl}" type="audio/mpeg">
+                    <source src="${mediaURL}" type="audio/mpeg">
                   Your browser does not support the video tag.
                   </audio>
                 </span>
@@ -467,6 +532,8 @@ function messageFunction() {
       }
 
       if (message.body.type == "IMAGE") {
+        const mediaURL = await getSafeImageURL(message.body.attachment.mediaUrl);
+
         chatDiv += `
           <div class="chat-message user-message ">
             <div class="profile-pic">
@@ -476,7 +543,7 @@ function messageFunction() {
               <div class="profile-pic-area user-img"> ${customerIcon} </div>
             </div>
             <div class="chat-message-content">
-              <p><a target="_blank" href="${message.body.attachment.mediaUrl}"><img src="${message.body.attachment.mediaUrl}" class="imageViewer"></a>
+              <p><a target="_blank" href="${mediaURL}"><img src="${mediaURL}" class="imageViewer"></a>
               <span>${message.body.caption}</span>
               <span class="message-stamp"><span class="chat-time">${time}</span></span></p>
             </div>
@@ -484,6 +551,8 @@ function messageFunction() {
       }
 
       if (message.body.type == "FILE") {
+        const mediaURL = await getSafeImageURL(message.body.attachment.mediaUrl);
+
         chatDiv += `
           <div class="chat-message user-message ">
           <div class="profile-pic">
@@ -506,7 +575,7 @@ function messageFunction() {
                     <span class="card-label">${message.body.additionalDetails.fileName
           }</span>
                     <span class="card-description">
-                        <a class="file-download" href="${message.body.attachment.mediaUrl
+                        <a class="file-download" href="${mediaURL
           }"> Download </a> </span>
                 </div>
               <span class="message-stamp"><span class="chat-time">${time}</span></span>
@@ -588,5 +657,7 @@ function iconAgent(name) {
 
 // Use a function to get the icon URL based on senderName, with a default fallback
 function getIconURL(senderName, senderId) {
-  return senderIconMap[senderName] ? senderIconMap[senderName] : senderIconMap[senderId] || senderIconMap["default"];
+  return senderIconMapSafe[senderName] ? senderIconMapSafe[senderName] : senderIconMapSafe[senderId] || senderIconMapSafe["default"];
 }
+}
+laodPage();

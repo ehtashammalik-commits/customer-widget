@@ -23,6 +23,7 @@ import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 
 import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
 import { tagFormatPipe } from './tagFormat.pipe';
+import { SafeFileURLPipe } from './getSafeFileURL.pipe';
 import { AppComponent } from './app.component';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { AppRoutingModule, routingComponents } from './app-routing.module';
@@ -51,6 +52,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     routingComponents,
     ConfirmDialogComponent,
     tagFormatPipe,
+    SafeFileURLPipe,
     getMediaFromTask,
     NpsColorPipe,
     SvgNpsFormatPipe,
@@ -88,8 +90,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatRadioModule
   ],
   exports: [getMediaFromTask],
-  providers: [
-    {
+  providers: [{
       provide: LocationStrategy,
       useClass: HashLocationStrategy,
     },

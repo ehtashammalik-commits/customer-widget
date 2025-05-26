@@ -1,17 +1,18 @@
 {
-  "SOCKET_URL": "https://chatsolution.expertflow.com/web-channel-manager",
-  "FILE_SERVER_URL": "https://chatsolution.expertflow.com/file-engine",
-  "BOT_FRAMEWORK_URL": "https://chatsolution.expertflow.com/bot-framework",
-  "CCM_URL": "https://chatsolution.expertflow.com/ccm",
-  "CONVERSATIONAL_URL": "https://chatsolution.expertflow.com/conversation-manager/customer-topics",
-  "FORM_URL": "https://chatsolution.expertflow.com/unified-admin",
-  "AUTHENTICATOR_URL": "https://chatsolution.expertflow.com/secure-link",
-  "BUSINESSCALENDAR_URL": "https://chatsolution.expertflow.com/business-calendar",
-  "CX_ACTIVITY": "https://chatsolution.expertflow.com/conversation-manager/activities",
+  "SOCKET_URL": "https://efcx-frontend.expertflow.com/web-channel-manager",
+  "FILE_SERVER_URL": "https://efcx-frontend.expertflow.com/file-engine",
+  "BOT_FRAMEWORK_URL": "https://efcx-frontend.expertflow.com/bot-framework",
+  "CCM_URL": "https://efcx-frontend.expertflow.com/ccm",
+  "CONVERSATIONAL_URL": "https://efcx-frontend.expertflow.com/conversation-manager/customer-topics",
+  "FORM_URL": "https://efcx-frontend.expertflow.com/unified-admin",
+  "AUTHENTICATOR_URL": "https://efcx-frontend.expertflow.com/secure-link",
+  "BUSINESSCALENDAR_URL": "https://efcx-frontend.expertflow.com/business-calendar",
+  "CX_ACTIVITY": "https://efcx-frontend.expertflow.com/conversation-manager/activities",
   "CHANNEL_IDENTIFIER": "phone",
   "ENABLE_LOGO": false,
   "ADDITIONAL_PANEL": true,
   "VIDEO": true,
   "USERNAME_ENABLED": true,
-  "MUTE_NOTIFICATIONS": false
+  "MUTE_NOTIFICATIONS": false,
+  "IS_DIRECT_WEBRTC_CALL_ENABLED": true
 }
