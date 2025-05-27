@@ -2724,7 +2724,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
 
-    if (data.event === 'mediaConversion') {
+    if (data.event === 'mediaStreamUpdate') {
       if (data.status === 'success') {
         console.log(
           '[mediaConversion] ACTIVE CALL mediaConversion: ===> ',
@@ -2760,6 +2760,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
 
+    if (data.event === 'mediaPermissionStatus') {
+     
+ console.log(
+          '[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ',
+          data.dialog,
+        );
+      }
     if (data.event === 'Error') {
       // this.errorDuringWebRTCCall = true;
       // This dialoguId we got in reponse once the call starts ringing on agent side 
