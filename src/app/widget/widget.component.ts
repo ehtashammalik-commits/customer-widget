@@ -2000,8 +2000,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     if (filesAmount) {
+      this.fileLoading = true
       this.selectedFile = filesAmount;
+      let filesLoaded = 0;
       for (let i = 0; i < filesAmount.length; i++) {
+        const file = filesAmount[i];
         const reader = new FileReader();
         reader.onload = (event: any) => {
           console.log(this.imageUrls, 'urlssssssss');
@@ -2014,9 +2017,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               .split(':')[1]
               .split('/')[1]
               .split(';')[0],
-            fileName: filesAmount[i].name,
+            fileName: file.name,
           });
         };
+
+        filesLoaded++;
+        if (filesLoaded === filesAmount.length) {
+          this.fileLoading = false;
+        }
         reader.readAsDataURL(filesAmount[i]);
       }
     }
@@ -2147,7 +2155,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         const fileSize = files[i].size;
         const fileMimeType = files[i].name.split('.').pop();
 
-        if (fileSize <= 5000000) {
+        // if (fileSize <= 5000000) {
           if (availableExtensions.includes(fileMimeType.toLowerCase())) {
             let fd = new FormData();
             fd.append('file', files[i]);
@@ -2161,11 +2169,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               fd,
               (res: any) => {
                 if (res?.isFileInvalid) {
-                  this.snackBar.open(res.errorMesage, 'X', {
-                    panelClass: 'custom-snackbar',
-                  });
-                  this.removeUploadFile();
-                  return;
+                  if(res?.statusCode === 413) {
+                    this.snackBar.open(`Error while uploading file(s) on Server. Requested Entity Too Large`, 'X', {
+                      duration: 3000,
+                      panelClass: ['error-snackbar'],
+                      horizontalPosition: 'right',
+                    });
+                    this.removeUploadFile();
+                    return;
+                  } else {
+                    this.snackBar.open(res?.errorMessage, 'X', {
+                      duration: 3000,
+                      panelClass: ['error-snackbar'],
+                      horizontalPosition: 'right',
+                    });
+                    this.removeUploadFile();
+                    return;
+                  }
                 }
 
                 this.constructCimMessage(
@@ -2187,18 +2207,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             });
             this.removeUploadFile();
           }
-        } else {
-          console.log(this.preChatFormGroup.get(additionalText))
-          console.log(files[i].name + ' File size should be less than 5MB');
-          this.snackBar.open(
-            files[i].name + ' File size should be less than 5MB',
-            'X',
-            {
-              panelClass: 'custom-snackbar',
-            },
-          );
-          this.removeUploadFile();
-        }
+        // } else {
+        //   console.log(this.preChatFormGroup.get(additionalText))
+        //   console.log(files[i].name + ' File size should be less than 5MB');
+        //   this.snackBar.open(
+        //     files[i].name + ' File size should be less than 5MB',
+        //     'X',
+        //     {
+        //       panelClass: 'custom-snackbar',
+        //     },
+        //   );
+        //   this.removeUploadFile();
+        // }
       }
     }
   }
