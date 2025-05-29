@@ -144,6 +144,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isCallMute = false;
   isVideoHide = false;
   isCallOnHold = false;
+  remoteStreamStatus = false;
   //varibales for MAX MIN length of the attributes (short Answer)
   short_ans_maxLength: number = 0;
   short_ans_minLength: number = 0;
@@ -2589,6 +2590,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         '[handleDialogStates] Inside Outbound Dialing Event: ===> ',
         data.response,
       );
+      if(this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO){this.remoteStreamStatus=false;}
+      
       if (data.response.dialog === null) {
         this.maintainDialog = null;
         this.dialogId = null;
@@ -2693,6 +2696,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               '[dialogState] DROPPED CALL DIALOG: ===> ',
               data.response.dialog,
             );
+            if(this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO){this.remoteStreamStatus=false;}
+      
             if (this.standaloneWebRtc) {
               this.callPopUpView = false;
               this.isWebRtcVideoCallActive = false;
@@ -2751,11 +2756,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         ) {
           // this.remoteVideoActive = false;
           console.log('Remote Camera Off');
+          this.remoteStreamStatus=true;
         } else if (
           data.dialog.eventRequest === 'remote' &&
           data.dialog.streamStatus === 'on'
         ) {
           console.log('Remote Camera On');
+          this.remoteStreamStatus=false;
         }
       }
     }

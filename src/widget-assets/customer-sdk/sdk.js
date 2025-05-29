@@ -3243,7 +3243,7 @@ function setupRemoteMedia(session, callback, dialogId) {
     console.log('<== remote Stream Audio Track:', remoteStream.getAudioTracks());
     console.log('<== remote Video Tag:', document.getElementById('remoteVideo'));
     console.log('<== remote Stream Video Track:', remoteStream.getVideoTracks());
-  }, 4000)
+  }, 2000)
 
 
   // var remoteVideo = document.getElementById('remoteVideo');
