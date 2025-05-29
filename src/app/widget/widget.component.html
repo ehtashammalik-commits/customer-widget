@@ -1583,7 +1583,7 @@
 
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div
+                <div *ngIf="!__appConfig.appConfig.VIDEO"
                   class="control-btn"
                   [ngClass]="{
                     'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
