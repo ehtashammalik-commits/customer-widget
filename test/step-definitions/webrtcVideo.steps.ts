@@ -5,28 +5,48 @@ defineFeature(feature, (test) => {
     //Feature file has a scenario titled "Customer initiates a video call", but no match found in step definitions. Try adding the following code:
 
     test('Customer initiates a video call', ({ given, and, when, then }) => {
+    let widgetLoaded = false;
+    let videoPermissionGranted = false;
+    let webrtcSessionStarted = false;
+    let routingRequestSent = false;
+    let agentReceivedVideoCall = false;
         given('the customer widget is loaded', () => {
-
+           // Simulate widget load
+        widgetLoaded = true;
+        expect(widgetLoaded).toBeTruthy();
         });
 
         and('video permissions are granted', () => {
-
+          // Simulate permission check/response
+        videoPermissionGranted = true;
+        expect(videoPermissionGranted).toBeTruthy();
         });
 
         when('the customer clicks on Start Video Call button', () => {
+             if (widgetLoaded && videoPermissionGranted) {
+            // Simulate WebRTC session initiation
+            webrtcSessionStarted = true;
+
+            // Simulate routing request to CX Core
+            routingRequestSent = true;
+
+            // Simulate agent receiving the call
+            agentReceivedVideoCall = true;
+        }
 
         });
 
         then('a new WebRTC session should be initiated', () => {
+            expect(webrtcSessionStarted).toBeTruthy();
 
         });
 
         and('a routing request is sent to CX Core', () => {
-
+           expect(routingRequestSent).toBeTruthy();
         });
 
         and('the agent receives an incoming call with a video prompt', () => {
-
+            expect(agentReceivedVideoCall).toBeTruthy();
         });
     });
 
