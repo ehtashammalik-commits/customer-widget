@@ -27,10 +27,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
-declare var EmojiPicker: any;
 
 interface Shift {
   id: string;
@@ -283,7 +281,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }[] = [];
 
   fileLoading = false;
-  selectedFile!: File;
+  selectedFile: any;
   fileUrl: any = "";
   fileName: string | null = null;
   // Variables for handling chat messages language and text directions
@@ -306,6 +304,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   fileContent: { [key: string]: string } = {};
   isSecureLinkExpired: boolean = false;
   IsRegisteredInFreeSwitch: boolean = false;
+
+
+  // file properties 
+  fileExtensons: any[] = [
+    'txt', 'png', 'jpg', 'jpeg', 'pdf', 'ppt', 'pptx', 'xlsx', 'xls',
+    'doc', 'docx', 'rtf', 'mp3', 'mp4', 'webp'
+  ]
+
+  isFileSelected: any;
+  isFileUploading: any = {};
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -320,7 +328,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private browserNotificationService: BrowserNotificationService,
     private deliveryNotificationService: DeliveryNotificationService,
     private __postMessageHandlerService: PostMessageHandlerService,
-    private _http: HttpClient,
     private translate: TranslateService
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
@@ -332,16 +339,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async ngAfterViewInit(): Promise<void> {
-    if(!this.standaloneWebRtc) {
+    if (!this.standaloneWebRtc) {
       this.customerChatResumed();
-        console.log('Not Secure Chat View');
+      console.log('Not Secure Chat View');
     }
 
     // Set the Customer Widget Theme Color based on Configurations from Unified Admin's Web Widget settings
     setTimeout(() => {
-        (this.el.nativeElement as HTMLElement).style.setProperty('--main-color', this.theme);
+      (this.el.nativeElement as HTMLElement).style.setProperty('--main-color', this.theme);
     }, 1000);
-}
+  }
 
 
   ngOnInit(): void {
@@ -354,7 +361,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
 
-      const rawEncryptedKey = params['encryptedKey']? params['encryptedKey']: null;
+      const rawEncryptedKey = params['encryptedKey'] ? params['encryptedKey'] : null;
 
       if (rawEncryptedKey !== null) {
         const preservedKey = decodeURIComponent(rawEncryptedKey);
@@ -500,7 +507,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (response: any) => {
         console.log('Connection Response:', response);
         if (response) {
-          
+
           this.eventListener(response);
           console.log('event listener:', response);
         }
@@ -731,7 +738,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.enableWebRtc = configs.webRtc?.enableWebRtc;
       console.log('List of webRTC Configs: ', this.webRTCConfig);
 
-      if(this.standaloneWebRtc) {
+      if (this.standaloneWebRtc) {
         await this.authenticateSecureLinkKey(false);
         this.changeScreen('webRtcScreen');
       }
@@ -786,7 +793,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log('Event Payload: ==>', eventPayload);
           // If Error is false than proceed with the start Chat and user data setting
           if (!eventPayload.error) {
-            this.setUserData(eventPayload.data, 'startChat');           
+            this.setUserData(eventPayload.data, 'startChat');
           }
         } else {
           this.preChatFormLoader = false;
@@ -934,7 +941,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   calculateAttributeScore(formData: any) {
-    console.log('calculate attribute score ===========>')
+
     formData.body.sections.forEach((section: any) => {
       // console.log(section); 
       section.attributes.forEach((attribute: any) => {
@@ -1151,7 +1158,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.resizeWidget('wraper-view');
 
         }
-        if(this.standaloneWebRtc) {
+        if (this.standaloneWebRtc) {
           this.authenticateSecureLinkKey(false);
         }
         this.preChatFormScreen = false;
@@ -1280,12 +1287,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   async changeView(view: any) {
     if (this.showInvalidCodeError && this.standaloneWebRtc) {
-      if(!this.isSecureLinkExpired) {
-      this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-        horizontalPosition: 'right',
-      });
+      if (!this.isSecureLinkExpired) {
+        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'right',
+        });
       }
       return;
     }
@@ -1385,7 +1392,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
           this.isSecureWebCall = false;
-          if(!this.IsRegisteredInFreeSwitch) {
+          if (!this.IsRegisteredInFreeSwitch) {
             await this.logInToFreeSwitch();
           }
           this.initiateWebRtcCall(view);
@@ -1564,12 +1571,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'CHANNEL_SESSION_EXPIRED':
           case 'SOCKET_DISCONNECTED':
             if (event.data == 'io server disconnect') {
-            localStorage.removeItem('user');
-            if (messageType !== 'survey') {
-              this.clearSession();
+              localStorage.removeItem('user');
+              if (messageType !== 'survey') {
+                this.clearSession();
+              }
+              this.composerDisable()
             }
-            this.composerDisable()
-          }
             break;
           case 'SOCKET_RECONNECTED':
             console.log(
@@ -2148,10 +2155,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.fileLoading = false;
       this.imageUrls = [];
       this.selectedFile = null as any;
-    } else if(messageTypesFormediaURLs.includes(messageType)){
+    } else if (messageTypesFormediaURLs.includes(messageType)) {
       const imageUrl = this.__appConfig.appConfig.FILE_SERVER_URL + "/api/downloadFileStream?filename=" + fileName;
       // this.sdk.getFileURLfromServer(imageUrl, (res: any ) => {
-      body['attachment'] = this.buildMediaAttachment(imageUrl, fileSize || 0, fileMimeType || '', fileType || '' )
+      body['attachment'] = this.buildMediaAttachment(imageUrl, fileSize || 0, fileMimeType || '', fileType || '')
       if (messageType == "application" || messageType == "text") {
         body.type = 'FILE';
         body.markdownText = additionalText || '';
@@ -2181,9 +2188,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       return;
     }
   }
-  
 
-  buildMediaAttachment(mediaUrl: SafeUrl, fileSize?: any , fileMimeType?: string, fileType?:any ): any {
+
+  buildMediaAttachment(mediaUrl: SafeUrl, fileSize?: any, fileMimeType?: string, fileType?: any): any {
     return {
       mediaUrl: mediaUrl,
       type: fileMimeType,
@@ -2222,95 +2229,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
   }
-  uploadFileFromForm(
-    event: Event,
-    additionalText: string,
-    restriction: boolean,
-    fileTypes: any,
-  ): void {
-    const input = event.target as HTMLInputElement;
-    let responce: any;
-    let availableExtensions: any;
-    if (input.files && input.files.length > 0) {
-      const files = input.files;
-      if (restriction) {
-        availableExtensions = fileTypes.map((extension: string) =>
-          extension.toLowerCase(),
-        );
-      } else {
-        availableExtensions = [
-          'txt',
-          'png',
-          'jpg',
-          'jpeg',
-          'pdf',
-          'ppt',
-          'pptx',
-          'xlsx',
-          'xls',
-          'doc',
-          'docx',
-          'rtf',
-          'mp3',
-          'mp4',
-          'webp',
-        ];
-      }
-      console.log(availableExtensions, 'available extensions: =>');
-      const file = files[0];
-      const fileSize = file.size;
-      const fileExtension = file.name.split('.').pop()?.toLowerCase();
-      const fileElem = event.target as HTMLInputElement;
-      const fileControl = this.preChatFormGroup.get(additionalText) as FormControl;
-      if (fileSize <= 5000000) {
-        if (fileExtension && availableExtensions.includes(fileExtension)) {
-          const fd = new FormData();
-          fd.append('file', file);
-          fd.append(
-            'conversationId',
-            `${Math.floor(Math.random() * 90000) + 10000}`,
-          );
-          console.log('Ready to upload file:', fileSize, fileExtension);
 
-          // Call to the SDK's file upload function
-          this.sdk.moveToFileServer(fd, (res: any) => {
-            console.log(res, '=> file uploaded data');
-            if (res?.isFileInvalid) {
-              this.snackBar.open(res?.errorMesage, 'X', {
-                panelClass: 'custom-snackbar',
-              });
-              this.resetFileValidation(event, additionalText)
-              return;
-            }
-            console.log(res.name, '=> file details');
-            this.fileName = res.name;
-            this.fileUrl = `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
-            console.log('=> file uploaded url', this.fileUrl);
-            fileControl?.setValue(this.fileUrl);
-          });
-        } else {
-          console.log(file.name + ' unsupported file type');
-          this.snackBar.open(file.name + ' unsupported file type', 'X', {
-            panelClass: 'custom-snackbar',
-          });
-          this.resetFileValidation(event, additionalText)
-        }
-
-      } else {
-        console.log(file.name + ' file size should be less than 5MB');
-        this.snackBar.open(
-          file.name + ' file size should be less than 5MB',
-          'X',
-          {
-            panelClass: 'custom-snackbar',
-          },
-        );
-        this.resetFileValidation(event, additionalText)
-      }
-
-      fileElem.value = ''
-    }
-  }
   resetFileValidation(event: Event, additionalText: string) {
     const fileElem = event.target as HTMLInputElement;
     const fileControl = this.preChatFormGroup.get(additionalText) as FormControl;
@@ -2326,117 +2245,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
 
-  isFileSelected: any;
 
-  uploadFile(files: any, additionalText: string) {
-    let availableExtensions = [
-      'txt',
-      'png',
-      'jpg',
-      'jpeg',
-      'pdf',
-      'ppt',
-      'pptx',
-      'xlsx',
-      'xls',
-      'doc',
-      'docx',
-      'rtf',
-      'mp3',
-      'mp4',
-      'webp',
-    ];
-    let ln = files.length;
-    if (ln > 0) {
-      for (var i = 0; i < ln; i++) {
-        const fileSize = files[i].size;
-        const fileMimeType = files[i].name.split('.').pop();
-
-        if (fileSize <= 5000000) {
-          if (availableExtensions.includes(fileMimeType.toLowerCase())) {
-            let fd = new FormData();
-            fd.append('file', files[i]);
-            fd.append(
-              'conversationId',
-              `${Math.floor(Math.random() * 90000) + 10000}`,
-            );
-            console.log('ready to Upload File', fileSize, fileMimeType);
-
-            this.sdk.moveToFileServer(
-              fd,
-              (res: any) => {
-                if (res?.isFileInvalid) {
-                  this.snackBar.open(res.errorMesage, 'X', {
-                    panelClass: 'custom-snackbar',
-                  });
-                  this.removeUploadFile();
-                  return;
-                }
-
-                this.constructCimMessage(
-                  res.type.split('/')[0],
-                  '',
-                  null,
-                  null,
-                  res.type,
-                  res.name,
-                  res.size,
-                  additionalText,
-                  res.name.split('.').pop(),
-                );
-              },
-            );
-          } else {
-            this.snackBar.open(files[i].name + ' unsupported type', 'X', {
-              panelClass: 'custom-snackbar',
-            });
-            this.removeUploadFile();
-          }
-        } else {
-          console.log(this.preChatFormGroup.get(additionalText))
-          console.log(files[i].name + ' File size should be less than 5MB');
-          this.snackBar.open(
-            files[i].name + ' File size should be less than 5MB',
-            'X',
-            {
-              panelClass: 'custom-snackbar',
-            },
-          );
-          this.removeUploadFile();
-        }
-      }
-    }
-  }
-
-  uploadPrechatFile(sectionIndex: number, controlName: any, fileInput: any, id: any) {
-    console.log('file uploading ===========>')
-    this.isFileUploading[`${controlName}`] = true
-    if (fileInput.files && fileInput.files.length > 0) {
-      const file = fileInput.files[0]
-      const formData = new FormData();
-      formData.append('file', file);
-
-      this._http.post(`${this.__appConfig.appConfig.FILE_SERVER_URL}/api/uploadFileStream`, formData).subscribe((res: any) => {
-        const fileName = `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
-        this.setFileControl(sectionIndex, fileName, controlName)
-
-        this.snackBar.open('File uploaded successfully', 'X', {
-          panelClass: 'custom-snackbar',
-        });
-
-        this.isFileUploading[`${controlName}`] = false
-        this.disableUploadBtn(id);
-      }, (error) => {
-
-
-        this.snackBar.open(error.message, 'X', {
-          panelClass: 'custom-snackbar',
-        });
-
-        this.isFileUploading[`${controlName}`] = false
-      })
-    }
-  }
 
 
 
@@ -2491,8 +2300,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.channelCustomerIdentifier,
       );
     } else {
-        localStorage.removeItem('widget-error');
-        this.changeScreen('widget');
+      localStorage.removeItem('widget-error');
+      this.changeScreen('widget');
     }
   }
 
@@ -2597,12 +2406,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.updateTooltip(tooltip);
     const action = !this.isCallMute ? 'mute_call' : 'unmute_call';
     this.sdk.handleCallMic(action, this.dialogId);
-        // Short delay to ensure proper state transition
+    // Short delay to ensure proper state transition
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // Update the control state that affects the tooltip text
-    this.isCallMute = !this.isCallMute; 
+    this.isCallMute = !this.isCallMute;
   }
 
   convertCallRequest(view: any) {
@@ -2624,8 +2433,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async toggleCallVideo(tooltip: any) {
-    if(tooltip)
-    this.updateTooltip(tooltip);
+    if (tooltip)
+      this.updateTooltip(tooltip);
     const cameraStatus = !this.isVideoHide ? 'off' : 'on';
     this.sdk.convertCall(cameraStatus, 'video', this.dialogId);
     // Short delay to ensure proper state transition
@@ -2639,26 +2448,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (tooltip) {
       // Hide the tooltip first
       tooltip.hide();
-    
-      
+
+
       // Small delay before showing the new tooltip
       await new Promise(resolve => setTimeout(resolve, 150));
-      
+
       tooltip.show();
     }
   }
 
-  async toggleCallHold(tooltip:any) {
+  async toggleCallHold(tooltip: any) {
     // Call updateTooltip with the new desired state
     this.updateTooltip(tooltip);
-    
+
     // Handle the call action
     const action = !this.isCallOnHold ? 'holdCall' : 'retrieveCall';
     this.sdk.handleCallHoldState(action, this.dialogId);
     // Short delay to ensure proper state transition
     await new Promise(resolve => setTimeout(resolve, 100));
     // Update the control state that affects the tooltip text
-    this.isCallOnHold =  !this.isCallOnHold;
+    this.isCallOnHold = !this.isCallOnHold;
   }
 
   initiateWebRtcCall(callType: any) {
@@ -2699,14 +2508,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     else {
 
-      if(this.preChatFormData && typeof this.preChatFormData === 'object') {
+      if (this.preChatFormData && typeof this.preChatFormData === 'object') {
         const phoneNumber = this.preChatFormData.phone || "";
         const name = this.preChatFormData.name || "";
 
         this.webRTCConfig.customerName = name;
         this.webRTCConfig.customerNumber = phoneNumber;
 
-        if(phoneNumber || name ) {
+        if (phoneNumber || name) {
           this.webRTCConfig.customerName = name;
           this.webRTCConfig.customerNumber = phoneNumber
         }
@@ -2717,13 +2526,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         authConfigs: this.webRTCConfig,
       });
 
-        if (callType === 'video' && !this.isSecureWebCall) {
-          this.isVideoCallActive = true;
-        } else if (callType === 'screenshare') {
-          this.isScreenShareActive = true;
-        } else {
-          this.isAudioCallActive = true;
-        }
+      if (callType === 'video' && !this.isSecureWebCall) {
+        this.isVideoCallActive = true;
+      } else if (callType === 'screenshare') {
+        this.isScreenShareActive = true;
+      } else {
+        this.isAudioCallActive = true;
+      }
     }
   }
 
@@ -2947,10 +2756,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               this.isVideoCallActive = false;
               this.isScreenShareActive = false;
               this.endCountdown();
-              if(this.IsRegisteredInFreeSwitch) {
+              if (this.IsRegisteredInFreeSwitch) {
                 this.callEnd();
               }
-              if(this.isChatActive && data.response.dialog.callEndReason !== "NO_ANSWER"){
+              if (this.isChatActive && data.response.dialog.callEndReason !== "NO_ANSWER") {
                 this.clearSession();
               } else {
                 this.changeView('chat');
@@ -3008,19 +2817,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       let errorMessage = '';
       switch (data.response.type) {
         case 'generalError':
-        switch (data.response.description) {
+          switch (data.response.description) {
             case 'Service Unavailable':
-                errorMessage = `The service is currently unavailable. Please check your network connection and try again.`;
-                break;
+              errorMessage = `The service is currently unavailable. Please check your network connection and try again.`;
+              break;
             case 'Forbidden':
-                errorMessage = `Authentication failed. Please verify your SIP credentials and try again.`;
-                break;
+              errorMessage = `Authentication failed. Please verify your SIP credentials and try again.`;
+              break;
             case 'Session.getOffer unknown error.':
-                errorMessage = `Please check Audio / Video permissions in your browser.`;
-                break;
-        }
-        console.log('[Error] Call terminated:', errorMessage);
-        break;
+              errorMessage = `Please check Audio / Video permissions in your browser.`;
+              break;
+          }
+          console.log('[Error] Call terminated:', errorMessage);
+          break;
         case 'subscriptionFailed':
           errorMessage = `Certificate Issues: Please contact with your administrator`;
           console.log('[Error] Call terminated:', errorMessage);
@@ -3034,34 +2843,34 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           errorMessage = 'An unknown error occurred.';
       }
 
-      if(errorMessage) {
-       this.showAuthenticationResponseMessage = errorMessage;
-       this.activeVideoView = false;
+      if (errorMessage) {
+        this.showAuthenticationResponseMessage = errorMessage;
+        this.activeVideoView = false;
 
         if (this.standaloneWebRtc) {
-            this.showInvalidCodeError = true;
-            this.callPopUpView = false;
-            this.activeVideoView = false;
-            this.isWebRtcVideoCallActive = false;
-            this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-              duration: 3000,
-              panelClass: ['error-snackbar'],
-              horizontalPosition: 'right',
-            });
+          this.showInvalidCodeError = true;
+          this.callPopUpView = false;
+          this.activeVideoView = false;
+          this.isWebRtcVideoCallActive = false;
+          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+            duration: 3000,
+            panelClass: ['error-snackbar'],
+            horizontalPosition: 'right',
+          });
 
         } else {
 
-            this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-              duration: 3000,
-              panelClass: ['error-snackbar'],
-              horizontalPosition: 'right',
-            });
-            this.isAudioCallActive = false;
-            this.isSecureWebCall = false;
-            this.isVideoCallActive = false;
-            this.activeVideoView = false;
-            this.errorDuringWebRTCCall = true;
-            this.changeView('chat')
+          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+            duration: 3000,
+            panelClass: ['error-snackbar'],
+            horizontalPosition: 'right',
+          });
+          this.isAudioCallActive = false;
+          this.isSecureWebCall = false;
+          this.isVideoCallActive = false;
+          this.activeVideoView = false;
+          this.errorDuringWebRTCCall = true;
+          this.changeView('chat')
         }
       }
     }
@@ -3140,47 +2949,47 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async authenticateSecureLinkKey(isAuthenticated: boolean): Promise<void> {
-    
+
     this.dialogId = undefined;
     const roomId = this.webRtcSecureLink;
     this.setAuthorizedResponse = undefined;
 
     this.sdk.authenticateKey({ roomId }, async (res: any) => {
-        if (res.error) {
-            this.isSecureLinkExpired = true;
-            this.showAuthenticationResponseMessage = res.data.message
-                ? "The link has expired"
-                : res.message;
-            this.showInvalidCodeError = true;
-            return;
+      if (res.error) {
+        this.isSecureLinkExpired = true;
+        this.showAuthenticationResponseMessage = res.data.message
+          ? "The link has expired"
+          : res.message;
+        this.showInvalidCodeError = true;
+        return;
+      }
+
+      this.agentName = res.data.agentName;
+      res.data.diallingUri = this.webRTCConfig.diallingUri;
+      this.showAuthenticationResponseMessage = res.message;
+      this.showInvalidCodeError = false;
+      this.setAuthorizedResponse = res.data; // Now includes diallingUri
+
+      try {
+        if (this.webRTCConfig && !this.IsRegisteredInFreeSwitch) {
+          await this.logInToFreeSwitch();
         }
-
-        this.agentName = res.data.agentName;
-        res.data.diallingUri = this.webRTCConfig.diallingUri;
-        this.showAuthenticationResponseMessage = res.message;
-        this.showInvalidCodeError = false;
-        this.setAuthorizedResponse = res.data; // Now includes diallingUri
-
-        try {
-          if(this.webRTCConfig && !this.IsRegisteredInFreeSwitch) {
-            await this.logInToFreeSwitch();
-          }
       } catch (error) {
-          console.error("Error logging into FreeSwitch:", error);
-          return;
-      } 
-        if (isAuthenticated) {
-            this.changeView('secureWebVideoCall');
-            return;
-        }
+        console.error("Error logging into FreeSwitch:", error);
+        return;
+      }
+      if (isAuthenticated) {
+        this.changeView('secureWebVideoCall');
+        return;
+      }
 
-        if (!this.setAuthorizedResponse) {
-            return;
-        }
+      if (!this.setAuthorizedResponse) {
+        return;
+      }
 
-        this.standaloneWebRtc = true;
+      this.standaloneWebRtc = true;
     });
-}
+  }
 
 
   processSecureLinkMessage(message: any) {
@@ -3198,13 +3007,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // const hashPart = hashIndex !== -1 ? mediaUrl.substring(hashIndex) : '';
     // const baseUrl = "http://localhost:4000";
     // const fullUrl = `${baseUrl}${hashPart}`;
-    
+
     // console.log("fullUrl", fullUrl);
     // window.open(fullUrl, '_blank');
 
     const widgetIdentifier = urlParams.get('widgetIdentifier')
     if (widgetIdentifier === this.widgetIdentifier) {
-        this.authenticateSecureLinkKey(true);
+      this.authenticateSecureLinkKey(true);
     } else {
       console.warn('[Warning] Widget Identifiers do not match or there was an error during WebRTC call.');
 
@@ -3278,7 +3087,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
 
-  Selected5starOption(
+  selected5starOption(
     controlName: string,
     sectionIndex: number,
     attributeIndex: number,
@@ -3373,7 +3182,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
 
-  ChangeScaleStyle(
+  changeScaleStyle(
     controlName: string,
     sectionIndex: number,
     attributeIndex: number,
@@ -3631,20 +3440,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const truncatedName = fileName.length > 10
       ? fileName.substring(0, 7) + '...' + fileName.split('.').pop()
       : fileName;
-    // displayElement.textContent = truncatedName;
 
-
-    // Validate file size
-    const maxSize = fileSize * 1024 * 1024; // Convert to bytes
-    if (file.size > maxSize) {
-      errorDiv.textContent = `File size exceeds ${fileSize}MB limit`;
-      errorDiv.style.display = 'block';
-      // displayElement.textContent = '';
-      input.value = '';
-      return;
-    }
-
-    // Enable upload button
     this.setFileControl(sectionIndex, fileName, attribute.key)
     this.previewFileForm(file, sectionIndex, attributeIndex)
     uploadBtn.disabled = false;
@@ -3671,34 +3467,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return currentSection.get(controlName)?.value || ''
 
   }
-  isFileUploading: any = {};
-  uploadFileFromPrechat(sectionIndex: number, controlName: any, fileInput: any, id: any) {
-    this.isFileUploading[`${controlName}`] = true
-    if (fileInput.files && fileInput.files.length > 0) {
-      const file = fileInput.files[0]
-      const formData = new FormData();
-      formData.append('file', file);
 
-      this._http.post(`${this.__appConfig?.appConfig?.FILE_ENGINE_URL}/api/uploadFileStream`, formData).subscribe((res: any) => {
-        const fileName = `${this.__appConfig.appConfig?.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
-        this.setFileControl(sectionIndex, fileName, controlName)
-        // this.snackBar.("success-snackbar", 'file uploaded successfully', 3)
-        this.snackBar.open('File uploaded successfully', 'X', {
-          panelClass: 'custom-snackbar',
-        });
-        console.log(res)
-        this.isFileUploading[`${controlName}`] = false
-        this.disableUploadBtn(id);
-      }, (error) => {
-        console.log(error)
-        // this.snackBar.snackbarMessage("error-snackbar", error.message, 3)
-        this.snackBar.open(error.message, 'X', {
-          panelClass: 'custom-snackbar',
-        });
-        this.isFileUploading[`${controlName}`] = false
-      })
-    }
-  }
   disableUploadBtn(buttonId: any) {
     const uploadedBtn = document.querySelector(`#upload-btn-${buttonId}`);
     // uploadedBtn.textContent = 'Uploaded'
@@ -3886,4 +3655,168 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       default: return null;
     }
   }
+
+
+  // Common helper function for uploading a file to server
+
+
+  private uploadToFileServer(
+    file: File,
+    allowedExtensions: string[],
+    onSuccess: (res: any) => void,
+    onError: (errorMsg: string) => void
+  ): void {
+    console.log('uploadFile')
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+
+    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+      onError(`${file.name} unsupported type`);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('conversationId', `${Math.floor(Math.random() * 90000) + 10000}`);
+
+    this.sdk.moveToFileServer(formData, (res: any) => {
+      if (res?.isFileInvalid) {
+        console.log('status code ===>',res.statusCode )
+        onError(res);
+      } else {
+        onSuccess(res);
+      }
+    });
+  }
+
+
+  uploadFileFromForm(
+    event: Event,
+    additionalText: string,
+    restriction: boolean,
+    fileTypes: string[],
+  ): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const availableExtensions = restriction ? fileTypes.map(ext => ext.toLowerCase()) : this.fileExtensons;
+      console.log('file uploading')
+
+      const fileControl = this.preChatFormGroup.get(additionalText) as FormControl;
+
+      this.uploadToFileServer(
+        file,
+        availableExtensions,
+        (res) => {
+          this.fileName = res.name;
+          this.fileUrl = `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
+          fileControl?.setValue(this.fileUrl);
+        },
+        (errorMsg) => {
+          this.snackBar.open(errorMsg, 'X', { panelClass: 'custom-snackbar' });
+          this.resetFileValidation(event, additionalText);
+        }
+      );
+
+      input.value = '';
+    }
+  }
+
+
+
+
+
+
+  uploadFile(files: FileList, additionalText: string): void {
+    const availableExtensions = this.fileExtensons
+    console.log('uplaodFile')
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      this.uploadToFileServer(
+        file,
+        availableExtensions,
+        (res) => {
+          this.constructCimMessage(
+            res.type.split('/')[0],
+            '',
+            null,
+            null,
+            res.type,
+            res.name,
+            res.size,
+            additionalText,
+            res.name.split('.').pop()
+          );
+        },
+        (errorMsg) => {
+          this.snackBar.open(errorMsg, 'X', { panelClass: 'custom-snackbar' });
+          this.removeUploadFile();
+        }
+      );
+    }
+  }
+
+
+  uploadPrechatFile(
+    sectionIndex: number,
+    controlName: string,
+    fileInput: HTMLInputElement,
+    id: any
+  ): void {
+    if (fileInput.files && fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      this.isFileUploading[controlName] = true;
+
+      this.uploadToFileServer(
+        file,
+        this.fileExtensons,
+        (res) => {
+          const fileName = `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
+          this.setFileControl(sectionIndex, fileName, controlName);
+
+          this.snackBar.open('File uploaded successfully', 'X', { panelClass: 'custom-snackbar' });
+
+          this.isFileUploading[controlName] = false;
+          this.disableUploadBtn(id);
+        },
+        (errorMsg) => {
+          console.log(errorMsg)
+          this.snackBar.open(errorMsg, 'X', { panelClass: 'custom-snackbar' });
+          this.isFileUploading[controlName] = false;
+        }
+      );
+    }
+  }
+
+
+  uploadFileFromPrechat(sectionIndex: number, controlName: any, fileInput: any, id: any) {
+    this.isFileUploading[`${controlName}`] = true
+    if (fileInput.files && fileInput.files.length > 0) {
+      const file = fileInput.files[0]
+      const formData = new FormData();
+      formData.append('file', file);
+      this.uploadToFileServer(file, this.fileExtensons, ((res) => {
+
+        const fileName = `${this.__appConfig.appConfig?.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
+        this.setFileControl(sectionIndex, fileName, controlName)
+        this.snackBar.open('File uploaded successfully', 'X', {
+          panelClass: 'custom-snackbar',
+        });
+        console.log(res)
+        this.isFileUploading[`${controlName}`] = false
+        this.disableUploadBtn(id);
+
+      }), (errorMesage: any) => {
+        {
+          console.log(errorMesage)
+          this.snackBar.open(errorMesage, 'X', {
+            panelClass: 'custom-snackbar',
+          });
+          this.isFileUploading[`${controlName}`] = false;
+
+        }
+      })
+    }
+  }
+
 }

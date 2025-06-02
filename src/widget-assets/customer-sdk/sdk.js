@@ -353,13 +353,13 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
     method: 'POST',
     body: formData
   }).then(async (response) => {
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log("Error: ", errorText);
-        throw new Error(errorText);
-      }
-      return response.json();
-    })
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log("Error: ", errorText);
+      throw new Error(errorText);
+    }
+    return response.json();
+  })
     .then((result) => {
       console.log('Success: ', result);
       callback(result);
@@ -372,7 +372,9 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
       } catch (e) {
         errorDetails.message = "Error parsing JSON response.";
       }
-    
+
+      console.log('errorDetails========>',errorDetails)
+
       if (errorDetails.result && errorDetails.result.isInfected) {
         callback({ errorDetails, isFileInvalid: true, errorMesage: "The file could not be uploaded due to security concerns. Please try a different file." });
       } else {
@@ -429,7 +431,7 @@ async function setConversationDataByCustomerIdentifier(url, channelIdentifier, d
  */
 async function pushFormDataAsActivity(url, payload, callback) {
   try {
-    const response = await fetch(`${url}`, {
+    const response = await authorizedFetch(`${url}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -514,59 +516,59 @@ function authenticateRequest(authenticatorUrl, authData, callback) {
     },
     body: JSON.stringify(authData)
   })
-  .then(async (response) => {
-    const contentType = response.headers.get('content-type');
+    .then(async (response) => {
+      const contentType = response.headers.get('content-type');
 
-    if (!response.ok) {
-      const errorData = contentType?.includes('application/json')
-        ? await response.json()
-        : await response.text();
+      if (!response.ok) {
+        const errorData = contentType?.includes('application/json')
+          ? await response.json()
+          : await response.text();
 
-      const errorMessage =
-        response.status === 400
-          ? '400 Bad Request'
-          : response.status === 500
-          ? '500 Internal Server Error'
-          : 'An error occurred';
+        const errorMessage =
+          response.status === 400
+            ? '400 Bad Request'
+            : response.status === 500
+              ? '500 Internal Server Error'
+              : 'An error occurred';
 
+        callback({
+          error: true,
+          status: response.status,
+          message: errorMessage,
+          data: errorData,
+        });
+        throw new Error(`${errorMessage}: ${JSON.stringify(errorData)}`);
+      }
+      // Parse JSON response if available, fallback to text
+      return contentType?.includes('application/json') ? response.json() : response.text();
+    })
+    .then((result) => {
+
+      // Ensure `agentExtension` and `customerId` are present and not empty
+      if (result.agentExtension && result.customerId) {
+        callback({
+          error: false,
+          status: 200,
+          data: result,
+          message: 'Authentication Successful!',
+        });
+      } else {
+        callback({
+          error: true,
+          status: 400,
+          data: result,
+          message: 'Invalid response: Missing required fields (agentExtension or customerId).',
+        });
+      }
+    })
+    .catch((error) => {
+      console.error('Authentication API Error:', error);
       callback({
         error: true,
-        status: response.status,
-        message: errorMessage,
-        data: errorData,
+        status: 500,
+        message: 'An unexpected error occurred. Please try again later.',
       });
-      throw new Error(`${errorMessage}: ${JSON.stringify(errorData)}`);
-    }
-    // Parse JSON response if available, fallback to text
-    return contentType?.includes('application/json') ? response.json() : response.text();
-  })
-  .then((result) => {
-
-    // Ensure `agentExtension` and `customerId` are present and not empty
-    if (result.agentExtension && result.customerId) {
-      callback({
-        error: false,
-        status: 200,
-        data: result,
-        message: 'Authentication Successful!',
-      });
-    } else {
-      callback({
-        error: true,
-        status: 400,
-        data: result,
-        message: 'Invalid response: Missing required fields (agentExtension or customerId).',
-      });
-    }
-  })
-  .catch((error) => {
-    console.error('Authentication API Error:', error);
-    callback({
-      error: true,
-      status: 500,
-      message: 'An unexpected error occurred. Please try again later.',
     });
-  });
 }
 /**
  * IP Data Request
@@ -638,7 +640,7 @@ function getCalendarId(url, serviceIdentifier, callback) {
     });
 }
 
-function getCalendarEvents(calendarId,url, startTime,endTime,callback) {
+function getCalendarEvents(calendarId, url, startTime, endTime, callback) {
   authorizedFetch(`${url}/calendars/events?&calendarId=${calendarId}&startTime=${startTime}&endTime=${endTime}`)
     .then(response => response.json())
     .then((data) => {
@@ -3939,10 +3941,10 @@ function setupRemoteMedia(session, callback) {
     if (document.getElementById('remoteVideo')) {
       console.log("document.getElementById('remoteVideo').srcObject", document.getElementById('remoteVideo').srcObject)
       document.getElementById('remoteVideo').srcObject = remoteStream;
-  } else {
+    } else {
       console.error("Element with ID 'remoteVideo' does not exist.");
-  }
-  
+    }
+
 
     // var remoteVideo = document.getElementById('remoteVideo');
     // if (remoteVideo) remoteVideo.srcObject = remoteStream;
