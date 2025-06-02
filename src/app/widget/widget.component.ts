@@ -2208,8 +2208,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     if (filesAmount) {
+      this.fileLoading = true
       this.selectedFile = filesAmount;
+      let filesLoaded = 0;
       for (let i = 0; i < filesAmount.length; i++) {
+        const file = filesAmount[i];
         const reader = new FileReader();
         reader.onload = (event: any) => {
           console.log(this.imageUrls, 'urlssssssss');
@@ -2222,9 +2225,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               .split(':')[1]
               .split('/')[1]
               .split(';')[0],
-            fileName: filesAmount[i].name,
+            fileName: file.name,
           });
         };
+
+        filesLoaded++;
+        if (filesLoaded === filesAmount.length) {
+          this.fileLoading = false;
+        }
         reader.readAsDataURL(filesAmount[i]);
       }
     }
@@ -2243,11 +2251,97 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
     fileControl.updateValueAndValidity()
   }
+uploadFile(files: any, additionalText: string) {
+    let availableExtensions = [
+      'txt',
+      'png',
+      'jpg',
+      'jpeg',
+      'pdf',
+      'ppt',
+      'pptx',
+      'xlsx',
+      'xls',
+      'doc',
+      'docx',
+      'rtf',
+      'mp3',
+      'mp4',
+      'webp',
+    ];
+    let ln = files.length;
+    if (ln > 0) {
+      for (var i = 0; i < ln; i++) {
+        const fileSize = files[i].size;
+        const fileMimeType = files[i].name.split('.').pop();
 
+        // if (fileSize <= 5000000) {
+          if (availableExtensions.includes(fileMimeType.toLowerCase())) {
+            let fd = new FormData();
+            fd.append('file', files[i]);
+            fd.append(
+              'conversationId',
+              `${Math.floor(Math.random() * 90000) + 10000}`,
+            );
+            console.log('ready to Upload File', fileSize, fileMimeType);
 
+            this.sdk.moveToFileServer(
+              fd,
+              (res: any) => {
+                if (res?.isFileInvalid) {
+                  if(res?.statusCode === 413) {
+                    this.snackBar.open(`Error while uploading file(s) on Server. Requested Entity Too Large`, 'X', {
+                      duration: 3000,
+                      panelClass: ['error-snackbar'],
+                      horizontalPosition: 'right',
+                    });
+                    this.removeUploadFile();
+                    return;
+                  } else {
+                    this.snackBar.open(res?.errorMessage, 'X', {
+                      duration: 3000,
+                      panelClass: ['error-snackbar'],
+                      horizontalPosition: 'right',
+                    });
+                    this.removeUploadFile();
+                    return;
+                  }
+                }
 
-
-
+                this.constructCimMessage(
+                  res.type.split('/')[0],
+                  '',
+                  null,
+                  null,
+                  res.type,
+                  res.name,
+                  res.size,
+                  additionalText,
+                  res.name.split('.').pop(),
+                );
+              },
+            );
+          } else {
+            this.snackBar.open(files[i].name + ' unsupported type', 'X', {
+              panelClass: 'custom-snackbar',
+            });
+            this.removeUploadFile();
+          }
+        // } else {
+        //   console.log(this.preChatFormGroup.get(additionalText))
+        //   console.log(files[i].name + ' File size should be less than 5MB');
+        //   this.snackBar.open(
+        //     files[i].name + ' File size should be less than 5MB',
+        //     'X',
+        //     {
+        //       panelClass: 'custom-snackbar',
+        //     },
+        //   );
+        //   this.removeUploadFile();
+        // }
+      }
+    }
+  }
 
   removeUploadFile() {
     this.imageUrls = [];
@@ -3720,43 +3814,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       input.value = '';
     }
   }
-
-
-
-
-
-
-  uploadFile(files: FileList, additionalText: string): void {
-    const availableExtensions = this.fileExtensons
-    console.log('uplaodFile')
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-
-      this.uploadToFileServer(
-        file,
-        availableExtensions,
-        (res) => {
-          this.constructCimMessage(
-            res.type.split('/')[0],
-            '',
-            null,
-            null,
-            res.type,
-            res.name,
-            res.size,
-            additionalText,
-            res.name.split('.').pop()
-          );
-        },
-        (errorMsg) => {
-          this.snackBar.open(errorMsg, 'X', { panelClass: 'custom-snackbar' });
-          this.removeUploadFile();
-        }
-      );
-    }
-  }
-
-
   uploadPrechatFile(
     sectionIndex: number,
     controlName: string,

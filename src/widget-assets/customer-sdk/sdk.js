@@ -355,8 +355,16 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
   }).then(async (response) => {
     if (!response.ok) {
       const errorText = await response.text();
-      console.log("Error: ", errorText);
-      throw new Error(errorText);
+      if (response.status === 413) {
+        callback({
+          isFileInvalid: true,
+          errorMessage: "File too large. Please upload a smaller file.",
+          statusCode: response.status,
+        });
+        // Prevent further .then from running
+        throw new UploadError(errorText, response.status);
+      }
+      throw new UploadError(errorText, response.status);
     }
     return response.json();
   })
@@ -364,23 +372,42 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
       console.log('Success: ', result);
       callback(result);
     })
-    .catch((error) => {
-      let errorDetails = {};
+    .catch(async (error) => {
+      let errorDetails = {
+        message: error.message || "Unknown error occurred.",
+        statusCode: error.statusCode || null,
+      };
 
-      try {
-        errorDetails = JSON.parse(error.message);
-      } catch (e) {
-        errorDetails.message = "Error parsing JSON response.";
-      }
-
-      console.log('errorDetails========>',errorDetails)
-
-      if (errorDetails.result && errorDetails.result.isInfected) {
-        callback({ errorDetails, isFileInvalid: true, errorMesage: "The file could not be uploaded due to security concerns. Please try a different file." });
+      // try {
+      //   errorDetails = JSON.parse(error.message);
+      // } catch (e) {
+      //   errorDetails.message = "Error parsing JSON response.";
+      // }
+    
+      if (error.result && error.result.isInfected) {
+        callback({
+          errorDetails,
+          isFileInvalid: true,
+          errorMessage: "The file could not be uploaded due to security concerns. Please try a different file.",
+          statusCode: errorDetails.statusCode,
+        });
       } else {
-        callback({ errorDetails, isFileInvalid: true, errorMesage: "The file name contains special characters. Only underscore, hyphen and space are allowed in file name." });
+        callback({
+          errorDetails,
+          isFileInvalid: true,
+          errorMessage: errorDetails.message,
+          statusCode: errorDetails.statusCode,
+        });
       }
     });
+}
+
+class UploadError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.statusCode = statusCode;
+    this.name = 'UploadError';
+  }
 }
 /**
  * Set Conversation Data Api
