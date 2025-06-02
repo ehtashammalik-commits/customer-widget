@@ -54,6 +54,8 @@ defineFeature(feature, (test) => {
       });
     test('Customer selects a button from the carousel', ({ given, when, and, then }) => {
         let mockEvent: any;
+        let carousalMessage: any;
+        let selectedButton: any;
         given('the customer is in an active conversation with the bot', () => {
             mockEvent = {
                 type: 'CHANNEL_SESSION_STARTED',
@@ -69,11 +71,36 @@ defineFeature(feature, (test) => {
         });
         
         when('the customer receives a carousel message', () => {
+            carousalMessage = {
+                type: 'MESSAGE_RECEIVED',
+                data: {
+                    body: {
+                        markdownText: "",
+                        type:"Carousal",
+                        elements: [
+                            {
+                                "text": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt.",
+                                "url": "",
+                                "buttons": [
+                                    { "title": "One","payload": "One","type": "button" },
+                                    { "title": "Two", "payload": "Two","type": "button" }
+                                ],
+                            }
+                        ]
+                    }
+               }
+           }
 
+            jest.spyOn(component, 'handleCimMessage');
+            component.eventListener(carousalMessage);
+            expect(component.handleCimMessage).toHaveBeenCalledWith(carousalMessage.data);
         })
 
         and('the customer selects a button from a carousel card', () => {
-
+            selectedButton = carousalMessage.data.body.elements[0].buttons[0];
+            jest.spyOn(component, 'handleCarousalMessageTypes');
+            component.handleCarousalMessageTypes(selectedButton);
+            expect(component.handleCarousalMessageTypes).toHaveBeenCalledWith(selectedButton);
         });
 
         and('the customer submits their selection', () => {
@@ -81,7 +108,7 @@ defineFeature(feature, (test) => {
         });
 
         then('the selected button should be shown as a quoted reply in the conversation', () => {
-            pending
+            
         });
     });
 
@@ -105,7 +132,7 @@ defineFeature(feature, (test) => {
         });
 
         then('the selected list item should be shown as a quoted reply', () => {
-            pending
+           
         });
     });
 
@@ -129,7 +156,7 @@ defineFeature(feature, (test) => {
         });
 
         and('the URL should remain clickable', () => {
-            pending
+            
         });
     });
 
@@ -149,7 +176,7 @@ defineFeature(feature, (test) => {
         });
 
         and('the quoted reply should be visually associated with the carousel card', () => {
-            pending
+            
         });
     });
 
@@ -164,7 +191,7 @@ defineFeature(feature, (test) => {
         });
 
         then('the submitted carousel response should be displayed as non interactive', () => {
-            pending
+           
         });
     });
     

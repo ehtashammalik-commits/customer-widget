@@ -2086,6 +2086,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+  handleCarousalMessageTypes(button) {
+    console.log("here is button", button);
+  }
+
   endChat(): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent);
 

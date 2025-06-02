@@ -1230,15 +1230,19 @@
                               <div class="carousel-actions">
                                 <ng-container *ngFor="let button of item.buttons">
                                   <!-- If link type -->
-                                  <a *ngIf="button.additionalButtonDetails" 
-                                     [href]="button.additionalButtonDetails.url" 
-                                     target="{{ button.additionalButtonDetails.target }}">
-                                    <button mat-stroked-button>{{ button.title }}</button>
+                                  <a *ngIf="button.type === 'linkButton'" 
+                                    [href]="button.additionalButtonDetails?.url" 
+                                    [attr.target]="button.additionalButtonDetails?.target"
+                                    class="link-button">
+                                    {{ button.payload }}
                                   </a>
                     
                                   <!-- If normal button -->
-                                  <button mat-stroked-button *ngIf="!button.additionalButtonDetails">
-                                    {{ button.title }}
+                                  <!-- [disabled]="isSubmitted" -->
+                                  <button mat-stroked-button
+                                    *ngIf="button.type === 'button' || button.type === 'clickableList'"
+                                    (click)="handleButtonClick(button)">
+                                      {{ button.title }}
                                   </button>
                                 </ng-container>
                               </div>
