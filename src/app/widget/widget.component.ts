@@ -2251,7 +2251,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
     fileControl.updateValueAndValidity()
   }
-uploadFile(files: any, additionalText: string) {
+  uploadFile(files: any, additionalText: string) {
     let availableExtensions = [
       'txt',
       'png',
@@ -2276,57 +2276,57 @@ uploadFile(files: any, additionalText: string) {
         const fileMimeType = files[i].name.split('.').pop();
 
         // if (fileSize <= 5000000) {
-          if (availableExtensions.includes(fileMimeType.toLowerCase())) {
-            let fd = new FormData();
-            fd.append('file', files[i]);
-            fd.append(
-              'conversationId',
-              `${Math.floor(Math.random() * 90000) + 10000}`,
-            );
-            console.log('ready to Upload File', fileSize, fileMimeType);
+        if (availableExtensions.includes(fileMimeType.toLowerCase())) {
+          let fd = new FormData();
+          fd.append('file', files[i]);
+          fd.append(
+            'conversationId',
+            `${Math.floor(Math.random() * 90000) + 10000}`,
+          );
+          console.log('ready to Upload File', fileSize, fileMimeType);
 
-            this.sdk.moveToFileServer(
-              fd,
-              (res: any) => {
-                if (res?.isFileInvalid) {
-                  if(res?.statusCode === 413) {
-                    this.snackBar.open(`Error while uploading file(s) on Server. Requested Entity Too Large`, 'X', {
-                      duration: 3000,
-                      panelClass: ['error-snackbar'],
-                      horizontalPosition: 'right',
-                    });
-                    this.removeUploadFile();
-                    return;
-                  } else {
-                    this.snackBar.open(res?.errorMessage, 'X', {
-                      duration: 3000,
-                      panelClass: ['error-snackbar'],
-                      horizontalPosition: 'right',
-                    });
-                    this.removeUploadFile();
-                    return;
-                  }
+          this.sdk.moveToFileServer(
+            fd,
+            (res: any) => {
+              if (res?.isFileInvalid) {
+                if (res?.statusCode === 413) {
+                  this.snackBar.open(`Error while uploading file(s) on Server. Requested Entity Too Large`, 'X', {
+                    duration: 3000,
+                    panelClass: ['error-snackbar'],
+                    horizontalPosition: 'right',
+                  });
+                  this.removeUploadFile();
+                  return;
+                } else {
+                  this.snackBar.open(res?.errorMessage, 'X', {
+                    duration: 3000,
+                    panelClass: ['error-snackbar'],
+                    horizontalPosition: 'right',
+                  });
+                  this.removeUploadFile();
+                  return;
                 }
+              }
 
-                this.constructCimMessage(
-                  res.type.split('/')[0],
-                  '',
-                  null,
-                  null,
-                  res.type,
-                  res.name,
-                  res.size,
-                  additionalText,
-                  res.name.split('.').pop(),
-                );
-              },
-            );
-          } else {
-            this.snackBar.open(files[i].name + ' unsupported type', 'X', {
-              panelClass: 'custom-snackbar',
-            });
-            this.removeUploadFile();
-          }
+              this.constructCimMessage(
+                res.type.split('/')[0],
+                '',
+                null,
+                null,
+                res.type,
+                res.name,
+                res.size,
+                additionalText,
+                res.name.split('.').pop(),
+              );
+            },
+          );
+        } else {
+          this.snackBar.open(files[i].name + ' unsupported type', 'X', {
+            panelClass: 'custom-snackbar',
+          });
+          this.removeUploadFile();
+        }
         // } else {
         //   console.log(this.preChatFormGroup.get(additionalText))
         //   console.log(files[i].name + ' File size should be less than 5MB');
@@ -3752,19 +3752,24 @@ uploadFile(files: any, additionalText: string) {
 
 
   // Common helper function for uploading a file to server
-
-
   private uploadToFileServer(
     file: File,
     allowedExtensions: string[],
     onSuccess: (res: any) => void,
-    onError: (errorMsg: string) => void
+    onError: (error: {
+      errorMessage: string;
+      isFileInvalid: boolean;
+      statusCode?: number;
+      errorDetails?: any;
+    }) => void
   ): void {
-    console.log('uploadFile')
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
 
     if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
-      onError(`${file.name} unsupported type`);
+      onError({
+        errorMessage: `${file.name} unsupported type`,
+        isFileInvalid: true,
+      });
       return;
     }
 
@@ -3774,15 +3779,25 @@ uploadFile(files: any, additionalText: string) {
 
     this.sdk.moveToFileServer(formData, (res: any) => {
       if (res?.isFileInvalid) {
-        console.log('status code ===>',res.statusCode )
-        onError(res);
+        if (res.statusCode === 413) {
+          onError({
+            errorMessage: 'File too large. Please upload a smaller file.',
+            isFileInvalid: true,
+            statusCode: res.statusCode,
+          });
+        } else {
+          onError({
+            errorMessage: res.errorMessage || 'Failed to upload file.',
+            isFileInvalid: true,
+            statusCode: res.statusCode,
+            errorDetails: res.errorDetails || {},
+          });
+        }
       } else {
         onSuccess(res);
       }
     });
   }
-
-
   uploadFileFromForm(
     event: Event,
     additionalText: string,
@@ -3805,8 +3820,8 @@ uploadFile(files: any, additionalText: string) {
           this.fileUrl = `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
           fileControl?.setValue(this.fileUrl);
         },
-        (errorMsg) => {
-          this.snackBar.open(errorMsg, 'X', { panelClass: 'custom-snackbar' });
+        (error: any) => {
+          this.snackBar.open(error.errorMessage, 'X', { panelClass: 'custom-snackbar' });
           this.resetFileValidation(event, additionalText);
         }
       );
@@ -3836,44 +3851,12 @@ uploadFile(files: any, additionalText: string) {
           this.isFileUploading[controlName] = false;
           this.disableUploadBtn(id);
         },
-        (errorMsg) => {
-          console.log(errorMsg)
-          this.snackBar.open(errorMsg, 'X', { panelClass: 'custom-snackbar' });
+        (error: any) => {
+          console.log(error)
+          this.snackBar.open(error.errorMessage, 'X', { panelClass: 'custom-snackbar' });
           this.isFileUploading[controlName] = false;
         }
       );
     }
   }
-
-
-  uploadFileFromPrechat(sectionIndex: number, controlName: any, fileInput: any, id: any) {
-    this.isFileUploading[`${controlName}`] = true
-    if (fileInput.files && fileInput.files.length > 0) {
-      const file = fileInput.files[0]
-      const formData = new FormData();
-      formData.append('file', file);
-      this.uploadToFileServer(file, this.fileExtensons, ((res) => {
-
-        const fileName = `${this.__appConfig.appConfig?.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
-        this.setFileControl(sectionIndex, fileName, controlName)
-        this.snackBar.open('File uploaded successfully', 'X', {
-          panelClass: 'custom-snackbar',
-        });
-        console.log(res)
-        this.isFileUploading[`${controlName}`] = false
-        this.disableUploadBtn(id);
-
-      }), (errorMesage: any) => {
-        {
-          console.log(errorMesage)
-          this.snackBar.open(errorMesage, 'X', {
-            panelClass: 'custom-snackbar',
-          });
-          this.isFileUploading[`${controlName}`] = false;
-
-        }
-      })
-    }
-  }
-
 }

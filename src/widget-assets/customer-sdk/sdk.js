@@ -353,8 +353,13 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
     method: 'POST',
     body: formData
   }).then(async (response) => {
+
+
+    console.log('response from sdk ', response)
     if (!response.ok) {
       const errorText = await response.text();
+
+
       if (response.status === 413) {
         callback({
           isFileInvalid: true,
@@ -383,7 +388,7 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
       // } catch (e) {
       //   errorDetails.message = "Error parsing JSON response.";
       // }
-    
+
       if (error.result && error.result.isInfected) {
         callback({
           errorDetails,
