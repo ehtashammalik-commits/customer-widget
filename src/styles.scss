@@ -15,6 +15,36 @@ body {
   font-weight: 400;
 }
 
+
+
+.mat-radio-button {
+
+  &.mat-accent.mat-radio-checked .mat-radio-outer-circle {
+    border-color: #000000;
+  }
+
+  &.mat-accent .mat-radio-inner-circle,
+  .mat-radio-ripple .mat-ripple-element:not(.mat-radio-persistent-ripple),
+  &.mat-radio-checked .mat-radio-persistent-ripple,
+  &.mat-accent:active .mat-radio-persistent-ripple {
+    background-color: #000000;
+  }
+
+
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px !important;
+}
+
+.mat-select {
+  border: 1px solid #E3E3E3;
+  border-radius: 5px !important;
+  padding: 10px;
+  margin-bottom: 10px;
+}
 .error-snackbar {
     bottom: 150px;
     position: relative;
