@@ -916,11 +916,18 @@
                         }">YOU</span>
                     </div>
 
-                    <div *ngIf="message.header?.quotedType === 'Carousel'" class="quoted-reply-info">
+                    
+                    <div *ngIf="message.header?.quotedType === 'Carousel'" class="quoted-reply-info quoted-message-area">
                       <!-- Replace with whatever data or HTML structure you want to show -->
-                      <div class="quoted-carousal-details">
-                        <strong>Quoted a Carousal:</strong>
-                        <!-- Add more fields if needed -->
+                      <span class="quoted-sender-name">Bot</span>
+                      <div class="quoted-carousal-details quoted-inner-main">
+                        <img src="https://media.a1.bg/newsite2018/private/carousel/2023/10/Netflix_1920x1080.jpg">
+                        <span class="quoted-carousal-content">
+                          <strong>{{message.body.quotedCardTitle}}</strong>
+                          <p>{{message.body.quotedText}}</p>
+                          <span class="quoted-time time">{{message.body.quotedTime | date: "h:mm a"}}</span>
+                        </span>
+
                       </div>
                     </div>
                     <span class="message msg-1" *ngIf="message.body.type == 'PLAIN'" innerHTML="{{

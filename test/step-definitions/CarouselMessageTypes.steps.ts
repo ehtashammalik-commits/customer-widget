@@ -112,6 +112,46 @@ defineFeature(feature, (test) => {
                 body: {
                   markdownText: 'Original message',
                   type: 'Carousal',
+                  elements: [
+                    {
+                      text: 'Text from first card',
+                      url: '',
+                      buttons: [
+                        {
+                          title: 'One',
+                          payload: 'One',
+                          type: 'button',
+                          additionalButtonDetails: null
+                        }
+                      ],
+                      defaultAction: { type: '', url: '' },
+                      additionalCarouselElementDetails: {
+                        title: 'Card 1',
+                        image_url: '',
+                        alt: '',
+                        repeatAble: false
+                      }
+                    },
+                    {
+                      text: 'Text from second card',
+                      url: '',
+                      buttons: [
+                        {
+                          title: 'Two',
+                          payload: 'Two',
+                          type: 'button',
+                          additionalButtonDetails: null
+                        }
+                      ],
+                      defaultAction: { type: '', url: '' },
+                      additionalCarouselElementDetails: {
+                        title: 'Card 2',
+                        image_url: '',
+                        alt: '',
+                        repeatAble: false
+                      }
+                    }
+                  ]
                 },
                 header: {
                   timestamp: '2023-01-01T12:00:00Z'
@@ -124,32 +164,28 @@ defineFeature(feature, (test) => {
                     type: 'Customer'
                   },
                   originalMessageId: 'msg-001',
-                  intent: 'reply'
+                  intent: 'Two'
                 },
                 body: {
                   markdownText: 'Reply message',
-                  type: 'PLAIN',
-                  payload: null
+                  type: 'PLAIN'
                 }
               };
+            
 
-              
-
+              const scrollSpy = jest.spyOn(component, 'scrollToBottom');
+              const reportSpy = jest.spyOn(component, 'handleMessageReport');
               component.cimMessage = [originalMessage];
               component.handleCimMessage(quotedMessage);
 
               const lastMessage = component.cimMessage[component.cimMessage.length - 1];
-              expect(lastMessage.quotedText).toBe('Original message');
-              expect(lastMessage.quotedTime).toBe('2023-01-01T12:00:00Z');
+              expect(lastMessage.body.quotedText).toBe('Text from second card');
+              expect(lastMessage.body.quotedTime).toBe('2023-01-01T12:00:00Z');
               expect(lastMessage.header.quotedType).toBe('Carousal');
+              expect(lastMessage.body.quotedCardTitle).toBe('Card 2');
 
-              const scrollSpy = jest.spyOn(component, 'scrollToBottom');
-              const reportSpy = jest.spyOn(component, 'handleMessageReport');
               expect(scrollSpy).toHaveBeenCalled();
-              expect(reportSpy).toHaveBeenCalledWith(expect.objectContaining({
-                quotedText: 'Original message'
-              }));
-
+              expect(reportSpy).toHaveBeenCalledWith(quotedMessage);
             
         });
     });

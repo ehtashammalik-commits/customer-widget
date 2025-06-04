@@ -1212,7 +1212,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   eventListener(event: any) {
-    console.log("here is the event now", event);
     try {
       let lastMessage = this.cimMessage[this.cimMessage.length - 1];
       let messageType = lastMessage?.body?.subType?.toLowerCase();
@@ -1397,7 +1396,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     } 
 
     else if (cimMessage.header.sender.type.toLowerCase() === 'customer') {
-      console.log("if the sender is customer>>>>>>>>>>>>>>>>>")
       if (
         cimMessage.header.originalMessageId &&
         cimMessage.header.intent &&
@@ -2109,8 +2107,36 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleCarousalQuotedMessage(cimMessage: any) {
-    
+    const originalMessageId = cimMessage.header.originalMessageId;
+    const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
+  
+    if (originalMessage) {
+      cimMessage.body.quotedText = originalMessage.body.markdownText || '';
+      cimMessage.body.quotedTime = originalMessage.header.timestamp || '';
+      cimMessage.header.quotedType = originalMessage.body.type;
+  
+      // New logic: match intent with buttons payload
+      const elements = originalMessage.body.elements || [];
+  
+      for (const element of elements) {
+        const buttons = element.buttons || [];
+        for (const button of buttons) {
+          if (button.payload === cimMessage.header.intent) {
+            // Match found, assign extra quoted values
+            cimMessage.body.quotedText = element.text || cimMessage.quotedText;
+            cimMessage.body.quotedCardTitle = element.additionalCarouselElementDetails?.title || '';
+            break;
+          }
+        }
+      }
+    }
+  
+    this.cimMessage.push(cimMessage);
+    this.browserNotificationService.notify(cimMessage);
+    this.scrollToBottom();
+    this.handleMessageReport(cimMessage);
   }
+  
 
   endChat(): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent);
