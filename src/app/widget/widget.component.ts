@@ -1386,13 +1386,35 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
         this.editMessage(cimMessage);
         this.handleMessageReport(cimMessage);
-      } else {
+      } 
+      
+      else {
         this.cimMessage.push(cimMessage);
         this.browserNotificationService.notify(cimMessage);
         this.scrollToBottom();
         this.handleMessageReport(cimMessage);
       }
-    } else {
+    } 
+
+    else if (cimMessage.header.sender.type.toLowerCase() === 'customer') {
+      console.log("if the sender is customer>>>>>>>>>>>>>>>>>")
+      if (
+        cimMessage.header.originalMessageId &&
+        cimMessage.header.intent &&
+        cimMessage.header.intent.toLowerCase() !== 'update'
+      ) {
+        this.handleCarousalQuotedMessage(cimMessage);
+      } 
+
+      else {
+        this.cimMessage.push(cimMessage);
+        this.browserNotificationService.notify(cimMessage);
+        this.scrollToBottom();
+        this.handleMessageReport(cimMessage);
+      }
+    } 
+    
+    else {
       if (
         cimMessage.body.type.toLowerCase() != 'notification' &&
         cimMessage.header.sender.type.toLowerCase() == 'agent'
@@ -2086,8 +2108,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  handleCarousalMessageTypes(button) {
-    console.log("here is button", button);
+  handleCarousalQuotedMessage(cimMessage: any) {
+    
   }
 
   endChat(): void {

@@ -916,6 +916,13 @@
                         }">YOU</span>
                     </div>
 
+                    <div *ngIf="message.header?.quotedType === 'Carousel'" class="quoted-reply-info">
+                      <!-- Replace with whatever data or HTML structure you want to show -->
+                      <div class="quoted-carousal-details">
+                        <strong>Quoted a Carousal:</strong>
+                        <!-- Add more fields if needed -->
+                      </div>
+                    </div>
                     <span class="message msg-1" *ngIf="message.body.type == 'PLAIN'" innerHTML="{{
                         (message.body.markdownText | tagFormat:enableDynamicLink)
                       }}" [ngStyle]="{
@@ -1241,7 +1248,7 @@
                                   <!-- [disabled]="isSubmitted" -->
                                   <button mat-stroked-button
                                     *ngIf="button.type === 'button' || button.type === 'clickableList'"
-                                    (click)="handleButtonClick(button)">
+                                    (click)="sendButtonMessage(button, message.id)">
                                       {{ button.title }}
                                   </button>
                                 </ng-container>

@@ -32,7 +32,11 @@ defineFeature(feature, (test) => {
         const mockSanitizer = {} as any;
         const mockSnackBar = {} as any;
         const mockDialog = {} as any;
-        const mockBrowserNotificationService = {} as any;
+        const mockBrowserNotificationService: any = {
+            notify: jest.fn(),
+            playSound: jest.fn(),
+            openBrowserNotification: jest.fn(),
+          };
         const mockDeliveryNotificationService = {} as any;
         const mockPostMessageHandlerService = {} as any;
         component = new WidgetComponent(
@@ -97,17 +101,55 @@ defineFeature(feature, (test) => {
         })
 
         and('the customer selects a button from a carousel card', () => {
-            selectedButton = carousalMessage.data.body.elements[0].buttons[0];
-            jest.spyOn(component, 'handleCarousalMessageTypes');
-            component.handleCarousalMessageTypes(selectedButton);
-            expect(component.handleCarousalMessageTypes).toHaveBeenCalledWith(selectedButton);
-        });
+          });          
 
         and('the customer submits their selection', () => {
-
         });
 
         then('the selected button should be shown as a quoted reply in the conversation', () => {
+            const originalMessage = {
+                id: 'msg-001',
+                body: {
+                  markdownText: 'Original message',
+                  type: 'Carousal',
+                },
+                header: {
+                  timestamp: '2023-01-01T12:00:00Z'
+                }
+              };
+            
+              const quotedMessage = {
+                header: {
+                  sender: {
+                    type: 'Customer'
+                  },
+                  originalMessageId: 'msg-001',
+                  intent: 'reply'
+                },
+                body: {
+                  markdownText: 'Reply message',
+                  type: 'PLAIN',
+                  payload: null
+                }
+              };
+
+              
+
+              component.cimMessage = [originalMessage];
+              component.handleCimMessage(quotedMessage);
+
+              const lastMessage = component.cimMessage[component.cimMessage.length - 1];
+              expect(lastMessage.quotedText).toBe('Original message');
+              expect(lastMessage.quotedTime).toBe('2023-01-01T12:00:00Z');
+              expect(lastMessage.header.quotedType).toBe('Carousal');
+
+              const scrollSpy = jest.spyOn(component, 'scrollToBottom');
+              const reportSpy = jest.spyOn(component, 'handleMessageReport');
+              expect(scrollSpy).toHaveBeenCalled();
+              expect(reportSpy).toHaveBeenCalledWith(expect.objectContaining({
+                quotedText: 'Original message'
+              }));
+
             
         });
     });
