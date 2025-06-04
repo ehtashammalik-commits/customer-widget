@@ -2756,7 +2756,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         ) {
           // this.remoteVideoActive = false;
           console.log('Remote Camera Off');
-          this.remoteStreamStatus=true;
+          setTimeout(() => {this.remoteStreamStatus=true;},2000)
         } else if (
           data.dialog.eventRequest === 'remote' &&
           data.dialog.streamStatus === 'on'

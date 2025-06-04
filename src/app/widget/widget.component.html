@@ -1561,7 +1561,8 @@
              <!-- test  div start -->
             <div class="video-container">
               <!-- Remote video when visible -->
-              <video *ngIf="!remoteStreamStatus" #remoteVideo id="remoteVideo" autoplay playsinline
+               <!-- *ngIf="!remoteStreamStatus"  -->
+              <video #remoteVideo id="remoteVideo" autoplay playsinline
                 class="remoteVideo"></video>
 
               <!-- Full-size cam-off icon placeholder -->
