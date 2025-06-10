@@ -47,7 +47,7 @@
         "participant-joined": "has joined the chat",
         "participant-left": "has left the chat",
         "agents-not-available": "No agents are available at the moment",
-        "transfering-request-to": "Your request is being transferred to",
+        "transfering-request-to": "Your request is being transferred, please wait!",
         "queue-please-wait": "queue, please wait!",
         "supported-file-types-allowed": "All supported file types allowed"
     },
