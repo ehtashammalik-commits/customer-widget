@@ -813,8 +813,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   onFormSubmit(): void {
-
-    console.log("here is this.isChatActive", this.isChatActive);
     try {
       if (this.preChatFormGroup.valid) {
         this.preChatFormLoader = true;
@@ -843,8 +841,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     } catch (error) {
       alert('Error while submitting the form');
     }
-
-    console.log("here is this.isChatActive", this.isChatActive);
   }
 
   onCallbackFormSubmit(): void {
@@ -1870,8 +1866,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.snackBar.open('unable to process the file', 'X');
       return;
     }
-
-    console.log("here is the header now", header)
 
     let msgPayload = {
       type: msgType,
