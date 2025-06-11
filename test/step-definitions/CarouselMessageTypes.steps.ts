@@ -19,7 +19,9 @@ defineFeature(feature, (test) => {
           } as any;
         const mockActivatedRoute = { snapshot: { params: {} } } as any;
         const mockFormBuilder = { group: jest.fn() } as any;
-        const mockSdkService = {} as any;
+        const mockSdkService = {
+          sendChatMessage: jest.fn()
+        } as any;
         const mockAppConfig = {
         appConfig: {
             ENABLE_LOGO: true,
@@ -55,6 +57,12 @@ defineFeature(feature, (test) => {
             mockPostMessageHandlerService,
             mockTranslateService
           );
+
+          (component as any).elementView = {
+            nativeElement: {
+              value: '',
+            },
+          };
       });
     test('Customer selects a button from the carousel', ({ given, when, and, then }) => {
         let mockEvent: any;
@@ -101,93 +109,132 @@ defineFeature(feature, (test) => {
         })
 
         and('the customer selects a button from a carousel card', () => {
+          selectedButton = {
+            title: 'Two',
+            payload: 'Two'
+          };
           });          
 
         and('the customer submits their selection', () => {
-        });
+          const constructSpy = jest.spyOn(component, 'constructCimMessage');
+          const originalMessageId = 'msg-001';
+          const carousalCardId = 'Card 2';
 
-        then('the selected button should be shown as a quoted reply in the conversation', () => {
-            const originalMessage = {
-                id: 'msg-001',
-                body: {
-                  markdownText: 'Original message',
-                  type: 'Carousal',
-                  elements: [
-                    {
-                      text: 'Text from first card',
-                      url: '',
-                      buttons: [
-                        {
-                          title: 'One',
-                          payload: 'One',
-                          type: 'button',
-                          additionalButtonDetails: null
-                        }
-                      ],
-                      defaultAction: { type: '', url: '' },
-                      additionalCarouselElementDetails: {
-                        title: 'Card 1',
-                        image_url: '',
-                        alt: '',
-                        repeatAble: false
-                      }
-                    },
-                    {
-                      text: 'Text from second card',
-                      url: '',
-                      buttons: [
-                        {
-                          title: 'Two',
-                          payload: 'Two',
-                          type: 'button',
-                          additionalButtonDetails: null
-                        }
-                      ],
-                      defaultAction: { type: '', url: '' },
-                      additionalCarouselElementDetails: {
-                        title: 'Card 2',
-                        image_url: '',
-                        alt: '',
-                        repeatAble: false
-                      }
-                    }
-                  ]
-                },
-                header: {
-                  timestamp: '2023-01-01T12:00:00Z'
+          component.sendCarousalMessage(selectedButton, originalMessageId, carousalCardId);
+
+          expect(constructSpy).toHaveBeenCalledWith(
+            'PLAIN',
+            'Two',
+            'Two',
+            originalMessageId,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'Card 2'
+          );
+      });
+
+      then('the selected button should be shown as a quoted reply in the conversation', () => {
+        const originalMessage = {
+          id: 'msg-001',
+          body: {
+            markdownText: 'Original message',
+            type: 'Carousal',
+            elements: [
+              {
+                text: 'Text from first card',
+                url: '',
+                buttons: [
+                  {
+                    title: 'One',
+                    payload: 'One',
+                    type: 'button',
+                    additionalButtonDetails: null
+                  }
+                ],
+                defaultAction: { type: '', url: '' },
+                additionalCarouselElementDetails: {
+                  id: 'card-1',
+                  title: 'Card 1',
+                  image_url: 'https://example.com/card1.jpg',
+                  alt: 'Card 1 image',
+                  repeatAble: false
                 }
-              };
-            
-              const quotedMessage = {
-                header: {
-                  sender: {
-                    type: 'Customer'
-                  },
-                  originalMessageId: 'msg-001',
-                  intent: 'Two'
-                },
-                body: {
-                  markdownText: 'Reply message',
-                  type: 'PLAIN'
+              },
+              {
+                text: 'Text from second card',
+                url: '',
+                buttons: [
+                  {
+                    title: 'Two',
+                    payload: 'Two',
+                    type: 'button',
+                    additionalButtonDetails: null
+                  }
+                ],
+                defaultAction: { type: '', url: '' },
+                additionalCarouselElementDetails: {
+                  id: 'card-2',
+                  title: 'Card 2',
+                  image_url: 'https://example.com/card2.jpg',
+                  alt: 'Card 2 image',
+                  repeatAble: false
                 }
-              };
-            
-
-              const scrollSpy = jest.spyOn(component, 'scrollToBottom');
-              const reportSpy = jest.spyOn(component, 'handleMessageReport');
-              component.cimMessage = [originalMessage];
-              component.handleCimMessage(quotedMessage);
-
-              const lastMessage = component.cimMessage[component.cimMessage.length - 1];
-              expect(lastMessage.body.quotedText).toBe('Text from second card');
-              expect(lastMessage.body.quotedTime).toBe('2023-01-01T12:00:00Z');
-              expect(lastMessage.header.quotedType).toBe('Carousal');
-              expect(lastMessage.body.quotedCardTitle).toBe('Card 2');
-
-              expect(scrollSpy).toHaveBeenCalled();
-              expect(reportSpy).toHaveBeenCalledWith(quotedMessage);
-            
-        });
+              }
+            ]
+          },
+          header: {
+            timestamp: '2023-01-01T12:00:00Z',
+            sender: {
+              type: 'Agent'
+            }
+          }
+        };
+      
+        const quotedMessage = {
+          header: {
+            sender: {
+              type: 'Customer'
+            },
+            originalMessageId: 'msg-001',
+            intent: 'Two',
+            additionalData: {
+              carousalCardId: 'card-2'
+            }
+          },
+          body: {
+            markdownText: 'Reply message',
+            type: 'PLAIN'
+          }
+        };
+      
+        const scrollSpy = jest.spyOn(component, 'scrollToBottom');
+        const reportSpy = jest.spyOn(component, 'handleMessageReport');
+      
+        component.cimMessage = [originalMessage];
+        component.handleCimMessage(quotedMessage);
+      
+        const lastMessage = component.cimMessage[component.cimMessage.length - 1];
+      
+        expect(lastMessage.body.quotedText).toBe('Text from second card');
+        expect(lastMessage.body.quotedTime).toBe('2023-01-01T12:00:00Z');
+        expect(lastMessage.header.quotedType).toBe('Carousal');
+        expect(lastMessage.body.quotedCardTitle).toBe('Card 2');
+        expect(lastMessage.body.quotedCardImage).toBe('https://example.com/card2.jpg');
+        expect(lastMessage.body.quotedAltImage).toBe('Card 2 image');
+        expect(lastMessage.body.quotedButtons).toEqual([
+          {
+            title: 'Two',
+            payload: 'Two',
+            type: 'button',
+            additionalButtonDetails: null
+          }
+        ]);
+        expect(scrollSpy).toHaveBeenCalled();
+        expect(reportSpy).toHaveBeenCalledWith(quotedMessage);
+      });      
     });
 
     

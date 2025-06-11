@@ -919,9 +919,9 @@
                     
                     <div *ngIf="message.header?.quotedType === 'Carousel'" class="quoted-reply-info quoted-message-area">
                       <!-- Replace with whatever data or HTML structure you want to show -->
-                      <span class="quoted-sender-name">Bot</span>
+                      <span class="quoted-sender-name">{{message.senderType}}</span>
                       <div class="quoted-carousal-details quoted-inner-main">
-                        <img src="https://media.a1.bg/newsite2018/private/carousel/2023/10/Netflix_1920x1080.jpg">
+                        <img [src]="message.body.quotedCardImage" alt="message.body.quotedAltImage" />
                         <span class="quoted-carousal-content">
                           <strong>{{message.body.quotedCardTitle}}</strong>
                           <p>{{message.body.quotedText}}</p>
@@ -1255,7 +1255,7 @@
                                   <!-- [disabled]="isSubmitted" -->
                                   <button mat-stroked-button
                                     *ngIf="button.type === 'button' || button.type === 'clickableList'"
-                                    (click)="sendButtonMessage(button, message.id)">
+                                    (click)="sendCarousalMessage(button, message.id, item.additionalCarouselElementDetails.id)">
                                       {{ button.title }}
                                   </button>
                                 </ng-container>

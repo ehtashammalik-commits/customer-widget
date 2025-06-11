@@ -1775,11 +1775,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     fileSize?: number,
     additionalText?: string,
     fileType?: string,
+    carousalCardId?: null | string,
   ) {
     let header = {
       originalMessageId: null as null | string,
       intent: null as null | string,
       entities: null as null | string,
+      additionalData: {} as any,
       sender: {
         id: '460df46c-adf9-11ed-afa1-0242ac120002',
         type: 'CUSTOMER',
@@ -1807,6 +1809,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (transformedIntent.entities) {
         header.entities = transformedIntent.entities;
       }
+      header.additionalData = {
+        carousalCardId:
+          typeof carousalCardId === 'string' && carousalCardId.trim() !== ''
+            ? carousalCardId
+            : null,
+      };
       body.type = 'PLAIN';
       body.markdownText = text!.trim();
     } else if (
@@ -1862,6 +1870,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.snackBar.open('unable to process the file', 'X');
       return;
     }
+
+    console.log("here is the header now", header)
 
     let msgPayload = {
       type: msgType,
@@ -2101,33 +2111,57 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         'PLAIN',
         data.title.trim(),
         data.payload,
+        originalMessageId
+      );
+    }
+  }
+
+  sendCarousalMessage(data: any, originalMessageId : string, carousalCardId? : null | string) {
+    if (data.title.trim() !== '') {
+      this.constructCimMessage(
+        'PLAIN',
+        data.title.trim(),
+        data.payload,
         originalMessageId,
+        null,
+        null,
+        null,
+        null,
+        null,
+        carousalCardId
       );
     }
   }
 
   handleCarousalQuotedMessage(cimMessage: any) {
+  
     const originalMessageId = cimMessage.header.originalMessageId;
+    const carousalCardId = cimMessage.header.additionalData?.carousalCardId;
+
     const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
   
     if (originalMessage) {
-      cimMessage.body.quotedText = originalMessage.body.markdownText || '';
-      cimMessage.body.quotedTime = originalMessage.header.timestamp || '';
-      cimMessage.header.quotedType = originalMessage.body.type;
+      cimMessage.body.quotedText = originalMessage.body?.markdownText || '';
+      cimMessage.body.quotedTime = originalMessage.header?.timestamp || '';
+      cimMessage.header.quotedType = originalMessage.body?.type;
+      cimMessage.senderType = originalMessage.header.sender.type
   
-      // New logic: match intent with buttons payload
-      const elements = originalMessage.body.elements || [];
+      const elements = originalMessage.body?.elements || [];
   
-      for (const element of elements) {
-        const buttons = element.buttons || [];
-        for (const button of buttons) {
-          if (button.payload === cimMessage.header.intent) {
-            // Match found, assign extra quoted values
-            cimMessage.body.quotedText = element.text || cimMessage.quotedText;
-            cimMessage.body.quotedCardTitle = element.additionalCarouselElementDetails?.title || '';
-            break;
-          }
-        }
+      // Find the carousel element matching the carousalCardId
+      const matchedElement = elements.find(
+        (element: any) =>
+          element.additionalCarouselElementDetails?.id === carousalCardId
+      );
+
+    
+  
+      if (matchedElement) {
+        cimMessage.body.quotedText = matchedElement.text
+        cimMessage.body.quotedCardTitle = matchedElement.additionalCarouselElementDetails?.title;
+        cimMessage.body.quotedCardImage = matchedElement.additionalCarouselElementDetails?.image_url;
+        cimMessage.body.quotedAltImage = matchedElement.additionalCarouselElementDetails?.alt
+        cimMessage.body.quotedButtons = matchedElement.buttons || [];
       }
     }
   
