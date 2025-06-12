@@ -509,24 +509,82 @@ defineFeature(feature, (test) => {
     
 
     test('Customer attempts to respond to carousel after submitting', ({ given, when, then, and }) => {
-         let originalMessage: any;
-         let quotedMessage: any;
-        given('the customer has already responded to the carousel message', () => {
-        });
-
-        when('the customer tries to interact with the carousel again', () => {
-          
-        });
-
-        then('the carousel message should be disabled for further input', () => {
-        });
-
-        and('the quoted reply should be visually associated with the carousel card', () => {
-          // expect(quotedMessage.body.quotedCardTitle).toBe('Netflix');
-          // expect(quotedMessage.body.quotedCardImage).toBe('https://example.com/netflix.jpg');
-          // expect(quotedMessage.body.quotedText).toBe('Subscribe to Netflix');
-        });
+      let submittedCarousal: any;
+      let newMessage: any;
+    
+      given('the customer has already responded to the carousel message', () => {
+        submittedCarousal = {
+          id: 'card-123',
+          body: {
+            type: 'plain',
+            markdownText: 'hello',
+            elements: [
+              {
+                text: 'Text from first card',
+                url: '',
+                buttons: [
+                  {
+                    title: 'One',
+                    payload: 'One',
+                    type: 'clickableList',
+                    additionalButtonDetails: null
+                  }
+                ],
+                defaultAction: { type: '', url: '' },
+                additionalCarouselElementDetails: {
+                  id: 'card-123',
+                  title: 'Card 1',
+                  image_url: 'https://example.com/card1.jpg',
+                  alt: 'Card 1 image',
+                  repeatAble: false
+                }
+              }
+            ]
+          },
+          header: {
+            additionalData: {
+              carousalCardId:"123"
+            },
+            intent: 'text',
+            originalMessageId: '2',
+            sender: {
+              type: 'Connector',
+            },
+          },
+        };
+      });
+    
+      when('the customer tries to interact with the carousel again', () => {
+        component.cimMessage.push(submittedCarousal);
+    
+        newMessage = {
+          header: {
+            originalMessageId: 'card-123',
+            additionalData: {
+              carousalCardId: 'card-123',
+            },
+          },
+          id: '1',
+          body: {},
+        };
+      });
+    
+      then('the carousel message should be disabled for further input', () => {
+        const spy = jest.spyOn(component, 'handleCarousalQuotedMessage');
+        component.handleCarousalQuotedMessage(newMessage);
+    
+        expect(spy).toHaveBeenCalledWith(newMessage);
+        expect(component.cimMessage[0].body.disableAllButtons).toBe(true);
+      });
+    
+      and('the quoted reply should be visually associated with the carousel card', () => {
+        const quotedMessage = component.cimMessage[1]; // newMessage gets pushed in handleCarousalQuotedMessage
+        expect(quotedMessage.body.quotedCardTitle).toBe('Card 1');
+        expect(quotedMessage.body.quotedCardImage).toBe('https://example.com/card1.jpg');
+        expect(quotedMessage.body.quotedText).toBe('Text from first card');
+      });
     });
+    
 
     
     test('Customer refreshes the browser after submits the carousel response', ({ given, when, then }) => {
