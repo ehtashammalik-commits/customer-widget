@@ -2148,6 +2148,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           element.additionalCarouselElementDetails?.id === carousalCardId
       );
 
+      if (matchedElement?.additionalCarouselElementDetails?.repeatAble === false) {
+        originalMessage.body.disableAllButtons = true;
+      }
+
     
   
       if (matchedElement) {

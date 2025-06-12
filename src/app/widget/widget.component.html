@@ -1255,8 +1255,9 @@
                                   <!-- [disabled]="isSubmitted" -->
                                   <button mat-stroked-button
                                     *ngIf="button.type === 'button' || button.type === 'clickableList'"
-                                    (click)="sendCarousalMessage(button, message.id, item.additionalCarouselElementDetails.id)">
-                                      {{ button.title }}
+                                    (click)="sendCarousalMessage(button, message.id, item.additionalCarouselElementDetails.id)"
+                                    [disabled]="message.body.disableAllButtons">
+                                    {{ button.title }}
                                   </button>
                                 </ng-container>
                               </div>

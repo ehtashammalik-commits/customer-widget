@@ -192,7 +192,7 @@ defineFeature(feature, (test) => {
           header: {
             timestamp: '2023-01-01T12:00:00Z',
             sender: {
-              type: 'Agent'
+              type: 'BOT'
             }
           }
         };
@@ -509,35 +509,73 @@ defineFeature(feature, (test) => {
     
 
     test('Customer attempts to respond to carousel after submitting', ({ given, when, then, and }) => {
+         let originalMessage: any;
+         let quotedMessage: any;
         given('the customer has already responded to the carousel message', () => {
-
         });
 
         when('the customer tries to interact with the carousel again', () => {
-
+          
         });
 
         then('the carousel message should be disabled for further input', () => {
-
         });
 
         and('the quoted reply should be visually associated with the carousel card', () => {
-            
+          // expect(quotedMessage.body.quotedCardTitle).toBe('Netflix');
+          // expect(quotedMessage.body.quotedCardImage).toBe('https://example.com/netflix.jpg');
+          // expect(quotedMessage.body.quotedText).toBe('Subscribe to Netflix');
         });
     });
 
     
     test('Customer refreshes the browser after submits the carousel response', ({ given, when, then }) => {
+      const cimMessage: any = {
+        id: '1',
+        body: {
+          type: 'plain',
+          markdownText: 'hello',
+        },
+        header: {
+          additionalData:{
+            carousalCardId:'3'
+          },
+          intent: 'text',
+          originalMessageId: '2',
+          sender: {
+            type: 'agent',
+          },
+        },
+      };
         given('the customer has submitted a carousel response', () => {
+          const constructSpy = jest.spyOn(component, 'constructCimMessage');
+          const originalMessageId = 'msg-001';
+          const carousalCardId = 'Card 2';
 
+          component.sendCarousalMessage(selectedButton, originalMessageId, carousalCardId);
+
+          expect(constructSpy).toHaveBeenCalledWith(
+            'PLAIN',
+            'Two',
+            'Two',
+            originalMessageId,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'Card 2'
+          );
         });
 
         when('the customer refreshes the customer widget browser', () => {
-
+          const constructSpy = jest.spyOn(component, 'handleCarousalQuotedMessage');
+          expect(constructSpy).toHaveBeenLastCalledWith(cimMessage)
+          component.handleResumedMessages([cimMessage]);
         });
 
         then('the submitted carousel response should be displayed as non interactive', () => {
-           
+          expect(component.handleCarousalQuotedMessage).toHaveBeenLastCalledWith(cimMessage)
         });
     });
     
