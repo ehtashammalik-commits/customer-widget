@@ -1489,6 +1489,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleResumedMessages(cimMessages: any[]) {
+    
     cimMessages.forEach((cimMessage) => {
       if (
         cimMessage.body.type.toLowerCase() == 'plain' &&
@@ -1532,6 +1533,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         } else {
           this.cimMessage.push(cimMessage);
         }
+
+        if(cimMessage.header.additionalData.carousalCardId) {
+          this.handleCarousalQuotedMessage(cimMessage);
+        } else {
+          this.cimMessage.push(cimMessage);
+        }
+        
         this.isChatActive = true;
         this.processSeenMessages();
         this.scrollToBottom();

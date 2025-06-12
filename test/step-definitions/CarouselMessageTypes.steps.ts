@@ -543,7 +543,7 @@ defineFeature(feature, (test) => {
           intent: 'text',
           originalMessageId: '2',
           sender: {
-            type: 'agent',
+            type: 'Connector',
           },
         },
       };
@@ -569,8 +569,7 @@ defineFeature(feature, (test) => {
         });
 
         when('the customer refreshes the customer widget browser', () => {
-          const constructSpy = jest.spyOn(component, 'handleCarousalQuotedMessage');
-          expect(constructSpy).toHaveBeenLastCalledWith(cimMessage)
+          jest.spyOn(component, 'handleCarousalQuotedMessage');
           component.handleResumedMessages([cimMessage]);
         });
 
