@@ -1,5 +1,5 @@
 {
-  "SOCKET_URL": "http://localhost:7000",
+  "SOCKET_URL": "https://cim.expertflow.com/web-channel-manager",
   "FILE_SERVER_URL": "https://cim.expertflow.com/file-engine",
   "BOT_FRAMEWORK_URL": "https://cim.expertflow.com/bot-framework",
   "CCM_URL": "https://cim.expertflow.com/ccm",

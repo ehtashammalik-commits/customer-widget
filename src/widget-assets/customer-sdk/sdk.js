@@ -254,7 +254,6 @@ function voiceRequest(data) {
  * @param {*} data
  */
 function sendMessage(data) {
-  console.log("here is the data", data)
   data.timestamp = '';
   this.socket.emit('MESSAGE_RECEIVED', data, (res) => {
     console.log('[sendMessage] ', res);

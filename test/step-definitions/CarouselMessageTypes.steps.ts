@@ -71,7 +71,7 @@ defineFeature(feature, (test) => {
       let carousalMessage: any;
       let selectedButton: any;
 
-    test('Customer selects a button from the carousel', ({ given, when, and, then }) => {
+    test('Customer selects a button from the carousel', ({ given, when, and, then }) => {  
         given('the customer is in an active conversation with the bot', () => {
             mockEvent = {
                 type: 'CHANNEL_SESSION_STARTED',
@@ -563,10 +563,13 @@ defineFeature(feature, (test) => {
             additionalData: {
               carousalCardId: 'card-123',
             },
+            sender: {
+              type: 'Customer',
+            }
           },
           id: '1',
           body: {},
-        };
+        };        
       });
     
       then('the carousel message should be disabled for further input', () => {

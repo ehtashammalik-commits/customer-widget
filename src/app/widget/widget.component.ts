@@ -1211,7 +1211,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     try {
       let lastMessage = this.cimMessage[this.cimMessage.length - 1];
       let messageType = lastMessage?.body?.subType?.toLowerCase();
-      console.log("mesage type ================>", messageType)
       console.log("event.type", event.type)
       if (event.id !== undefined || event.id !== '' || event.id !== null) {
         switch (event.type) {
@@ -1470,7 +1469,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const newContent = cimMessage.body.markdownText
       this.cimMessage[existingMessageIndex].body.markdownText = newContent;
       this.cimMessage[existingMessageIndex].isEdited = true;
-
     }
   }
 
@@ -1514,7 +1512,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
           this.editMessage(cimMessage);
-        } else {
+        } 
+        else {
           this.cimMessage.push(cimMessage);
         }
         this.isChatActive = true;
@@ -1530,16 +1529,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
           this.editMessage(cimMessage);
-        } else {
-          this.cimMessage.push(cimMessage);
-        }
+        } 
 
         if(cimMessage.header.additionalData.carousalCardId) {
           this.handleCarousalQuotedMessage(cimMessage);
-        } else {
-          this.cimMessage.push(cimMessage);
-        }
-        
+        } 
+
+        this.cimMessage.push(cimMessage);
         this.isChatActive = true;
         this.processSeenMessages();
         this.scrollToBottom();
@@ -2149,7 +2145,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       cimMessage.senderType = originalMessage.header.sender.type
   
       const elements = originalMessage.body?.elements || [];
-  
       // Find the carousel element matching the carousalCardId
       const matchedElement = elements.find(
         (element: any) =>
@@ -2159,8 +2154,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (matchedElement?.additionalCarouselElementDetails?.repeatAble === false) {
         originalMessage.body.disableAllButtons = true;
       }
-
-    
   
       if (matchedElement) {
         cimMessage.body.quotedText = matchedElement.text
@@ -2171,10 +2164,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
   
-    this.cimMessage.push(cimMessage);
-    this.browserNotificationService.notify(cimMessage);
-    this.scrollToBottom();
-    this.handleMessageReport(cimMessage);
+    if(cimMessage.header.sender.type.toLowerCase() === "customer" && cimMessage.header.additionalData.carousalCardId) {
+
+      this.cimMessage.push(cimMessage);
+      this.browserNotificationService.notify(cimMessage);
+      this.scrollToBottom();
+      this.handleMessageReport(cimMessage);
+    } else {
+      console.error("Could not found carousal card id--- CimMessage Detail", cimMessage)
+    }
   }
   
 
