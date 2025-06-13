@@ -261,7 +261,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   callbackLoader = false;
   callbackConfig: any;
   todayShifts: { eventId: string, shiftName: string | null, startTime: string, endTime: string }[] = [];
-  events: EventData[] = []; 
+  events: EventData[] = [];
   orderedEvents: any[] = [];
   daySummary: { startOfDay: Date | null; endOfDay: Date | null } | null = null;
 
@@ -318,16 +318,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async ngAfterViewInit(): Promise<void> {
-    if(!this.standaloneWebRtc) {
+    if (!this.standaloneWebRtc) {
       this.customerChatResumed();
-        console.log('Not Secure Chat View');
+      console.log('Not Secure Chat View');
     }
 
     // Set the Customer Widget Theme Color based on Configurations from Unified Admin's Web Widget settings
     setTimeout(() => {
-        (this.el.nativeElement as HTMLElement).style.setProperty('--main-color', this.theme);
+      (this.el.nativeElement as HTMLElement).style.setProperty('--main-color', this.theme);
     }, 1000);
-}
+  }
 
 
   ngOnInit(): void {
@@ -338,7 +338,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
 
-      const rawEncryptedKey = params['encryptedKey']? params['encryptedKey']: null;
+      const rawEncryptedKey = params['encryptedKey'] ? params['encryptedKey'] : null;
 
       if (rawEncryptedKey !== null) {
         const preservedKey = decodeURIComponent(rawEncryptedKey);
@@ -482,7 +482,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (response: any) => {
         console.log('Connection Response:', response);
         if (response) {
-          
+
           this.eventListener(response);
           console.log('event listener:', response);
         }
@@ -502,7 +502,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   async getCalendarEvents() {
     this.sdk
       .fetchBusinessCalendarId()
-      .then((calendarId:string) => {
+      .then((calendarId: string) => {
 
         return this.sdk.getCalendarEvents(calendarId);
       })
@@ -520,7 +520,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getTodayEvent(): Promise<any[]> {
     return new Promise((resolve, reject) => {
       try {
-        
+
         const today = new Date();
         const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Start of today in local time
         const todayEnd = new Date(todayStart);
@@ -552,7 +552,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             endTime: shift.endTime,
           }))
         );
-  
+
         // If no shifts are available, handle accordingly
         if (!allShifts.length) {
           this.daySummary = null;
@@ -571,27 +571,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               .map((shift) => (shift?.endTime ? new Date(shift.endTime).getTime() : -Infinity))
           )
         );
-  
+
         // Set the day summary with the minimum and maximum times
         this.daySummary = {
           startOfDay: minStartTime,
           endOfDay: maxEndTime,
         };
-        
+
         ///this.orderedEvents = allShifts;
-  
+
         resolve(this.orderedEvents);
       } catch (error) {
         reject("Error processing Business Hours events: " + error);
       }
     });
   }
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
 
   formatTime(dateTime: string): string {
     const date = new Date(dateTime);
@@ -755,7 +755,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.enableWebRtc = configs.webRtc?.enableWebRtc;
       console.log('List of webRTC Configs: ', this.webRTCConfig);
 
-      if(this.standaloneWebRtc) {
+      if (this.standaloneWebRtc) {
         await this.authenticateSecureLinkKey(false);
         this.changeScreen('webRtcScreen');
       }
@@ -810,7 +810,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log('Event Payload: ==>', eventPayload);
           // If Error is false than proceed with the start Chat and user data setting
           if (!eventPayload.error) {
-            this.setUserData(eventPayload.data, 'startChat');           
+            this.setUserData(eventPayload.data, 'startChat');
           }
         } else {
           this.preChatFormLoader = false;
@@ -970,7 +970,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         } else {
           this.additionalPanel = true;
         }
-        if(this.standaloneWebRtc) {
+        if (this.standaloneWebRtc) {
           this.authenticateSecureLinkKey(false);
         }
         this.preChatFormScreen = false;
@@ -1088,12 +1088,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   async changeView(view: any) {
     if (this.showInvalidCodeError && this.standaloneWebRtc) {
-      if(!this.isSecureLinkExpired) {
-      this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-        horizontalPosition: 'right',
-      });
+      if (!this.isSecureLinkExpired) {
+        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'right',
+        });
       }
       return;
     }
@@ -1193,7 +1193,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeCallbackView = false;
           this.activeCallbackResponseView = false;
           this.isSecureWebCall = false;
-          if(!this.IsRegisteredInFreeSwitch) {
+          if (!this.IsRegisteredInFreeSwitch) {
             await this.logInToFreeSwitch();
           }
           this.initiateWebRtcCall(view);
@@ -1264,7 +1264,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   //   if (document.getElementById('localVideo')) {
   //   this.localStream = document.getElementById('localVideo')
   //   console.log("here is the localStream")
-  //   } 
+  //   }
 
   //   if(document.getElementById('remoteVide')) {
   //   this.remoteStream = document.getElementById('localVideo')
@@ -1368,12 +1368,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'CHANNEL_SESSION_EXPIRED':
           case 'SOCKET_DISCONNECTED':
             if (event.data == 'io server disconnect') {
-            localStorage.removeItem('user');
-            if (messageType !== 'survey') {
-              this.clearSession();
+              localStorage.removeItem('user');
+              if (messageType !== 'survey') {
+                this.clearSession();
+              }
+              this.composerDisable()
             }
-            this.composerDisable()
-          }
             break;
           case 'SOCKET_RECONNECTED':
             console.log(
@@ -1948,10 +1948,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.fileLoading = false;
       this.imageUrls = [];
       this.selectedFile = null as any;
-    } else if(messageTypesFormediaURLs.includes(messageType)){
+    } else if (messageTypesFormediaURLs.includes(messageType)) {
       const imageUrl = this.__appConfig.appConfig.FILE_SERVER_URL + "/api/downloadFileStream?filename=" + fileName;
       // this.sdk.getFileURLfromServer(imageUrl, (res: any ) => {
-      body['attachment'] = this.buildMediaAttachment(imageUrl, fileSize || 0, fileMimeType || '', fileType || '' )
+      body['attachment'] = this.buildMediaAttachment(imageUrl, fileSize || 0, fileMimeType || '', fileType || '')
       if (messageType == "application" || messageType == "text") {
         body.type = 'FILE';
         body.markdownText = additionalText || '';
@@ -1981,9 +1981,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       return;
     }
   }
-  
 
-  buildMediaAttachment(mediaUrl: SafeUrl, fileSize?: any , fileMimeType?: string, fileType?:any ): any {
+
+  buildMediaAttachment(mediaUrl: SafeUrl, fileSize?: any, fileMimeType?: string, fileType?: any): any {
     return {
       mediaUrl: mediaUrl,
       type: fileMimeType,
@@ -2255,8 +2255,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.channelCustomerIdentifier,
       );
     } else {
-        localStorage.removeItem('widget-error');
-        this.changeScreen('widget');
+      localStorage.removeItem('widget-error');
+      this.changeScreen('widget');
     }
   }
 
@@ -2361,12 +2361,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.updateTooltip(tooltip);
     const action = !this.isCallMute ? 'mute_call' : 'unmute_call';
     this.sdk.handleCallMic(action, this.dialogId);
-        // Short delay to ensure proper state transition
+    // Short delay to ensure proper state transition
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // Update the control state that affects the tooltip text
-    this.isCallMute = !this.isCallMute; 
+    this.isCallMute = !this.isCallMute;
   }
 
   convertCallRequest(view: any) {
@@ -2388,8 +2388,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async toggleCallVideo(tooltip: any) {
-    if(tooltip)
-    this.updateTooltip(tooltip);
+    if (tooltip)
+      this.updateTooltip(tooltip);
     const cameraStatus = !this.isVideoHide ? 'off' : 'on';
     this.sdk.convertCall(cameraStatus, 'video', this.dialogId);
     // Short delay to ensure proper state transition
@@ -2403,26 +2403,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (tooltip) {
       // Hide the tooltip first
       tooltip.hide();
-    
-      
+
+
       // Small delay before showing the new tooltip
       await new Promise(resolve => setTimeout(resolve, 150));
-      
+
       tooltip.show();
     }
   }
 
-  async toggleCallHold(tooltip:any) {
+  async toggleCallHold(tooltip: any) {
     // Call updateTooltip with the new desired state
     this.updateTooltip(tooltip);
-    
+
     // Handle the call action
     const action = !this.isCallOnHold ? 'holdCall' : 'retrieveCall';
     this.sdk.handleCallHoldState(action, this.dialogId);
     // Short delay to ensure proper state transition
     await new Promise(resolve => setTimeout(resolve, 100));
     // Update the control state that affects the tooltip text
-    this.isCallOnHold =  !this.isCallOnHold;
+    this.isCallOnHold = !this.isCallOnHold;
   }
 
   initiateWebRtcCall(callType: any) {
@@ -2463,31 +2463,33 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     else {
 
-      if(this.preChatFormData && typeof this.preChatFormData === 'object') {
+      if (this.preChatFormData && typeof this.preChatFormData === 'object') {
         const phoneNumber = this.preChatFormData.phone || "";
         const name = this.preChatFormData.name || "";
 
         this.webRTCConfig.customerName = name;
         this.webRTCConfig.customerNumber = phoneNumber;
 
-        if(phoneNumber || name ) {
+        if (phoneNumber || name) {
           this.webRTCConfig.customerName = name;
           this.webRTCConfig.customerNumber = phoneNumber
         }
       }
+      else this.handleRefreshCaseForWebRTC();
+
 
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.webRTCConfig,
       });
 
-        if (callType === 'video' && !this.isSecureWebCall) {
-          this.isVideoCallActive = true;
-        } else if (callType === 'screenshare') {
-          this.isScreenShareActive = true;
-        } else {
-          this.isAudioCallActive = true;
-        }
+      if (callType === 'video' && !this.isSecureWebCall) {
+        this.isVideoCallActive = true;
+      } else if (callType === 'screenshare') {
+        this.isScreenShareActive = true;
+      } else {
+        this.isAudioCallActive = true;
+      }
     }
   }
 
@@ -2590,8 +2592,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         '[handleDialogStates] Inside Outbound Dialing Event: ===> ',
         data.response,
       );
-      if(this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO){this.remoteStreamStatus=false;}
-      
+      if (this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO) { this.remoteStreamStatus = false; }
+
       if (data.response.dialog === null) {
         this.maintainDialog = null;
         this.dialogId = null;
@@ -2696,8 +2698,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               '[dialogState] DROPPED CALL DIALOG: ===> ',
               data.response.dialog,
             );
-            if(this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO){this.remoteStreamStatus=false;}
-      
+            if (this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO) { this.remoteStreamStatus = false; }
+
             if (this.standaloneWebRtc) {
               this.callPopUpView = false;
               this.isWebRtcVideoCallActive = false;
@@ -2715,10 +2717,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               this.isVideoCallActive = false;
               this.isScreenShareActive = false;
               this.endCountdown();
-              if(this.IsRegisteredInFreeSwitch) {
+              if (this.IsRegisteredInFreeSwitch) {
                 this.callEnd();
               }
-              if(this.isChatActive && data.response.dialog.callEndReason !== "NO_ANSWER"){
+              if (this.isChatActive && data.response.dialog.callEndReason !== "NO_ANSWER") {
                 this.clearSession();
               } else {
                 this.changeView('chat');
@@ -2756,48 +2758,48 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         ) {
           // this.remoteVideoActive = false;
           console.log('Remote Camera Off');
-          setTimeout(() => {this.remoteStreamStatus=true;},2000)
+          setTimeout(() => { this.remoteStreamStatus = true; }, 2000)
         } else if (
           data.dialog.eventRequest === 'remote' &&
           data.dialog.streamStatus === 'on'
         ) {
           console.log('Remote Camera On');
-          this.remoteStreamStatus=false;
+          this.remoteStreamStatus = false;
         }
       }
     }
 
     if (data.event === 'mediaPermissionStatus') {
-     
- console.log(
-          '[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ',
-          data.dialog,
-        );
-      }
+
+      console.log(
+        '[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ',
+        data.dialog,
+      );
+    }
     if (data.event === 'Error') {
       // this.errorDuringWebRTCCall = true;
-      // This dialoguId we got in reponse once the call starts ringing on agent side 
-      // If share end / mute / hold / unhold events on the basis of this Id. 
-      // If we do not have this id, we might face unexpected errors / behavour. 
-      // That is why it is necessary that if an error occurs while initiating a call we make this Id undefined 
-      // so that while initiating a new call it is overridden easily. 
+      // This dialoguId we got in reponse once the call starts ringing on agent side
+      // If share end / mute / hold / unhold events on the basis of this Id.
+      // If we do not have this id, we might face unexpected errors / behavour.
+      // That is why it is necessary that if an error occurs while initiating a call we make this Id undefined
+      // so that while initiating a new call it is overridden easily.
       this.dialogId = undefined;
       let errorMessage = '';
       switch (data.response.type) {
         case 'generalError':
-        switch (data.response.description) {
+          switch (data.response.description) {
             case 'Service Unavailable':
-                errorMessage = `The service is currently unavailable. Please check your network connection and try again.`;
-                break;
+              errorMessage = `The service is currently unavailable. Please check your network connection and try again.`;
+              break;
             case 'Forbidden':
-                errorMessage = `Authentication failed. Please verify your SIP credentials and try again.`;
-                break;
+              errorMessage = `Authentication failed. Please verify your SIP credentials and try again.`;
+              break;
             case 'Session.getOffer unknown error.':
-                errorMessage = `Please check Audio / Video permissions in your browser.`;
-                break;
-        }
-        console.log('[Error] Call terminated:', errorMessage);
-        break;
+              errorMessage = `Please check Audio / Video permissions in your browser.`;
+              break;
+          }
+          console.log('[Error] Call terminated:', errorMessage);
+          break;
         case 'subscriptionFailed':
           errorMessage = `Certificate Issues: Please contact with your administrator`;
           console.log('[Error] Call terminated:', errorMessage);
@@ -2811,34 +2813,34 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           errorMessage = 'An unknown error occurred.';
       }
 
-      if(errorMessage) {
-       this.showAuthenticationResponseMessage = errorMessage;
-       this.activeVideoView = false;
+      if (errorMessage) {
+        this.showAuthenticationResponseMessage = errorMessage;
+        this.activeVideoView = false;
 
         if (this.standaloneWebRtc) {
-            this.showInvalidCodeError = true;
-            this.callPopUpView = false;
-            this.activeVideoView = false;
-            this.isWebRtcVideoCallActive = false;
-            this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-              duration: 3000,
-              panelClass: ['error-snackbar'],
-              horizontalPosition: 'right',
-            });
+          this.showInvalidCodeError = true;
+          this.callPopUpView = false;
+          this.activeVideoView = false;
+          this.isWebRtcVideoCallActive = false;
+          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+            duration: 3000,
+            panelClass: ['error-snackbar'],
+            horizontalPosition: 'right',
+          });
 
         } else {
 
-            this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-              duration: 3000,
-              panelClass: ['error-snackbar'],
-              horizontalPosition: 'right',
-            });
-            this.isAudioCallActive = false;
-            this.isSecureWebCall = false;
-            this.isVideoCallActive = false;
-            this.activeVideoView = false;
-            this.errorDuringWebRTCCall = true;
-            this.changeView('chat')
+          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+            duration: 3000,
+            panelClass: ['error-snackbar'],
+            horizontalPosition: 'right',
+          });
+          this.isAudioCallActive = false;
+          this.isSecureWebCall = false;
+          this.isVideoCallActive = false;
+          this.activeVideoView = false;
+          this.errorDuringWebRTCCall = true;
+          this.changeView('chat')
         }
       }
     }
@@ -2917,47 +2919,47 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async authenticateSecureLinkKey(isAuthenticated: boolean): Promise<void> {
-    
+
     this.dialogId = undefined;
     const roomId = this.webRtcSecureLink;
     this.setAuthorizedResponse = undefined;
 
     this.sdk.authenticateKey({ roomId }, async (res: any) => {
-        if (res.error) {
-            this.isSecureLinkExpired = true;
-            this.showAuthenticationResponseMessage = res.data.message
-                ? "The link has expired"
-                : res.message;
-            this.showInvalidCodeError = true;
-            return;
+      if (res.error) {
+        this.isSecureLinkExpired = true;
+        this.showAuthenticationResponseMessage = res.data.message
+          ? "The link has expired"
+          : res.message;
+        this.showInvalidCodeError = true;
+        return;
+      }
+
+      this.agentName = res.data.agentName;
+      res.data.diallingUri = this.webRTCConfig.diallingUri;
+      this.showAuthenticationResponseMessage = res.message;
+      this.showInvalidCodeError = false;
+      this.setAuthorizedResponse = res.data; // Now includes diallingUri
+
+      try {
+        if (this.webRTCConfig && !this.IsRegisteredInFreeSwitch) {
+          await this.logInToFreeSwitch();
         }
-
-        this.agentName = res.data.agentName;
-        res.data.diallingUri = this.webRTCConfig.diallingUri;
-        this.showAuthenticationResponseMessage = res.message;
-        this.showInvalidCodeError = false;
-        this.setAuthorizedResponse = res.data; // Now includes diallingUri
-
-        try {
-          if(this.webRTCConfig && !this.IsRegisteredInFreeSwitch) {
-            await this.logInToFreeSwitch();
-          }
       } catch (error) {
-          console.error("Error logging into FreeSwitch:", error);
-          return;
-      } 
-        if (isAuthenticated) {
-            this.changeView('secureWebVideoCall');
-            return;
-        }
+        console.error("Error logging into FreeSwitch:", error);
+        return;
+      }
+      if (isAuthenticated) {
+        this.changeView('secureWebVideoCall');
+        return;
+      }
 
-        if (!this.setAuthorizedResponse) {
-            return;
-        }
+      if (!this.setAuthorizedResponse) {
+        return;
+      }
 
-        this.standaloneWebRtc = true;
+      this.standaloneWebRtc = true;
     });
-}
+  }
 
 
   processSecureLinkMessage(message: any) {
@@ -2970,18 +2972,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const preservedKey = decodeURIComponent(encryptedKey ?? "");
     this.webRtcSecureLink = preservedKey;
 
-    // Just for Debugging to open url in new window. 
+    // Just for Debugging to open url in new window.
     // const hashIndex = mediaUrl.indexOf('#');
     // const hashPart = hashIndex !== -1 ? mediaUrl.substring(hashIndex) : '';
     // const baseUrl = "http://localhost:4000";
     // const fullUrl = `${baseUrl}${hashPart}`;
-    
+
     // console.log("fullUrl", fullUrl);
     // window.open(fullUrl, '_blank');
 
     const widgetIdentifier = urlParams.get('widgetIdentifier')
     if (widgetIdentifier === this.widgetIdentifier) {
-        this.authenticateSecureLinkKey(true);
+      this.authenticateSecureLinkKey(true);
     } else {
       console.warn('[Warning] Widget Identifiers do not match or there was an error during WebRTC call.');
 
@@ -3011,10 +3013,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getTextAlignment(alignment: string | undefined) {
     // by default, the text alignment is center from scss
     alignment = alignment?.toLowerCase();
-    switch(alignment) {
+    switch (alignment) {
       case 'left': return 'left';
       case 'right': return 'right';
       default: return null;
+    }
+  }
+
+  handleRefreshCaseForWebRTC() {
+    try {
+      const storageUserData = localStorage.getItem('user');
+      let parsedStorageUserData;
+      if (storageUserData) parsedStorageUserData = JSON.parse(storageUserData);
+      if (parsedStorageUserData) {
+        let attributes: Array<any> = parsedStorageUserData.data.formData.attributes;
+        attributes.forEach((item) => {
+          if (item.key === 'name') this.webRTCConfig.customerName = item.value;
+          if (item.key === 'phone') this.webRTCConfig.customerNumber = item.value;
+        });
+      }
+    } catch (error) {
+      console.error('Error onhandleRefreshCaseForWebRTC:', error);
     }
   }
 }
