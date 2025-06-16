@@ -14,7 +14,7 @@
     "format:check": "prettier --check **/*.ts",
     "format:fix": "prettier --write **/*.ts",
     "sonar": "node sonar-project.js",
-    "test:tdd": "jest --testMatch \"**/*.spec.ts\" --coverage"
+    "tdd-test": "jest --testMatch \"**/*.spec.ts\" --coverage"
   },
   "private": true,
   "dependencies": {
