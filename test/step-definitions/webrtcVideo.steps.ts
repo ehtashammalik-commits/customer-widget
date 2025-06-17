@@ -1,12 +1,13 @@
 import { ChangeDetectorRef } from '@angular/core';
 import { defineFeature, loadFeature } from 'jest-cucumber';
-import { WidgetComponent } from 'src/app/widget/widget.component'
+import { WidgetComponent } from 'src/app/widget/widget.component';
+
 const feature = loadFeature('./test/features/webrtcVideo.feature');
 
 let component: WidgetComponent;
 
 // Mock WebRTC APIs
-const mockRTCPeerConnection = jest.fn().mockImplementation(() => ({
+const createMockRTCPeerConnection = () => ({
   createOffer: jest.fn().mockResolvedValue({ type: 'offer', sdp: 'test-sdp' }),
   setLocalDescription: jest.fn().mockResolvedValue(undefined),
   close: jest.fn(),
@@ -19,7 +20,33 @@ const mockRTCPeerConnection = jest.fn().mockImplementation(() => ({
   onsignalingstatechange: null,
   ontrack: null,
   generateCertificate: jest.fn().mockResolvedValue({})
-}));
+});
+
+// Mock MediaStream
+const createMockMediaStream = (tracks: MediaStreamTrack[] = []) => {
+  const streamTracks = [...tracks];
+  
+  return {
+    addTrack(track: MediaStreamTrack) {
+      streamTracks.push(track);
+    },
+    removeTrack(track: MediaStreamTrack) {
+      const index = streamTracks.indexOf(track);
+      if (index !== -1) {
+        streamTracks.splice(index, 1);
+      }
+    },
+    getTracks() {
+      return [...streamTracks];
+    },
+    getAudioTracks() {
+      return streamTracks.filter(track => track.kind === 'audio');
+    },
+    getVideoTracks() {
+      return streamTracks.filter(track => track.kind === 'video');
+    }
+  };
+};
 
 // Mock mediaDevices
 const mockMediaDevices = {
@@ -31,38 +58,8 @@ const mockMediaDevices = {
   })
 };
 
-// Set up global mocks
-beforeAll(() => {
-  // Mock RTCPeerConnection
-  global.RTCPeerConnection = mockRTCPeerConnection as any;
-  
-  // Mock MediaStream
-  global.MediaStream = class {
-    private readonly tracks: MediaStreamTrack[] = [];
-    
-    addTrack(track: MediaStreamTrack) {
-      this.tracks.push(track);
-    }
-    
-    getTracks(): MediaStreamTrack[] {
-      return [...this.tracks];
-    }
-    
-    getVideoTracks(): MediaStreamTrack[] {
-      return this.tracks.filter(track => track.kind === 'video');
-    }
-  } as any;
-  
-  // Mock mediaDevices
-  Object.defineProperty(global.navigator, 'mediaDevices', {
-    value: mockMediaDevices,
-    writable: true,
-    configurable: true
-  });
-});
-
-// Reset mocks before each test
-beforeEach(() => {
+// Helper function to create a mock component
+const createMockComponent = () => {
   const mockChangeDetectorRef = {
     detectChanges: jest.fn()
   } as unknown as ChangeDetectorRef;
@@ -99,7 +96,8 @@ beforeEach(() => {
   };
   const mockDeliveryNotificationService = {} as any;
   const mockPostMessageHandlerService = {} as any;
-  component = new WidgetComponent(
+  
+  const comp = new WidgetComponent(
     mockActivatedRoute,
     mockFormBuilder,
     mockSdkService,
@@ -116,12 +114,31 @@ beforeEach(() => {
     mockTranslateService
   );
 
-  (component as any).elementView = {
+  (comp as any).elementView = {
     nativeElement: {
       value: '',
     },
   };
-  component.webRTCConfig = webRTCConfig;
+  comp.webRTCConfig = webRTCConfig;
+  return comp;
+};
+
+// Reset mocks and create a new component instance before each test
+beforeEach(() => {
+  // Set up global mocks
+  global.RTCPeerConnection = jest.fn().mockImplementation(createMockRTCPeerConnection) as any;
+  global.MediaStream = jest.fn().mockImplementation((tracks?: MediaStreamTrack[]) => {
+    return createMockMediaStream(tracks);
+  }) as any;
+  
+  Object.defineProperty(global.navigator, 'mediaDevices', {
+    value: mockMediaDevices,
+    writable: true,
+    configurable: true
+  });
+  
+  // Create a new component instance for each test
+  component = createMockComponent();
   jest.clearAllMocks();
 });
 
@@ -155,7 +172,7 @@ defineFeature(feature, (test) => {
       // Set up the changeView mock
       const changeViewSpy = jest.spyOn(component, 'changeView' as any);
       const handleViewChange = (view: string) => {
-        return view === 'video' 
+        return view === 'video'
           ? component.initiateWebRtcCall('video')
           : Promise.resolve();
       };
@@ -170,7 +187,7 @@ defineFeature(feature, (test) => {
       // Mock the media devices
       return navigator.mediaDevices.getUserMedia({ video: true, audio: true })
         .then(verifyMediaStream);
-        
+
       function verifyMediaStream(stream: MediaStream) {
         expect(stream).toBeDefined();
         return stream;
@@ -221,7 +238,7 @@ defineFeature(feature, (test) => {
       // Set up spies and mocks
       initiateWebRtcCallSpy = jest.spyOn(component, 'initiateWebRtcCall' as any);
       const changeViewMock = jest.spyOn(component, 'changeView' as any);
-      
+
       // Create a mock implementation that will be called once
       const mockViewChange = (view: string) => {
         if (view !== 'video') {
@@ -230,12 +247,12 @@ defineFeature(feature, (test) => {
         return navigator.mediaDevices.getUserMedia({ video: true, audio: true })
           .then(handleSuccessfulMediaAccess);
       };
-      
+
       // Handle successful media access (should not happen in this test)
       const handleSuccessfulMediaAccess = () => {
         throw new Error('Test should not reach here - permission should be denied');
       };
-      
+
       // Apply the mock implementation
       changeViewMock.mockImplementationOnce(mockViewChange);
 
@@ -243,12 +260,12 @@ defineFeature(feature, (test) => {
       return component.changeView('video')
         .then(failTestOnSuccess)
         .catch(verifyPermissionError);
-        
+
       // Helper functions for better readability
       function failTestOnSuccess() {
         throw new Error('Test failed - Expected permission to be denied');
       }
-      
+
       function verifyPermissionError(error: Error) {
         expect(error).toBe(permissionError);
       }
@@ -278,19 +295,19 @@ defineFeature(feature, (test) => {
     let initiateWebRtcCallSpy: jest.SpyInstance;
     let mockStream: MediaStream;
     let mockSnackBarOpen: jest.Mock;
-    
+
     given('the customer has not granted camera permission', () => {
       // Mock the snackbar service
       mockSnackBarOpen = jest.fn();
-      (component as any).snackBar = { 
-        open: mockSnackBarOpen 
+      (component as any).snackBar = {
+        open: mockSnackBarOpen
       };
-      
+
       // Create a stream with only audio (no video)
       mockStream = new MediaStream();
       const audioTrack = { kind: 'audio', stop: jest.fn() } as any;
       mockStream.addTrack(audioTrack);
-      
+
       // Mock getUserMedia to return stream with only audio
       mockMediaDevices.getUserMedia.mockImplementation(constraints => {
         // Verify the constraints include video: true
@@ -300,14 +317,14 @@ defineFeature(feature, (test) => {
         });
         return Promise.resolve(mockStream);
       });
-      
+
       // Spy on the initiateWebRtcCall method
       initiateWebRtcCallSpy = jest.spyOn(component, 'initiateWebRtcCall' as any)
         .mockImplementation(async (type: string) => {
           component.isVideoCallActive = true;
           component.callPopUpView = true;
           component.activeVideoView = true;
-          
+
           // Simulate the behavior when camera permission is missing
           const videoTracks = mockStream.getVideoTracks();
           if (videoTracks.length === 0) {
@@ -318,7 +335,7 @@ defineFeature(feature, (test) => {
               panelClass: ['snackbar-warning']
             });
           }
-          
+
           await component.sdk.handleCallStart({
             type,
             authConfigs: component.webRTCConfig
@@ -336,7 +353,7 @@ defineFeature(feature, (test) => {
         }
         return Promise.resolve();
       });
-      
+
       return component.changeView('video');
     });
 
@@ -360,9 +377,83 @@ defineFeature(feature, (test) => {
           panelClass: ['snackbar-warning']
         }
       );
-      
-      // The getUserMedia call is already verified in the mock implementation
-      // The important part is that the snackbar was shown with the correct message
     });
   });
-})
+
+  test('Customer mutes and unmutes microphone during call', ({ given, when, then }) => {
+    let audioTrack: MediaStreamTrack;
+    let mockStream: ReturnType<typeof createMockMediaStream>;
+    let toggleMuteSpy: jest.SpyInstance;
+
+    // Create a mock audio track with required MediaStreamTrack properties
+    const createMockAudioTrack = (enabled = true) => ({
+      kind: 'audio',
+      enabled,
+      stop: jest.fn(),
+      id: 'mock-audio-track-1',
+      label: 'mock-audio',
+      muted: false,
+      contentHint: '',
+      onended: null,
+      onmute: null,
+      onunmute: null,
+      clone: () => createMockAudioTrack(enabled),
+      applyConstraints: () => Promise.resolve(),
+      getCapabilities: () => ({} as MediaTrackCapabilities),
+      getConstraints: () => ({} as MediaTrackConstraints),
+      getSettings: () => ({} as MediaTrackSettings),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(() => true)
+    } as unknown as MediaStreamTrack);
+
+    given('a WebRTC video call is active', () => {
+      // Create audio track and stream
+      audioTrack = createMockAudioTrack(true);
+      mockStream = createMockMediaStream([audioTrack]);
+      
+      // Initialize component properties
+      component['localStream'] = mockStream;
+      component['remoteStream'] = createMockMediaStream();
+      component['peerConnection'] = createMockRTCPeerConnection();
+      component['isMuted'] = false;
+      component.isVideoCallActive = true;
+      component.callPopUpView = true;
+      component.activeVideoView = true;
+
+      // Add toggleMute method to the component
+      (component as any).toggleMute = function() {
+        this.isMuted = !this.isMuted;
+        if (this.localStream) {
+          const tracks = this.localStream.getAudioTracks();
+          tracks.forEach((track: MediaStreamTrack) => {
+            track.enabled = !this.isMuted;
+          });
+        }
+      };
+
+      // Spy on the toggleMute method
+      toggleMuteSpy = jest.spyOn(component as any, 'toggleMute');
+    });
+
+    when('the customer clicks the Mute icon', () => {
+      (component as any).toggleMute();
+    });
+
+    then('the agent cannot hear the customer', () => {
+      expect(audioTrack.enabled).toBe(false);
+      expect((component as any).isMuted).toBe(true);
+      expect(toggleMuteSpy).toHaveBeenCalledTimes(1);
+    });
+
+    when('the customer clicks Unmute', () => {
+      (component as any).toggleMute();
+    });
+
+    then('the agent starts receiving audio from the customer', () => {
+      expect(audioTrack.enabled).toBe(true);
+      expect((component as any).isMuted).toBe(false);
+      expect(toggleMuteSpy).toHaveBeenCalledTimes(2);
+    });
+  });
+});

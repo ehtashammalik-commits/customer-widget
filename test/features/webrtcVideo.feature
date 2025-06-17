@@ -20,3 +20,10 @@ Feature: WebRTC Video Channel for Customer-Agent Communication
     When the customer clicks Start Video Call
     Then the call should be initiated
     And an error is shown suggesting camera permission is required
+
+    Scenario: Customer mutes and unmutes microphone during call
+    Given a WebRTC video call is active
+    When the customer clicks the Mute icon
+    Then the agent cannot hear the customer
+    When the customer clicks Unmute
+    Then the agent starts receiving audio from the customer
