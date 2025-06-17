@@ -2604,7 +2604,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     else {
 
       if (this.preChatFormData && typeof this.preChatFormData === 'object') {
-        //
         if (this.preChatFormData?.sections?.length > 0) {
           this.webRTCConfig.customerName = "";
           this.webRTCConfig.customerNumber = "";
