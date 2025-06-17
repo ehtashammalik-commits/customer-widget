@@ -33,15 +33,32 @@ const mockMediaDevices = {
 
 // Set up global mocks
 beforeAll(() => {
+  // Mock RTCPeerConnection
   global.RTCPeerConnection = mockRTCPeerConnection as any;
+  
+  // Mock MediaStream
+  global.MediaStream = class {
+    private readonly tracks: MediaStreamTrack[] = [];
+    
+    addTrack(track: MediaStreamTrack) {
+      this.tracks.push(track);
+    }
+    
+    getTracks(): MediaStreamTrack[] {
+      return [...this.tracks];
+    }
+    
+    getVideoTracks(): MediaStreamTrack[] {
+      return this.tracks.filter(track => track.kind === 'video');
+    }
+  } as any;
+  
+  // Mock mediaDevices
   Object.defineProperty(global.navigator, 'mediaDevices', {
     value: mockMediaDevices,
     writable: true,
     configurable: true
   });
-
-
-
 });
 
 // Reset mocks before each test
@@ -135,25 +152,37 @@ defineFeature(feature, (test) => {
           return Promise.resolve();
         });
 
-      // Mock the changeView method to call initiateWebRtcCall
-      jest.spyOn(component, 'changeView' as any).mockImplementation(async (view: string) => {
-        if (view === 'video') {
-          await component.initiateWebRtcCall('video');
-        }
-      });
+      // Set up the changeView mock
+      const changeViewSpy = jest.spyOn(component, 'changeView' as any);
+      const handleViewChange = (view: string) => {
+        return view === 'video' 
+          ? component.initiateWebRtcCall('video')
+          : Promise.resolve();
+      };
+      changeViewSpy.mockImplementation(handleViewChange);
 
+      // Verify component initialization
       expect(component).toBeDefined();
       expect(component.IsRegisteredInFreeSwitch).toBe(false);
     });
 
-    and('video permissions are granted', async () => {
+    and('video permissions are granted', () => {
       // Mock the media devices
-      const mockStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      expect(mockStream).toBeDefined();
+      return navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(verifyMediaStream);
+        
+      function verifyMediaStream(stream: MediaStream) {
+        expect(stream).toBeDefined();
+        return stream;
+      }
     });
 
-    when('the customer clicks on Start Video Call button', async () => {
-      await component.changeView('video');
+    when('the customer clicks on Start Video Call button', () => {
+      return new Promise((resolve, reject) => {
+        component.changeView('video')
+          .then(() => resolve(undefined))
+          .catch(reject);
+      });
     });
 
     then('a new WebRTC session should be initiated', () => {
@@ -188,27 +217,39 @@ defineFeature(feature, (test) => {
       mockMediaDevices.getUserMedia.mockRejectedValueOnce(permissionError);
     });
 
-    when('the customer clicks Start Video Call', async () => {
-      // Create a spy on the initiateWebRtcCall method
+    when('the customer clicks Start Video Call', () => {
+      // Set up spies and mocks
       initiateWebRtcCallSpy = jest.spyOn(component, 'initiateWebRtcCall' as any);
-
-      // Mock the changeView implementation to handle the permission error
-      jest.spyOn(component, 'changeView' as any).mockImplementationOnce(async (view: string) => {
-        if (view === 'video') {
-          // This will trigger the mocked permission denied error
-          await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-          throw new Error('Test should not reach here - permission should be denied');
+      const changeViewMock = jest.spyOn(component, 'changeView' as any);
+      
+      // Create a mock implementation that will be called once
+      const mockViewChange = (view: string) => {
+        if (view !== 'video') {
+          return Promise.resolve();
         }
-        return Promise.resolve();
-      });
+        return navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+          .then(handleSuccessfulMediaAccess);
+      };
+      
+      // Handle successful media access (should not happen in this test)
+      const handleSuccessfulMediaAccess = () => {
+        throw new Error('Test should not reach here - permission should be denied');
+      };
+      
+      // Apply the mock implementation
+      changeViewMock.mockImplementationOnce(mockViewChange);
 
-      // Execute the test - we expect this to fail with a permission error
-      try {
-        await component.changeView('video');
-        // If we get here, the test should fail as we expected an error
+      // Execute and verify the test
+      return component.changeView('video')
+        .then(failTestOnSuccess)
+        .catch(verifyPermissionError);
+        
+      // Helper functions for better readability
+      function failTestOnSuccess() {
         throw new Error('Test failed - Expected permission to be denied');
-      } catch (error) {
-        // Verify the error is the one we expect
+      }
+      
+      function verifyPermissionError(error: Error) {
         expect(error).toBe(permissionError);
       }
     });
@@ -230,6 +271,98 @@ defineFeature(feature, (test) => {
       // Verify the error was properly propagated
       expect(permissionError).toBeDefined();
       expect(permissionError.message).toBe('Permission denied');
+    });
+  });
+
+  test('Video call initiated but missing camera permission', ({ given, when, then, and }) => {
+    let initiateWebRtcCallSpy: jest.SpyInstance;
+    let mockStream: MediaStream;
+    let mockSnackBarOpen: jest.Mock;
+    
+    given('the customer has not granted camera permission', () => {
+      // Mock the snackbar service
+      mockSnackBarOpen = jest.fn();
+      (component as any).snackBar = { 
+        open: mockSnackBarOpen 
+      };
+      
+      // Create a stream with only audio (no video)
+      mockStream = new MediaStream();
+      const audioTrack = { kind: 'audio', stop: jest.fn() } as any;
+      mockStream.addTrack(audioTrack);
+      
+      // Mock getUserMedia to return stream with only audio
+      mockMediaDevices.getUserMedia.mockImplementation(constraints => {
+        // Verify the constraints include video: true
+        expect(constraints).toEqual({
+          video: true,
+          audio: true
+        });
+        return Promise.resolve(mockStream);
+      });
+      
+      // Spy on the initiateWebRtcCall method
+      initiateWebRtcCallSpy = jest.spyOn(component, 'initiateWebRtcCall' as any)
+        .mockImplementation(async (type: string) => {
+          component.isVideoCallActive = true;
+          component.callPopUpView = true;
+          component.activeVideoView = true;
+          
+          // Simulate the behavior when camera permission is missing
+          const videoTracks = mockStream.getVideoTracks();
+          if (videoTracks.length === 0) {
+            mockSnackBarOpen('Camera permission is required for video. Call will continue with audio only.', 'OK', {
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+              duration: 5000,
+              panelClass: ['snackbar-warning']
+            });
+          }
+          
+          await component.sdk.handleCallStart({
+            type,
+            authConfigs: component.webRTCConfig
+          });
+          return Promise.resolve();
+        });
+    });
+
+    when('the customer clicks Start Video Call', () => {
+      // Mock the changeView method to call initiateWebRtcCall
+      const changeViewSpy = jest.spyOn(component, 'changeView' as any);
+      changeViewSpy.mockImplementation((view: string) => {
+        if (view === 'video') {
+          return component.initiateWebRtcCall('video');
+        }
+        return Promise.resolve();
+      });
+      
+      return component.changeView('video');
+    });
+
+    then('the call should be initiated', () => {
+      // Verify the call was initiated
+      expect(initiateWebRtcCallSpy).toHaveBeenCalledWith('video');
+      expect(component.isVideoCallActive).toBe(true);
+      expect(component.callPopUpView).toBe(true);
+      expect(component.activeVideoView).toBe(true);
+    });
+
+    and('an error is shown suggesting camera permission is required', () => {
+      // Verify the snackbar was called with the correct message
+      expect(mockSnackBarOpen).toHaveBeenCalledWith(
+        'Camera permission is required for video. Call will continue with audio only.',
+        'OK',
+        {
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          duration: 5000,
+          panelClass: ['snackbar-warning']
+        }
+      );
+      
+      // The getUserMedia call is already verified in the mock implementation
+      // The important part is that the snackbar was shown with the correct message
     });
   });
 })

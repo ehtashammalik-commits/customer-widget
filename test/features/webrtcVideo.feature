@@ -14,3 +14,9 @@ Feature: WebRTC Video Channel for Customer-Agent Communication
     When the customer clicks Start Video Call
     Then the call should not be initiated
     And an error is shown suggesting audio permission is required
+
+    Scenario: Video call initiated but missing camera permission
+    Given the customer has not granted camera permission
+    When the customer clicks Start Video Call
+    Then the call should be initiated
+    And an error is shown suggesting camera permission is required

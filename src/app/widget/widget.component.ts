@@ -2617,7 +2617,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
       else this.handleRefreshCaseForWebRTC();
 
-      console.log('this.webRTCConfig==>', this.webRTCConfig);
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.webRTCConfig,
