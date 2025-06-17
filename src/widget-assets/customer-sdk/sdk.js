@@ -353,32 +353,66 @@ function uploadToFileEngine(fileServerUrl, formData, callback) {
     method: 'POST',
     body: formData
   }).then(async (response) => {
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log("Error: ", errorText);
-        throw new Error(errorText);
+
+
+    console.log('response from sdk ', response)
+    if (!response.ok) {
+      const errorText = await response.text();
+
+
+      if (response.status === 413) {
+        callback({
+          isFileInvalid: true,
+          errorMessage: "File too large. Please upload a smaller file.",
+          statusCode: response.status,
+        });
+        // Prevent further .then from running
+        throw new UploadError(errorText, response.status);
       }
-      return response.json();
-    })
+      throw new UploadError(errorText, response.status);
+    }
+    return response.json();
+  })
     .then((result) => {
       console.log('Success: ', result);
       callback(result);
     })
-    .catch((error) => {
-      let errorDetails = {};
+    .catch(async (error) => {
+      let errorDetails = {
+        message: error.message || "Unknown error occurred.",
+        statusCode: error.statusCode || null,
+      };
 
-      try {
-        errorDetails = JSON.parse(error.message);
-      } catch (e) {
-        errorDetails.message = "Error parsing JSON response.";
-      }
-    
-      if (errorDetails.result && errorDetails.result.isInfected) {
-        callback({ errorDetails, isFileInvalid: true, errorMesage: "The file could not be uploaded due to security concerns. Please try a different file." });
+      // try {
+      //   errorDetails = JSON.parse(error.message);
+      // } catch (e) {
+      //   errorDetails.message = "Error parsing JSON response.";
+      // }
+
+      if (error.result && error.result.isInfected) {
+        callback({
+          errorDetails,
+          isFileInvalid: true,
+          errorMessage: "The file could not be uploaded due to security concerns. Please try a different file.",
+          statusCode: errorDetails.statusCode,
+        });
       } else {
-        callback({ errorDetails, isFileInvalid: true, errorMesage: "The file name contains special characters. Only underscore, hyphen and space are allowed in file name." });
+        callback({
+          errorDetails,
+          isFileInvalid: true,
+          errorMessage: errorDetails.message,
+          statusCode: errorDetails.statusCode,
+        });
       }
     });
+}
+
+class UploadError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.statusCode = statusCode;
+    this.name = 'UploadError';
+  }
 }
 /**
  * Set Conversation Data Api
@@ -424,6 +458,46 @@ async function setConversationDataByCustomerIdentifier(url, channelIdentifier, d
     callback(error); // Re-throw the error for the caller to handle
   }
 }
+/**
+ * Push form data as an activity
+ */
+async function pushFormDataAsActivity(url, payload, callback) {
+  try {
+    const response = await authorizedFetch(`${url}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const responseBody = await response.text();
+    let jsonResponse;
+
+    try {
+      jsonResponse = JSON.parse(responseBody);
+    } catch (e) {
+      jsonResponse = responseBody;
+    }
+
+    if (!response.ok) {
+      callback({
+        error: true,
+        status: response.status,
+        message: jsonResponse?.message || 'Request failed.'
+      });
+      return;
+    }
+
+    callback(jsonResponse);
+  } catch (error) {
+    callback({
+      error: true,
+      message: error.message || 'An unexpected error occurred.'
+    });
+  }
+}
+
 /**
 * Get Conversation Data Api By Customer Identifier
 */
@@ -474,59 +548,59 @@ function authenticateRequest(authenticatorUrl, authData, callback) {
     },
     body: JSON.stringify(authData)
   })
-  .then(async (response) => {
-    const contentType = response.headers.get('content-type');
+    .then(async (response) => {
+      const contentType = response.headers.get('content-type');
 
-    if (!response.ok) {
-      const errorData = contentType?.includes('application/json')
-        ? await response.json()
-        : await response.text();
+      if (!response.ok) {
+        const errorData = contentType?.includes('application/json')
+          ? await response.json()
+          : await response.text();
 
-      const errorMessage =
-        response.status === 400
-          ? '400 Bad Request'
-          : response.status === 500
-          ? '500 Internal Server Error'
-          : 'An error occurred';
+        const errorMessage =
+          response.status === 400
+            ? '400 Bad Request'
+            : response.status === 500
+              ? '500 Internal Server Error'
+              : 'An error occurred';
 
+        callback({
+          error: true,
+          status: response.status,
+          message: errorMessage,
+          data: errorData,
+        });
+        throw new Error(`${errorMessage}: ${JSON.stringify(errorData)}`);
+      }
+      // Parse JSON response if available, fallback to text
+      return contentType?.includes('application/json') ? response.json() : response.text();
+    })
+    .then((result) => {
+
+      // Ensure `agentExtension` and `customerId` are present and not empty
+      if (result.agentExtension && result.customerId) {
+        callback({
+          error: false,
+          status: 200,
+          data: result,
+          message: 'Authentication Successful!',
+        });
+      } else {
+        callback({
+          error: true,
+          status: 400,
+          data: result,
+          message: 'Invalid response: Missing required fields (agentExtension or customerId).',
+        });
+      }
+    })
+    .catch((error) => {
+      console.error('Authentication API Error:', error);
       callback({
         error: true,
-        status: response.status,
-        message: errorMessage,
-        data: errorData,
+        status: 500,
+        message: 'An unexpected error occurred. Please try again later.',
       });
-      throw new Error(`${errorMessage}: ${JSON.stringify(errorData)}`);
-    }
-    // Parse JSON response if available, fallback to text
-    return contentType?.includes('application/json') ? response.json() : response.text();
-  })
-  .then((result) => {
-
-    // Ensure `agentExtension` and `customerId` are present and not empty
-    if (result.agentExtension && result.customerId) {
-      callback({
-        error: false,
-        status: 200,
-        data: result,
-        message: 'Authentication Successful!',
-      });
-    } else {
-      callback({
-        error: true,
-        status: 400,
-        data: result,
-        message: 'Invalid response: Missing required fields (agentExtension or customerId).',
-      });
-    }
-  })
-  .catch((error) => {
-    console.error('Authentication API Error:', error);
-    callback({
-      error: true,
-      status: 500,
-      message: 'An unexpected error occurred. Please try again later.',
     });
-  });
 }
 /**
  * IP Data Request
@@ -598,7 +672,7 @@ function getCalendarId(url, serviceIdentifier, callback) {
     });
 }
 
-function getCalendarEvents(calendarId,url, startTime,endTime,callback) {
+function getCalendarEvents(calendarId, url, startTime, endTime, callback) {
   authorizedFetch(`${url}/calendars/events?&calendarId=${calendarId}&startTime=${startTime}&endTime=${endTime}`)
     .then(response => response.json())
     .then((data) => {
@@ -903,7 +977,7 @@ const invitedata1 = {
 /**
  * Custom Media Stream Factory
  * This factory function is used by the UserAgent to fetch audio, video, or screen sharing streams from the browser.
- * 
+ *
  * @param {Object} constraints - The media constraints specifying what kind of media stream is required.
  * @param {Object} sessionDescriptionHandler - The session description handler for the media session.
  * @returns {Promise<MediaStream>} - A promise that resolves to the requested media stream.
@@ -1127,7 +1201,7 @@ const Custompermissions = Promise.all([
       }
     }
     if (microphonePermission.state === "granted") {
-      // if permission is provided then check current call state, if muted then mute it else dont mute it. 
+      // if permission is provided then check current call state, if muted then mute it else dont mute it.
       await replaceAudioTrackInCalls("videoPermissionChange");
     }
   };
@@ -1135,7 +1209,7 @@ const Custompermissions = Promise.all([
 
 
 
-// For the communication with freeswitch >>>>> Centralized function for all webRTC related stuff. 
+// For the communication with freeswitch >>>>> Centralized function for all webRTC related stuff.
 
 function postMessages(obj, callback) {
   if (Object.keys(sipconfig).length === 0) sipconfig = obj.parameter.sipConfig;
@@ -1348,7 +1422,7 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
          * Fetching MediaType from an incoming Request
          * normal = Call coming from anywhere except Customer SDK
          * webrtc = Call coming from Customer SDK
-         * 
+         *
          * Incase of Consult incomingCallSource = normal
          */
 
@@ -1365,8 +1439,8 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
           }
 
           // if ((/\r\nm=video /).test(sdp)) {
-          //     incomingMediaType = "video"; 
-          //     } 
+          //     incomingMediaType = "video";
+          //     }
           incomingCallSource = "VOICE"
         }
 
@@ -1555,7 +1629,7 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
         var index = getCallIndex(invitedata.response.dialog.id);
         if (index == -1) {
           invitedata.session = invitation;
-          // making dialogState & InviteData Event same 
+          // making dialogState & InviteData Event same
           invitedata.event = dialogStatedata.event;
           calls.push(invitedata);
         }
@@ -1617,7 +1691,7 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
         // error("generalError",loginid,response.message.reasonPhrase,callback);
       },
     },
-    logLevel: "log",          
+    logLevel: "log",
     logBuiltinEnabled: sip_log
   };
 
@@ -1636,14 +1710,14 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
               dialogStatedata = JSON.parse(JSON.stringify(dialogStatedata1));
 
 
-            //there can be 2 Calls active at the same Time 
+            //there can be 2 Calls active at the same Time
             //First call can be Webrtc
             console.log("==>> SIPJS Console => Trying to send ReInvite, Calls array length is =>", calls.length)
             for (var k = 0; k < calls.length; k++) {
               var _tempDialogState = calls[k]
               if (_tempDialogState.response.dialog.state && _tempDialogState.response.dialog.state !== "DROPPED") {
                 var currentCallStatus = ""
-                
+
                   let data = {
                     event: _tempDialogState.event,
                     response: _tempDialogState.response
@@ -1651,7 +1725,7 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
                   var _tempData = JSON.parse(JSON.stringify(data))
                   callback(_tempData)
                   SendPostMessage(_tempData)
-                
+
 
                 // adding logic to check if call is still there or not
                 var index = getCallIndex(_tempDialogState.response.dialog.id)
@@ -1692,7 +1766,7 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
                   }
                 };
 
-                // first one checks simple calls, second one check conference calls 
+                // first one checks simple calls, second one check conference calls
                 if (_tempDialogState.response.dialog.state === 'HELD' || currentCallStatus == "HELD") {
                   options.sessionDescriptionHandlerOptions.hold = true;
                 } else if (_tempDialogState.response.dialog.state === 'ACTIVE') {
@@ -2068,7 +2142,7 @@ function initiate_call(calledNumber, DN, mediaType, authData, callback, callType
             var index = getCallIndex(outboundDialingdata.response.dialog.id);
             if (index == -1) {
               outboundDialingdata.session = sessionall;
-              // making dialogState & outboundDialingdata Event same 
+              // making dialogState & outboundDialingdata Event same
               outboundDialingdata.event = "dialogState"
               calls.push(outboundDialingdata);
             }
@@ -2435,7 +2509,7 @@ function phone_unmute(callback, dialogId) {
     _sessionDialog.event = sessionall.event;
     const eventCopy = JSON.parse(JSON.stringify(_sessionDialog))
     callback(eventCopy)
-    SendPostMessage(eventCopy);    // consult Jazeb on this 
+    SendPostMessage(eventCopy);    // consult Jazeb on this
   }
 }
 /**
@@ -2553,7 +2627,7 @@ function respond_call(callback, dialogId, type) {
         })
       }
 
-      // Send Message to Customer / Agent about agent Extention 
+      // Send Message to Customer / Agent about agent Extention
       agentDetailsToOtherParticiapnt(dialogId)
     }).catch((e) => {
       console.error("==>> SIPJS CONSOLE => respond_call FAILED -> ", e)
@@ -2840,7 +2914,7 @@ function addsipcallback(temp_session, call_type, callback) {
             dialogStatedata.response.dialog.callEndReason = null;
             // clearTimeout(myTimeout);
           }
-          // End All Calls if C1 Leaves 
+          // End All Calls if C1 Leaves
           dialogId = dialogStatedata.response.dialog.id
           await terminateAllRemainingCalls().then(() => {
             calls.splice(index, 1)
@@ -3077,7 +3151,7 @@ var Errors = {
   errorsList: {
     "Forbidden": "Invalid Credentials. Please provide valid credentials.",
     "websocketissue_unhold": "websocketissue_unhold",  //unHold Failed due to Network Issue
-    "customer_left": "customer_left",                  //When Customer Leave during Network Disconnection 
+    "customer_left": "customer_left",                  //When Customer Leave during Network Disconnection
     "Microphone_denied": "Microphone permission denied. Please enable.",
     "Camera_denied": "Camera permission denied. Please enable.",
     "Screen_denied": "Screen Share permission denied. Please allow it.",
@@ -3101,7 +3175,7 @@ var Errors = {
     "User_Not_Registered": "User is not Registered",
     "Reinvite in progress. Please wait until complete, then try again.": "Please Wait until Previous action is Completed",
     "Consult_Customer_left": "Cannot consult when Customer Call doesn't Exists",
-    "Unknown": "Something went wrong",    // addsicallback function error 
+    "Unknown": "Something went wrong",    // addsicallback function error
     "USER_BUSY": "USER BUSY",
     "Busy Here": "Call Not Connected",
     "Decline": "Call Not Connected",
@@ -3456,7 +3530,7 @@ function createMessage(message, dialogId) {
 
 /**
  * Internal function used to convert an audio call to a video call by sending a re-INVITE.
- * 
+ *
  * @param {string} dialogId - The ID of the dialog/call.
  * @param {Function} callback - The callback function to be executed after sending the re-INVITE.
  * @param {string} streamType - The type of stream to be added ('audio' or 'video').
@@ -3544,7 +3618,7 @@ function sendingReInvite(dialogId, callback, streamType) {
         }
         else {
           console.log("==>> SIPJS Console => Call is converting, Automatic triggered")
-          // remove video Tag 
+          // remove video Tag
           let peer = sessionall.sessionDescriptionHandler.peerConnection;
           let senders = peer.getSenders();
           console.log(senders)
@@ -3589,7 +3663,7 @@ function sendingReInvite(dialogId, callback, streamType) {
 
 /**
  * Function used to identify what kind of media device error occurred.
- * 
+ *
  * @param {string} errorName - The name of the media device error.
  * @param {Object} constraints - The constraints related to the media device.
  * @returns {Promise<void>} - A promise that resolves once the error is handled.
@@ -3716,7 +3790,7 @@ function updateAgentDetails(message) {
 
 /**
  * Generates a conversion event indicating changes in media stream status.
- * 
+ *
  * @param {string} dialogId - The dialog ID associated with the conversation.
  * @param {string} streamType - Type of stream (e.g., "video", "screen-share").
  * @param {string} streamStatus - The status of the stream ("on" or "off").
@@ -3759,7 +3833,7 @@ function publishMediaStreamUpdateEvent(dialogId, streamType, streamStatus, callb
 
 /**
  * Terminates all remaining calls when an agent or customer leaves the call.
- * 
+ *
  * @returns {Promise} - A promise that resolves after all remaining calls are terminated.
  */
 async function terminateAllRemainingCalls() {
@@ -4372,7 +4446,7 @@ const handleOnlyViewScreenShareAnswer = async (constraints, mediaStream) => {
 
 
 /**
- * @returns {void} 
+ * @returns {void}
  * @description This function creates a dummy audio track.
  */
 
@@ -4394,10 +4468,10 @@ const createDummyAudioTrack = () => {
 
 
 /**
- * 
- * @param {*} width 
- * @param {*} height 
- * @returns {void} 
+ *
+ * @param {*} width
+ * @param {*} height
+ * @returns {void}
  * @description This function creates a dummy video track using a canvas element.
  */
 
@@ -4416,8 +4490,8 @@ const createDummyVideoTrack = (width = 640, height = 480) => {
 };
 
 /**
- * @param {*} dialogId 
- * @param {*} callback 
+ * @param {*} dialogId
+ * @param {*} callback
  * @returns {void}
  * @description This function iterates through the senders of the session and stops any dummy tracks found.
  */
@@ -4471,10 +4545,10 @@ const removeDummyTracks = (dialogId, callback) => {
 };
 
 /**
- * @param {*} dialogId 
- * @param {*} mediaType 
- * @param {*} status 
- * @param {*} errorMessage 
+ * @param {*} dialogId
+ * @param {*} mediaType
+ * @param {*} status
+ * @param {*} errorMessage
  * @returns {Object} - The media permission status update event object.
  * @description This function creates an event object that contains information about the media permission status.
  */

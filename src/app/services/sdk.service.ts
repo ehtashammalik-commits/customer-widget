@@ -7,6 +7,7 @@ declare var widgetConfigs: any,
   formValidation: any,
   establishConnection: any,
   setConversationDataByCustomerIdentifier: any,
+  pushFormDataAsActivity: any,
   chatRequest: any,
   sendChatMessage: any,
   uploadToFileEngine: any,
@@ -221,6 +222,16 @@ export class SdkService implements OnInit {
       },
     );
   }
+  postFormDataAsActivity(data: any) {
+    pushFormDataAsActivity(
+      this.ConfigData.CX_ACTIVITY,
+      data,
+      (res: any) => {
+        console.log('Set an activity Request', res);
+      },
+    );
+  }
+
 
   onChatResumed(serviceIdentifier: any, channelCustomerIdentifier: any) {
     console.log('onChatResumed in service');
@@ -326,10 +337,10 @@ export class SdkService implements OnInit {
     chatEnd(customerPayload);
   }
 
-   /**************************
-   *  BUSINESS CALENDARS
-   * @param calendarId
-   *************************/
+  /**************************
+  *  BUSINESS CALENDARS
+  * @param calendarId
+  *************************/
 
 
   /**************************
