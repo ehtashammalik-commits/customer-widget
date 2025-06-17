@@ -1898,11 +1898,6 @@ mat-spinner {
       opacity: 0.8;
       display: flex;
 
-      .audio-agent{
-        width: 60px;
-        height: 60px;
-        }
-
       img {
         position: inherit;
         width: 100%;
@@ -3092,6 +3087,12 @@ mat-spinner {
   animation: rotation 1s linear infinite;
   position: relative;
   right: 9px;
+
+  &.call-loader{
+    width: 60px;
+    height: 60px;
+    right: inherit;
+    }
 }
 
 @keyframes rotation {
