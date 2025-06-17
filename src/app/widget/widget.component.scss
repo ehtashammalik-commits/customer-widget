@@ -395,7 +395,7 @@ button.close-widget-wrapper {
 
   &.exist-calendar {
     h5 {
-      line-height: 25px;
+      line-height: 22px;
     }
   }
 
@@ -423,16 +423,16 @@ button.close-widget-wrapper {
 }
 
 .widget-form-header .widget-header-icon {
-  position: absolute;
-  top: 7px;
-  right: 10px;
-  width: 21px;
-  height: 21px;
-  border-color: $white-color;
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 7px;
-  background: var(--main-color);
+  //position: absolute;
+  //top: 7px;
+  //right: 10px;
+  //width: 21px;
+  //height: 21px;
+  //border-color: $white-color;
+  //border-width: 1px;
+  //border-style: solid;
+  //border-radius: 7px;
+  //background: var(--main-color);
 
 }
 
@@ -1663,6 +1663,10 @@ mat-spinner {
 
 // Language Direction Right
 .right-direction {
+  .file-preview-cover {
+    right: 15px;
+    left: initial !important;
+    }
   .header {
     justify-content: end;
     }
@@ -1789,9 +1793,13 @@ mat-spinner {
       direction: rtl;
       }
     }
-  .widget-chat-header {
+  .widget-chat-header, .widget-form-header {
     flex-direction: row-reverse;
     text-align: right;
+
+    h5{
+      text-align: right;
+      }
     }
   .widget-chat-navbar{
     flex-direction: row-reverse;
@@ -1824,6 +1832,19 @@ mat-spinner {
       direction: rtl;
       }
     }
+
+  .widget-header-icon{
+    display: flex;
+    flex-direction: row-reverse;
+
+    .topbar-icon{
+      position: relative;
+      top: -10px;
+      right: 2px;
+      color: rgb(255, 255, 255) !important;
+      }
+    }
+
 }
 
 // Call Stylings
@@ -1875,6 +1896,7 @@ mat-spinner {
       border: 1px solid white;
       background: rgba(171, 173, 176);
       opacity: 0.8;
+      display: flex;
 
       img {
         position: inherit;

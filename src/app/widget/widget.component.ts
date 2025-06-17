@@ -196,7 +196,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     'left',
     'right',
   ];
-  matToolTipPosition = this.positionOptions[4];
+  matToolTipPosition = this.positionOptions[3];
   isMobile = false;
 
   dictionary: { [key: string]: string } = {

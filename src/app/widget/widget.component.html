@@ -43,11 +43,14 @@
         <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')" *ngIf="!isWebRtcVideoCallActive">
-            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">
-              minimize
-            </span>
+          <div class="widget-header-icon"  *ngIf="!isWebRtcVideoCallActive">
+<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              minimize-->
+<!--            </span>-->
+              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
           </div>
         </div>
         <!-- Widget Chat Control Toolbar -->
@@ -205,12 +208,17 @@
   <ng-container *ngIf="callbackFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-color" (click)="changeScreen('widget')">
+        <div class="widget-form-header widget-chat-header widget-color">
           <h5 id="headerHeading">{{ title }}</h5>
-          <span class="widget-header-icon">
-            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">minimize</span>
-          </span>
+<!--          <span class="widget-header-icon">-->
+<!--            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">minimize</span>-->
+<!--          </span>-->
+          <div class="widget-header-icon">
+            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+              <mat-icon>remove</mat-icon>
+            </button>
+          </div>
         </div>
         <div class="widget-form-content">
           <h4 class="callback-title">{{ 'callback.request' | translate }}</h4>
@@ -438,15 +446,22 @@
   <ng-container *ngIf="preChatFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-color" [ngClass]="{'exist-calendar':daySummary}"
-          (click)="changeScreen('widget')">
-          <h5 id="headerHeading">{{ title }}</h5>
-          <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
-            | date: 'shortTime' }}</p>
-          <span class="widget-header-icon">
-            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">minimize</span>
-          </span>
+        <div class="widget-form-header widget-chat-header widget-color" [ngClass]="{'exist-calendar':daySummary}"
+          >
+          <h5 id="headerHeading">{{ title }}
+            <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
+              | date: 'shortTime' }}</p>
+          </h5>
+<!--          <span class="widget-header-icon" (click)="changeScreen('widget')">-->
+<!--            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">minimize</span>-->
+<!--          </span>-->
+
+          <div class="widget-header-icon">
+            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+              <mat-icon>remove</mat-icon>
+            </button>
+          </div>
         </div>
 
         <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
@@ -1097,11 +1112,11 @@
         <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon iconTwo">
-            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltip="{{'button.minimize' | translate}}">
+          <div class="widget-header-icon">
+            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
               <mat-icon>remove</mat-icon>
             </button>
-            <button matMiniFab (click)="endChat()"  aria-label="close conversation"  matTooltip="{{ 'button.end-conversation' | translate }}">
+            <button matMiniFab (click)="endChat()"  aria-label="close conversation" matTooltipPosition="above"  matTooltip="{{ 'button.end-conversation' | translate }}">
               <mat-icon>close</mat-icon>
             </button>
 
@@ -1232,17 +1247,17 @@
           <ng-container *ngIf="fontDropDown">
             <div class="font-dropdown-container">
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
-                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '12' }"
+                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12' }"
                 (click)="setFontSize('12')" [ngClass]="{ btnOne: enableFontResize === true }">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px"
-                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '14' }"
+                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14' }"
                 (click)="setFontSize('14')" [ngClass]="{ btnOne: enableFontResize === true }">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px"
-                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '16' }"
+                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16' }"
                 (click)="setFontSize('16')" [ngClass]="{ btnOne: enableFontResize === true }">
                 text_fields
               </span>
@@ -2230,11 +2245,14 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">
-              minimize
-            </span>
+          <div class="widget-header-icon">
+<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              minimize-->
+<!--            </span>-->
+              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
           </div>
         </div>
         <div class="widget-error-content">
@@ -2272,11 +2290,14 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">
-              minimize
-            </span>
+          <div class="widget-header-icon">
+<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              minimize-->
+<!--            </span>-->
+              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
           </div>
         </div>
         <div class="widget-error-content">
@@ -2333,11 +2354,14 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">
-              minimize
-            </span>
+          <div class="widget-header-icon">
+<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              minimize-->
+<!--            </span>-->
+              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
           </div>
         </div>
         <div class="widget-error-content">
