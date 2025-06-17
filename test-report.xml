@@ -1,21 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testExecutions version="1">
-  <file path="/home/seeker/customer-widget/src/app/widget/widget.component.spec.ts">
-    <testCase name="WidgetComponent Test Check test check" duration="2"/>
-  </file>
-  <file path="/home/seeker/customer-widget/src/app/services/sdk.service.spec.ts">
-    <testCase name="SdkService Test Check test check" duration="1"/>
-  </file>
-  <file path="/home/seeker/customer-widget/src/app/services/delivery-notification.service.spec.ts">
-    <testCase name="DeliveryNotificationService Test Check test check" duration="0"/>
-  </file>
-  <file path="/home/seeker/customer-widget/src/app/services/browser-notification.service.spec.ts">
-    <testCase name="browserNotificationService Test Check test check" duration="0"/>
-  </file>
-  <file path="/home/seeker/customer-widget/src/app/confirm-dialog/confirm-dialog.component.spec.ts">
-    <testCase name="ConfirmDialogComponent Test Check test check" duration="1"/>
-  </file>
-  <file path="/home/seeker/customer-widget/src/app/services/config.service.spec.ts">
-    <testCase name="ConfigService Test Check test check" duration="0"/>
+  <file path="/home/seeker/customer-widget/test/step-definitions/CarouselMessageTypes.steps.ts">
   </file>
 </testExecutions>

@@ -314,6 +314,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   isFileSelected: any;
   isFileUploading: any = {};
+  innerRichForm: FormGroup;
+  stars = [1, 2, 3, 4, 5];
+
+  isStarRating = true;
+  isFormsView = true;
+  isCarouselView = true;
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -336,6 +342,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     translate.setDefaultLang('en');
     translate.use('en');
+
+    this.innerRichForm = this.fb.group({
+      text: [''],
+      url: [''],
+      email: [''],
+      radio: ['option1'],
+      checkbox: [false],
+      textarea: [''],
+      date: [''],
+      time: [''],
+      range: [50],
+      rating: [0],
+      comment: ['']
+    });
+
+
   }
 
   async ngAfterViewInit(): Promise<void> {
@@ -1736,13 +1758,34 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
         this.editMessage(cimMessage);
         this.handleMessageReport(cimMessage);
-      } else {
+      } 
+      
+      else {
         this.cimMessage.push(cimMessage);
         this.browserNotificationService.notify(cimMessage);
         this.scrollToBottom();
         this.handleMessageReport(cimMessage);
       }
-    } else {
+    } 
+
+    else if (cimMessage.header.sender.type.toLowerCase() === 'customer' && cimMessage.header.additionalData?.carousalCardId) {
+      if (
+        cimMessage.header.originalMessageId &&
+        cimMessage.header.intent &&
+        cimMessage.header.intent.toLowerCase() !== 'update'
+      ) {
+        this.handleCarousalQuotedMessage(cimMessage);
+      } 
+
+      else {
+        this.cimMessage.push(cimMessage);
+        this.browserNotificationService.notify(cimMessage);
+        this.scrollToBottom();
+        this.handleMessageReport(cimMessage);
+      }
+    } 
+    
+    else {
       if (
         cimMessage.body.type.toLowerCase() != 'notification' &&
         cimMessage.header.sender.type.toLowerCase() == 'agent'
@@ -1804,13 +1847,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const newContent = cimMessage.body.markdownText
       this.cimMessage[existingMessageIndex].body.markdownText = newContent;
       this.cimMessage[existingMessageIndex].isEdited = true;
-
     }
   }
 
 
   composerDisable() {
-    console.log("message element is ", this.messageElement)
     const messageRef: any = this.messageElement?.nativeElement;
     if (messageRef) {
       this.renderer.setAttribute(messageRef, 'disabled', 'true')
@@ -1823,6 +1864,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleResumedMessages(cimMessages: any[]) {
+    
     cimMessages.forEach((cimMessage) => {
       if (
         cimMessage.body.type.toLowerCase() == 'plain' &&
@@ -1847,7 +1889,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
           this.editMessage(cimMessage);
-        } else {
+        } 
+        else {
           this.cimMessage.push(cimMessage);
         }
         this.isChatActive = true;
@@ -1863,9 +1906,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
           this.editMessage(cimMessage);
-        } else {
-          this.cimMessage.push(cimMessage);
-        }
+        } 
+
+        if(cimMessage.header.additionalData?.carousalCardId) {
+          console.log(">>>>>>>>>>>>>>>>>>>>>>>>>cimmessage in the handleResumed messages", cimMessage)
+          this.handleCarousalQuotedMessage(cimMessage);
+        } 
+
+        this.cimMessage.push(cimMessage);
         this.isChatActive = true;
         this.processSeenMessages();
         this.scrollToBottom();
@@ -2108,11 +2156,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     fileSize?: number,
     additionalText?: string,
     fileType?: string,
+    carousalCardId?: null | string,
   ) {
     let header = {
       originalMessageId: null as null | string,
       intent: null as null | string,
       entities: null as null | string,
+      additionalData: {} as any,
       sender: {
         id: '460df46c-adf9-11ed-afa1-0242ac120002',
         type: 'CUSTOMER',
@@ -2142,6 +2192,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (transformedIntent.entities) {
         header.entities = transformedIntent.entities;
       }
+      header.additionalData = {
+        carousalCardId:
+          typeof carousalCardId === 'string' && carousalCardId.trim() !== ''
+            ? carousalCardId
+            : null,
+      };
       body.type = 'PLAIN';
       body.markdownText = text!.trim();
       const msgPayload = {
@@ -2357,10 +2413,71 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         'PLAIN',
         data.title.trim(),
         data.payload,
-        originalMessageId,
+        originalMessageId
       );
     }
   }
+
+  sendCarousalMessage(data: any, originalMessageId : string, carousalCardId? : null | string) {
+    if (data.title.trim() !== '') {
+      this.constructCimMessage(
+        'PLAIN',
+        data.title.trim(),
+        data.payload,
+        originalMessageId,
+        null,
+        null,
+        null,
+        null,
+        null,
+        carousalCardId
+      );
+    }
+  }
+
+  handleCarousalQuotedMessage(cimMessage: any) {
+  
+    const originalMessageId = cimMessage.header.originalMessageId;
+    const carousalCardId = cimMessage.header.additionalData?.carousalCardId;
+
+    const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
+  
+    if (originalMessage) {
+      cimMessage.body.quotedText = originalMessage.body?.markdownText || '';
+      cimMessage.body.quotedTime = originalMessage.header?.timestamp || '';
+      cimMessage.header.quotedType = originalMessage.body?.type;
+      cimMessage.senderType = originalMessage.header.sender.type
+  
+      const elements = originalMessage.body?.elements || [];
+      // Find the carousel element matching the carousalCardId
+      const matchedElement = elements.find(
+        (element: any) =>
+          element.additionalCarouselElementDetails?.id === carousalCardId
+      );
+
+      if (matchedElement?.additionalCarouselElementDetails?.repeatAble === false) {
+        originalMessage.body.disableAllButtons = true;
+      }
+  
+      if (matchedElement) {
+        cimMessage.body.quotedText = matchedElement.text
+        cimMessage.body.quotedCardTitle = matchedElement.additionalCarouselElementDetails?.title;
+        cimMessage.body.quotedCardImage = matchedElement.additionalCarouselElementDetails?.image_url;
+        cimMessage.body.quotedAltImage = matchedElement.additionalCarouselElementDetails?.alt
+        cimMessage.body.quotedButtons = matchedElement.buttons || [];
+      }
+    }
+  
+    
+    if(cimMessage.header.sender.type.toLowerCase() === "customer" && cimMessage.header.additionalData?.carousalCardId) {
+
+      this.cimMessage.push(cimMessage);
+      this.browserNotificationService.notify(cimMessage);
+      this.scrollToBottom();
+      this.handleMessageReport(cimMessage);
+    }
+  }
+  
 
   endChat(): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent);
@@ -3859,4 +3976,25 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       );
     }
   }
+//  carousel function
+  currentIndex = 0;
+
+  next(message) {
+    if (message?.body?.elements && this.currentIndex < message.body.elements.length - 1) {
+      this.currentIndex++;
+    }
+  }
+
+  prev() {
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+    }
+  }
+
+
+
+  setRating(value: number): void {
+    this.innerRichForm.get('rating')?.setValue(value);
+  }
+
 }

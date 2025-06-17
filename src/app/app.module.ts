@@ -16,7 +16,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatRadioModule } from '@angular/material/radio';
 
 import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
@@ -33,6 +32,12 @@ import { getMediaFromTask } from './getMediaFromTask.pipe';
 import { NpsColorPipe } from './npsColor.pipe';
 import { SvgNpsFormatPipe } from './svgFormat.pipe';
 import { IsEllipsisActiveDirective } from './isEllipsisActive.directive';
+import {MatCardModule} from "@angular/material/card";
+import {MatDatepickerModule} from "@angular/material/datepicker";
+import {MatRadioModule} from "@angular/material/radio";
+import {MatNativeDateModule} from "@angular/material/core";
+import {MatCheckboxModule} from "@angular/material/checkbox";
+import {OwlDateTimeModule, OwlNativeDateTimeModule} from "ng-pick-datetime";
 
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
@@ -66,11 +71,11 @@ export function initializeApp1(appConfigService: ConfigService) {
     BrowserModule,
     HttpClientModule,
     TranslateModule.forRoot({
-        loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClient]
-        }
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient]
+      }
     }),
     AppRoutingModule,
     BrowserAnimationsModule,
@@ -87,7 +92,14 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatSnackBarModule,
     MatDialogModule,
     MatChipsModule,
-    MatRadioModule
+    MatRadioModule,
+    MatCardModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatRadioModule,
+    MatCheckboxModule,
+    OwlDateTimeModule,
+    OwlNativeDateTimeModule,
   ],
   exports: [getMediaFromTask],
   providers: [{
