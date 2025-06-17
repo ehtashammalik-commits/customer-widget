@@ -1812,15 +1812,15 @@ mat-spinner {
     }
 
   .widget-section.widget-video-section{
-    .localVideoView {
-      right: inherit;
-      left: 5px;
-      }
-    .agent-detail {
-      left: initial !important;
-      right: 3% !important;
-      text-align: right;
-      }
+    //.localVideoView, .localVideo {
+    //  right: inherit;
+    //  left: 5px;
+    //  }
+    //.agent-detail {
+    //  left: initial !important;
+    //  right: 3% !important;
+    //  text-align: right;
+    //  }
     }
   .font-dropdown-container{
     left: 0;
@@ -1897,6 +1897,11 @@ mat-spinner {
       background: rgba(171, 173, 176);
       opacity: 0.8;
       display: flex;
+
+      .audio-agent{
+        width: 60px;
+        height: 60px;
+        }
 
       img {
         position: inherit;
