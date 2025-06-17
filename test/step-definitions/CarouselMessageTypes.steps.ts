@@ -21,8 +21,9 @@ defineFeature(feature, (test) => {
         const mockActivatedRoute = { snapshot: { params: {} } } as any;
         const mockFormBuilder = { group: jest.fn() } as any;
         const mockSdkService = {
-          sendChatMessage: jest.fn()
-        } as any;
+          sendChatMessage: jest.fn(),
+          setConversationDataAgainstCustomerIdentifier: jest.fn()
+        } as any;        
         const mockAppConfig = {
         appConfig: {
             ENABLE_LOGO: true,
@@ -58,6 +59,13 @@ defineFeature(feature, (test) => {
             mockPostMessageHandlerService,
             mockTranslateService
           );
+
+          component.customerData = {
+            channelCustomerIdentifier: 'cust‑123',
+            serviceIdentifier: 'svc‑999'
+          } as any;
+
+          component.preChatFormData = {};
 
           (component as any).elementView = {
             nativeElement: {
@@ -103,7 +111,16 @@ defineFeature(feature, (test) => {
                                 ],
                             }
                         ]
-                    }
+                    },
+                    header: {
+                     additionalData: {
+                      carousalCardId:"123"
+                     },
+                     timestamp: '2023-01-01T12:00:00Z',
+                     sender: {
+                       type: 'customer'
+                     }
+                   }
                }
            }
 
@@ -269,9 +286,18 @@ defineFeature(feature, (test) => {
                             ],
                         }
                     ]
+                },
+                header: {
+                  additionalData: {
+                   carousalCardId:"123"
+                  },
+                  timestamp: '2023-01-01T12:00:00Z',
+                  sender: {
+                    type: 'customer'
+                  }
                 }
-           }
-       }
+              }
+          }
 
         jest.spyOn(component, 'handleCimMessage');
         component.eventListener(carousalMessage);
@@ -359,7 +385,7 @@ defineFeature(feature, (test) => {
             header: {
               timestamp: '2023-01-01T12:00:00Z',
               sender: {
-                type: 'Agent'
+                type: 'customer'
               }
             }
           };
@@ -456,6 +482,15 @@ defineFeature(feature, (test) => {
                     ]
                   }
                 ]
+              },
+              header: {
+                additionalData: {
+                 carousalCardId:"123"
+                },
+                timestamp: '2023-01-01T12:00:00Z',
+                sender: {
+                  type: 'customer'
+                }
               }
             }
           };          
@@ -548,7 +583,7 @@ defineFeature(feature, (test) => {
             intent: 'text',
             originalMessageId: '2',
             sender: {
-              type: 'Connector',
+              type: 'customer',
             },
           },
         };
@@ -564,7 +599,7 @@ defineFeature(feature, (test) => {
               carousalCardId: 'card-123',
             },
             sender: {
-              type: 'Customer',
+              type: 'customer',
             }
           },
           id: '1',
@@ -604,7 +639,7 @@ defineFeature(feature, (test) => {
           intent: 'text',
           originalMessageId: '2',
           sender: {
-            type: 'Connector',
+            type: 'customer',
           },
         },
       };

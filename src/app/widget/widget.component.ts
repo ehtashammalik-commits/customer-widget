@@ -1390,7 +1390,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     } 
 
-    else if (cimMessage.header.sender.type.toLowerCase() === 'customer') {
+    else if (cimMessage.header.sender.type.toLowerCase() === 'customer' && cimMessage.header.additionalData.carousalCardId) {
       if (
         cimMessage.header.originalMessageId &&
         cimMessage.header.intent &&
@@ -1474,7 +1474,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   composerDisable() {
-    console.log("message element is ", this.messageElement)
     const messageRef: any = this.messageElement?.nativeElement;
     if (messageRef) {
       this.renderer.setAttribute(messageRef, 'disabled', 'true')
@@ -1531,7 +1530,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.editMessage(cimMessage);
         } 
 
-        if(cimMessage.header.additionalData.carousalCardId) {
+        if(cimMessage.header.additionalData?.carousalCardId) {
           this.handleCarousalQuotedMessage(cimMessage);
         } 
 
@@ -2164,7 +2163,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
   
-    if(cimMessage.header.sender.type.toLowerCase() === "customer" && cimMessage.header.additionalData.carousalCardId) {
+    if(cimMessage.header.sender.type.toLowerCase() === "customer" && cimMessage.header.additionalData?.carousalCardId) {
 
       this.cimMessage.push(cimMessage);
       this.browserNotificationService.notify(cimMessage);
