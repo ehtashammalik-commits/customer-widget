@@ -27,3 +27,9 @@ Feature: WebRTC Video Channel for Customer-Agent Communication
     Then the agent cannot hear the customer
     When the customer clicks Unmute
     Then the agent starts receiving audio from the customer
+
+    Scenario: Customer puts the call on hold
+    Given a WebRTC video call is active
+    When the customer clicks the Hold button
+    And the customer's audio and video streams are paused
+    And the Agent hears hold music
