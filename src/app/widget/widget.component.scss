@@ -908,7 +908,7 @@ button.close-widget-wrapper {
   margin: 6px 4px 6px 4px;
 
   &.font-selection {
-    position: relative; 
+    position: relative;
     margin-left: 4px;
     &:before {
       content: "|";
@@ -1778,6 +1778,14 @@ mat-spinner {
       border: 1px solid white;
       background: rgba(171, 173, 176);
       opacity: 0.8;
+      display: flex;
+      justify-content: center;
+
+      .call-loader {
+        width: 60px;
+        height: 60px;
+        right: inherit;
+      }
 
       img {
         position: inherit;
@@ -2377,7 +2385,7 @@ mat-spinner {
 }
 
 
-// new form schema handling 
+// new form schema handling
 
 
 .mat-error {
@@ -2990,7 +2998,7 @@ mat-spinner {
 
 }
 
-// custom loader 
+// custom loader
 .loader {
   width: 18px;
   height: 18px;
@@ -3306,4 +3314,4 @@ input[type='radio'] {
     pointer-events: none;
     opacity: 0.5;
   }
-  
+

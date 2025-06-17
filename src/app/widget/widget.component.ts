@@ -2617,10 +2617,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
       else this.handleRefreshCaseForWebRTC();
 
-      this.sdk.handleCallStart({
-        type: callType,
-        authConfigs: this.webRTCConfig,
-      });
+      // this.sdk.handleCallStart({
+      //   type: callType,
+      //   authConfigs: this.webRTCConfig,
+      // });
 
       if (callType === 'video' && !this.isSecureWebCall) {
         this.isVideoCallActive = true;
