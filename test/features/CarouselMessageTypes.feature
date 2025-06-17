@@ -1,4 +1,4 @@
-Feature: Customer Widget Message Types Support
+Feature: Customer Widget Carousal Message Types Support
 
   Scenario: Customer selects a button from the carousel
     Given the customer is in an active conversation with the bot
