@@ -221,7 +221,7 @@
             <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg"
               alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
             <!-- Global error message for the form -->
-            <div>
+            <div class="fields-validation-error">
               <span class="field-error error_text_for_filling"
                 *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
                 {{ 'error.incomplete-required-fields' | translate }}
@@ -1097,18 +1097,29 @@
         <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon iconTwo" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">
-              minimize
-            </span>
+          <div class="widget-header-icon iconTwo">
+            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltip="{{'button.minimize' | translate}}">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <button matMiniFab (click)="endChat()"  aria-label="close conversation"  matTooltip="{{ 'button.end-conversation' | translate }}">
+              <mat-icon>close</mat-icon>
+            </button>
+
+<!--            <span (click)="changeScreen('widget')" class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              minimize-->
+<!--            </span>-->
+<!--            <span (click)="endChat()" class="material-symbols-outlined close-icon" matTooltip="{{ 'button.end-conversation' | translate }}"-->
+<!--                  [matTooltipPosition]="matToolTipPosition!">-->
+<!--              close-->
+<!--            </span>-->
           </div>
-          <div class="widget-header-icon iconOne" mat-raised-button (click)="endChat()">
-            <span class="material-symbols-outlined close-icon" matTooltip="{{ 'button.end-conversation' | translate }}"
-              [matTooltipPosition]="matToolTipPosition!">
-              close
-            </span>
-          </div>
+<!--          <div class="widget-header-icon iconOne" mat-raised-button (click)="endChat()">-->
+<!--            <span class="material-symbols-outlined close-icon" matTooltip="{{ 'button.end-conversation' | translate }}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              close-->
+<!--            </span>-->
+<!--          </div>-->
         </div>
         <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
@@ -1450,7 +1461,7 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                        (message.body.markdownText | tagFormat:enableDynamicLink) 
+                        (message.body.markdownText | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1689,7 +1700,7 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                        (message.body.markdownText | tagFormat:enableDynamicLink) 
+                        (message.body.markdownText | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':

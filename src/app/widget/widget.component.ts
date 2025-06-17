@@ -297,7 +297,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   source: any;
 
 
-  // file preview 
+  // file preview
   filePreviewUrl: { [key: string]: any } = {};
   fileHistory: { [key: string]: { isImage: boolean } } = {}
   // Add a new property to store text content
@@ -306,7 +306,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   IsRegisteredInFreeSwitch: boolean = false;
 
 
-  // file properties 
+  // file properties
   fileExtensons: any[] = [
     'txt', 'png', 'jpg', 'jpeg', 'pdf', 'ppt', 'pptx', 'xlsx', 'xls',
     'doc', 'docx', 'rtf', 'mp3', 'mp4', 'webp'
@@ -943,7 +943,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   calculateAttributeScore(formData: any) {
 
     formData.body.sections.forEach((section: any) => {
-      // console.log(section); 
+      // console.log(section);
       section.attributes.forEach((attribute: any) => {
         //  console.log(attribute);
         let selectedOption = attribute?.answer.find((option: any) => option?.isSelected === true);
@@ -1463,7 +1463,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   //   if (document.getElementById('localVideo')) {
   //   this.localStream = document.getElementById('localVideo')
   //   console.log("here is the localStream")
-  //   } 
+  //   }
 
   //   if(document.getElementById('remoteVide')) {
   //   this.remoteStream = document.getElementById('localVideo')
@@ -2483,6 +2483,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     if (this.selectedLanguage == 'ar') {
       this.textDirection = 'right-direction';
+      this.translate.use(this.selectedLanguage);
+      console.log(this.selectedLanguage, 'this.selectedLanguage')
     }
   }
 
@@ -2902,11 +2904,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     if (data.event === 'Error') {
       // this.errorDuringWebRTCCall = true;
-      // This dialoguId we got in reponse once the call starts ringing on agent side 
-      // If share end / mute / hold / unhold events on the basis of this Id. 
-      // If we do not have this id, we might face unexpected errors / behavour. 
-      // That is why it is necessary that if an error occurs while initiating a call we make this Id undefined 
-      // so that while initiating a new call it is overridden easily. 
+      // This dialoguId we got in reponse once the call starts ringing on agent side
+      // If share end / mute / hold / unhold events on the basis of this Id.
+      // If we do not have this id, we might face unexpected errors / behavour.
+      // That is why it is necessary that if an error occurs while initiating a call we make this Id undefined
+      // so that while initiating a new call it is overridden easily.
       this.dialogId = undefined;
       let errorMessage = '';
       switch (data.response.type) {
@@ -3096,7 +3098,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const preservedKey = decodeURIComponent(encryptedKey ?? "");
     this.webRtcSecureLink = preservedKey;
 
-    // Just for Debugging to open url in new window. 
+    // Just for Debugging to open url in new window.
     // const hashIndex = mediaUrl.indexOf('#');
     // const hashPart = hashIndex !== -1 ? mediaUrl.substring(hashIndex) : '';
     // const baseUrl = "http://localhost:4000";
