@@ -8,3 +8,9 @@ Feature: WebRTC Video Channel for Customer-Agent Communication
     When the customer clicks on Start Video Call button
     Then a new WebRTC session should be initiated
     And a routing request is sent to CX Core
+
+    Scenario: Video call initiation fails due to missing audio permission
+    Given the customer has not granted microphone permission
+    When the customer clicks Start Video Call
+    Then the call should not be initiated
+    And an error is shown suggesting audio permission is required
