@@ -1755,6 +1755,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           }
         }
       }
+
       if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
         this.editMessage(cimMessage);
         this.handleMessageReport(cimMessage);
@@ -1768,20 +1769,31 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     } 
 
-    else if (cimMessage.header.sender.type.toLowerCase() === 'customer' && cimMessage.header.additionalData?.carousalCardId) {
+
+    // For Teneo Bot
+
+    else if (cimMessage.header.sender.type.toLowerCase() === 'customer') {
       if (
         cimMessage.header.originalMessageId &&
         cimMessage.header.intent &&
-        cimMessage.header.intent.toLowerCase() !== 'update'
+        cimMessage.header.intent.toLowerCase() !== 'update' && 
+        cimMessage.header.additionalData?.carousalCardId
       ) {
         this.handleCarousalQuotedMessage(cimMessage);
       } 
 
+      
+
+      else if(cimMessage.header.originalMessageId &&
+        cimMessage.header.intent && cimMessage.header.intent.toLowerCase() !== 'update') {
+          this.handleClickableList(cimMessage);
+      }  
+
       else {
-        this.cimMessage.push(cimMessage);
-        this.browserNotificationService.notify(cimMessage);
-        this.scrollToBottom();
-        this.handleMessageReport(cimMessage);
+       this.cimMessage.push(cimMessage);
+       this.browserNotificationService.notify(cimMessage);
+       this.scrollToBottom();
+       this.handleMessageReport(cimMessage);
       }
     } 
     
@@ -1891,11 +1903,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.editMessage(cimMessage);
         } 
         else {
-          this.cimMessage.push(cimMessage);
-        }
+
+        this.cimMessage.push(cimMessage);
         this.isChatActive = true;
         this.processSeenMessages();
         this.scrollToBottom();
+        }
       } else {
         if (
           cimMessage.body.type.toLowerCase() != 'notification' &&
@@ -1909,10 +1922,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         } 
 
         if(cimMessage.header.additionalData?.carousalCardId) {
-          console.log(">>>>>>>>>>>>>>>>>>>>>>>>>cimmessage in the handleResumed messages", cimMessage)
+          
           this.handleCarousalQuotedMessage(cimMessage);
         } 
 
+        if(cimMessage.header.originalMessageId && cimMessage.header.intent && !cimMessage.header.additionalData?.carousalCardId) {
+          this.handleClickableList(cimMessage)
+        }
+
+        
         this.cimMessage.push(cimMessage);
         this.isChatActive = true;
         this.processSeenMessages();
@@ -2476,6 +2494,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.scrollToBottom();
       this.handleMessageReport(cimMessage);
     }
+  }
+
+
+  handleClickableList(cimMessage: any) {
+
+      const originalMessageId = cimMessage.header.originalMessageId;
+      const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
+
+      console.log("here ir original message", originalMessage)
+        if(originalMessage && originalMessage.body.additionalDetails.interactive.type.toLowerCase() === "clickablelist") {
+          originalMessage.body.disableClickaAbleList = true;
+        }
+
+       if(cimMessage.header.sender.type.toLowerCase() === "customer") {
+
+        console.log("here is cimessage after updattion    ", cimMessage)
+        this.cimMessage.push(cimMessage);
+        this.browserNotificationService.notify(cimMessage);
+        this.scrollToBottom();
+        this.handleMessageReport(cimMessage);
+       }
   }
   
 

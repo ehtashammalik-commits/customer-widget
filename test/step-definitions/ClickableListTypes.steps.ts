@@ -19,10 +19,13 @@ defineFeature(feature, (test) => {
           } as any;
         const mockActivatedRoute = { snapshot: { params: {} } } as any;
         const mockFormBuilder = { group: jest.fn() } as any;
+
         const mockSdkService = {
           sendChatMessage: jest.fn(),
-          setConversationDataAgainstCustomerIdentifier: jest.fn()
+          setConversationDataAgainstCustomerIdentifier: jest.fn(),
+          postFormDataAsActivity: jest.fn()
         } as any;        
+
         const mockAppConfig = {
         appConfig: {
             ENABLE_LOGO: true,
@@ -64,7 +67,16 @@ defineFeature(feature, (test) => {
             serviceIdentifier: 'svc‑999'
           } as any;
 
-          component.preChatFormData = {};
+          component.preChatFormData = {
+            sections: []
+          } as any;
+
+
+          component.preChatFormGroup = {
+            value: { sections: [] }
+          } as any;
+          
+          component.formData = [] as any;
 
           (component as any).elementView = {
             nativeElement: {
@@ -74,20 +86,77 @@ defineFeature(feature, (test) => {
       });
       
       test('Customer selects a text option from the list', ({ given, when, and, then }) => {
+
+        let mockEvent: any;
+        let clickableList: any;
+        let selectedOption: any;
         given('the customer is in an active conversation with the bot', () => {
+          given('the customer is in an active conversation with the bot', () => {
+            mockEvent = {
+                type: 'CHANNEL_SESSION_STARTED',
+                data: {
+                  header: {
+                    conversationId: 'conv-123',
+                    customer: {
+                      _id:"123"
+                    }
+                  }
+                }
+              };
+              component.eventListener(mockEvent);
+              expect(component.isChatActive).toBe(true);
+              expect(localStorage.getItem('conversationId')).toBe('conv-123');
+        });
 
         });
 
         when('the customer receives a list message with text options', () => {
-
+          clickableList = {
+            type: 'MESSAGE_RECEIVED',
+            data: {
+                body: {
+                    markdownText: "",
+                    type:"Button",
+                },
+                header: {
+                 timestamp: '2023-01-01T12:00:00Z',
+                 sender: {
+                   type: 'customer'
+                 },
+                 customer: {
+                  _id:"789"
+                 }
+               }
+           }
+       }
         });
 
         and('the customer selects a text option', () => {
-
+          selectedOption = {
+            title: 'Two',
+            payload: 'Two'
+          };
         });
 
         then('the selected option text should appear as a text in the chat', () => {
+          const constructSpy = jest.spyOn(component, 'constructCimMessage');
+          const originalMessageId = 'msg-001';
+          const carousalCardId = 'Card 2';
 
+          component.sendCarousalMessage(selectedOption, originalMessageId, carousalCardId);
+
+          expect(constructSpy).toHaveBeenCalledWith(
+            'PLAIN',
+            'Two',
+            'Two',
+            originalMessageId,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'Card 2'
+          );
         });
 
         and('the list message should become non interactive', () => {
