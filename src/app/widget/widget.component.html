@@ -1895,7 +1895,28 @@
             <!-- <video *ngIf="remoteVideoActive" #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
             <video *ngIf="localVideoActive" #localVideo id="localVideo" autoplay playsinline class="localVideo"></video> -->
             <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
-            <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
+            <!-- <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video> -->
+
+             <!-- test  div start -->
+            <div class="video-container">
+              <!-- Remote video when visible -->
+               <!-- *ngIf="!remoteStreamStatus"  -->
+              <video #remoteVideo id="remoteVideo" autoplay playsinline
+                class="remoteVideo"></video>
+
+              <!-- Full-size cam-off icon placeholder -->
+              <div *ngIf="remoteStreamStatus" class="remoteVideo cam-off-placeholder">
+                <mat-icon class="large-icon">videocam_off</mat-icon>
+              </div>
+
+              <!-- Optional fallback message -->
+              <!-- <div class="unsupported-msg">
+                {{ 'error.html5-not-supported' | translate }}
+              </div> -->
+            </div>
+
+            <!-- test div end -->
+
 
             <div class="audio-agent" *ngIf="activeAudioView">
               <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon" />
@@ -1915,7 +1936,9 @@
 
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div class="control-btn" [ngClass]="{
+                <div *ngIf="!__appConfig.appConfig.VIDEO"
+                  class="control-btn"
+                  [ngClass]="{
                     'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
 
                     'focus-icon-video ': isScreenShareActive === true
