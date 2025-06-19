@@ -1663,6 +1663,10 @@ mat-spinner {
 
 // Language Direction Right
 .right-direction {
+  .typing-indicator {
+    left: initial !important;
+    right: 15px !important;
+    }
   .file-preview-cover {
     right: 15px;
     left: initial !important;
