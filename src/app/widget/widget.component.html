@@ -2266,9 +2266,14 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger"
+            <input
+              id="formTrigger"
+              type="submit"
+              class="widget-error-trigger"
               value="{{ 'button.download-transcript' | translate }}"
-              *ngIf="enableDownloadTranscript && !standaloneWebRtc" (click)="chatTranscript()" />
+              *ngIf="enableDownloadTranscript && !standaloneWebRtc"
+              (click)="chatTranscript()"
+            />
           </div>
         </div>
       </div>

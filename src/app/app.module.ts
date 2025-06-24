@@ -33,6 +33,7 @@ import { getMediaFromTask } from './getMediaFromTask.pipe';
 import { NpsColorPipe } from './npsColor.pipe';
 import { SvgNpsFormatPipe } from './svgFormat.pipe';
 import { IsEllipsisActiveDirective } from './isEllipsisActive.directive';
+import { TranscriptComponent } from './chat-transcript/chat-transcript.component';
 
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
@@ -56,7 +57,8 @@ export function initializeApp1(appConfigService: ConfigService) {
     getMediaFromTask,
     NpsColorPipe,
     SvgNpsFormatPipe,
-    IsEllipsisActiveDirective
+    IsEllipsisActiveDirective,
+    TranscriptComponent
   ],
   imports: [
     NgxLinkifyjsModule.forRoot({
@@ -89,7 +91,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatChipsModule,
     MatRadioModule
   ],
-  exports: [getMediaFromTask],
+  exports: [getMediaFromTask,TranscriptComponent],
   providers: [{
       provide: LocationStrategy,
       useClass: HashLocationStrategy,
