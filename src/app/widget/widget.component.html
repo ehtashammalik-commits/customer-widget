@@ -229,7 +229,7 @@
             <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg"
               alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
             <!-- Global error message for the form -->
-            <div class="fields-validation-error">
+            <div class="fields-validation-error mr-2">
               <span class="field-error error_text_for_filling"
                 *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
                 {{ 'error.incomplete-required-fields' | translate }}
@@ -476,7 +476,7 @@
                 alt="Live Chat" />
 
               <!-- Global error message for the form -->
-              <div>
+              <div class="fields-validation-error mr-2">
                 <span class="field-error error_text_for_filling"
                   *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
                   {{'error.incomplete-required-fields'| translate }}
@@ -2003,7 +2003,7 @@
             <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
               <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
               <!-- Global error message for the form -->
-              <div>
+              <div class="fields-validation-error mr-2">
                 <span class="field-error error_text_for_filling"
                   *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
                   {{ 'error.incomplete-required-fields' | translate }}
@@ -2404,7 +2404,7 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number"
+            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="{{ 'button.call-on-my-number' | translate }}"
               *ngIf="enableWebRtc" />
 
             <input id="formTrigger" typCall pope="submit" class="widget-error-trigger"
