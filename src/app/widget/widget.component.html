@@ -1371,10 +1371,7 @@
                       (message.body.notificationData.data.task
                         | getMediaFromTask: 'direction') == 'DIRECT_TRANSFER'
                     ">
-                    <span innerHTML="{{ 'notification.transfering-request-to' | translate }} '{{
-                        message.body.notificationData.data.task
-                          | getMediaFromTask: 'queueName'
-                      }}' {{ 'notification.queue-please-wait' | translate }}">
+                    <span innerHTML="{{ 'notification.transfering-request-to' | translate }}">
                     </span>
                   </div>
                   <div *ngIf="
@@ -1382,10 +1379,7 @@
                       (message.body.notificationData.data.task
                         | getMediaFromTask: 'direction') == 'DIRECT_TRANSFER'
                     ">
-                    <span innerHTML="{{ 'notification.transfering-request-to' | translate }} '{{
-                        message.body.notificationData.data.task
-                          | getMediaFromTask: 'queueName'
-                      }}' {{ 'notification.queue-please-wait' | translate }}">
+                    <span innerHTML="{{ 'notification.transfering-request-to' | translate }}">
                     </span>
                   </div>
                 </div>
