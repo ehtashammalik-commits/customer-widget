@@ -69,7 +69,7 @@ await  loadIcons();
 const request = new XMLHttpRequest();
 request.open(
   "GET",
-  `${ccm_url}/message?customerChannelIdentifier=${channel_customer_identifier}&serviceIdentifier=${service_identifier}&conversationId=${conversation_id}`,
+  `${ccm_url}/message?&conversationId=${conversation_id}`,
 );
 request.setRequestHeader("Authorization", `Bearer ${jwtToken}`);
 request.send();
