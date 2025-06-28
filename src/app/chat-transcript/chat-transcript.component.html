@@ -5,723 +5,603 @@
 
 <div class="chat-area" id="conversation-area" [ngClass]="conversationAreaClass">
   <div *ngFor="let message of processedMessages">
+    
     <!-- BUTTON Message -->
-    <div
-      *ngIf="
-        message.header.sender.type === 'BOT' && message.body.type === 'BUTTON'
-      "
-      class="chat-message agent-message bot-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="Bot" />
-        </div>
-      </div>
-      <div class="chat-message-content structured-message">
-        <p>
-          <b>{{ message.body.additionalDetails.interactive.header.text }}</b>
-          <span>{{
-            message.body.additionalDetails.interactive.body.text
-          }}</span>
-        </p>
-        <ul class="structured-actions">
-          <li *ngFor="let btn of message.body.buttons">{{ btn.title }}</li>
-        </ul>
-        <span class="message-stamp">
-          <span class="chat-time">{{
-            formatTime(message.header.timestamp)
-          }}</span>
-        </span>
-      </div>
-    </div>
+      <ng-container *ngIf="message.header.sender.type === 'BOT'">
 
-    <!-- URL Message -->
-    <div *ngIf="message.body.type === 'URL'" class="chat-message agent-message">
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
-        </div>
-      </div>
-      <div class="chat-message-content">
-        <p>
-          <span>{{ message.body.markdownText }}</span>
-          <a [href]="message.body.mediaUrl" target="_blank"
-            ><span>{{ message.body.mediaUrl }}</span></a
-          >
-          <span class="message-stamp">
-            <span class="chat-time">{{
-              formatTime(message.header.timestamp)
-            }}</span>
-          </span>
-        </p>
-      </div>
-    </div>
+        <div [ngSwitch]="message.body.type">
 
-    <!-- VIDEO Message -->
-    <div
-      *ngIf="message.body.type === 'VIDEO'"
-      class="chat-message user-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
-        </div>
-      </div>
-      <div class="chat-message-content file-type-message image-type">
-        <p>
-          <span>
-            <video class="videoPlayer" autoplay muted>
-              <source
-                [src]="getSafeUrl(message.body.attachment.mediaUrl)"
-                type="video/mp4"
-              />
-              Your browser does not support the video tag.
-            </video>
-          </span>
-          <span class="message-stamp">
-            <span class="chat-time">{{
-              formatTime(message.header.timestamp)
-            }}</span>
-          </span>
-        </p>
-      </div>
-    </div>
-
-    <!-- IMAGE Message -->
-    <div
-      *ngIf="message.body.type === 'IMAGE'"
-      class="chat-message agent-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
-        </div>
-      </div>
-      <div class="chat-message-content">
-        <p>
-          <span>{{ message.body.caption }}</span>
-          <a
-            [href]="getSafeUrl(message.body.attachment.mediaUrl)"
-            target="_blank"
-          >
-            <img
-              [src]="getSafeUrl(message.body.attachment.mediaUrl)"
-              class="imageViewer"
-            />
-          </a>
-          <span class="message-stamp">
-            <span class="chat-time">{{
-              formatTime(message.header.timestamp)
-            }}</span>
-          </span>
-        </p>
-      </div>
-    </div>
-
-    <!-- FILE Message -->
-    <div
-      *ngIf="message.body.type === 'FILE'"
-      class="chat-message agent-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
-        </div>
-      </div>
-      <div class="chat-message-content file-type-message contact-type">
-        <span class="display-file contact-logo file-message">
-          <img
-            src="assets/images/file-type.svg"
-            alt="{{ message.body.additionalDetails.fileName }}"
-          />
-          <span class="file-ext-main">{{
-            getFileExtension(message.body.attachment.mimeType)
-          }}</span>
-        </span>
-        <div class="contact-inner">
-          <span class="card-label">{{
-            message.body.additionalDetails.fileName
-          }}</span>
-          <span class="card-description">
-            <a
-              class="file-download"
-              [href]="getSafeUrl(message.body.attachment.mediaUrl)"
-              >Download</a
-            >
-          </span>
-        </div>
-        <span class="message-stamp">
-          <span class="chat-time">{{
-            formatTime(message.header.timestamp)
-          }}</span>
-        </span>
-      </div>
-    </div>
-
-    <!-- LOCATION Message -->
-    <div
-      *ngIf="message.body.type === 'LOCATION'"
-      class="chat-message agent-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
-        </div>
-      </div>
-      <div class="chat-message-content">
-        <p>
-          <b>{{ message.body.additionalDetails.name }}</b>
-        </p>
-        <div class="mapouter">
-          <div class="gmap_canvas">
-            <iframe
-              width="235"
-              height="190"
-              frameborder="0"
-              scrolling="no"
-              marginheight="0"
-              marginwidth="0"
-              [src]="
-                'https://maps.google.com/maps?q=' +
-                message.body.location.latitude +
-                ',' +
-                message.body.location.longitude +
-                '&t=&z=15&ie=UTF8&iwloc=&output=embed'
-              "
-            ></iframe>
+          <div *ngSwitchCase="'BUTTON'" class="chat-message agent-message bot-message">
+            <div class="profile-pic">
+              <div class="profile-pic-area user-img">
+                <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="Bot" />
+              </div>
+            </div>
+            <div class="chat-message-content structured-message">
+              <p>
+                <b>{{ message.body.additionalDetails.interactive.header.text }}</b>
+                <span>{{
+                  message.body.additionalDetails.interactive.body.text
+                }}</span>
+              </p>
+              <ul class="structured-actions">
+                <li *ngFor="let btn of message.body.buttons">{{ btn.title }}</li>
+              </ul>
+              <span class="message-stamp">
+                <span class="chat-time">{{
+                  formatTime(message.header.timestamp)
+                }}</span>
+              </span>
+            </div>
           </div>
+
+          <div *ngSwitchCase="'URL'" class="chat-message agent-message">
+            <div class="profile-pic">
+              <div class="profile-pic-area user-img">
+                <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
+              </div>
+            </div>
+            <div class="chat-message-content">
+              <p>
+                <span>{{ message.body.markdownText }}</span>
+                <a [href]="message.body.mediaUrl" target="_blank"
+                  ><span>{{ message.body.mediaUrl }}</span></a
+                >
+                <span class="message-stamp">
+                  <span class="chat-time">{{
+                    formatTime(message.header.timestamp)
+                  }}</span>
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div *ngSwitchCase="'VIDEO'" class="chat-message agent-message">
+            <div class="profile-pic">
+              <div class="profile-pic-area user-img">
+                <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
+              </div>
+            </div>
+            <div class="chat-message-content file-type-message image-type">
+              <p>
+                <span>
+                  <video class="videoPlayer" autoplay muted>
+                    <source         
+                      [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                      type="video/mp4"
+                    />
+                    Your browser does not support the video tag.
+                  </video>
+                </span>
+                <span class="message-stamp">
+                  <span class="chat-time">{{
+                    formatTime(message.header.timestamp)
+                  }}</span>
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div *ngSwitchCase="'IMAGE'" class="chat-message agent-message">
+            <div class="profile-pic">
+              <div class="profile-pic-area user-img">
+                <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
+              </div>
+            </div>
+            <div class="chat-message-content">
+              <p>
+                <span>{{ message.body.caption }}</span>
+                <a
+                  [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                  target="_blank"
+                >
+                  <img
+                    [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                    class="imageViewer"
+                  />
+                </a>
+                <span class="message-stamp">
+                  <span class="chat-time">{{
+                    formatTime(message.header.timestamp)
+                  }}</span>
+                </span>
+              </p>
+            </div> <!-- BOT PLAIN message markup -->
+          </div>
+
+          <div *ngSwitchCase="'FILE'" class="chat-message agent-message">
+            <div class="profile-pic">
+              <div class="profile-pic-area user-img">
+                <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
+              </div>
+            </div>
+            <div class="chat-message-content file-type-message contact-type">
+              <p>
+                <span>{{ message.body.attachment.fileName }}</span>
+                <span class="message-stamp">
+                  <span class="chat-time">{{
+                    formatTime(message.header.timestamp)
+                  }}</span>
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div *ngSwitchCase="'LOCATION'" class="chat-message agent-message">
+            <div class="profile-pic">
+              <div class="profile-pic-area user-img">
+                <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
+              </div>
+            </div>
+            <div class="chat-message-content">
+              <p>
+                <b>{{ message.body.additionalDetails.name }}</b>
+              </p>
+              <div class="mapouter">
+                <div class="gmap_canvas">
+                  <iframe
+                    width="235"
+                    height="190"
+                    [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                    frameborder="0"
+                    scrolling="no"
+                    marginheight="0"
+                    marginwidth="0"
+                  ></iframe>
+                </div>
+              </div>
+              <span class="message-stamp">
+                <span class="chat-time">{{
+                  formatTime(message.header.timestamp)
+                }}</span>
+              </span>
+            </div>
+          </div>
+
+          <div *ngSwitchCase="'PLAIN'" class="chat-message agent-message">
+            <div class="profile-pic">
+              <div class="profile-pic-area user-img">
+                <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
+              </div>
+            </div>
+            <div class="chat-message-content">
+              <p>
+                <span>{{ message.body.markdownText }}</span>
+                <span class="message-stamp">
+                  <span class="chat-time">{{
+                    formatTime(message.header.timestamp)
+                  }}</span>
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div *ngSwitchCase="'CONTACT'" class="chat-message agent-message">
+              <div class="profile-pic">
+                <div class="profile-pic-area user-img">
+                  <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
+                </div>
+              </div>
+              <div class="chat-message-content file-type-message contact-type">
+                <span class="display-file contact-logo">
+                  <img
+                    src="assets/images/contact-type.svg"
+                    alt="{{ message.body.additionalDetails.name }}"
+                  />
+                  <span class="file-ext-main">vCard</span>
+                </span>
+                <div class="contact-inner">
+                  <span class="card-label">{{
+                    message.body.additionalDetails.name
+                  }}</span>
+                  <span class="card-description">
+                    <span class="contact-number">{{ message.body.additionalDetails.phone }}</span>
+                    <a
+                      class="file-download"
+                      [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                      download="{{ message.body.additionalDetails.name }}.vcf"
+                      >Download</a
+                    >
+                  </span>
+                </div>
+                <span class="message-stamp">
+                  <span class="chat-time">{{
+                    formatTime(message.header.timestamp)
+                  }}</span>
+                </span> 
+              </div>  
+            </div>
         </div>
-        <p>
-          <span class="message-stamp">
-            <span class="chat-time">{{
-              formatTime(message.header.timestamp)
-            }}</span>
-          </span>
-        </p>
-      </div>
+      </ng-container>
+
+      <ng-container *ngIf="message.header.sender.type === 'AGENT'">
+          <div [ngSwitch]="message.body.type">
+
+            <div *ngSwitchCase="'NOTIFICATION'">
+              <div
+                class="line-info"
+                *ngIf="message.body.notificationType === 'AGENT_SUBSCRIBED'"
+               >
+                <span>{{ message.header.sender.senderName }} joined the Conversation</span>
+              </div>
+              <div
+                class="line-info"
+                *ngIf="message.body.notificationType === 'AGENT_UNSUBSCRIBED'"
+               >
+                <span>{{ message.header.sender.senderName }} left the Conversation</span>
+              </div>
+            </div>
+
+
+            <div *ngSwitchCase="'PLAIN'" class="chat-message agent-message">
+              <div class="profile-pic">
+                <div class="profile-pic-area user-img">
+                  <img
+                    [src]="getAgentIcon(message.header.sender.senderName)"
+                    alt="Agent"
+                  />
+                </div>
+              </div>
+
+              <div class="chat-message-content">
+                <div class="user-name">
+                  <span>{{ message.header.sender.senderName }}</span>
+                </div>
+                <p>
+                  <span>{{ message.body.markdownText }}</span>
+                  <span *ngIf="message.isEdited" class="edit-message">Edited</span>
+                  <span class="message-stamp">
+                    <span class="chat-time">{{
+                      formatTime(message.header.timestamp)
+                    }}</span>
+                  </span>
+                </p>
+             </div>
+           </div>
+
+            <div *ngSwitchCase="'VIDEO'" class="chat-message user-message">
+              <div class="profile-pic">
+                <div class="profile-pic-area user-img">
+                  <img
+                    [src]="getAgentIcon(message.header.sender.senderName)"
+                    alt="Agent"
+                  />
+                </div>
+              </div>
+              <div class="chat-message-content file-type-message image-type">
+                <p>
+                  <span>
+                    <video class="videoPlayer" controls>
+                      <source
+                        [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                        type="video/mp4"
+                      />
+                      Your browser does not support the video tag.
+                    </video>
+                  </span>
+                  <span class="message-stamp">
+                    <span class="chat-time">{{
+                      formatTime(message.header.timestamp)
+                    }}</span>
+                  </span>
+                </p>
+              </div>
+            </div>
+
+
+            <div *ngSwitchCase="'AUDIO'" class="chat-message user-message">
+              <div class="profile-pic">
+                <div class="profile-pic-area user-img">
+                  <img
+                    [src]="getAgentIcon(message.header.sender.senderName)"
+                    alt="Agent"
+                  />
+                </div>
+              </div>
+              <div class="chat-message-content file-type-message image-type">
+                <div class="user-name">
+                  <span>{{ message.header.sender.senderName }}</span>
+                </div>
+                <p>
+                  <span>
+                    <audio class="audioPlayer" controls>
+                      <source
+                        [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                        type="audio/mpeg"
+                      />
+                      Your browser does not support the audio tag.
+                    </audio>
+                  </span>
+                  <span class="message-stamp">
+                    <span class="chat-time">{{
+                      formatTime(message.header.timestamp)
+                    }}</span>
+                  </span>
+                </p>
+             </div>
+            </div>
+
+              <div *ngSwitchCase="'IMAGE'" class="chat-message agent-message">
+                <div class="profile-pic">
+                  <div class="profile-pic-area user-img">
+                    <img
+                      [src]="getAgentIcon(message.header.sender.senderName)"
+                      alt="Agent"
+                    />
+                  </div>
+                </div>
+                <div class="chat-message-content">
+                    <div class="user-name">
+                      <span>{{ message.header.sender.senderName }}</span>
+                    </div>
+                      <p>
+                        <a
+                          target="_blank"
+                          [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                        >
+                          <img
+                            [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                            class="imageViewer"
+                          />
+                        </a>
+                        <span>{{ message.body.caption }}</span>
+                        <span class="message-stamp">
+                          <span class="chat-time">{{
+                            formatTime(message.header.timestamp)
+                          }}</span>
+                        </span>
+                      </p>
+                </div>
+
+              </div>
+
+            <div *ngSwitchCase="'FILE'" class="chat-message agent-message">
+              <div class="profile-pic">
+                <div class="profile-pic-area user-img">
+                  <img
+                    [src]="getAgentIcon(message.header.sender.senderName)"
+                    alt="Agent"
+                  />
+                </div>
+              </div>
+              <div class="chat-message-content file-type-message contact-type">
+                <div class="user-name">
+                  <span>{{ message.header.sender.senderName }}</span>
+                </div>
+                <span class="display-file contact-logo file-message">
+                  <img
+                    src="assets/images/file-type.svg"
+                    alt="{{ message.body.additionalDetails.fileName }}"
+                  />
+                  <span class="file-ext-main">{{
+                    getFileExtension(message.body.attachment.mimeType)
+                  }}</span>
+                </span>
+                <div class="contact-inner">
+                  <span class="card-label">{{
+                    message.body.additionalDetails.fileName
+                  }}</span>
+                  <span class="card-description">
+                    <a
+                      class="file-download"
+                      [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                      >Download</a
+                    >
+                  </span>
+                </div>
+                <span class="message-stamp">
+                  <span class="chat-time">{{
+                    formatTime(message.header.timestamp)
+                  }}</span>
+                </span>
+              </div>
+            </div>
+
+          </div>
+       </ng-container>
+
+
+       <ng-container *ngIf="message.header.sender.type === 'CONNECTOR'">
+
+         <ngswitch [ngSwitch]="message.body.type">  
+
+           <div *ngSwitchCase="'PLAIN'" class="chat-message user-message">
+             <div class="profile-pic">
+                <div class="active-channel channel-icon web">
+                  <img
+                    [src]="getChannelIconURL(
+                      message.header.sender.senderName,
+                      message.header.sender.id
+                    )"
+                    width="20"
+                  />
+                </div>
+                <div class="profile-pic-area user-img">
+                  <img
+                    [src]="getCustomerIcon(message.header.customer.firstName)"
+                    alt="Customer"
+                  />
+                </div>
+             </div>
+             <div class="chat-message-content">
+               <p>
+                 <span>{{ message.body.markdownText }}</span>
+                 <span class="message-stamp">
+                   <span class="chat-time">{{
+                     formatTime(message.header.timestamp)
+                   }}</span>
+                 </span>
+               </p>
+             </div>
+           </div>
+
+           <div *ngSwitchCase="'VIDEO'" class="chat-message user-message">
+             <div class="profile-pic">
+               <div class="active-channel channel-icon web">
+                 <img
+                   [src]="getChannelIconURL(
+                     message.header.sender.senderName,
+                     message.header.sender.id
+                   )"
+                   width="20"
+                 />
+               </div>
+               <div class="profile-pic-area user-img">
+                 <img
+                   [src]="getCustomerIcon(message.header.customer.firstName)"
+                    alt="Customer"
+                  />
+                </div>
+              </div>
+             <div class="chat-message-content file-type-message image-type">
+                <p>
+                  <span>
+                    <video class="videoPlayer" controls>
+                      <source
+                        [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                        type="video/mp4"
+                      />
+                      Your browser does not support the video tag.
+                    </video>
+                  </span>
+                  <span class="message-stamp">
+                    <span class="chat-time">{{
+                      formatTime(message.header.timestamp)
+                    }}</span>
+                  </span>
+                </p>
+              </div>
+           </div>
+
+           <div *ngSwitchCase="'AUDIO'" class="chat-message user-message">
+              <div class="profile-pic">
+                <div class="active-channel channel-icon web">
+                  <img
+                    [src]="
+                      getChannelIconURL(
+                        message.header.sender.senderName,
+                        message.header.sender.id
+                      )
+                    "
+                    width="20"
+                  />
+                </div>
+                <div class="profile-pic-area user-img">
+                  <img
+                    [src]="getCustomerIcon(message.header.customer.firstName)"
+                    alt="Customer"
+                  />
+                </div>
+              </div>
+               <div class="chat-message-content file-type-message image-type">
+                  <p>
+                    <span>
+                      <audio class="audioPlayer" controls>
+                        <source
+                          [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                          type="audio/mpeg"
+                        />
+                        Your browser does not support the audio tag.
+                      </audio>
+                    </span>
+                    <span class="message-stamp">
+                      <span class="chat-time">{{
+                        formatTime(message.header.timestamp)
+                      }}</span>
+                    </span>
+                  </p>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'IMAGE'" class="chat-message user-message">
+              <div class="profile-pic">
+                <div class="active-channel channel-icon web">
+                  <img
+                    [src]="getChannelIconURL(
+                      message.header.sender.senderName,
+                      message.header.sender.id
+                    )"
+                    width="20"
+                  />
+                </div>
+                <div class="profile-pic-area user-img">
+                  <img
+                    [src]="getCustomerIcon(message.header.customer.firstName)"
+                    alt="Customer"
+                  />
+                </div>
+              </div>
+              <div class="chat-message-content">
+                <p>
+                  <a
+                    target="_blank"
+                    [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                  >
+                    <img
+                      [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                      class="imageViewer"
+                    />
+                  </a>
+                  <span>{{ message.body.caption }}</span>
+                  <span class="message-stamp">
+                    <span class="chat-time">{{
+                      formatTime(message.header.timestamp)
+                    }}</span>
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'File'" class="chat-message user-message">
+              <div class="profile-pic">
+                <div class="active-channel channel-icon web">
+                  <img
+                    [src]="getChannelIconURL(
+                      message.header.sender.senderName,
+                      message.header.sender.id
+                    )"
+                    width="20"
+                  />
+                </div>
+                <div class="profile-pic-area user-img">
+                  <img
+                    [src]="getCustomerIcon(message.header.customer.firstName)"
+                    alt="Customer"
+                  />
+                </div>
+              </div>
+              <div class="chat-message-content file-type-message contact-type">
+                <span class="display-file contact-logo file-message">
+                  <img
+                    src="assets/images/file-type.svg"
+                    alt="{{ message.body.additionalDetails.fileName }}"
+                  />
+                  <span class="file-ext-main">{{
+                    getFileExtension(message.body.attachment.mimeType)
+                  }}</span>
+                </span>
+                <div class="contact-inner">
+                  <span class="card-label">{{
+                    message.body.additionalDetails.fileName
+                  }}</span>
+                  <span class="card-description">
+                    <a
+                      class="file-download"
+                      [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                      >Download</a
+                    >
+                  </span>
+                </div>
+                <span class="message-stamp">
+                  <span class="chat-time">{{
+                    formatTime(message.header.timestamp)
+                  }}</span>
+                </span>
+              </div>
+            </div>
+          </ngswitch>
+        </ng-container>
     </div>
-
-    <!-- CONTACT Message -->
-    <div
-      *ngIf="message.body.type === 'CONTACT'"
-      class="chat-message agent-message bot-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
-        </div>
-      </div>
-      <div class="chat-message-content file-type-message contact-type">
-        <span class="display-file contact-logo">
-          <img src="../../widget-assets/chat-transcript/images/dummy-user.svg" />
-        </span>
-        <div class="contact-inner">
-          <ng-container *ngFor="let contact of message.body.contacts">
-            <span class="card-label">{{ contact.name.formattedName }}</span>
-            <span class="card-description">
-              <a
-                [href]="
-                  'https://api.whatsapp.com/send?phone=' +
-                  contact.phones[0].phone +
-                  '&text=Hello%2C%20I%20want%20more%20info%20about%20the%20product.'
-                "
-                target="_blank"
-              >
-                {{ contact.phones[0].phone }}
-              </a>
-            </span>
-          </ng-container>
-        </div>
-        <span class="message-stamp">
-          <span class="chat-time">{{
-            formatTime(message.header.timestamp)
-          }}</span>
-        </span>
-      </div>
-    </div>
-
-    <!-- PLAIN Message -->
-    <div
-      *ngIf="message.body.type === 'PLAIN'"
-      class="chat-message agent-message bot-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
-        </div>
-      </div>
-      <div class="chat-message-content">
-        <p>
-          <span>{{ message.body.markdownText }}</span>
-          <span *ngIf="message.isEdited" class="edit-message">Edited</span>
-          <span class="message-stamp">
-            <span class="chat-time">{{
-              formatTime(message.header.timestamp)
-            }}</span>
-          </span>
-        </p>
-      </div>
-    </div>
-
-    <!-- AGENT Notifications -->
-    <div
-      *ngIf="
-        message.header.sender.type === 'AGENT' &&
-        message.body.type === 'NOTIFICATION'
-      "
-    >
-      <div
-        class="line-info"
-        *ngIf="message.body.notificationType === 'AGENT_SUBSCRIBED'"
-      >
-        <span
-          >{{ message.header.sender.senderName }} joined the Conversation</span
-        >
-      </div>
-      <div
-        class="line-info"
-        *ngIf="message.body.notificationType === 'AGENT_UNSUBSCRIBED'"
-      >
-        <span
-          >{{ message.header.sender.senderName }} left the Conversation</span
-        >
-      </div>
-    </div>
-
-    <!-- AGENT Plain Text -->
-    <div
-      *ngIf="
-        message.header.sender.type === 'AGENT' && message.body.type === 'PLAIN'
-      "
-      class="chat-message agent-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img
-            [src]="getAgentIcon(message.header.sender.senderName)"
-            alt="Agent"
-          />
-        </div>
-      </div>
-      <div class="chat-message-content">
-        <div class="user-name">
-          <span>{{ message.header.sender.senderName }}</span>
-        </div>
-        <p>
-          <span>{{ message.body.markdownText }}</span>
-          <span *ngIf="message.isEdited" class="edit-message">Edited</span>
-          <span class="message-stamp">
-            <span class="chat-time">{{
-              formatTime(message.header.timestamp)
-            }}</span>
-          </span>
-        </p>
-      </div>
-    </div>
-
-    <!-- AGENT Video -->
-    <div
-      *ngIf="
-        message.header.sender.type === 'AGENT' && message.body.type === 'VIDEO'
-      "
-      class="chat-message user-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img
-            [src]="getAgentIcon(message.header.sender.senderName)"
-            alt="Agent"
-          />
-        </div>
-      </div>
-      <div class="chat-message-content file-type-message image-type">
-        <div class="user-name">
-          <span>{{ message.header.sender.senderName }}</span>
-        </div>
-        <p>
-          <span>
-            <video class="videoPlayer" controls>
-              <source
-                [src]="getSafeUrl(message.body.attachment.mediaUrl)"
-                type="video/mp4"
-              />
-              Your browser does not support the video tag.
-            </video>
-          </span>
-          <span class="message-stamp">
-            <span class="chat-time">{{
-              formatTime(message.header.timestamp)
-            }}</span>
-          </span>
-        </p>
-      </div>
-    </div>
-
-    <!-- AGENT Audio -->
-    <div
-      *ngIf="
-        message.header.sender.type === 'AGENT' && message.body.type === 'AUDIO'
-      "
-      class="chat-message user-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img
-            [src]="getAgentIcon(message.header.sender.senderName)"
-            alt="Agent"
-          />
-        </div>
-      </div>
-      <div class="chat-message-content file-type-message image-type">
-        <div class="user-name">
-          <span>{{ message.header.sender.senderName }}</span>
-        </div>
-        <p>
-          <span>
-            <audio class="audioPlayer" controls>
-              <source
-                [src]="getSafeUrl(message.body.attachment.mediaUrl)"
-                type="audio/mpeg"
-              />
-              Your browser does not support the audio tag.
-            </audio>
-          </span>
-          <span class="message-stamp">
-            <span class="chat-time">{{
-              formatTime(message.header.timestamp)
-            }}</span>
-          </span>
-        </p>
-      </div>
-    </div>
-
-    <!-- AGENT Image -->
-    <div
-      *ngIf="
-        message.header.sender.type === 'AGENT' && message.body.type === 'IMAGE'
-      "
-      class="chat-message agent-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img
-            [src]="getAgentIcon(message.header.sender.senderName)"
-            alt="Agent"
-          />
-        </div>
-      </div>
-      <div class="chat-message-content">
-        <div class="user-name">
-          <span>{{ message.header.sender.senderName }}</span>
-        </div>
-        <p>
-          <a
-            target="_blank"
-            [href]="getSafeUrl(message.body.attachment.mediaUrl)"
-          >
-            <img
-              [src]="getSafeUrl(message.body.attachment.mediaUrl)"
-              class="imageViewer"
-            />
-          </a>
-          <span>{{ message.body.caption }}</span>
-          <span class="message-stamp">
-            <span class="chat-time">{{
-              formatTime(message.header.timestamp)
-            }}</span>
-          </span>
-        </p>
-      </div>
-    </div>
-
-    <!-- AGENT File -->
-    <div
-      *ngIf="
-        message.header.sender.type === 'AGENT' && message.body.type === 'FILE'
-      "
-      class="chat-message agent-message"
-    >
-      <div class="profile-pic">
-        <div class="profile-pic-area user-img">
-          <img
-            [src]="getAgentIcon(message.header.sender.senderName)"
-            alt="Agent"
-          />
-        </div>
-      </div>
-      <div class="chat-message-content file-type-message contact-type">
-        <div class="user-name">
-          <span>{{ message.header.sender.senderName }}</span>
-        </div>
-        <span class="display-file contact-logo file-message">
-          <img
-            src="assets/images/file-type.svg"
-            alt="{{ message.body.additionalDetails.fileName }}"
-          />
-          <span class="file-ext-main">{{
-            getFileExtension(message.body.attachment.mimeType)
-          }}</span>
-        </span>
-        <div class="contact-inner">
-          <span class="card-label">{{
-            message.body.additionalDetails.fileName
-          }}</span>
-          <span class="card-description">
-            <a
-              class="file-download"
-              [href]="getSafeUrl(message.body.attachment.mediaUrl)"
-              >Download</a
-            >
-          </span>
-        </div>
-        <span class="message-stamp">
-          <span class="chat-time">{{
-            formatTime(message.header.timestamp)
-          }}</span>
-        </span>
-      </div>
-      <!-- CONNECTOR Messages -->
-
-      <!-- PLAIN -->
-      <div
-        *ngIf="
-          message.header.sender.type === 'CONNECTOR' &&
-          message.body.type === 'PLAIN'
-        "
-        class="chat-message user-message"
-      >
-        <div class="profile-pic">
-          <div class="active-channel channel-icon web">
-            <img
-              [src]="
-                getChannelIconURL(
-                  message.header.sender.senderName,
-                  message.header.sender.id
-                )
-              "
-              width="20"
-            />
-          </div>
-          <div class="profile-pic-area user-img">
-            <img
-              [src]="getCustomerIcon(message.header.customer.firstName)"
-              alt="Customer"
-            />
-          </div>
-        </div>
-        <div class="chat-message-content">
-          <p>
-            <span>{{ message.body.markdownText }}</span>
-            <span class="message-stamp">
-              <span class="chat-time">{{
-                formatTime(message.header.timestamp)
-              }}</span>
-            </span>
-          </p>
-        </div>
-      </div>
-
-      <!-- VIDEO -->
-      <div
-        *ngIf="
-          message.header.sender.type === 'CONNECTOR' &&
-          message.body.type === 'VIDEO'
-        "
-        class="chat-message user-message"
-      >
-        <div class="profile-pic">
-          <div class="active-channel channel-icon web">
-            <img
-              [src]="
-                getChannelIconURL(
-                  message.header.sender.senderName,
-                  message.header.sender.id
-                )
-              "
-              width="20"
-            />
-          </div>
-          <div class="profile-pic-area user-img">
-            <img
-              [src]="getCustomerIcon(message.header.customer.firstName)"
-              alt="Customer"
-            />
-          </div>
-        </div>
-        <div class="chat-message-content file-type-message image-type">
-          <p>
-            <span>
-              <video class="videoPlayer" controls>
-                <source
-                  [src]="getSafeUrl(message.body.attachment.mediaUrl)"
-                  type="video/mp4"
-                />
-                Your browser does not support the video tag.
-              </video>
-            </span>
-            <span class="message-stamp">
-              <span class="chat-time">{{
-                formatTime(message.header.timestamp)
-              }}</span>
-            </span>
-          </p>
-        </div>
-      </div>
-
-      <!-- AUDIO -->
-      <div
-        *ngIf="
-          message.header.sender.type === 'CONNECTOR' &&
-          message.body.type === 'AUDIO'
-        "
-        class="chat-message user-message"
-      >
-        <div class="profile-pic">
-          <div class="active-channel channel-icon web">
-            <img
-              [src]="
-                getChannelIconURL(
-                  message.header.sender.senderName,
-                  message.header.sender.id
-                )
-              "
-              width="20"
-            />
-          </div>
-          <div class="profile-pic-area user-img">
-            <img
-              [src]="getCustomerIcon(message.header.customer.firstName)"
-              alt="Customer"
-            />
-          </div>
-        </div>
-        <div class="chat-message-content file-type-message image-type">
-          <p>
-            <span>
-              <audio class="audioPlayer" controls>
-                <source
-                  [src]="getSafeUrl(message.body.attachment.mediaUrl)"
-                  type="audio/mpeg"
-                />
-                Your browser does not support the audio tag.
-              </audio>
-            </span>
-            <span class="message-stamp">
-              <span class="chat-time">{{
-                formatTime(message.header.timestamp)
-              }}</span>
-            </span>
-          </p>
-        </div>
-      </div>
-
-      <!-- IMAGE -->
-      <div
-        *ngIf="
-          message.header.sender.type === 'CONNECTOR' &&
-          message.body.type === 'IMAGE'
-        "
-        class="chat-message user-message"
-      >
-        <div class="profile-pic">
-          <div class="active-channel channel-icon web">
-            <img
-              [src]="
-                getChannelIconURL(
-                  message.header.sender.senderName,
-                  message.header.sender.id
-                )
-              "
-              width="20"
-            />
-          </div>
-          <div class="profile-pic-area user-img">
-            <img
-              [src]="getCustomerIcon(message.header.customer.firstName)"
-              alt="Customer"
-            />
-          </div>
-        </div>
-        <div class="chat-message-content">
-          <p>
-            <a
-              target="_blank"
-              [href]="getSafeUrl(message.body.attachment.mediaUrl)"
-            >
-              <img
-                [src]="getSafeUrl(message.body.attachment.mediaUrl)"
-                class="imageViewer"
-              />
-            </a>
-            <span>{{ message.body.caption }}</span>
-            <span class="message-stamp">
-              <span class="chat-time">{{
-                formatTime(message.header.timestamp)
-              }}</span>
-            </span>
-          </p>
-        </div>
-      </div>
-
-      <!-- FILE -->
-      <div
-        *ngIf="
-          message.header.sender.type === 'CONNECTOR' &&
-          message.body.type === 'FILE'
-        "
-        class="chat-message user-message"
-      >
-        <div class="profile-pic">
-          <div class="active-channel channel-icon web">
-            <img
-              [src]="
-                getChannelIconURL(
-                  message.header.sender.senderName,
-                  message.header.sender.id
-                )
-              "
-              width="20"
-            />
-          </div>
-          <div class="profile-pic-area user-img">
-            <img
-              [src]="getCustomerIcon(message.header.customer.firstName)"
-              alt="Customer"
-            />
-          </div>
-        </div>
-        <div class="chat-message-content file-type-message contact-type">
-          <span class="display-file contact-logo file-message">
-            <img
-              src="assets/images/file-type.svg"
-              alt="{{ message.body.additionalDetails.fileName }}"
-            />
-            <span class="file-ext-main">{{
-              getFileExtension(message.body.attachment.mimeType)
-            }}</span>
-          </span>
-          <div class="contact-inner">
-            <span class="card-label">{{
-              message.body.additionalDetails.fileName
-            }}</span>
-            <span class="card-description">
-              <a
-                class="file-download"
-                [href]="getSafeUrl(message.body.attachment.mediaUrl)"
-                >Download</a
-              >
-            </span>
-          </div>
-          <span class="message-stamp">
-            <span class="chat-time">{{
-              formatTime(message.header.timestamp)
-            }}</span>
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="chat-footer" id="pageFooter-last">
-      <p>Copyright &copy;2023 Expertflow - All Rights Reserved</p>
-    </div>
-</div>
+    <p>Copyright &copy;2023 Expertflow - All Rights Reserved</p>
+  </div>
