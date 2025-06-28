@@ -1,15 +1,40 @@
-* {
-    -webkit-print-color-adjust: exact !important;
-    color-adjust: exact !important;
-    /* Chrome, Safari, Edge */
-    margin: 0;
-    font-family: Roboto, 'Open Sans', sans-serif;
-    /*Firefox*/
-}
+// * {
+//     -webkit-print-color-adjust: exact !important;
+//     color-adjust: exact !important;
+//     /* Chrome, Safari, Edge */
+//     margin: 0;
+//     font-family: Roboto, 'Open Sans', sans-serif;
+//     /*Firefox*/
+// }
 
-html,
-body {
-    height: 100%;
+// html,
+// body {
+//     height: 100%;
+// }
+.transcript-header {
+    padding: 0 15px;
+    height: 40px;
+    border-bottom: 1px solid #ccc;
+    line-height: 40px;
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    img {
+        height: 30px;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+    h3 {
+        font-size: 18px;
+        width: 100%;
+        text-align: center;
+        margin: 0;
+        color: #4773b5;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
 }
 
 /* Right direction */

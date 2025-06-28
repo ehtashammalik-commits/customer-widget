@@ -9,7 +9,7 @@ import { ConfigService } from '../services/config.service';
   styleUrls: ['./chat-transcript.component.scss'],
 })
 export class TranscriptComponent implements OnInit {
-  chatDate = '';
+  chatDate = '465132564';
   processedMessages: any[] = [];
   senderIconMapSafe: { [key: string]: string } = {};
   browserLang = '';
@@ -81,7 +81,7 @@ export class TranscriptComponent implements OnInit {
     try {
       const data = await this.transcript.getTranscriptData(req).toPromise();
       console.log("Transcript data received:", data);
-      this.chatDate = data.date;
+      this.chatDate = "34/14/2009"
       this.processedMessages = data;
     } catch (error) {
       console.error("Error loading chat data:", error);
