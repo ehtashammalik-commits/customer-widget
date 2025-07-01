@@ -550,7 +550,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.log('Business Calendar Api Response:', error);
       });
   }
 

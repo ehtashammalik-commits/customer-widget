@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { TranscriptService } from '../services/transcript.service';
 import { ActivatedRoute } from '@angular/router';
 import { ConfigService } from '../services/config.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-transcript',
@@ -9,7 +10,7 @@ import { ConfigService } from '../services/config.service';
   styleUrls: ['./chat-transcript.component.scss'],
 })
 export class TranscriptComponent implements OnInit {
-  chatDate = '465132564';
+  chatDate = '';
   processedMessages: any[] = [];
   senderIconMapSafe: { [key: string]: string } = {};
   browserLang = '';
@@ -69,28 +70,33 @@ export class TranscriptComponent implements OnInit {
     };
 
     await this.loadChatData(req)
-    // this.transcript.getTranscriptData(req).subscribe(data => {
-    //   console.log("Transcript data received:", data);
-    //   this.chatDate = data;
-    //   this.processedMessages = data
-    // });
   });
 }
 
   async loadChatData(req: any) {
-    try {
-      const data = await this.transcript.getTranscriptData(req).toPromise();
-      console.log("Transcript data received:", data);
-      this.chatDate = "34/14/2009"
-      this.processedMessages = data;
-    } catch (error) {
-      console.error("Error loading chat data:", error);
-    }
+  try {
+    const data = await firstValueFrom(this.transcript.getTranscriptData(req));
+    console.log("Transcript data received:", data);
+
+    const rawTimestamp = data[0].header.timestamp;
+    const localDate = new Date(rawTimestamp);
+
+    // Format as YYYY/MM/DD in local time
+    const formattedDate = `${localDate.getFullYear()}/${String(localDate.getMonth() + 1).padStart(2, '0')}/${String(localDate.getDate()).padStart(2, '0')}`;
+
+    this.chatDate = formattedDate;
+    this.processedMessages = data;
+  } catch (error) {
+    console.error("Error loading chat data:", error);
   }
+}
 
 
   async loadIcons(senderIconMap: { [key: string]: string }, jwtToken: string) {
+
+    console.log("Sender Icon Map:", senderIconMap);
     const entries = Object.entries(senderIconMap);
+    console.log("Entries:", entries);
     const promises = entries.map(async ([key, url]) => {
       try {
         const response = await fetch(url, {
@@ -98,10 +104,13 @@ export class TranscriptComponent implements OnInit {
             Authorization: `Bearer ${jwtToken}`,
           },
         });
+        console.log(`Fetching icon for ${key}:`, url);
         if (!response.ok) throw new Error(`${key} failed: ${response.status}`);
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
+        console.log(`Blob URL for ${key}:`, blobUrl);
         this.senderIconMapSafe[key] = blobUrl;
+        console.log(`this.senderIconMapSafe[key]`,this.senderIconMapSafe[key]);
       } catch (err) {
         console.error(`Error loading ${key}:`, err);
         this.senderIconMapSafe[key] = '';
@@ -110,12 +119,6 @@ export class TranscriptComponent implements OnInit {
     await Promise.all(promises);
     // Now senderIconMapSafe is ready to use in your template
   }
-
-  formatTime(timestamp: string): string {
-  const dateTime = new Date(timestamp);
-  const minutes = dateTime.getMinutes() < 10 ? '0' + dateTime.getMinutes() : dateTime.getMinutes();
-  return `${dateTime.getHours()}:${minutes}`;
-}
 
 getSafeUrl(url: string): string {
   // You can sanitize this later if needed via DomSanitizer
@@ -133,15 +136,28 @@ getAgentIcon(senderName: string): string {
 }
 
 getCustomerIcon(firstName: string): string {
-  // You can customize this or use a generated icon
-  return 'assets/images/dummy-user.svg';
+  console.log("First Name:", firstName);
+  const nameParts = firstName.split(" ");
+  if (nameParts.length > 1) {
+    // If there is more than one part to the name (i.e. a space), use the first letters of each part
+    const [firstLetter, secondLetter] = nameParts.map((s) => s.charAt(0));
+    return firstLetter + "" + secondLetter;
+  } else {
+    // If there is only one part to the name (i.e. no space), use the first and last letters of the word
+    return firstName.charAt(0) + "" + firstName.charAt(firstName.length - 1);
+  }
+  // console.log("First Name:", firstName);
+  // // You can customize this or use a generated icon
+  // return '../../widget-assets/chat-transcript/images/dummy-user.svg';
 }
 
 getChannelIconURL(senderName: string, senderId: string): string {
   // Example fallback, can be replaced with logic or a service map
   const lowerName = senderName?.toLowerCase() || '';
-  const lowerId = senderId?.toLowerCase() || '';
-  return `assets/images/channels/${lowerName || lowerId}.svg`;
+  console.log("Sender Name:", lowerName);
+  const lowerId = senderId?.toLowerCase() || '';  
+  console.log("Sender ID:", lowerId);
+  return this.senderIconMapSafe[lowerName] || this.senderIconMapSafe[lowerId] || this.senderIconMapSafe['default'] || '';
 }
 
 

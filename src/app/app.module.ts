@@ -34,6 +34,7 @@ import { NpsColorPipe } from './npsColor.pipe';
 import { SvgNpsFormatPipe } from './svgFormat.pipe';
 import { IsEllipsisActiveDirective } from './isEllipsisActive.directive';
 import { TranscriptComponent } from './chat-transcript/chat-transcript.component';
+import { FormatTimePipe } from './pipes/format-time.pipe';
 
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
@@ -58,7 +59,8 @@ export function initializeApp1(appConfigService: ConfigService) {
     NpsColorPipe,
     SvgNpsFormatPipe,
     IsEllipsisActiveDirective,
-    TranscriptComponent
+    TranscriptComponent,
+    FormatTimePipe
   ],
   imports: [
     NgxLinkifyjsModule.forRoot({

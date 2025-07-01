@@ -3,7 +3,10 @@
   <h3>Conversation Transcript</h3>
 </div>
 
+
 <div class="chat-area" id="conversation-area" [ngClass]="conversationAreaClass">
+
+        <div id="pageHeader" class="line-info">{{ chatDate }}</div>
   <div *ngFor="let message of processedMessages">
     
     <!-- BUTTON Message -->
@@ -28,9 +31,7 @@
                 <li *ngFor="let btn of message.body.buttons">{{ btn.title }}</li>
               </ul>
               <span class="message-stamp">
-                <span class="chat-time">{{
-                  formatTime(message.header.timestamp)
-                }}</span>
+                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
               </span>
             </div>
           </div>
@@ -48,9 +49,7 @@
                   ><span>{{ message.body.mediaUrl }}</span></a
                 >
                 <span class="message-stamp">
-                  <span class="chat-time">{{
-                    formatTime(message.header.timestamp)
-                  }}</span>
+                  <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                 </span>
               </p>
             </div>
@@ -74,9 +73,7 @@
                   </video>
                 </span>
                 <span class="message-stamp">
-                  <span class="chat-time">{{
-                    formatTime(message.header.timestamp)
-                  }}</span>
+                  <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                 </span>
               </p>
             </div>
@@ -101,9 +98,7 @@
                   />
                 </a>
                 <span class="message-stamp">
-                  <span class="chat-time">{{
-                    formatTime(message.header.timestamp)
-                  }}</span>
+                  <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                 </span>
               </p>
             </div> <!-- BOT PLAIN message markup -->
@@ -119,9 +114,7 @@
               <p>
                 <span>{{ message.body.attachment.fileName }}</span>
                 <span class="message-stamp">
-                  <span class="chat-time">{{
-                    formatTime(message.header.timestamp)
-                  }}</span>
+                  <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                 </span>
               </p>
             </div>
@@ -151,9 +144,7 @@
                 </div>
               </div>
               <span class="message-stamp">
-                <span class="chat-time">{{
-                  formatTime(message.header.timestamp)
-                }}</span>
+                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
               </span>
             </div>
           </div>
@@ -168,9 +159,7 @@
               <p>
                 <span>{{ message.body.markdownText }}</span>
                 <span class="message-stamp">
-                  <span class="chat-time">{{
-                    formatTime(message.header.timestamp)
-                  }}</span>
+                  <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                 </span>
               </p>
             </div>
@@ -205,9 +194,7 @@
                   </span>
                 </div>
                 <span class="message-stamp">
-                  <span class="chat-time">{{
-                    formatTime(message.header.timestamp)
-                  }}</span>
+                  <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                 </span> 
               </div>  
             </div>
@@ -251,9 +238,7 @@
                   <span>{{ message.body.markdownText }}</span>
                   <span *ngIf="message.isEdited" class="edit-message">Edited</span>
                   <span class="message-stamp">
-                    <span class="chat-time">{{
-                      formatTime(message.header.timestamp)
-                    }}</span>
+                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                   </span>
                 </p>
              </div>
@@ -280,9 +265,7 @@
                     </video>
                   </span>
                   <span class="message-stamp">
-                    <span class="chat-time">{{
-                      formatTime(message.header.timestamp)
-                    }}</span>
+                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                   </span>
                 </p>
               </div>
@@ -313,9 +296,7 @@
                     </audio>
                   </span>
                   <span class="message-stamp">
-                    <span class="chat-time">{{
-                      formatTime(message.header.timestamp)
-                    }}</span>
+                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                   </span>
                 </p>
              </div>
@@ -346,9 +327,7 @@
                         </a>
                         <span>{{ message.body.caption }}</span>
                         <span class="message-stamp">
-                          <span class="chat-time">{{
-                            formatTime(message.header.timestamp)
-                          }}</span>
+                          <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                         </span>
                       </p>
                 </div>
@@ -390,9 +369,7 @@
                   </span>
                 </div>
                 <span class="message-stamp">
-                  <span class="chat-time">{{
-                    formatTime(message.header.timestamp)
-                  }}</span>
+                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                 </span>
               </div>
             </div>
@@ -427,9 +404,7 @@
                <p>
                  <span>{{ message.body.markdownText }}</span>
                  <span class="message-stamp">
-                   <span class="chat-time">{{
-                     formatTime(message.header.timestamp)
-                   }}</span>
+                   <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                  </span>
                </p>
              </div>
@@ -465,9 +440,7 @@
                     </video>
                   </span>
                   <span class="message-stamp">
-                    <span class="chat-time">{{
-                      formatTime(message.header.timestamp)
-                    }}</span>
+                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                   </span>
                 </p>
               </div>
@@ -505,9 +478,7 @@
                       </audio>
                     </span>
                     <span class="message-stamp">
-                      <span class="chat-time">{{
-                        formatTime(message.header.timestamp)
-                      }}</span>
+                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                     </span>
                   </p>
               </div>
@@ -544,9 +515,7 @@
                   </a>
                   <span>{{ message.body.caption }}</span>
                   <span class="message-stamp">
-                    <span class="chat-time">{{
-                      formatTime(message.header.timestamp)
-                    }}</span>
+                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                   </span>
                 </p>
               </div>
@@ -593,9 +562,7 @@
                   </span>
                 </div>
                 <span class="message-stamp">
-                  <span class="chat-time">{{
-                    formatTime(message.header.timestamp)
-                  }}</span>
+                  <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                 </span>
               </div>
             </div>
