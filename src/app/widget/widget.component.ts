@@ -197,7 +197,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     'left',
     'right',
   ];
-  matToolTipPosition = this.positionOptions[4];
+  matToolTipPosition = this.positionOptions[3];
   isMobile = false;
 
   dictionary: { [key: string]: string } = {
@@ -2483,6 +2483,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     if (this.selectedLanguage == 'ar') {
       this.textDirection = 'right-direction';
+      this.translate.use(this.selectedLanguage);
+      console.log(this.selectedLanguage, 'this.selectedLanguage')
     }
   }
 
