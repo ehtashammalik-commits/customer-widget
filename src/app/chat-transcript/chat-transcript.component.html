@@ -199,7 +199,7 @@
           <div *ngSwitchCase="'CONTACT'" class="chat-message agent-message bot-message">
           <div class="profile-pic">
             <div class="profile-pic-area user-img">
-              <img src="assets/images/robot-dark.svg" alt="Bot" />
+              <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="Bot" />
             </div>
           </div>
 
@@ -252,10 +252,7 @@
             <div *ngSwitchCase="'PLAIN'" class="chat-message agent-message">
               <div class="profile-pic">
                 <div class="profile-pic-area user-img">
-                  <img
-                    [src]="getAgentIcon(message.header.sender.senderName)"
-                    alt="Agent"
-                  />
+                  {{ getInitialsFromFullName(message.header.sender.senderName) }}
                 </div>
               </div>
 
@@ -276,10 +273,7 @@
             <div *ngSwitchCase="'VIDEO'" class="chat-message user-message">
               <div class="profile-pic">
                 <div class="profile-pic-area user-img">
-                  <img
-                    [src]="getAgentIcon(message.header.sender.senderName)"
-                    alt="Agent"
-                  />
+                  {{ getInitialsFromFullName(message.header.sender.senderName) }}
                 </div>
               </div>
               <div class="chat-message-content file-type-message image-type">
@@ -304,10 +298,7 @@
             <div *ngSwitchCase="'AUDIO'" class="chat-message user-message">
               <div class="profile-pic">
                 <div class="profile-pic-area user-img">
-                  <img
-                    [src]="getAgentIcon(message.header.sender.senderName)"
-                    alt="Agent"
-                  />
+                  {{ getInitialsFromFullName(message.header.sender.senderName) }}
                 </div>
               </div>
               <div class="chat-message-content file-type-message image-type">
@@ -334,10 +325,7 @@
               <div *ngSwitchCase="'IMAGE'" class="chat-message agent-message">
                 <div class="profile-pic">
                   <div class="profile-pic-area user-img">
-                    <img
-                      [src]="getAgentIcon(message.header.sender.senderName)"
-                      alt="Agent"
-                    />
+                  {{ getInitialsFromFullName(message.header.sender.senderName) }}
                   </div>
                 </div>
                 <div class="chat-message-content">
@@ -366,10 +354,7 @@
             <div *ngSwitchCase="'FILE'" class="chat-message agent-message">
               <div class="profile-pic">
                 <div class="profile-pic-area user-img">
-                  <img
-                    [src]="getAgentIcon(message.header.sender.senderName)"
-                    alt="Agent"
-                  />
+                  {{ getInitialsFromFullName(message.header.sender.senderName) }}
                 </div>
               </div>
               <div class="chat-message-content file-type-message contact-type">
@@ -448,10 +433,7 @@
                  />
                </div>
                <div class="profile-pic-area user-img">
-                 <img
-                   [src]="getCustomerIcon(message.header.customer.firstName)"
-                    alt="Customer"
-                  />
+                  {{ getInitialsFromFullName(message.header.customer.firstName) }}
                 </div>
               </div>
              <div class="chat-message-content file-type-message image-type">
@@ -486,10 +468,7 @@
                   />
                 </div>
                 <div class="profile-pic-area user-img">
-                  <img
-                    [src]="getCustomerIcon(message.header.customer.firstName)"
-                    alt="Customer"
-                  />
+                  {{ getInitialsFromFullName(message.header.customer.firstName) }}
                 </div>
               </div>
                <div class="chat-message-content file-type-message image-type">
@@ -522,10 +501,7 @@
                   />
                 </div>
                 <div class="profile-pic-area user-img">
-                  <img
-                    [src]="getCustomerIcon(message.header.customer.firstName)"
-                    alt="Customer"
-                  />
+                  {{ getInitialsFromFullName(message.header.customer.firstName) }}
                 </div>
               </div>
               <div class="chat-message-content">
@@ -559,10 +535,7 @@
                   />
                 </div>
                 <div class="profile-pic-area user-img">
-                  <img
-                    [src]="getCustomerIcon(message.header.customer.firstName)"
-                    alt="Customer"
-                  />
+                  {{ getInitialsFromFullName(message.header.customer.firstName) }}
                 </div>
               </div>
               <div class="chat-message-content file-type-message contact-type">
