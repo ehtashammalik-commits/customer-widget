@@ -3,6 +3,7 @@ import { TranscriptService } from '../services/transcript.service';
 import { ActivatedRoute } from '@angular/router';
 import { ConfigService } from '../services/config.service';
 import { firstValueFrom } from 'rxjs';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-transcript',
@@ -19,7 +20,8 @@ export class TranscriptComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private transcript: TranscriptService,
-    public __appConfig: ConfigService
+    public __appConfig: ConfigService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -81,7 +83,6 @@ export class TranscriptComponent implements OnInit {
   async loadChatData(req: any) {
   try {
     const data = await firstValueFrom(this.transcript.getTranscriptData(req));
-    console.log("Transcript data received:", data);
 
     const rawTimestamp = data[0].header.timestamp;
     const localDate = new Date(rawTimestamp);
@@ -99,9 +100,9 @@ export class TranscriptComponent implements OnInit {
 
   async loadIcons(senderIconMap: { [key: string]: string }, jwtToken: string) {
 
-    console.log("Sender Icon Map:", senderIconMap);
+    // console.log("Sender Icon Map:", senderIconMap);
     const entries = Object.entries(senderIconMap);
-    console.log("Entries:", entries);
+    // console.log("Entries:", entries);
     const promises = entries.map(async ([key, url]) => {
       try {
         const response = await fetch(url, {
@@ -109,13 +110,13 @@ export class TranscriptComponent implements OnInit {
             Authorization: `Bearer ${jwtToken}`,
           },
         });
-        console.log(`Fetching icon for ${key}:`, url);
+        // console.log(`Fetching icon for ${key}:`, url);
         if (!response.ok) throw new Error(`${key} failed: ${response.status}`);
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
-        console.log(`Blob URL for ${key}:`, blobUrl);
+        // console.log(`Blob URL for ${key}:`, blobUrl);
         this.senderIconMapSafe[key] = blobUrl;
-        console.log(`this.senderIconMapSafe[key]`,this.senderIconMapSafe[key]);
+        // console.log(`this.senderIconMapSafe[key]`,this.senderIconMapSafe[key]);
       } catch (err) {
         console.error(`Error loading ${key}:`, err);
         this.senderIconMapSafe[key] = '';
@@ -147,6 +148,15 @@ export class TranscriptComponent implements OnInit {
     }
   }
 
+    getGoogleMapsUrl(lat: number, lng: number): SafeResourceUrl {
+    const mapUrl = `https://maps.google.com/maps?q=${lat},${lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(mapUrl);
+  }
+
+  trackByMessageId(index: number, message: any): string {
+    return message.header.messageId;
+  }
+
   getFileExtension(mimeType: string): string {
   const type = mimeType?.split("/")[1];
   return type === "vnd.openxmlformats-officedocument.wordprocessingml.document" ? "DOCX" : type;
@@ -169,17 +179,14 @@ export class TranscriptComponent implements OnInit {
       // If there is only one part to the name (i.e. no space), use the first and last letters of the word
       return firstName.charAt(0) + "" + firstName.charAt(firstName.length - 1);
     }
-    // console.log("First Name:", firstName);
-    // // You can customize this or use a generated icon
-    // return '../../widget-assets/chat-transcript/images/dummy-user.svg';
   }
 
   getChannelIconURL(senderName: string, senderId: string): string {
     // Example fallback, can be replaced with logic or a service map
     const lowerName = senderName?.toLowerCase() || '';
-    console.log("Sender Name:", lowerName);
+    // console.log("Sender Name:", lowerName);
     const lowerId = senderId?.toLowerCase() || '';  
-    console.log("Sender ID:", lowerId);
+    // console.log("Sender ID:", lowerId);
     return this.senderIconMapSafe[lowerName] || this.senderIconMapSafe[lowerId] || this.senderIconMapSafe['default'] || '';
   }
 

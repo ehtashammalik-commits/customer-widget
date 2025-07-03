@@ -7,8 +7,8 @@
 <div class="chat-area" id="conversation-area" [ngClass]="conversationAreaClass" #chatTranscript id="chat-transcript">
 
         <div id="pageHeader" class="line-info">{{ chatDate }}</div>
-  <div *ngFor="let message of processedMessages">
-    
+  <div *ngFor="let message of processedMessages; trackBy: trackByMessageId">
+
     <!-- BUTTON Message -->
       <ng-container *ngIf="message.header.sender.type === 'BOT'">
 
@@ -151,39 +151,42 @@
           <div *ngSwitchCase="'LOCATION'" class="chat-message agent-message">
             <div class="profile-pic">
               <div class="profile-pic-area user-img">
-                <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
+                <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="Bot" />
               </div>
             </div>
+
             <div class="chat-message-content">
-              <p>
-                <b>{{ message.body.additionalDetails.name }}</b>
-              </p>
+              <p><b>{{ message.body.additionalDetails.name }}</b></p>
+
               <div class="mapouter">
                 <div class="gmap_canvas">
                   <iframe
                     width="235"
                     height="190"
-                    [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                    [src]="getGoogleMapsUrl(message.body.location.latitude, message.body.location.longitude)"
                     frameborder="0"
                     scrolling="no"
                     marginheight="0"
                     marginwidth="0"
                   ></iframe>
+                  <br />
+                  <a href="https://www.embedgooglemap.net" target="_blank">google maps api html</a>
                 </div>
               </div>
+
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
               </span>
             </div>
           </div>
 
-          <div *ngSwitchCase="'PLAIN'" class="chat-message agent-message">
-            <div class="profile-pic">
-              <div class="profile-pic-area user-img">
-                <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
-              </div>
+        <div *ngSwitchCase="'PLAIN'" class="chat-message agent-message">
+          <div class="profile-pic">
+            <div class="profile-pic-area user-img">
+              <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
             </div>
-            <div class="chat-message-content">
+          </div>
+          <div class="chat-message-content">
               <p>
                 <span>{{ message.body.markdownText }}</span>
                 <span class="message-stamp">
@@ -193,39 +196,37 @@
             </div>
           </div>
 
-          <div *ngSwitchCase="'CONTACT'" class="chat-message agent-message">
-              <div class="profile-pic">
-                <div class="profile-pic-area user-img">
-                  <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
-                </div>
-              </div>
-              <div class="chat-message-content file-type-message contact-type">
-                <span class="display-file contact-logo">
-                  <img
-                    src="assets/images/contact-type.svg"
-                    alt="{{ message.body.additionalDetails.name }}"
-                  />
-                  <span class="file-ext-main">vCard</span>
-                </span>
-                <div class="contact-inner">
-                  <span class="card-label">{{
-                    message.body.additionalDetails.name
-                  }}</span>
-                  <span class="card-description">
-                    <span class="contact-number">{{ message.body.additionalDetails.phone }}</span>
-                    <a
-                      class="file-download"
-                      [href]="getSafeUrl(message.body.attachment.mediaUrl)"
-                      download="{{ message.body.additionalDetails.name }}.vcf"
-                      >Download</a
-                    >
-                  </span>
-                </div>
-                <span class="message-stamp">
-                  <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
-                </span> 
-              </div>  
+          <div *ngSwitchCase="'CONTACT'" class="chat-message agent-message bot-message">
+          <div class="profile-pic">
+            <div class="profile-pic-area user-img">
+              <img src="assets/images/robot-dark.svg" alt="Bot" />
             </div>
+          </div>
+
+          <div class="chat-message-content file-type-message contact-type">
+            <span class="display-file contact-logo">
+              <img src="../../widget-assets/chat-transcript/images/dummy-user.svg" alt="Contact" />
+            </span>
+
+            <div class="contact-inner" *ngFor="let contact of message.body.contacts">
+              <span class="card-label">{{ contact.name.formattedName }}</span>
+              <span class="card-description">
+                <a
+                  class="contact-number"
+                  [href]="'https://api.whatsapp.com/send?phone=' + contact.phones[0].phone + '&text=Hello%2C%20I%20want%20more%20info%20about%20the%20product.'"
+                  target="_blank"
+                >
+                  {{ contact.phones[0].phone }}
+                </a>
+              </span>
+            </div>
+
+            <span class="message-stamp">
+              <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+            </span>
+          </div>
+        </div>
+
         </div>
       </ng-container>
 
