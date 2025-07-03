@@ -3,7 +3,7 @@ import { TranscriptService } from '../services/transcript.service';
 import { ActivatedRoute } from '@angular/router';
 import { ConfigService } from '../services/config.service';
 import { firstValueFrom } from 'rxjs';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-transcript',
@@ -99,32 +99,31 @@ export class TranscriptComponent implements OnInit {
 
 
   async loadIcons(senderIconMap: { [key: string]: string }, jwtToken: string) {
+  const entries = Object.entries(senderIconMap);
 
-    // console.log("Sender Icon Map:", senderIconMap);
-    const entries = Object.entries(senderIconMap);
-    // console.log("Entries:", entries);
-    const promises = entries.map(async ([key, url]) => {
-      try {
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-          },
-        });
-        // console.log(`Fetching icon for ${key}:`, url);
-        if (!response.ok) throw new Error(`${key} failed: ${response.status}`);
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        // console.log(`Blob URL for ${key}:`, blobUrl);
-        this.senderIconMapSafe[key] = blobUrl;
-        // console.log(`this.senderIconMapSafe[key]`,this.senderIconMapSafe[key]);
-      } catch (err) {
-        console.error(`Error loading ${key}:`, err);
-        this.senderIconMapSafe[key] = '';
-      }
-    });
-    await Promise.all(promises);
-    // Now senderIconMapSafe is ready to use in your template
-  }
+  const promises = entries.map(async ([key, url]) => {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      });
+
+      if (!response.ok) throw new Error(`${key} failed: ${response.status}`);
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const safeUrl: SafeUrl = this.sanitizer.bypassSecurityTrustUrl(blobUrl);
+
+      this.senderIconMapSafe[key] = safeUrl as string; // type assertion needed for template binding
+    } catch (err) {
+      console.error(`Error loading ${key}:`, err);
+      this.senderIconMapSafe[key] = '';
+    }
+  });
+
+  await Promise.all(promises);
+}
 
   getSafeUrl(url: string): string {
     // You can sanitize this later if needed via DomSanitizer
