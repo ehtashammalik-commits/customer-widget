@@ -4,7 +4,7 @@
 </div>
 
 
-<div class="chat-area" id="conversation-area" [ngClass]="conversationAreaClass">
+<div class="chat-area" id="conversation-area" [ngClass]="conversationAreaClass" #chatTranscript id="chat-transcript">
 
         <div id="pageHeader" class="line-info">{{ chatDate }}</div>
   <div *ngFor="let message of processedMessages">
@@ -105,20 +105,48 @@
           </div>
 
           <div *ngSwitchCase="'FILE'" class="chat-message agent-message">
+
             <div class="profile-pic">
               <div class="profile-pic-area user-img">
                 <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="bot" />
               </div>
             </div>
+
             <div class="chat-message-content file-type-message contact-type">
-              <p>
-                <span>{{ message.body.attachment.fileName }}</span>
-                <span class="message-stamp">
-                  <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+              <span class="display-file contact-logo file-message">
+                <img
+                  src="../../widget-assets/chat-transcript/images/file-type.svg"
+                  [alt]="message.body.additionalDetails?.fileName"
+                />
+                <span class="file-ext-main">
+                  {{
+                    message.body.attachment.mimeType?.split('/')[1] === 'vnd.openxmlformats-officedocument.wordprocessingml.document'
+                      ? 'DOCX'
+                      : message.body.attachment.mimeType?.split('/')[1] | uppercase
+                  }}
                 </span>
-              </p>
+              </span>
+
+              <div class="contact-inner">
+                <span class="card-label">{{ message.body.additionalDetails?.fileName }}</span>
+                <span class="card-description">
+                  <a
+                    class="file-download"
+                    [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                    download
+                    target="_blank"
+                  >
+                    Download
+                  </a>
+                </span>
+              </div>
+
+              <span class="message-stamp">
+                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+              </span>
             </div>
           </div>
+
 
           <div *ngSwitchCase="'LOCATION'" class="chat-message agent-message">
             <div class="profile-pic">
@@ -394,10 +422,7 @@
                   />
                 </div>
                 <div class="profile-pic-area user-img">
-                  <img
-                    [src]="getCustomerIcon(message.header.customer.firstName)"
-                    alt="Customer"
-                  />
+                  {{ getInitialsFromFullName(message.header.customer.firstName) }}
                 </div>
              </div>
              <div class="chat-message-content">

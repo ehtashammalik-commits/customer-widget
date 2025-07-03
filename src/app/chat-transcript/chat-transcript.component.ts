@@ -34,6 +34,15 @@ export class TranscriptComponent implements OnInit {
       this.conversationAreaClass = 'right-direction';
     }
 
+     const req = {
+      customerIdentifier,
+      serviceIdentifier,
+      conversationId,
+      browserLang: this.browserLang,
+    };
+
+    await this.loadChatData(req)
+
     // Prepare icon URLs
     let originURL = '';
     try {
@@ -58,20 +67,16 @@ export class TranscriptComponent implements OnInit {
     };
 
     const jwtToken = localStorage.getItem('jwt_token') || '';
-
-    // ⏳ Wait until icons are loaded
     await this.loadIcons(senderIconMap, jwtToken);
-
-    const req = {
-      customerIdentifier,
-      serviceIdentifier,
-      conversationId,
-      browserLang: this.browserLang,
-    };
-
-    await this.loadChatData(req)
   });
 }
+
+  ngAfterViewInit(): void {
+    // Wait for view + any bindings to finish
+    // setTimeout(() => {
+    //   window.print();
+    // }, 2000);
+  }
 
   async loadChatData(req: any) {
   try {
@@ -120,45 +125,63 @@ export class TranscriptComponent implements OnInit {
     // Now senderIconMapSafe is ready to use in your template
   }
 
-getSafeUrl(url: string): string {
-  // You can sanitize this later if needed via DomSanitizer
-  return url;
-}
+  getSafeUrl(url: string): string {
+    // You can sanitize this later if needed via DomSanitizer
+    return url;
+  }
 
-getFileExtension(mimeType: string): string {
+    getInitialsFromFullName(name: string = ''): string {
+    const trimmedName = name.trim();
+    if (!trimmedName) return ''; // safeguard for empty input
+
+    const nameParts = trimmedName.split(' ').filter(part => part.length > 0);
+
+    if (nameParts.length > 1) {
+      const [firstLetter, secondLetter] = nameParts.map((s) => s.charAt(0).toUpperCase());
+      return firstLetter + secondLetter;
+    } else {
+      return (
+        trimmedName.charAt(0).toUpperCase() +
+        trimmedName.charAt(trimmedName.length - 1).toUpperCase()
+      );
+    }
+  }
+
+  getFileExtension(mimeType: string): string {
   const type = mimeType?.split("/")[1];
   return type === "vnd.openxmlformats-officedocument.wordprocessingml.document" ? "DOCX" : type;
 }
 
-getAgentIcon(senderName: string): string {
-  // Optionally generate based on senderName
-  return this.senderIconMapSafe[senderName] || 'assets/images/agent-default-icon.svg';
-}
 
-getCustomerIcon(firstName: string): string {
-  console.log("First Name:", firstName);
-  const nameParts = firstName.split(" ");
-  if (nameParts.length > 1) {
-    // If there is more than one part to the name (i.e. a space), use the first letters of each part
-    const [firstLetter, secondLetter] = nameParts.map((s) => s.charAt(0));
-    return firstLetter + "" + secondLetter;
-  } else {
-    // If there is only one part to the name (i.e. no space), use the first and last letters of the word
-    return firstName.charAt(0) + "" + firstName.charAt(firstName.length - 1);
+  getAgentIcon(senderName: string): string {
+    // Optionally generate based on senderName
+    return this.senderIconMapSafe[senderName] || 'assets/images/agent-default-icon.svg';
   }
-  // console.log("First Name:", firstName);
-  // // You can customize this or use a generated icon
-  // return '../../widget-assets/chat-transcript/images/dummy-user.svg';
-}
 
-getChannelIconURL(senderName: string, senderId: string): string {
-  // Example fallback, can be replaced with logic or a service map
-  const lowerName = senderName?.toLowerCase() || '';
-  console.log("Sender Name:", lowerName);
-  const lowerId = senderId?.toLowerCase() || '';  
-  console.log("Sender ID:", lowerId);
-  return this.senderIconMapSafe[lowerName] || this.senderIconMapSafe[lowerId] || this.senderIconMapSafe['default'] || '';
-}
+  getCustomerIcon(firstName: string): string {
+    console.log("First Name:", firstName);
+    const nameParts = firstName.split(" ");
+    if (nameParts.length > 1) {
+      // If there is more than one part to the name (i.e. a space), use the first letters of each part
+      const [firstLetter, secondLetter] = nameParts.map((s) => s.charAt(0));
+      return firstLetter + "" + secondLetter;
+    } else {
+      // If there is only one part to the name (i.e. no space), use the first and last letters of the word
+      return firstName.charAt(0) + "" + firstName.charAt(firstName.length - 1);
+    }
+    // console.log("First Name:", firstName);
+    // // You can customize this or use a generated icon
+    // return '../../widget-assets/chat-transcript/images/dummy-user.svg';
+  }
+
+  getChannelIconURL(senderName: string, senderId: string): string {
+    // Example fallback, can be replaced with logic or a service map
+    const lowerName = senderName?.toLowerCase() || '';
+    console.log("Sender Name:", lowerName);
+    const lowerId = senderId?.toLowerCase() || '';  
+    console.log("Sender ID:", lowerId);
+    return this.senderIconMapSafe[lowerName] || this.senderIconMapSafe[lowerId] || this.senderIconMapSafe['default'] || '';
+  }
 
 
   getMessageClass(msg: any) {

@@ -8,6 +8,7 @@ import { ConfigService } from './config.service';
   providedIn: 'root',
 })
 export class TranscriptService {
+  nativeElement: any;
   constructor(
     private http: HttpClient,
     public __appConfig: ConfigService
