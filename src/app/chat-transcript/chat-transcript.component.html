@@ -263,11 +263,13 @@
                 </div>
                 <p>
                   <span>{{ message.body.markdownText }}</span>
-                  <span *ngIf="message.isEdited" class="edit-message">Edited</span>
                   <span class="message-stamp">
-                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                    <span class="chat-time">
+                      <span *ngIf="message.isEdited" class="edit-message">Edited </span>{{ message.header.timestamp | formatTime }}
+                    </span>
                   </span>
                 </p>
+
              </div>
            </div>
 

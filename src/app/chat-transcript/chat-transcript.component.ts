@@ -87,21 +87,40 @@ export class TranscriptComponent implements OnInit {
   }
 
   async loadChatData(req: any) {
-  try {
-    const data = await firstValueFrom(this.transcript.getTranscriptData(req));
+      try {
+        const data = await firstValueFrom(this.transcript.getTranscriptData(req));
 
-    const rawTimestamp = data[0].header.timestamp;
-    const localDate = new Date(rawTimestamp);
+        const processed: any[] = [];
 
-    // Format as YYYY/MM/DD in local time
-    const formattedDate = `${localDate.getFullYear()}/${String(localDate.getMonth() + 1).padStart(2, '0')}/${String(localDate.getDate()).padStart(2, '0')}`;
+        for (const message of data) {
+          const intent = message?.header?.intent?.toLowerCase();
 
-    this.chatDate = formattedDate;
-    this.processedMessages = data;
-  } catch (error) {
-    console.error("Error loading chat data:", error);
-  }
-}
+          if (intent === 'update') {
+            const originalId = message.header.originalMessageId;
+
+            const index = processed.findIndex((msg) => msg.id === originalId);
+
+            if (index !== -1) {
+              // Update the original message
+              processed[index].body.markdownText = message.body.markdownText;
+              processed[index].isEdited = true;
+            }
+          } else {
+            processed.push(message);
+          }
+        }
+
+        const rawTimestamp = processed[0]?.header?.timestamp;
+        const localDate = new Date(rawTimestamp);
+
+        this.chatDate = `${localDate.getFullYear()}/${String(localDate.getMonth() + 1).padStart(2, '0')}/${String(localDate.getDate()).padStart(2, '0')}`;
+        this.processedMessages = processed;
+
+      } catch (error) {
+        console.error("Error loading chat data:", error);
+      }
+    }
+
 
 
   async loadIcons(senderIconMap: { [key: string]: string }, jwtToken: string) {
