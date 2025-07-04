@@ -35,6 +35,7 @@ import { SvgNpsFormatPipe } from './svgFormat.pipe';
 import { IsEllipsisActiveDirective } from './isEllipsisActive.directive';
 import { TranscriptComponent } from './chat-transcript/chat-transcript.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
+import { NgxUiLoaderModule, NgxUiLoaderConfig } from 'ngx-ui-loader';
 
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
@@ -66,6 +67,12 @@ export function initializeApp1(appConfigService: ConfigService) {
     NgxLinkifyjsModule.forRoot({
       enableHash: false,
       enableMention: true,
+    }),
+    NgxUiLoaderModule.forRoot({
+      fgsType: 'ball-spin', // You can choose other types like ball-spin, chasing-dots, etc.
+      fgsColor: '#1d8cf8',
+      pbDirection: 'ltr',
+      text: 'Loading...',
     }),
     BrowserModule,
     HttpClientModule,

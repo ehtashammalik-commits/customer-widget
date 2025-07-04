@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { WidgetComponent } from './widget.component';
 
 // Mock services
@@ -75,7 +76,9 @@ describe('WidgetComponent', () => {
       mockBrowserNotificationService as any,
       mockDeliveryNotificationService as any,
       mockPostMessageHandlerService as any,
-      mockTranslateService as any
+      mockTranslateService as any,
+      undefined, // router
+      undefined, // doc
     );
   });
 

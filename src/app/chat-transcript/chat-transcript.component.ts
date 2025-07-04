@@ -4,6 +4,8 @@ import { ActivatedRoute } from '@angular/router';
 import { ConfigService } from '../services/config.service';
 import { firstValueFrom } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
+import { NgxUiLoaderService } from 'ngx-ui-loader';
+
 
 @Component({
   selector: 'app-transcript',
@@ -21,7 +23,8 @@ export class TranscriptComponent implements OnInit {
     private route: ActivatedRoute,
     private transcript: TranscriptService,
     public __appConfig: ConfigService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private ngxLoader: NgxUiLoaderService
   ) {}
 
   ngOnInit(): void {
@@ -43,7 +46,10 @@ export class TranscriptComponent implements OnInit {
       browserLang: this.browserLang,
     };
 
-    await this.loadChatData(req)
+    this.ngxLoader.start();
+    await this.loadChatData(req);
+    this.ngxLoader.stop();
+
 
     // Prepare icon URLs
     let originURL = '';
@@ -183,14 +189,7 @@ export class TranscriptComponent implements OnInit {
   getChannelIconURL(senderName: string, senderId: string): string {
     // Example fallback, can be replaced with logic or a service map
     const lowerName = senderName?.toLowerCase() || '';
-    // console.log("Sender Name:", lowerName);
     const lowerId = senderId?.toLowerCase() || '';  
-    // console.log("Sender ID:", lowerId);
     return this.senderIconMapSafe[lowerName] || this.senderIconMapSafe[lowerId] || this.senderIconMapSafe['default'] || '';
-  }
-
-
-  getMessageClass(msg: any) {
-    return msg.type === 'BOT' ? 'bot-message' : 'user-message';
   }
 }
