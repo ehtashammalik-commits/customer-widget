@@ -80,10 +80,10 @@ export class TranscriptComponent implements OnInit {
 }
 
   ngAfterViewInit(): void {
-    // Wait for view + any bindings to finish
-    // setTimeout(() => {
-    //   window.print();
-    // }, 2000);
+    
+    setTimeout(() => {
+      window.print();
+    }, 2000);
   }
 
   async loadChatData(req: any) {
@@ -155,7 +155,7 @@ export class TranscriptComponent implements OnInit {
     return url;
   }
 
-    getInitialsFromFullName(name: string = ''): string {
+  getInitialsFromFullName(name: string = ''): string {
     const trimmedName = name.trim();
     if (!trimmedName) return ''; // safeguard for empty input
 
@@ -172,7 +172,7 @@ export class TranscriptComponent implements OnInit {
     }
   }
 
-    getGoogleMapsUrl(lat: number, lng: number): SafeResourceUrl {
+  getGoogleMapsUrl(lat: number, lng: number): SafeResourceUrl {
     const mapUrl = `https://maps.google.com/maps?q=${lat},${lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(mapUrl);
   }
@@ -186,14 +186,7 @@ export class TranscriptComponent implements OnInit {
   return type === "vnd.openxmlformats-officedocument.wordprocessingml.document" ? "DOCX" : type;
 }
 
-
-  getAgentIcon(senderName: string): string {
-    // Optionally generate based on senderName
-    return this.senderIconMapSafe[senderName] || 'assets/images/agent-default-icon.svg';
-  }
-
   getCustomerIcon(firstName: string): string {
-    console.log("First Name:", firstName);
     const nameParts = firstName.split(" ");
     if (nameParts.length > 1) {
       // If there is more than one part to the name (i.e. a space), use the first letters of each part
