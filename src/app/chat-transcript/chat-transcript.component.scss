@@ -209,17 +209,18 @@
     text-align: center;
     font-size: 11px;
     font-weight: 600;
-    line-height: 35px;
+    line-height: 32px;
     border-radius: 100%;
     color: #000;
     text-transform: uppercase;
-}
 
-.profile-pic .profile-pic-area img {
+    img {
     width: 22px;
     position: relative;
-    top: 3px;
+    top: 0;
 }
+}
+
 
 .chat-message-content {
     position: relative;
@@ -544,5 +545,63 @@ small.edit-message {
 @media only screen and (min-width: 1440px) {
     .chat-message-content {
         max-width: 1200px;
+    }
+}
+
+.email-case{
+    .profile-pic-area{
+        background: #eff2f7;
+    }
+    .chat-message-content{
+        &:before,&:after{
+            display: none;
+
+        }
+        background: transparent;
+    }
+}
+.user-activity {
+    .message-list-header {
+        background: #EFF2F7;
+        min-height: 35px;
+        display: flex;
+        flex-direction: row;
+        border-radius: 2px 2px 0 0;
+
+        .activity-list {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+
+            li {
+                display: inline-flex;
+                border-right: 1px solid #ccc;
+                margin: 0;
+                padding: 0px 10px;
+                vertical-align: middle;
+                font-size: 13px;
+                color: #000;
+                gap: 5px;
+
+                &:last-child {
+                    border-right: none;
+                }
+              &.email-recipients {
+                line-break: anywhere;
+                span{
+                  line-break: strict;
+                  }
+                }
+
+            }
+        }
+
+    }
+
+    .activity-inner-content {
+        border: 1px solid #eee;
+        padding: 10px;
     }
 }
