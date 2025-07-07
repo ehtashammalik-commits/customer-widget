@@ -605,3 +605,22 @@ small.edit-message {
         padding: 10px;
     }
 }
+
+.structured-message{
+  strong{
+    display: block;
+    }
+  }
+.chat-message-content {
+  p {
+    color: #000;
+    font-size: 13px;
+    margin: 0;
+    line-height: 15px;
+    word-break: break-word;
+    clear: both;
+    white-space: pre-line;
+    position: relative;
+    display: inline-grid;
+    }
+  }
