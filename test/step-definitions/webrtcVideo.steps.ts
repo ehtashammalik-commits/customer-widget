@@ -111,7 +111,9 @@ const createMockComponent = () => {
     mockBrowserNotificationService,
     mockDeliveryNotificationService,
     mockPostMessageHandlerService,
-    mockTranslateService
+    mockTranslateService,
+    undefined,
+    undefined
   );
 
   (comp as any).elementView = {

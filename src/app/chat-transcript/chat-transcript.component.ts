@@ -4,6 +4,8 @@ import { ActivatedRoute } from '@angular/router';
 import { ConfigService } from '../services/config.service';
 import { firstValueFrom } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
+import { NgxUiLoaderService } from 'ngx-ui-loader';
+
 
 @Component({
   selector: 'app-transcript',
@@ -21,7 +23,8 @@ export class TranscriptComponent implements OnInit {
     private route: ActivatedRoute,
     private transcript: TranscriptService,
     public __appConfig: ConfigService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private ngxLoader: NgxUiLoaderService
   ) {}
 
   ngOnInit(): void {
@@ -43,7 +46,10 @@ export class TranscriptComponent implements OnInit {
       browserLang: this.browserLang,
     };
 
-    await this.loadChatData(req)
+    this.ngxLoader.start();
+    await this.loadChatData(req);
+    this.ngxLoader.stop();
+
 
     // Prepare icon URLs
     let originURL = '';
@@ -74,28 +80,47 @@ export class TranscriptComponent implements OnInit {
 }
 
   ngAfterViewInit(): void {
-    // Wait for view + any bindings to finish
-    // setTimeout(() => {
-    //   window.print();
-    // }, 2000);
+    
+    setTimeout(() => {
+      window.print();
+    }, 2000);
   }
 
   async loadChatData(req: any) {
-  try {
-    const data = await firstValueFrom(this.transcript.getTranscriptData(req));
+      try {
+        const data = await firstValueFrom(this.transcript.getTranscriptData(req));
 
-    const rawTimestamp = data[0].header.timestamp;
-    const localDate = new Date(rawTimestamp);
+        const processed: any[] = [];
 
-    // Format as YYYY/MM/DD in local time
-    const formattedDate = `${localDate.getFullYear()}/${String(localDate.getMonth() + 1).padStart(2, '0')}/${String(localDate.getDate()).padStart(2, '0')}`;
+        for (const message of data) {
+          const intent = message?.header?.intent?.toLowerCase();
 
-    this.chatDate = formattedDate;
-    this.processedMessages = data;
-  } catch (error) {
-    console.error("Error loading chat data:", error);
-  }
-}
+          if (intent === 'update') {
+            const originalId = message.header.originalMessageId;
+
+            const index = processed.findIndex((msg) => msg.id === originalId);
+
+            if (index !== -1) {
+              // Update the original message
+              processed[index].body.markdownText = message.body.markdownText;
+              processed[index].isEdited = true;
+            }
+          } else {
+            processed.push(message);
+          }
+        }
+
+        const rawTimestamp = processed[0]?.header?.timestamp;
+        const localDate = new Date(rawTimestamp);
+
+        this.chatDate = `${localDate.getFullYear()}/${String(localDate.getMonth() + 1).padStart(2, '0')}/${String(localDate.getDate()).padStart(2, '0')}`;
+        this.processedMessages = processed;
+
+      } catch (error) {
+        console.error("Error loading chat data:", error);
+      }
+    }
+
 
 
   async loadIcons(senderIconMap: { [key: string]: string }, jwtToken: string) {
@@ -130,7 +155,7 @@ export class TranscriptComponent implements OnInit {
     return url;
   }
 
-    getInitialsFromFullName(name: string = ''): string {
+  getInitialsFromFullName(name: string = ''): string {
     const trimmedName = name.trim();
     if (!trimmedName) return ''; // safeguard for empty input
 
@@ -147,7 +172,7 @@ export class TranscriptComponent implements OnInit {
     }
   }
 
-    getGoogleMapsUrl(lat: number, lng: number): SafeResourceUrl {
+  getGoogleMapsUrl(lat: number, lng: number): SafeResourceUrl {
     const mapUrl = `https://maps.google.com/maps?q=${lat},${lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(mapUrl);
   }
@@ -161,14 +186,7 @@ export class TranscriptComponent implements OnInit {
   return type === "vnd.openxmlformats-officedocument.wordprocessingml.document" ? "DOCX" : type;
 }
 
-
-  getAgentIcon(senderName: string): string {
-    // Optionally generate based on senderName
-    return this.senderIconMapSafe[senderName] || 'assets/images/agent-default-icon.svg';
-  }
-
   getCustomerIcon(firstName: string): string {
-    console.log("First Name:", firstName);
     const nameParts = firstName.split(" ");
     if (nameParts.length > 1) {
       // If there is more than one part to the name (i.e. a space), use the first letters of each part
@@ -183,14 +201,7 @@ export class TranscriptComponent implements OnInit {
   getChannelIconURL(senderName: string, senderId: string): string {
     // Example fallback, can be replaced with logic or a service map
     const lowerName = senderName?.toLowerCase() || '';
-    // console.log("Sender Name:", lowerName);
     const lowerId = senderId?.toLowerCase() || '';  
-    // console.log("Sender ID:", lowerId);
     return this.senderIconMapSafe[lowerName] || this.senderIconMapSafe[lowerId] || this.senderIconMapSafe['default'] || '';
-  }
-
-
-  getMessageClass(msg: any) {
-    return msg.type === 'BOT' ? 'bot-message' : 'user-message';
   }
 }
