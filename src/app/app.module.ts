@@ -37,6 +37,7 @@ import { TranscriptComponent } from './chat-transcript/chat-transcript.component
 import { FormatTimePipe } from './pipes/format-time.pipe';
 import { NgxUiLoaderModule, NgxUiLoaderConfig } from 'ngx-ui-loader';
 import { SanitizeHtmlPipe } from './sanitizeHtml.pipe';
+import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
 
 
 export function initializeApp1(appConfigService: ConfigService) {
@@ -64,7 +65,8 @@ export function initializeApp1(appConfigService: ConfigService) {
     IsEllipsisActiveDirective,
     TranscriptComponent,
     FormatTimePipe,
-    SanitizeHtmlPipe
+    SanitizeHtmlPipe,
+    SafeAttachmentUrlPipe
   ],
   imports: [
     NgxLinkifyjsModule.forRoot({
