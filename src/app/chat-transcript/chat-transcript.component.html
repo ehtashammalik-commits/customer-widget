@@ -254,7 +254,7 @@
                 <ul class="activity-list">
                   <li matTooltip="{{ message.body.from }}"><span>From:</span> {{ message.body.from }}</li>
                   <li  class="email-recipients" matTooltip="{{ message.body.recipientsTo }}"><span>To:</span> {{ message.body.recipientsTo }}</li>
-                  <li class="email-subject" matTooltip="{{ message.header.sender.emailSubject }}"><span>Subject:</span> {{ message.body.subject }}</li>
+                  <li class="email-subject" matTooltip="{{ message.body.subject }}"><span>Subject:</span> {{ message.body.subject }}</li>
                   <li class="email-time">
                     {{ message.header.timestamp | date: 'd/MMM/yy, h:mm a' }}
                   </li>
