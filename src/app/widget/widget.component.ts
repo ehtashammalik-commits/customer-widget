@@ -2501,7 +2501,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     browserLang:        browserLang || '',
   });
 
-  const absoluteUrl = `${window.location.origin}/#/chat-transcript?${params.toString()}`;
+  const absoluteUrl = `${window.location.origin}/customer-widget/#/chat-transcript?${params.toString()}`;
   console.log('Opening transcript URL:', absoluteUrl);
   window.open(absoluteUrl, '_blank', 'noopener');
   localStorage.removeItem('conversationId');
