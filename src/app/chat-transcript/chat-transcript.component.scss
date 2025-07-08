@@ -584,15 +584,26 @@ small.edit-message {
                 font-size: 13px;
                 color: #000;
                 gap: 5px;
+              flex-basis: fit-content;
+              line-break: anywhere;
+              span{
+                line-break: strict;
+                margin-right: 5px;
+                }
 
                 &:last-child {
                     border-right: none;
                 }
-              &.email-recipients {
-                line-break: anywhere;
-                span{
-                  line-break: strict;
-                  }
+              &.email-time{
+                min-width: 130px;
+                }
+              &.email-recipients, &.email-subject {
+                max-width: 450px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                -webkit-line-clamp: 2;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
                 }
 
             }
