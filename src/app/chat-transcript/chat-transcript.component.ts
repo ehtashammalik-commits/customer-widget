@@ -34,6 +34,10 @@ export class TranscriptComponent implements OnInit {
     const conversationId = params['conversationId'] || '';
     this.browserLang = params['browserLang'] || '';
 
+    if (!conversationId) {
+      alert('Conversation ID is missing. Cannot load transcript.');
+      return;
+    }
     // Set text direction class
     if (this.browserLang === 'ar') {
       this.conversationAreaClass = 'right-direction';
@@ -49,6 +53,7 @@ export class TranscriptComponent implements OnInit {
     this.ngxLoader.start();
     await this.loadChatData(req);
     this.ngxLoader.stop();
+    this.printChatTranscript();
 
 
     // Prepare icon URLs
@@ -78,13 +83,6 @@ export class TranscriptComponent implements OnInit {
     await this.loadIcons(senderIconMap, jwtToken);
   });
 }
-
-  ngAfterViewInit(): void {
-    
-    setTimeout(() => {
-      window.print();
-    }, 2000);
-  }
 
   async loadChatData(req: any) {
       try {
@@ -149,6 +147,14 @@ export class TranscriptComponent implements OnInit {
 
   await Promise.all(promises);
 }
+
+  printChatTranscript() {
+
+    setTimeout(() => {
+      window.print();
+    }, 2000);
+  }
+
 
   getSafeUrl(url: string): string {
     // You can sanitize this later if needed via DomSanitizer

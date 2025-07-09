@@ -1636,6 +1636,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               'conversationId',
               event.data.header.conversationId,
             );
+
+            console.log("localstorage conversationId: ", localStorage.getItem('conversationId'))
             this.sdk.setConversationDataAgainstCustomerIdentifier(
               this.customerData.channelCustomerIdentifier,
               this.getFormDataAsConversationData(this.preChatFormData),
@@ -2488,23 +2490,21 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   
 
   chatTranscript(): void {
-  const customerIdentifier = this.customerIdentifier;
-  const serviceIdentifier  = this.serviceIdentifier;
-  const conversationId     = localStorage.getItem('conversationId');
-  const browserLang        = this.browserLang;
+    const customerIdentifier = this.customerIdentifier;
+    const serviceIdentifier  = this.serviceIdentifier;
+    const conversationId     = localStorage.getItem('conversationId');
+    const browserLang        = this.browserLang;
 
-  // Build the query string
-  const params = new URLSearchParams({
-    customerIdentifier: customerIdentifier || '',
-    serviceIdentifier:  serviceIdentifier || '',
-    conversationId:     conversationId || '',
-    browserLang:        browserLang || '',
-  });
+    // Build the query string
+    const params = new URLSearchParams({
+      customerIdentifier: customerIdentifier || '',
+      serviceIdentifier:  serviceIdentifier || '',
+      conversationId:     conversationId || '',
+      browserLang:        browserLang || '',
+    });
 
   const absoluteUrl = `${window.location.origin}/customer-widget/#/chat-transcript?${params.toString()}`;
-  console.log('Opening transcript URL:', absoluteUrl);
   window.open(absoluteUrl, '_blank', 'noopener');
-  localStorage.removeItem('conversationId');
 }
 
   loadBrowserLanguage() {
