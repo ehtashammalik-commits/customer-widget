@@ -3,7 +3,7 @@ import { TranscriptService } from '../services/transcript.service';
 import { ActivatedRoute } from '@angular/router';
 import { ConfigService } from '../services/config.service';
 import { firstValueFrom } from 'rxjs';
-import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
+import {DomSanitizer, SafeResourceUrl, SafeUrl, Title} from '@angular/platform-browser';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 
 
@@ -25,10 +25,12 @@ export class TranscriptComponent implements OnInit {
     private transcript: TranscriptService,
     public __appConfig: ConfigService,
     private sanitizer: DomSanitizer,
-    private ngxLoader: NgxUiLoaderService
+    private ngxLoader: NgxUiLoaderService,
+    private title: Title
   ) {}
 
   ngOnInit(): void {
+    this.title.setTitle('Conversation Transcript');
   this.route.queryParams.subscribe(async params => {
     const conversationId = params['conversationId'] || '';
     this.browserLang = params['browserLang'] || '';
@@ -207,7 +209,7 @@ export class TranscriptComponent implements OnInit {
   getChannelIconURL(senderName: string, senderId: string): string {
     // Example fallback, can be replaced with logic or a service map
     const lowerName = senderName?.toLowerCase() || '';
-    const lowerId = senderId?.toLowerCase() || '';  
+    const lowerId = senderId?.toLowerCase() || '';
     return this.senderIconMapSafe[lowerName] || this.senderIconMapSafe[lowerId] || this.senderIconMapSafe['default'] || '';
   }
 }
