@@ -2490,17 +2490,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   
 
   chatTranscript(): void {
-    const customerIdentifier = this.customerIdentifier;
-    const serviceIdentifier  = this.serviceIdentifier;
     const conversationId     = localStorage.getItem('conversationId');
     const browserLang        = this.browserLang;
 
     // Build the query string
+    //state=download&browserLang=en&conversationId=
     const params = new URLSearchParams({
-      customerIdentifier: customerIdentifier || '',
-      serviceIdentifier:  serviceIdentifier || '',
-      conversationId:     conversationId || '',
+      state:              'download',
       browserLang:        browserLang || '',
+      conversationId:     conversationId || '',
     });
 
   const absoluteUrl = `${window.location.origin}/customer-widget/#/chat-transcript?${params.toString()}`;

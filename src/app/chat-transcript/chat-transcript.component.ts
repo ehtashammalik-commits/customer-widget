@@ -18,6 +18,7 @@ export class TranscriptComponent implements OnInit {
   senderIconMapSafe: { [key: string]: string } = {};
   browserLang = '';
   conversationAreaClass = '';
+  state : string = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -29,10 +30,9 @@ export class TranscriptComponent implements OnInit {
 
   ngOnInit(): void {
   this.route.queryParams.subscribe(async params => {
-    const customerIdentifier = params['customerIdentifier'] || '';
-    const serviceIdentifier = params['serviceIdentifier'] || '';
     const conversationId = params['conversationId'] || '';
     this.browserLang = params['browserLang'] || '';
+    this.state = params['state'] || '';
 
     if (!conversationId) {
       alert('Conversation ID is missing. Cannot load transcript.');
@@ -44,8 +44,6 @@ export class TranscriptComponent implements OnInit {
     }
 
      const req = {
-      customerIdentifier,
-      serviceIdentifier,
       conversationId,
       browserLang: this.browserLang,
     };
@@ -149,11 +147,13 @@ export class TranscriptComponent implements OnInit {
 }
 
   printChatTranscript() {
+  if (this.state !== 'download') return;
 
-    setTimeout(() => {
-      window.print();
-    }, 2000);
-  }
+  setTimeout(() => {
+    window.print();
+  }, 2000);
+}
+
 
 
   getSafeUrl(url: string): string {

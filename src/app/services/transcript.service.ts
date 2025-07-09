@@ -15,9 +15,8 @@ export class TranscriptService {
   ) {}
 
   getTranscriptData(data): Observable<any> {
-    console.log("here is the data in service now", data)
     const ccmUrl = this.__appConfig.appConfig.CCM_URL;
-    const url =  `${ccmUrl}/message?customerChannelIdentifier=${data.customerIdentifier}&serviceIdentifier=${data.serviceIdentifier}&conversationId=${data.conversationId}` // Replace with actual API endpoint
+    const url =  `${ccmUrl}/message?customerChannelIdentifier=${null}&serviceIdentifier=${null}&conversationId=${data.conversationId}`
     return this.http.get(url);
   }
 }
