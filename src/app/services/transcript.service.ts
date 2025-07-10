@@ -15,8 +15,15 @@ export class TranscriptService {
   ) {}
 
   getTranscriptData(data): Observable<any> {
-    const ccmUrl = this.__appConfig.appConfig.CCM_URL;
-    const url =  `${ccmUrl}/message?customerChannelIdentifier=${null}&serviceIdentifier=${null}&conversationId=${data.conversationId}`
-    return this.http.get(url);
-  }
+      const ccmUrl = this.__appConfig.appConfig.CCM_URL;
+      const url = `${ccmUrl}/message?customerChannelIdentifier=${null}&serviceIdentifier=${null}&conversationId=${data.conversationId}`;
+
+      const token = localStorage.getItem('jwt_token');
+
+      const headers = {
+        Authorization: `Bearer ${token}`
+      };
+
+      return this.http.get(url, { headers });
+    }
 }
