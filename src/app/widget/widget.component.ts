@@ -199,7 +199,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     'left',
     'right',
   ];
-  matToolTipPosition = this.positionOptions[4];
+  matToolTipPosition = this.positionOptions[3];
   isMobile = false;
 
   dictionary: { [key: string]: string } = {
@@ -333,7 +333,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private deliveryNotificationService: DeliveryNotificationService,
     private __postMessageHandlerService: PostMessageHandlerService,
     private translate: TranslateService,
-    private router: Router, 
+    private router: Router,
     @Inject(DOCUMENT) private doc: Document,
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
@@ -1636,8 +1636,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               'conversationId',
               event.data.header.conversationId,
             );
-
-            console.log("localstorage conversationId: ", localStorage.getItem('conversationId'))
             this.sdk.setConversationDataAgainstCustomerIdentifier(
               this.customerData.channelCustomerIdentifier,
               this.getFormDataAsConversationData(this.preChatFormData),
@@ -2478,16 +2476,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   //     conversationId:     localStorage.getItem('conversationId'),
   //     browserLang:        this.browserLang,
   //   };
-  
+
   //   localStorage.setItem('ef_transcript_req', JSON.stringify(requestData));
-  
+
   //   const absoluteUrl = `${window.location.origin}/#/chat-transcript`;
   //   console.log('Opening transcript URL:', absoluteUrl);
   //   window.open(absoluteUrl, '_blank', 'noopener');
   //   localStorage.removeItem('conversationId');
   // }
-  
-  
+
+
 
   chatTranscript(): void {
     const conversationId     = localStorage.getItem('conversationId');
@@ -2512,6 +2510,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     if (this.selectedLanguage == 'ar') {
       this.textDirection = 'right-direction';
+      this.translate.use(this.selectedLanguage);
+      console.log(this.selectedLanguage, 'this.selectedLanguage')
     }
   }
 
