@@ -26,9 +26,11 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject } from '@angular/core';
 
 interface Shift {
   id: string;
@@ -272,6 +274,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   webhookUrl: any;
+  isChatTranscriptVisible = false;
 
   // Upload File Variables
   imageUrls: {
@@ -329,7 +332,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private browserNotificationService: BrowserNotificationService,
     private deliveryNotificationService: DeliveryNotificationService,
     private __postMessageHandlerService: PostMessageHandlerService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private router: Router,
+    @Inject(DOCUMENT) private doc: Document,
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
@@ -545,7 +550,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.log('Business Calendar Api Response:', error);
       });
   }
 
@@ -2463,18 +2468,40 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  chatTranscript() {
-    if (localStorage.getItem('conversationId') !== '') {
-      window.open(
-        `widget-assets/chat-transcript/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
-        }&conversationId=${localStorage.getItem(
-          'conversationId',
-        )}&browserLang=${this.browserLang}`,
-        '_blank',
-      );
-      localStorage.removeItem('conversationId');
-    }
-  }
+  // chatTranscript(): void {
+  //   const requestData = {
+  //     ccmUrl:             this.__appConfig.appConfig.CCM_URL,
+  //     customerIdentifier: this.customerIdentifier,
+  //     serviceIdentifier:  this.serviceIdentifier,
+  //     conversationId:     localStorage.getItem('conversationId'),
+  //     browserLang:        this.browserLang,
+  //   };
+
+  //   localStorage.setItem('ef_transcript_req', JSON.stringify(requestData));
+
+  //   const absoluteUrl = `${window.location.origin}/#/chat-transcript`;
+  //   console.log('Opening transcript URL:', absoluteUrl);
+  //   window.open(absoluteUrl, '_blank', 'noopener');
+  //   localStorage.removeItem('conversationId');
+  // }
+
+
+
+  chatTranscript(): void {
+    const conversationId     = localStorage.getItem('conversationId');
+    const browserLang        = this.browserLang;
+
+    // Build the query string
+    //state=download&browserLang=en&conversationId=
+    const params = new URLSearchParams({
+      state:              'download',
+      browserLang:        browserLang || '',
+      conversationId:     conversationId || '',
+    });
+
+  const absoluteUrl = `${window.location.origin}/customer-widget/#/chat-transcript?${params.toString()}`;
+  window.open(absoluteUrl, '_blank', 'noopener');
+}
 
   loadBrowserLanguage() {
     this.browserLang = navigator.language;

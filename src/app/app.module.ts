@@ -33,6 +33,12 @@ import { getMediaFromTask } from './getMediaFromTask.pipe';
 import { NpsColorPipe } from './npsColor.pipe';
 import { SvgNpsFormatPipe } from './svgFormat.pipe';
 import { IsEllipsisActiveDirective } from './isEllipsisActive.directive';
+import { TranscriptComponent } from './chat-transcript/chat-transcript.component';
+import { FormatTimePipe } from './pipes/format-time.pipe';
+import { NgxUiLoaderModule, NgxUiLoaderConfig } from 'ngx-ui-loader';
+import { SanitizeHtmlPipe } from './sanitizeHtml.pipe';
+import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
+
 
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
@@ -56,12 +62,22 @@ export function initializeApp1(appConfigService: ConfigService) {
     getMediaFromTask,
     NpsColorPipe,
     SvgNpsFormatPipe,
-    IsEllipsisActiveDirective
+    IsEllipsisActiveDirective,
+    TranscriptComponent,
+    FormatTimePipe,
+    SanitizeHtmlPipe,
+    SafeAttachmentUrlPipe
   ],
   imports: [
     NgxLinkifyjsModule.forRoot({
       enableHash: false,
       enableMention: true,
+    }),
+    NgxUiLoaderModule.forRoot({
+      fgsType: 'ball-spin', // You can choose other types like ball-spin, chasing-dots, etc.
+      fgsColor: '#1d8cf8',
+      pbDirection: 'ltr',
+      text: 'Loading...',
     }),
     BrowserModule,
     HttpClientModule,
@@ -89,7 +105,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatChipsModule,
     MatRadioModule
   ],
-  exports: [getMediaFromTask],
+  exports: [getMediaFromTask,TranscriptComponent],
   providers: [{
       provide: LocationStrategy,
       useClass: HashLocationStrategy,
