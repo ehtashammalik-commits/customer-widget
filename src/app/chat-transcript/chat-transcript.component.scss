@@ -20,6 +20,15 @@
     align-items: center;
     position: relative;
 
+  @media(max-width: 480px){
+    height: auto !important;
+    flex-direction: column;
+    padding: 5px 15px !important;
+    img{
+      position: static !important;
+      }
+    }
+
     img {
         //height: 30px;
         //margin-right: 10px;
