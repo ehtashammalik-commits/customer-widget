@@ -3866,48 +3866,79 @@ const attemptReconnection = (reconnectionAttempt = 1) => {
  * @param {Function} callback - The callback function to execute after setting up media.
  */
 function setupRemoteMedia(session, callback) {
+  console.log('[setupRemoteMedia] Initializing...');
+
   var pc = session.sessionDescriptionHandler.peerConnection;
-  var remoteStream;
-  remoteStream = new MediaStream();
-  var size = pc.getReceivers().length;
-  console.log('size is ', size);
-  var receiver = pc.getReceivers()[0];
-  var receivervideo = pc.getReceivers()[1];
-  remoteStream.addTrack(receiver.track);
-  if (receivervideo) {
-    console.log('vdieo found');
-    remoteStream.addTrack(receivervideo.track);
+  var remoteStream = new MediaStream();
+
+  var receiverAudio = pc.getReceivers().find(r => r.track && r.track.kind === 'audio');
+  var receiverVideo = pc.getReceivers().find(r => r.track && r.track.kind === 'video');
+
+  if (receiverAudio) {
+    remoteStream.addTrack(receiverAudio.track);
+    console.log('[setupRemoteMedia] Added audio track to remoteStream');
   }
+
+  if (receiverVideo) {
+    remoteStream.addTrack(receiverVideo.track);
+    console.log('[setupRemoteMedia] Added video track to remoteStream');
+  }
+
   remote_stream = remoteStream;
+
+  // Create black screen video track and assign audio to black fallback
+  var blackTrack = createBlackTrack();
+  var blackWithAudioStream = new MediaStream();
+  blackWithAudioStream.addTrack(blackTrack);
+  if (receiverAudio) blackWithAudioStream.addTrack(receiverAudio.track);
+
+  const originalTrack = receiverVideo?.track;
+
   setTimeout(() => {
+    const remoteVideoElem = document.getElementById('remoteVideo');
+    if (remoteVideoElem) {
+      remoteVideoElem.srcObject = remoteStream;
+      console.log('[setupRemoteMedia] Assigned remoteStream to #remoteVideo');
+    } else {
+      console.error("[setupRemoteMedia] Element with ID 'remoteVideo' not found.");
+    }
 
-    if (document.getElementById('remoteVideo')) {
-      console.log("document.getElementById('remoteVideo').srcObject", document.getElementById('remoteVideo').srcObject)
-      document.getElementById('remoteVideo').srcObject = remoteStream;
-  } else {
-      console.error("Element with ID 'remoteVideo' does not exist.");
+    console.log('[setupRemoteMedia] Final remote audio tracks:', remoteStream.getAudioTracks());
+    console.log('[setupRemoteMedia] Final remote video tracks:', remoteStream.getVideoTracks());
+  }, 500);
+
+  // Replace video with black screen on mute/unmute
+  if (originalTrack) {
+    originalTrack.onmute = () => {
+      console.log("=====> [setupRemoteMedia] Video Track is Muted");
+
+      if (remoteStream.getVideoTracks().includes(originalTrack)) {
+        remoteStream.removeTrack(originalTrack);
+        console.log("=====> [setupRemoteMedia] Removed original video track from remoteStream");
+      }
+
+      remoteStream.addTrack(blackTrack);
+      console.log("=====> [setupRemoteMedia] Added black video track to remoteStream");
+    };
+
+    originalTrack.onunmute = () => {
+      console.log("=====> [setupRemoteMedia] Video Track is Unmuted");
+
+      if (remoteStream.getVideoTracks().includes(blackTrack)) {
+        remoteStream.removeTrack(blackTrack);
+        console.log("=====> [setupRemoteMedia] Removed black video track from remoteStream");
+      }
+
+      remoteStream.addTrack(originalTrack);
+      console.log("=====> [setupRemoteMedia] Re-added original video track to remoteStream");
+    };
+
+    originalTrack.onchange = () => {
+      console.log("=====> [setupRemoteMedia] Video Track Changed");
+    };
   }
-  
 
-    // var remoteVideo = document.getElementById('remoteVideo');
-    // if (remoteVideo) remoteVideo.srcObject = remoteStream;
-    console.log('<== remote Stream Audio Track:', remoteStream.getAudioTracks());
-    console.log('<== remote Video Tag:', document.getElementById('remoteVideo'));
-    console.log('<== remote Stream Video Track:', remoteStream.getVideoTracks());
-  }, 4000)
-
-
-  // var remoteVideo = document.getElementById('remoteVideo');
-  // if (remoteVideo) remoteVideo.srcObject = remoteStream;
-
-
-  // session.sessionDescriptionHandler.peerConnection.getReceivers().forEach((receiver) => {
-  //     if (receiver.track) {
-  //       remoteStream.addTrack(receiver.track);
-  //     }
-  //   });
-  //   remoteVideo.srcObject = remoteStream;
-
+  // Setup local video stream
   var localStream_1;
   if (pc.getSenders) {
     localStream_1 = new window.MediaStream();
@@ -3915,30 +3946,50 @@ function setupRemoteMedia(session, callback) {
       var track = sender.track;
       if (track && track.kind === "video") {
         localStream_1.addTrack(track);
+        console.log('[setupRemoteMedia] Added local video track');
 
-        //trigger when user press browser button of Stop Sharing
         track.addEventListener('ended', () => {
-          console.log("Screen Sharing is Tured off")
-          if (typeof session.incomingInviteRequest !== 'undefined') {
-            let _dialogId = session.incomingInviteRequest.message.headers["X-Call-Id"] != undefined ? session.incomingInviteRequest.message.headers["X-Call-Id"][0]['raw'] : session.incomingInviteRequest.message.headers["Call-ID"][0]['raw'];
-            generateConversionEvent(_dialogId, "screenshare", "off", callback)
-          }
-          else if (typeof session.outgoingInviteRequest !== 'undefined') {
-            let _dialogId = session.outgoingInviteRequest.message.headers["Call-ID"][0]
-            generateConversionEvent(_dialogId, "screenshare", "off", callback)
+          console.log("[setupRemoteMedia] Screen Sharing turned off");
+          const inviteRequest = session.incomingInviteRequest || session.outgoingInviteRequest;
+          const callIdHeader = inviteRequest?.message?.headers["X-Call-Id"]?.[0]?.raw ||
+            inviteRequest?.message?.headers["Call-ID"]?.[0]?.raw;
+
+          if (callIdHeader) {
+            generateConversionEvent(callIdHeader, "screenshare", "off", callback);
           }
         });
       }
     });
-  }
-  else {
+  } else {
     localStream_1 = pc.getLocalStreams()[0];
+    console.log('[setupRemoteMedia] Fallback to pc.getLocalStreams()');
   }
 
   var localVideo = document.getElementById('localVideo');
-  if (localVideo) localVideo.srcObject = localStream_1;
+  if (localVideo) {
+    localVideo.srcObject = localStream_1;
+    console.log('[setupRemoteMedia] Assigned localStream_1 to #localVideo');
+  } else {
+    console.warn("[setupRemoteMedia] Element with ID 'localVideo' not found.");
+  }
+
   local_stream = localStream_1;
+
+  // === Helper Function ===
+  function createBlackTrack() {
+    console.log('[createBlackTrack] Creating black canvas track...');
+    var canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 480;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    var stream = canvas.captureStream(30); // 30 FPS
+    return stream.getVideoTracks()[0];
+  }
 }
+
 
 // function testing(dialogId, callback) {
 //   console.log("dialogueID is coming into the SDK now", dialogId)
