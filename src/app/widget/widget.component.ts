@@ -1086,6 +1086,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async changeView(view: any) {
+    console.log('Change View:', view);
     if (this.showInvalidCodeError && this.standaloneWebRtc) {
       if(!this.isSecureLinkExpired) {
       this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
@@ -1185,7 +1186,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           //this.convertCallView('video');
         } else {
           this.callPopUpView = true;
-          this.activeVideoView = true;
           this.activeChatView = false;
           this.activeAudioView = false;
           this.activeScreenShareView = false;
@@ -1195,6 +1195,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           if(!this.IsRegisteredInFreeSwitch) {
             await this.logInToFreeSwitch();
           }
+          this.activeVideoView = true;
           this.initiateWebRtcCall(view);
         }
         break;
@@ -2444,6 +2445,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.callText = callType;
     // standAlone Web RTC Call when the link is clicked other than web.
     if (this.standaloneWebRtc) {
+      console.log("step ==== > if this.standaloneWebRtc along with authConfigs", this.setAuthorizedResponse);
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.setAuthorizedResponse,
@@ -2458,6 +2460,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // standAlone Web RTC Call when the link is given in active chat / web session as a message..
     if (this.isSecureWebCall && !this.errorDuringWebRTCCall) {
 
+      console.log("step 4 ==== > if this.isSecureWebCall along with authConfigs", this.setAuthorizedResponse);
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.setAuthorizedResponse,
@@ -2929,11 +2932,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             return;
         }
 
+
+        console.log("step 2 =====>  Secure Link Response ", res);
         this.agentName = res.data.agentName;
         res.data.diallingUri = this.webRTCConfig.diallingUri;
         this.showAuthenticationResponseMessage = res.message;
         this.showInvalidCodeError = false;
         this.setAuthorizedResponse = res.data; // Now includes diallingUri
+
+        console.log("step 3 =====>  Setting data in the authenticateKey() for making a call ", this.setAuthorizedResponse);
 
         try {
           if(this.webRTCConfig && !this.IsRegisteredInFreeSwitch) {
@@ -2958,6 +2965,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   processSecureLinkMessage(message: any) {
+
+    console.log("step1 ======= > processSecureLinkMessage", message);
 
     this.isSecureWebCall = false;
     const mediaUrl = message.body.mediaUrl

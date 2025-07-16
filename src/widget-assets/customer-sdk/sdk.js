@@ -1854,6 +1854,7 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
  */
 
 function initiate_call(calledNumber, DN, mediaType, authData, callback, callType) {
+  console.log("Auth Data in the SDK while initiating call", authData)
   var res = lockFunction("initiate_call", 500); // --- seconds cooldown
   if (!res) return;
   const undefinedParams = checkUndefinedParams(initiate_call, [calledNumber, DN, mediaType, authData, callback, callType]);
