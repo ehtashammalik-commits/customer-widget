@@ -1723,7 +1723,7 @@
                                   <button mat-stroked-button
                                     *ngIf="button.type === 'button' || button.type === 'clickableList'"
                                     (click)="sendCarousalMessage(button, message.id, item.additionalCarouselElementDetails.id)"
-                                    [disabled]="message.body.disableAllButtons">
+                                    [disabled]="message.body.disableAllButtons || message.body.additionalDetails?.disabled">
                                     {{ button.title }}
                                   </button>
                                 </ng-container>
@@ -1809,8 +1809,8 @@
                       <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
                         <mat-chip *ngFor="let btn of message.body.buttons"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
-                          (click)="!message.body.disableClickaAbleList && sendButtonMessage(btn, message.id)"
-                          [disabled]="message.body.disableClickaAbleList">
+                          (click)="!message.body.disableClickaAbleList && !message.body.additionalDetails?.disabled && sendButtonMessage(btn, message.id)"
+                          [disabled]="message.body.disableClickaAbleList || message.body.additionalDetails?.disabled">
                           {{ btn.title }}
                         </mat-chip>
                       </mat-chip-list>

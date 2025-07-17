@@ -203,7 +203,7 @@ defineFeature(feature, (test) => {
                   title: 'Card 1',
                   image_url: 'https://example.com/card1.jpg',
                   alt: 'Card 1 image',
-                  repeatAble: false
+                  disableInteraction: true
                 }
               },
               {
@@ -223,7 +223,7 @@ defineFeature(feature, (test) => {
                   title: 'Card 2',
                   image_url: 'https://example.com/card2.jpg',
                   alt: 'Card 2 image',
-                  repeatAble: false
+                  disableInteraction: true
                 }
               }
             ]
@@ -381,7 +381,7 @@ defineFeature(feature, (test) => {
                     title: 'Card 1',
                     image_url: 'https://example.com/card1.jpg',
                     alt: 'Card 1 image',
-                    repeatAble: false
+                    disableInteraction: true
                   }
                 },
                 {
@@ -401,7 +401,7 @@ defineFeature(feature, (test) => {
                     title: 'Card 2',
                     image_url: 'https://example.com/card2.jpg',
                     alt: 'Card 2 image',
-                    repeatAble: false
+                    disableInteraction: true
                   }
                 }
               ]
@@ -606,7 +606,7 @@ defineFeature(feature, (test) => {
                   title: 'Card 1',
                   image_url: 'https://example.com/card1.jpg',
                   alt: 'Card 1 image',
-                  repeatAble: false
+                  disableInteraction: true
                 }
               }
             ]

@@ -141,6 +141,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // If this flag is 'true' than that's mean ScreenShare Call is Active (In Side Chat Screen)
   isScreenShareActive = false;
 
+
+  // Teneo 
+
+  INTERACTIVE_TYPES = ['button', 'carousel'];
   // Variables for Call Controls
   isCallMute = false;
   isVideoHide = false;
@@ -1773,6 +1777,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // For Teneo Bot
 
     else if (cimMessage.header.sender.type.toLowerCase() === 'customer') {
+
+      console.log("Received message from customer: ", cimMessage);
+      this.disableOldInteractiveMessages(this.cimMessage);
       if (
         cimMessage.header.originalMessageId &&
         cimMessage.header.intent &&
@@ -1849,6 +1856,47 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+  disableOldInteractiveMessages(cimMessages: any[]) {
+    console.log("Disabling old interactive messages");
+
+    cimMessages.forEach((message: any) => {
+      const isFromBot = message.header?.sender?.type?.toLowerCase() === 'bot';
+      const type = message.body?.type?.toLowerCase();
+
+      if (!isFromBot || !this.INTERACTIVE_TYPES.includes(type)) return;
+
+      if (type === 'button') {
+        console.log("Disabling button interaction for message", message);
+        const disableInteraction = message.body?.additionalDetails?.interactive?.disableInteraction;
+          console.log("hi", message.body?.additionalDetails?.interactive.disableInteraction)
+          console.log("disableInteraction", disableInteraction)
+        
+
+          if (disableInteraction === true) {
+            message.body.additionalDetails = {
+            ...(message.body.additionalDetails || {}),
+            disabled: true,
+          }
+        }
+      }
+
+      if (type === 'carousel') {
+        console.log("Carousal Message", message);
+        const disableInteraction = message.body?.elements?.[0]?.additionalCarouselElementDetails?.disableInteraction;
+          console.log("hi", message.body?.additionalDetails?.interactive.disableInteraction)
+        
+
+          if (disableInteraction === true) {
+            message.body.additionalDetails = {
+            ...(message.body.additionalDetails || {}),
+            disabled: true,
+          }
+        }
+      }
+    });
+  }
+
+
   editMessage(cimMessage: any) {
     const messageId = cimMessage.header.originalMessageId;
 
@@ -1876,6 +1924,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleResumedMessages(cimMessages: any[]) {
+    
     
     cimMessages.forEach((cimMessage) => {
       if (
@@ -1905,6 +1954,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         else {
 
         this.cimMessage.push(cimMessage);
+        this.disableOldInteractiveMessages(this.cimMessage);
         this.isChatActive = true;
         this.processSeenMessages();
         this.scrollToBottom();
@@ -2473,7 +2523,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           element.additionalCarouselElementDetails?.id === carousalCardId
       );
 
-      if (matchedElement?.additionalCarouselElementDetails?.repeatAble === false) {
+      if (matchedElement?.additionalCarouselElementDetails?.disableInteraction === true) {
         originalMessage.body.disableAllButtons = true;
       }
   
