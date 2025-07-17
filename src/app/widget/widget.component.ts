@@ -1237,7 +1237,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         break;
       case 'secureWebVideoCall':
+
         if (this.isSecureWebCall) {
+          console.log("STEP In the ChangeView if(this.isSecureWebCall === true) Secure Web Video Call is initiated")
           this.activeChatView = false;
           this.activeAudioView = false;
           this.activeVideoView = true;
@@ -2452,15 +2454,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       });
 
       if (!this.showInvalidCodeError) {
+        console.log("Step ===> Function -> initiateWebRTcCAll ==> !this.showInvalidCodeError")
         this.isWebRtcVideoCallActive = true;
         //this.startCountdown();
       }
     }
 
+    console.log("step ==== > this.issecureWebCall value", this.isSecureWebCall, "this.errorDuringWebRTCCall", this.errorDuringWebRTCCall, "this.setAuthorizedResponse", this.setAuthorizedResponse);
     // standAlone Web RTC Call when the link is given in active chat / web session as a message..
     if (this.isSecureWebCall && !this.errorDuringWebRTCCall) {
 
-      console.log("step 4 ==== > if this.isSecureWebCall along with authConfigs", this.setAuthorizedResponse);
+      console.log("step 4 ==== > if this.isSecureWebCall and starting handleCallStart", this.setAuthorizedResponse);
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.setAuthorizedResponse,
@@ -2475,6 +2479,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // In case of simple webRTC call
 
     else {
+
+
+      console.log("step UNEXPECTED ELSE PART ==== > this.isSecureWebCall along with authConfigs", this.webRTCConfig);
 
       if(this.preChatFormData && typeof this.preChatFormData === 'object') {
         const phoneNumber = this.preChatFormData.phone || "";
