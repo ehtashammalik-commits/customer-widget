@@ -1883,9 +1883,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (type === 'carousel') {
         console.log("Carousal Message", message);
         const disableInteraction = message.body?.elements?.[0]?.additionalCarouselElementDetails?.disableInteraction;
-          console.log("hi", message.body?.additionalDetails?.interactive.disableInteraction)
-        
-
           if (disableInteraction === true) {
             message.body.additionalDetails = {
             ...(message.body.additionalDetails || {}),
