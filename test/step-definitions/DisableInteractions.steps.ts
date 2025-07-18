@@ -94,7 +94,7 @@ defineFeature(feature, (test) => {
             body: {
               type: 'button',
               additionalDetails: {
-                disabled: true,
+                disableButtonType: true,
                 interactive: {
                   disableInteraction: true,
                 },
@@ -113,7 +113,7 @@ defineFeature(feature, (test) => {
                 },
               ],
               additionalDetails: {
-                disabled: true,
+                disableButtonType: true,
               },
             },
           },
@@ -219,9 +219,9 @@ defineFeature(feature, (test) => {
                 ?.disableInteraction === true);
 
           if (isBot && shouldDisable) {
-            expect(msg.body.additionalDetails.disabled).toBe(true);
+            expect(msg.body.additionalDetails.disableButtonType).toBe(true);
           } else {
-            expect(msg.body?.additionalDetails?.disabled).toBeUndefined();
+            expect(msg.body?.additionalDetails?.disableButtonType).toBeUndefined();
           }
         });
       },
@@ -267,7 +267,7 @@ defineFeature(feature, (test) => {
                 },
               ],
               additionalDetails: {
-                disabled: true,
+                disableButtonType: true,
               },
             },
             header: {
@@ -351,7 +351,7 @@ defineFeature(feature, (test) => {
                 },
               ],
               additionalDetails: {
-                disabled: true,
+                disableButtonType: true,
               },
             },
             header: {
@@ -377,7 +377,7 @@ defineFeature(feature, (test) => {
     });
 
     then(
-      'the previously enabled actionable elements in the chat history should remain visually enabled',
+      'the latest messages that were previously interactive should remain visually enabled',
       () => {
       },
     );

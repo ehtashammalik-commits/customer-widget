@@ -20,5 +20,5 @@ Scenario: Persistence of Enabled State of Actionable Elements
 Given the controller sends a message containing actionable elements
 And the message includes the flag disableInteraction set to true
 And the customer refreshes their browser session
-Then the previously enabled actionable elements in the chat history should remain visually enabled
+Then the latest messages that were previously interactive should remain visually enabled
 And clicking on them should trigger an action

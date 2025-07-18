@@ -1777,8 +1777,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // For Teneo Bot
 
     else if (cimMessage.header.sender.type.toLowerCase() === 'customer') {
-
-      console.log("Received message from customer: ", cimMessage);
       this.disableOldInteractiveMessages(this.cimMessage);
       if (
         cimMessage.header.originalMessageId &&
@@ -1869,7 +1867,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           if (disableInteraction === true) {
             message.body.additionalDetails = {
             ...(message.body.additionalDetails || {}),
-            disabled: true,
+            disableButtonType: true,
           }
         }
       }
@@ -1879,7 +1877,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           if (disableInteraction === true) {
             message.body.additionalDetails = {
             ...(message.body.additionalDetails || {}),
-            disabled: true,
+            disableButtonType: true,
           }
         }
       }
@@ -2542,14 +2540,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const originalMessageId = cimMessage.header.originalMessageId;
       const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
 
-      console.log("here ir original message", originalMessage)
         if(originalMessage && originalMessage.body.additionalDetails.interactive.type.toLowerCase() === "clickablelist") {
           originalMessage.body.disableClickaAbleList = true;
         }
 
        if(cimMessage.header.sender.type.toLowerCase() === "customer") {
-
-        console.log("here is cimessage after updattion    ", cimMessage)
         this.cimMessage.push(cimMessage);
         this.browserNotificationService.notify(cimMessage);
         this.scrollToBottom();
