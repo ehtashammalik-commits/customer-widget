@@ -3895,20 +3895,47 @@ function setupRemoteMedia(session, callback) {
 
   const originalTrack = receiverVideo?.track;
 
+  // Safe timeout block
   setTimeout(() => {
+    console.log('[setupRemoteMedia] setTimeout triggered...');
+
     const remoteVideoElem = document.getElementById('remoteVideo');
-    if (remoteVideoElem) {
-      remoteVideoElem.srcObject = remoteStream;
-      console.log('[setupRemoteMedia] Assigned remoteStream to #remoteVideo');
-    } else {
+    if (!remoteVideoElem) {
       console.error("[setupRemoteMedia] Element with ID 'remoteVideo' not found.");
+      return;
     }
+
+    const currentVideoTracks = remoteStream.getVideoTracks();
+    const hasOriginal = currentVideoTracks.includes(originalTrack);
+    const hasBlack = currentVideoTracks.includes(blackTrack);
+
+    if (originalTrack?.muted && hasOriginal) {
+      remoteStream.removeTrack(originalTrack);
+      if (!hasBlack) {
+        remoteStream.addTrack(blackTrack);
+        console.log('[setupRemoteMedia] Swapped muted original video with black video track (inside setTimeout)');
+      }
+    } else if (!originalTrack?.muted && !hasOriginal) {
+      if (hasBlack) {
+        remoteStream.removeTrack(blackTrack);
+        console.log('[setupRemoteMedia] Removed black track');
+      }
+      remoteStream.addTrack(originalTrack);
+      console.log('[setupRemoteMedia] Added original video track (inside setTimeout)');
+    }
+
+    remoteVideoElem.srcObject = remoteStream;
+    remoteVideoElem.onloadedmetadata = () => {
+      remoteVideoElem.play().catch(err => {
+        console.warn('[setupRemoteMedia] Auto-play failed:', err);
+      });
+    };
 
     console.log('[setupRemoteMedia] Final remote audio tracks:', remoteStream.getAudioTracks());
     console.log('[setupRemoteMedia] Final remote video tracks:', remoteStream.getVideoTracks());
   }, 500);
 
-  // Replace video with black screen on mute/unmute
+  // Reattach mute/unmute/change triggers for original track
   if (originalTrack) {
     originalTrack.onmute = () => {
       console.log("=====> [setupRemoteMedia] Video Track is Muted");
@@ -3918,8 +3945,10 @@ function setupRemoteMedia(session, callback) {
         console.log("=====> [setupRemoteMedia] Removed original video track from remoteStream");
       }
 
-      remoteStream.addTrack(blackTrack);
-      console.log("=====> [setupRemoteMedia] Added black video track to remoteStream");
+      if (!remoteStream.getVideoTracks().includes(blackTrack)) {
+        remoteStream.addTrack(blackTrack);
+        console.log("=====> [setupRemoteMedia] Added black video track to remoteStream");
+      }
     };
 
     originalTrack.onunmute = () => {
@@ -3930,13 +3959,25 @@ function setupRemoteMedia(session, callback) {
         console.log("=====> [setupRemoteMedia] Removed black video track from remoteStream");
       }
 
-      remoteStream.addTrack(originalTrack);
-      console.log("=====> [setupRemoteMedia] Re-added original video track to remoteStream");
+      if (!remoteStream.getVideoTracks().includes(originalTrack)) {
+        remoteStream.addTrack(originalTrack);
+        console.log("=====> [setupRemoteMedia] Re-added original video track to remoteStream");
+      }
     };
 
     originalTrack.onchange = () => {
       console.log("=====> [setupRemoteMedia] Video Track Changed");
     };
+
+    // If the original track is muted, don't add it immediately
+    if (!originalTrack.muted) {
+      if (!remoteStream.getVideoTracks().includes(originalTrack)) {
+        remoteStream.addTrack(originalTrack);
+        console.log("[setupRemoteMedia] Added original video track to remoteStream (was not muted)");
+      }
+    } else {
+      console.log("[setupRemoteMedia] Skipping original video track because it is muted");
+    }
   }
 
   // Setup local video stream
