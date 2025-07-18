@@ -1857,8 +1857,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   disableOldInteractiveMessages(cimMessages: any[]) {
-    console.log("Disabling old interactive messages");
-
     cimMessages.forEach((message: any) => {
       const isFromBot = message.header?.sender?.type?.toLowerCase() === 'bot';
       const type = message.body?.type?.toLowerCase();
@@ -1866,11 +1864,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (!isFromBot || !this.INTERACTIVE_TYPES.includes(type)) return;
 
       if (type === 'button') {
-        console.log("Disabling button interaction for message", message);
         const disableInteraction = message.body?.additionalDetails?.interactive?.disableInteraction;
-          console.log("hi", message.body?.additionalDetails?.interactive.disableInteraction)
-          console.log("disableInteraction", disableInteraction)
-        
 
           if (disableInteraction === true) {
             message.body.additionalDetails = {
@@ -1881,7 +1875,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
 
       if (type === 'carousel') {
-        console.log("Carousal Message", message);
         const disableInteraction = message.body?.elements?.[0]?.additionalCarouselElementDetails?.disableInteraction;
           if (disableInteraction === true) {
             message.body.additionalDetails = {
