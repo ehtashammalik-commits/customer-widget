@@ -66,6 +66,6 @@
     "sonar56x": true
   },
   "overrides": {
-    "stylus": "0.55.0"
+    "stylus": "0.54.8"
   }
 }
