@@ -64,7 +64,7 @@
     "reportFile": "test-report.xml",
     "indent": 4,
     "sonar56x": true
-  }
+  },
   "overrides": {
     "stylus": "0.55.0"
   }
