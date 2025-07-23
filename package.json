@@ -65,7 +65,7 @@
     "indent": 4,
     "sonar56x": true
   },
-    "overrides": {
+  "resolutions": {
     "stylus": "github:stylus/stylus#0.54.4"
   }
 }
