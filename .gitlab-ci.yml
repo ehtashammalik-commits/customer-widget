@@ -33,6 +33,7 @@ node-test:
   when: on_success
   image: node:18.14.1-alpine3.17
   script:
+    - rm -rf node_modules package-lock.json
     - npm install --legacy-peer-deps
     - npm run coverage
   only:
