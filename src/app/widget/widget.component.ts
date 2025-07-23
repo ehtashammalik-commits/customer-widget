@@ -1570,7 +1570,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   eventListener(event: any) {
     try {
       let lastMessage = this.cimMessage[this.cimMessage.length - 1];
-      let messageType = lastMessage?.body?.type?.toLowerCase();
+      let messageType = lastMessage?.body?.subType?.toLowerCase();
       if (event.id !== undefined || event.id !== '' || event.id !== null) {
         switch (event.type) {
           case 'CHANNEL_SESSION_ENDED':
