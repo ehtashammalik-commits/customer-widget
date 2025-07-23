@@ -31,7 +31,7 @@ stages:
 node-test:
   stage: test
   when: on_success
-  image: node:18.14.1-alpine3.17
+  image: node:14.15.0
   script:
     - npm install --legacy-peer-deps         
     - npm run coverage
@@ -60,7 +60,7 @@ node-test:
 node-format:
   stage: code_format
   when: on_success
-  image: node:18.14.1-alpine3.17
+  image: node:14.15.0
   script:
     - npm run format:check
 
@@ -93,7 +93,7 @@ time_build:
 node_artifacts:
    stage: artifacts
    when: on_success
-   image: node:18.14.1-alpine3.17
+   image: node:14.15.0
    script:
      - npm install --legacy-peer-deps
      - npm run build
