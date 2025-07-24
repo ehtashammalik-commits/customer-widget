@@ -3870,69 +3870,58 @@ function setupRemoteMedia(session, callback) {
   console.log('[setupRemoteMedia] Initializing...');
 
   var pc = session.sessionDescriptionHandler.peerConnection;
-  var remoteStream = new MediaStream();
+  var remoteStreamAudio = new MediaStream();
+  var remoteStreamVideo = new MediaStream();
 
   var receiverAudio = pc.getReceivers().find(r => r.track && r.track.kind === 'audio');
   var receiverVideo = pc.getReceivers().find(r => r.track && r.track.kind === 'video');
 
   if (receiverAudio) {
-    remoteStream.addTrack(receiverAudio.track);
-    console.log('[setupRemoteMedia] Added audio track to remoteStream');
+    remoteStreamAudio.addTrack(receiverAudio.track);
+    console.log('[setupRemoteMedia] Added audio track to remoteStreamAudio');
   }
 
   if (receiverVideo) {
-    remoteStream.addTrack(receiverVideo.track);
-    console.log('[setupRemoteMedia] Added video track to remoteStream');
+    remoteStreamVideo.addTrack(receiverVideo.track);
+    console.log('[setupRemoteMedia] Added video track to remoteStreamVideo');
   }
 
-  remote_stream = remoteStream;
-
-  // Create black screen video track and assign audio to black fallback
+  var remoteStream = new MediaStream();
+  var originalTrack = receiverVideo?.track;
   var blackTrack = createBlackTrack();
-  var blackWithAudioStream = new MediaStream();
-  blackWithAudioStream.addTrack(blackTrack);
-  if (receiverAudio) blackWithAudioStream.addTrack(receiverAudio.track);
 
-  const originalTrack = receiverVideo?.track;
-
-  // Safe timeout block
+  // Wrap all in timeout for stable playback & DOM availability
   setTimeout(() => {
-    console.log('[setupRemoteMedia] setTimeout triggered...');
-
     const remoteVideoElem = document.getElementById('remoteVideo');
+    const remoteAudioElem = document.getElementById('remoteAudio');
+
     if (!remoteVideoElem) {
-      console.error("[setupRemoteMedia] Element with ID 'remoteVideo' not found.");
+      console.error("[setupRemoteMedia] #remoteVideo not found.");
       return;
     }
 
-    const currentVideoTracks = remoteStream.getVideoTracks();
-    const hasOriginal = currentVideoTracks.includes(originalTrack);
-    const hasBlack = currentVideoTracks.includes(blackTrack);
+    if (!remoteAudioElem) {
+      console.error("[setupRemoteMedia] #remoteAudio not found.");
+      return;
+    }
 
-    if (originalTrack?.muted && hasOriginal) {
-      remoteStream.removeTrack(originalTrack);
-      if (!hasBlack) {
-        remoteStream.addTrack(blackTrack);
-        console.log('[setupRemoteMedia] Swapped muted original video with black video track (inside setTimeout)');
-      }
-    } else if (!originalTrack?.muted && !hasOriginal) {
-      if (hasBlack) {
-        remoteStream.removeTrack(blackTrack);
-        console.log('[setupRemoteMedia] Removed black track');
-      }
+    // Handle Video Track Assignment
+    if (originalTrack && !originalTrack.muted) {
       remoteStream.addTrack(originalTrack);
-      console.log('[setupRemoteMedia] Added original video track (inside setTimeout)');
+      console.log('[setupRemoteMedia] Added original video track');
+    } else {
+      remoteStream.addTrack(blackTrack);
+      console.log('[setupRemoteMedia] Added black video track (muted)');
     }
 
     remoteVideoElem.srcObject = remoteStream;
-    remoteVideoElem.onloadedmetadata = () => {
-      remoteVideoElem.play().catch(err => {
-        console.warn('[setupRemoteMedia] Auto-play failed:', err);
-      });
-    };
+    remoteVideoElem.onloadedmetadata = () => remoteVideoElem.play().catch(console.warn);
 
-    console.log('[setupRemoteMedia] Final remote audio tracks:', remoteStream.getAudioTracks());
-    console.log('[setupRemoteMedia] Final remote video tracks:', remoteStream.getVideoTracks());
+    // Handle Audio Track Assignment
+    remoteAudioElem.srcObject = remoteStreamAudio;
+    remoteAudioElem.onloadedmetadata = () => remoteAudioElem.play().catch(console.warn);
+
+    console.log('[setupRemoteMedia] Remote video & audio stream assignment complete.');
   }, 500);
 
   // Reattach mute/unmute/change triggers for original track
@@ -3983,15 +3972,12 @@ function setupRemoteMedia(session, callback) {
   // Setup local video stream
   var localStream_1;
   if (pc.getSenders) {
-    localStream_1 = new window.MediaStream();
-    pc.getSenders().forEach(function (sender) {
-      var track = sender.track;
-      if (track && track.kind === "video") {
-        localStream_1.addTrack(track);
-        console.log('[setupRemoteMedia] Added local video track');
-
-        track.addEventListener('ended', () => {
-          console.log("[setupRemoteMedia] Screen Sharing turned off");
+    localStream_1 = new MediaStream();
+    pc.getSenders().forEach(sender => {
+      if (sender.track?.kind === 'video') {
+        localStream_1.addTrack(sender.track);
+        sender.track.addEventListener('ended', () => {
+          console.log("[setupRemoteMedia] Screen sharing ended.");
           const inviteRequest = session.incomingInviteRequest || session.outgoingInviteRequest;
           const callIdHeader = inviteRequest?.message?.headers["X-Call-Id"]?.[0]?.raw ||
             inviteRequest?.message?.headers["Call-ID"]?.[0]?.raw;
