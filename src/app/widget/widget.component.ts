@@ -26,9 +26,11 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject } from '@angular/core';
 
 interface Shift {
   id: string;
@@ -149,6 +151,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isCallMute = false;
   isVideoHide = false;
   isCallOnHold = false;
+  remoteStreamStatus = false;
   //varibales for MAX MIN length of the attributes (short Answer)
   short_ans_maxLength: number = 0;
   short_ans_minLength: number = 0;
@@ -200,7 +203,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     'left',
     'right',
   ];
-  matToolTipPosition = this.positionOptions[4];
+  matToolTipPosition = this.positionOptions[3];
   isMobile = false;
 
   dictionary: { [key: string]: string } = {
@@ -275,6 +278,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
   webhookUrl: any;
+  isChatTranscriptVisible = false;
 
   // Upload File Variables
   imageUrls: {
@@ -301,7 +305,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   source: any;
 
 
-  // file preview 
+  // file preview
   filePreviewUrl: { [key: string]: any } = {};
   fileHistory: { [key: string]: { isImage: boolean } } = {}
   // Add a new property to store text content
@@ -310,7 +314,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   IsRegisteredInFreeSwitch: boolean = false;
 
 
-  // file properties 
+  // file properties
   fileExtensons: any[] = [
     'txt', 'png', 'jpg', 'jpeg', 'pdf', 'ppt', 'pptx', 'xlsx', 'xls',
     'doc', 'docx', 'rtf', 'mp3', 'mp4', 'webp'
@@ -337,7 +341,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private browserNotificationService: BrowserNotificationService,
     private deliveryNotificationService: DeliveryNotificationService,
     private __postMessageHandlerService: PostMessageHandlerService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private router: Router,
+    @Inject(DOCUMENT) private doc: Document,
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
@@ -570,7 +576,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.log('Business Calendar Api Response:', error);
       });
   }
 
@@ -969,7 +975,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   calculateAttributeScore(formData: any) {
 
     formData.body.sections.forEach((section: any) => {
-      // console.log(section); 
+      // console.log(section);
       section.attributes.forEach((attribute: any) => {
         //  console.log(attribute);
         let selectedOption = attribute?.answer.find((option: any) => option?.isSelected === true);
@@ -1489,7 +1495,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   //   if (document.getElementById('localVideo')) {
   //   this.localStream = document.getElementById('localVideo')
   //   console.log("here is the localStream")
-  //   } 
+  //   }
 
   //   if(document.getElementById('remoteVide')) {
   //   this.remoteStream = document.getElementById('localVideo')
@@ -1590,7 +1596,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   eventListener(event: any) {
     try {
       let lastMessage = this.cimMessage[this.cimMessage.length - 1];
-      let messageType = lastMessage?.body?.type?.toLowerCase();
+      let messageType = lastMessage?.body?.subType?.toLowerCase();
       if (event.id !== undefined || event.id !== '' || event.id !== null) {
         switch (event.type) {
           case 'CHANNEL_SESSION_ENDED':
@@ -2653,19 +2659,40 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  chatTranscript() {
-    if (localStorage.getItem('conversationId') !== '') {
-      window.open(
-        `widget-assets/chat-transcript/?ccmUrl=${this.__appConfig.appConfig.CCM_URL
-        }&customerIdentifier=${this.customerIdentifier}&serviceIdentifier=${this.serviceIdentifier
-        }&conversationId=${localStorage.getItem(
-          'conversationId',
-        )}&browserLang=${this.browserLang}`,
-        '_blank',
-      );
-      localStorage.removeItem('conversationId');
-    }
-  }
+  // chatTranscript(): void {
+  //   const requestData = {
+  //     ccmUrl:             this.__appConfig.appConfig.CCM_URL,
+  //     customerIdentifier: this.customerIdentifier,
+  //     serviceIdentifier:  this.serviceIdentifier,
+  //     conversationId:     localStorage.getItem('conversationId'),
+  //     browserLang:        this.browserLang,
+  //   };
+
+  //   localStorage.setItem('ef_transcript_req', JSON.stringify(requestData));
+
+  //   const absoluteUrl = `${window.location.origin}/#/chat-transcript`;
+  //   console.log('Opening transcript URL:', absoluteUrl);
+  //   window.open(absoluteUrl, '_blank', 'noopener');
+  //   localStorage.removeItem('conversationId');
+  // }
+
+
+
+  chatTranscript(): void {
+    const conversationId     = localStorage.getItem('conversationId');
+    const browserLang        = this.browserLang;
+
+    // Build the query string
+    //state=download&browserLang=en&conversationId=
+    const params = new URLSearchParams({
+      state:              'download',
+      browserLang:        browserLang || '',
+      conversationId:     conversationId || '',
+    });
+
+  const absoluteUrl = `${window.location.origin}/customer-widget/#/chat-transcript?${params.toString()}`;
+  window.open(absoluteUrl, '_blank', 'noopener');
+}
 
   loadBrowserLanguage() {
     this.browserLang = navigator.language;
@@ -2674,6 +2701,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     if (this.selectedLanguage == 'ar') {
       this.textDirection = 'right-direction';
+      this.translate.use(this.selectedLanguage);
+      console.log(this.selectedLanguage, 'this.selectedLanguage')
     }
   }
 
@@ -2794,17 +2823,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     else {
 
       if (this.preChatFormData && typeof this.preChatFormData === 'object') {
-        const phoneNumber = this.preChatFormData.phone || "";
-        const name = this.preChatFormData.name || "";
-
-        this.webRTCConfig.customerName = name;
-        this.webRTCConfig.customerNumber = phoneNumber;
-
-        if (phoneNumber || name) {
-          this.webRTCConfig.customerName = name;
-          this.webRTCConfig.customerNumber = phoneNumber
+        if (this.preChatFormData?.sections?.length > 0) {
+          this.webRTCConfig.customerName = "";
+          this.webRTCConfig.customerNumber = "";
+          let sections: Array<any> = this.preChatFormData?.sections;
+          sections.forEach((item) => {
+            if (item?.name) this.webRTCConfig.customerName = item.name;
+            if (item?.phone) this.webRTCConfig.customerNumber = item.phone;
+          });
         }
       }
+      else this.handleRefreshCaseForWebRTC();
 
       this.sdk.handleCallStart({
         type: callType,
@@ -2920,6 +2949,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         '[handleDialogStates] Inside Outbound Dialing Event: ===> ',
         data.response,
       );
+      if (this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO) { this.remoteStreamStatus = false; }
+
       if (data.response.dialog === null) {
         this.maintainDialog = null;
         this.dialogId = null;
@@ -3024,6 +3055,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               '[dialogState] DROPPED CALL DIALOG: ===> ',
               data.response.dialog,
             );
+            if (this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO) { this.remoteStreamStatus = false; }
+
             if (this.standaloneWebRtc) {
               this.callPopUpView = false;
               this.isWebRtcVideoCallActive = false;
@@ -3055,7 +3088,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
 
-    if (data.event === 'mediaConversion') {
+    if (data.event === 'mediaStreamUpdate') {
       if (data.status === 'success') {
         console.log(
           '[mediaConversion] ACTIVE CALL mediaConversion: ===> ',
@@ -3082,22 +3115,31 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         ) {
           // this.remoteVideoActive = false;
           console.log('Remote Camera Off');
+          setTimeout(() => { this.remoteStreamStatus = true; }, 2000)
         } else if (
           data.dialog.eventRequest === 'remote' &&
           data.dialog.streamStatus === 'on'
         ) {
           console.log('Remote Camera On');
+          this.remoteStreamStatus = false;
         }
       }
     }
 
+    if (data.event === 'mediaPermissionStatus') {
+
+      console.log(
+        '[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ',
+        data.dialog,
+      );
+    }
     if (data.event === 'Error') {
       // this.errorDuringWebRTCCall = true;
-      // This dialoguId we got in reponse once the call starts ringing on agent side 
-      // If share end / mute / hold / unhold events on the basis of this Id. 
-      // If we do not have this id, we might face unexpected errors / behavour. 
-      // That is why it is necessary that if an error occurs while initiating a call we make this Id undefined 
-      // so that while initiating a new call it is overridden easily. 
+      // This dialoguId we got in reponse once the call starts ringing on agent side
+      // If share end / mute / hold / unhold events on the basis of this Id.
+      // If we do not have this id, we might face unexpected errors / behavour.
+      // That is why it is necessary that if an error occurs while initiating a call we make this Id undefined
+      // so that while initiating a new call it is overridden easily.
       this.dialogId = undefined;
       let errorMessage = '';
       switch (data.response.type) {
@@ -3287,7 +3329,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const preservedKey = decodeURIComponent(encryptedKey ?? "");
     this.webRtcSecureLink = preservedKey;
 
-    // Just for Debugging to open url in new window. 
+    // Just for Debugging to open url in new window.
     // const hashIndex = mediaUrl.indexOf('#');
     // const hashPart = hashIndex !== -1 ? mediaUrl.substring(hashIndex) : '';
     // const baseUrl = "http://localhost:4000";
@@ -4085,4 +4127,21 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+
+  handleRefreshCaseForWebRTC() {
+    try {
+      const storageUserData = localStorage.getItem('user');
+      let parsedStorageUserData;
+      if (storageUserData) parsedStorageUserData = JSON.parse(storageUserData);
+      if (parsedStorageUserData) {
+        let attributes: Array<any> = parsedStorageUserData.data.formData.attributes;
+        attributes.forEach((item) => {
+          if (item.key === 'name') this.webRTCConfig.customerName = item.value;
+          if (item.key === 'phone') this.webRTCConfig.customerNumber = item.value;
+        });
+      }
+    } catch (error) {
+      console.error('Error onhandleRefreshCaseForWebRTC:', error);
+    }
+  }
 }

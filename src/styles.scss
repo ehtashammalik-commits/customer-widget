@@ -6,7 +6,7 @@ body {
 }
 
 :root {
-  --main-color: #eff2f7;
+  --main-color: rgba(239, 242, 247, 0.16);
 }
 
 body {
@@ -51,7 +51,22 @@ body {
     right: -1px;
     min-width: 319px !important;
 }
-  .message-type-form {
+
+@media print {
+  blockquote {
+    box-shadow: none;
+    border: none;
+    }
+  }
+.email-preview-main{
+  blockquote {
+    margin: 0 0 0 10px;
+    border-left: 1px solid rgb(211 211 211);
+    padding-left: 10px;
+    }
+  }
+
+.message-type-form {
     padding-right: 2px;
     width: 260px;
     max-width: 260px;

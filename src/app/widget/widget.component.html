@@ -43,11 +43,14 @@
         <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')" *ngIf="!isWebRtcVideoCallActive">
-            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">
-              minimize
-            </span>
+          <div class="widget-header-icon"  *ngIf="!isWebRtcVideoCallActive">
+<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              minimize-->
+<!--            </span>-->
+              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
           </div>
         </div>
         <!-- Widget Chat Control Toolbar -->
@@ -205,12 +208,17 @@
   <ng-container *ngIf="callbackFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-color" (click)="changeScreen('widget')">
+        <div class="widget-form-header widget-chat-header widget-color">
           <h5 id="headerHeading">{{ title }}</h5>
-          <span class="widget-header-icon">
-            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">minimize</span>
-          </span>
+<!--          <span class="widget-header-icon">-->
+<!--            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">minimize</span>-->
+<!--          </span>-->
+          <div class="widget-header-icon">
+            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+              <mat-icon>remove</mat-icon>
+            </button>
+          </div>
         </div>
         <div class="widget-form-content">
           <h4 class="callback-title">{{ 'callback.request' | translate }}</h4>
@@ -221,7 +229,7 @@
             <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg"
               alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
             <!-- Global error message for the form -->
-            <div>
+            <div class="fields-validation-error mr-2">
               <span class="field-error error_text_for_filling"
                 *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
                 {{ 'error.incomplete-required-fields' | translate }}
@@ -438,15 +446,22 @@
   <ng-container *ngIf="preChatFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-color" [ngClass]="{'exist-calendar':daySummary}"
-          (click)="changeScreen('widget')">
-          <h5 id="headerHeading">{{ title }}</h5>
-          <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
-            | date: 'shortTime' }}</p>
-          <span class="widget-header-icon">
-            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">minimize</span>
-          </span>
+        <div class="widget-form-header widget-chat-header widget-color" [ngClass]="{'exist-calendar':daySummary}"
+          >
+          <h5 id="headerHeading">{{ title }}
+            <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
+              | date: 'shortTime' }}</p>
+          </h5>
+<!--          <span class="widget-header-icon" (click)="changeScreen('widget')">-->
+<!--            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">minimize</span>-->
+<!--          </span>-->
+
+          <div class="widget-header-icon">
+            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+              <mat-icon>remove</mat-icon>
+            </button>
+          </div>
         </div>
 
         <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
@@ -461,7 +476,7 @@
                 alt="Live Chat" />
 
               <!-- Global error message for the form -->
-              <div>
+              <div class="fields-validation-error mr-2">
                 <span class="field-error error_text_for_filling"
                   *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
                   {{'error.incomplete-required-fields'| translate }}
@@ -1097,18 +1112,29 @@
         <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon iconTwo" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">
-              minimize
-            </span>
+          <div class="widget-header-icon">
+            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <button matMiniFab (click)="endChat()"  aria-label="close conversation" matTooltipPosition="above"  matTooltip="{{ 'button.end-conversation' | translate }}">
+              <mat-icon>close</mat-icon>
+            </button>
+
+<!--            <span (click)="changeScreen('widget')" class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              minimize-->
+<!--            </span>-->
+<!--            <span (click)="endChat()" class="material-symbols-outlined close-icon" matTooltip="{{ 'button.end-conversation' | translate }}"-->
+<!--                  [matTooltipPosition]="matToolTipPosition!">-->
+<!--              close-->
+<!--            </span>-->
           </div>
-          <div class="widget-header-icon iconOne" mat-raised-button (click)="endChat()">
-            <span class="material-symbols-outlined close-icon" matTooltip="{{ 'button.end-conversation' | translate }}"
-              [matTooltipPosition]="matToolTipPosition!">
-              close
-            </span>
-          </div>
+<!--          <div class="widget-header-icon iconOne" mat-raised-button (click)="endChat()">-->
+<!--            <span class="material-symbols-outlined close-icon" matTooltip="{{ 'button.end-conversation' | translate }}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              close-->
+<!--            </span>-->
+<!--          </div>-->
         </div>
         <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
@@ -1221,17 +1247,17 @@
           <ng-container *ngIf="fontDropDown">
             <div class="font-dropdown-container">
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
-                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '12' }"
+                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12' }"
                 (click)="setFontSize('12')" [ngClass]="{ btnOne: enableFontResize === true }">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px"
-                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '14' }"
+                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14' }"
                 (click)="setFontSize('14')" [ngClass]="{ btnOne: enableFontResize === true }">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px"
-                [matTooltipPosition]="matToolTipPosition!" [ngClass]="{ active: fontSize.value == '16' }"
+                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16' }"
                 (click)="setFontSize('16')" [ngClass]="{ btnOne: enableFontResize === true }">
                 text_fields
               </span>
@@ -1345,10 +1371,7 @@
                       (message.body.notificationData.data.task
                         | getMediaFromTask: 'direction') == 'DIRECT_TRANSFER'
                     ">
-                    <span innerHTML="{{ 'notification.transfering-request-to' | translate }} '{{
-                        message.body.notificationData.data.task
-                          | getMediaFromTask: 'queueName'
-                      }}' {{ 'notification.queue-please-wait' | translate }}">
+                    <span innerHTML="{{ 'notification.transfering-request-to' | translate }}">
                     </span>
                   </div>
                   <div *ngIf="
@@ -1356,10 +1379,7 @@
                       (message.body.notificationData.data.task
                         | getMediaFromTask: 'direction') == 'DIRECT_TRANSFER'
                     ">
-                    <span innerHTML="{{ 'notification.transfering-request-to' | translate }} '{{
-                        message.body.notificationData.data.task
-                          | getMediaFromTask: 'queueName'
-                      }}' {{ 'notification.queue-please-wait' | translate }}">
+                    <span innerHTML="{{ 'notification.transfering-request-to' | translate }}">
                     </span>
                   </div>
                 </div>
@@ -1464,7 +1484,7 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                        (message.body.markdownText | tagFormat:enableDynamicLink) 
+                        (message.body.markdownText | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1900,7 +1920,7 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                        (message.body.markdownText | tagFormat:enableDynamicLink) 
+                        (message.body.markdownText | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -2080,7 +2100,28 @@
             <!-- <video *ngIf="remoteVideoActive" #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
             <video *ngIf="localVideoActive" #localVideo id="localVideo" autoplay playsinline class="localVideo"></video> -->
             <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
-            <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
+            <!-- <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video> -->
+
+             <!-- test  div start -->
+            <div class="video-container">
+              <!-- Remote video when visible -->
+               <!-- *ngIf="!remoteStreamStatus"  -->
+              <video #remoteVideo id="remoteVideo" autoplay playsinline
+                class="remoteVideo"></video>
+
+              <!-- Full-size cam-off icon placeholder -->
+              <div *ngIf="remoteStreamStatus" class="remoteVideo cam-off-placeholder">
+                <mat-icon class="large-icon">videocam_off</mat-icon>
+              </div>
+
+              <!-- Optional fallback message -->
+              <!-- <div class="unsupported-msg">
+                {{ 'error.html5-not-supported' | translate }}
+              </div> -->
+            </div>
+
+            <!-- test div end -->
+
 
             <div class="audio-agent" *ngIf="activeAudioView">
               <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon" />
@@ -2100,7 +2141,9 @@
 
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div class="control-btn" [ngClass]="{
+                <div *ngIf="!__appConfig.appConfig.VIDEO"
+                  class="control-btn"
+                  [ngClass]="{
                     'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
 
                     'focus-icon-video ': isScreenShareActive === true
@@ -2165,7 +2208,7 @@
             <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
               <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
               <!-- Global error message for the form -->
-              <div>
+              <div class="fields-validation-error mr-2">
                 <span class="field-error error_text_for_filling"
                   *ngIf="preChatFormGroup.invalid && preChatFormGroup.touched">
                   {{ 'error.incomplete-required-fields' | translate }}
@@ -2430,11 +2473,14 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">
-              minimize
-            </span>
+          <div class="widget-header-icon">
+<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              minimize-->
+<!--            </span>-->
+              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
           </div>
         </div>
         <div class="widget-error-content">
@@ -2454,9 +2500,14 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger"
+            <input
+              id="formTrigger"
+              type="submit"
+              class="widget-error-trigger"
               value="{{ 'button.download-transcript' | translate }}"
-              *ngIf="enableDownloadTranscript && !standaloneWebRtc" (click)="chatTranscript()" />
+              *ngIf="enableDownloadTranscript && !standaloneWebRtc"
+              (click)="chatTranscript()"
+            />
           </div>
         </div>
       </div>
@@ -2472,11 +2523,14 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">
-              minimize
-            </span>
+          <div class="widget-header-icon">
+<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              minimize-->
+<!--            </span>-->
+              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
           </div>
         </div>
         <div class="widget-error-content">
@@ -2533,11 +2587,14 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon iconOne" (click)="changeScreen('widget')">
-            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"
-              [matTooltipPosition]="matToolTipPosition!">
-              minimize
-            </span>
+          <div class="widget-header-icon">
+<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+<!--              [matTooltipPosition]="matToolTipPosition!">-->
+<!--              minimize-->
+<!--            </span>-->
+              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
           </div>
         </div>
         <div class="widget-error-content">
@@ -2557,7 +2614,7 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Call on my number"
+            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="{{ 'button.call-on-my-number' | translate }}"
               *ngIf="enableWebRtc" />
 
             <input id="formTrigger" typCall pope="submit" class="widget-error-trigger"
@@ -2576,7 +2633,7 @@
       <div class="call-popup">
         <p><span innerHTML="Initiating {{ callText }} call"></span></p>
         <div class="audio-agent">
-          <div class="loader"></div>
+          <div class="loader call-loader"></div>
           <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon" />
         </div>
         <div class="agent-detail">
