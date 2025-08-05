@@ -322,7 +322,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   stars = [1, 2, 3, 4, 5];
 
   isStarRating = true;
-  isFormsView = true;
   isCarouselView = true;
   constructor(
     private route: ActivatedRoute,
@@ -351,14 +350,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       text: [''],
       url: [''],
       email: [''],
-      radio: ['option1'],
+      radios: ['option1'],
       checkbox: [false],
       textarea: [''],
       date: [''],
       time: [''],
       range: [50],
       rating: [0],
-      comment: ['']
+      comment: [''],
+      dropdown:['']
     });
 
 
@@ -4069,6 +4069,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   setRating(value: number): void {
     this.innerRichForm.get('rating')?.setValue(value);
+  }
+
+    handleActionButtonClick(button: any, messageId: string) {
+    if (button.action === 'submit') {
+      const formData = this.innerRichForm[messageId]?.value;
+      console.log('Submitted form data for', messageId, formData);
+      // Optionally emit or send this data to backend
+    } else if (button.action === 'cancel') {
+      console.log('Cancelled form for', messageId);
+      // Reset or close form, depending on your use case
+    } else {
+      console.log('Custom action triggered:', button.action, 'for', messageId);
+      // Handle any custom logic
+    }
   }
 
 }
