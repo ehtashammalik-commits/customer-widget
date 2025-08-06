@@ -1611,43 +1611,50 @@
 
 <!--                      form type-->
         <div *ngIf="message.body.type.toLowerCase() === 'formdata'" class="message-type-form rich-message-content pt-3 pb-3">
-           <p class="rich-inner-text">{{ message.body.formData.formTitle }}</p>
+          <!-- Form Title and Description -->
+          <p class="rich-inner-text">{{ message.body.formData.formTitle }}</p>
           <p class="rich-inner-text">{{ message.body.formData.formDescription }}</p>
-           <div class="message-inner-form">
-            <form class="compact-form" [formGroup]="innerRichForm">
-              <div class="main-form">
-                <ng-container *ngFor="let section of message.body.formData.sections">
-                  <h4>{{ section.sectionName }}</h4>
-                  <p *ngIf="section.sectionDescription">{{ section.sectionDescription }}</p>
 
-                  <ng-container *ngFor="let attribute of section.attributes">
+          <div class="message-inner-form">
+            <form
+              class="compact-form"
+              [formGroup]="formGroupsMap[message.id]"
+              (ngSubmit)="onFormMessageTypeSubmit(message.id)"
+              *ngIf="formGroupsMap[message.id]?.get('sections')"
+            >
+              <div class="main-form" formArrayName="sections">
+                <ng-container
+                  *ngFor="let sectionGroup of getSectionsControls(message.id); let i = index"
+                  [formGroup]="sectionGroup"
+                >
+                  <!-- Section Header -->
+                  <h4>{{ message.body.formData.sections[i].sectionName }}</h4>
+                  <p *ngIf="message.body.formData.sections[i].sectionDescription">
+                    {{ message.body.formData.sections[i].sectionDescription }}
+                  </p>
+
+                  <!-- Fields Rendering -->
+                  <ng-container *ngFor="let attribute of message.body.formData.sections[i].attributes">
                     <div class="form-group" [ngSwitch]="attribute.valueType">
-
-                      <!-- short answer / text -->
+                      <!-- Short Answer -->
                       <div *ngSwitchCase="'shortAnswer'">
-                        <label>{{ attribute.label }} <span *ngIf="attribute.required">*</span></label>
+                        <label>
+                          {{ attribute.label }} <span *ngIf="attribute.isRequired">*</span>
+                        </label>
                         <mat-form-field appearance="outline">
-                          <input
-                            matInput
-                            [formControlName]="attribute.key"
-                            type="text"
-                          />
+                          <input matInput type="text" [formControlName]="attribute.key" />
                         </mat-form-field>
                       </div>
 
-                      <!-- paragraph -->
+                      <!-- Paragraph -->
                       <div *ngSwitchCase="'paragraph'">
                         <label>{{ attribute.label }}</label>
                         <mat-form-field appearance="outline">
-                          <textarea
-                            matInput
-                            rows="3"
-                            [formControlName]="attribute.key"
-                          ></textarea>
+                          <textarea matInput rows="3" [formControlName]="attribute.key"></textarea>
                         </mat-form-field>
                       </div>
 
-                      <!-- radio -->
+                      <!-- Radio -->
                       <div *ngSwitchCase="'radio'">
                         <label>{{ attribute.label }}</label>
                         <mat-radio-group [formControlName]="attribute.key">
@@ -1660,19 +1667,7 @@
                         </mat-radio-group>
                       </div>
 
-                      <!-- checkbox -->
-                      <div *ngSwitchCase="'checkbox'">
-                        <label>{{ attribute.label }}</label>
-                        <div
-                          *ngFor="let option of attribute.attributeOptions?.attributeData[0]?.values"
-                        >
-                          <mat-checkbox [formControlName]="option.value">
-                            {{ option.label }}
-                          </mat-checkbox>
-                        </div>
-                      </div>
-
-                      <!-- dropdown -->
+                      <!-- Dropdown -->
                       <div *ngSwitchCase="'dropdown'">
                         <label>{{ attribute.label }}</label>
                         <mat-form-field appearance="outline">
@@ -1687,64 +1682,54 @@
                         </mat-form-field>
                       </div>
 
-                      <!-- date -->
-                      <div *ngSwitchCase="'data'">
+                      <!-- Date -->
+                      <div *ngSwitchCase="'date'">
                         <label>{{ attribute.label }}</label>
-                        <input
-                          matInput
-                          type="date"
-                          [formControlName]="attribute.key"
-                        />
+                        <input matInput type="date" [formControlName]="attribute.key" />
                       </div>
 
-                      <!-- time -->
+                      <!-- Time -->
                       <div *ngSwitchCase="'time'">
                         <label>{{ attribute.label }}</label>
-                        <input
-                          matInput
-                          type="time"
-                          [formControlName]="attribute.key"
-                        />
+                        <input matInput type="time" [formControlName]="attribute.key" />
                       </div>
 
-                      <!-- dateTime -->
+                      <!-- DateTime -->
                       <div *ngSwitchCase="'dateTime'">
                         <label>{{ attribute.label }}</label>
-                        <input
-                          matInput
-                          type="datetime-local"
-                          [formControlName]="attribute.key"
-                        />
+                        <input matInput type="datetime-local" [formControlName]="attribute.key" />
                       </div>
 
-                      <!-- fallback -->
+                      <!-- Unsupported -->
                       <div *ngSwitchDefault>
-                        <p>Unsupported type: {{ attribute.valueType }}</p>
+                        <p>Unsupported field type: {{ attribute.valueType }}</p>
                       </div>
                     </div>
                   </ng-container>
                 </ng-container>
               </div>
 
-              <!-- action buttons -->
-              <div class="button-group form-inner-action mt-2" *ngIf="message.body.formData?.additionalDetail.actionButtons?.length">
-                  <button
-                    *ngFor="let button of message.body.formData.additionalDetail.actionButtons"
-                    [attr.type]="button.action === 'submit' ? 'submit' : 'button'"
-                    [ngClass]="{
-                      'mat-flat-button': button.action === 'submit',
-                      'mat-stroked-button': button.action !== 'submit'
-                    }"
-                    mat-button
-                    (click)="handleActionButtonClick(button, message.id)"
-                  >
-                    {{ button.text }}
-                  </button>
-                </div>
-
+              <!-- Action Buttons -->
+              <div class="button-group form-inner-action mt-2" *ngIf="message.body.formData?.additionalDetail?.actionButtons?.length">
+                <button
+                  *ngFor="let button of message.body.formData.additionalDetail.actionButtons"
+                  [type]="button.action === 'submit' ? 'submit' : 'button'"
+                  [disabled]="message.body.formData?.disableInteraction"
+                  [ngClass]="{
+                    'mat-flat-button': button.action === 'submit',
+                    'mat-stroked-button': button.action !== 'submit'
+                  }"
+                  mat-button
+                  (click)="handleActionButtonClick(button, message.id)"
+                >
+                  {{ button.text }}
+                </button>
+              </div>
             </form>
           </div>
         </div>
+
+
 
 
 

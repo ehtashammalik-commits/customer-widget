@@ -14,6 +14,7 @@ import {
   Validators,
   FormControl,
   FormArray,
+  AbstractControl,
 } from '@angular/forms';
 import { SdkService } from '../services/sdk.service';
 import { ConfigService } from '../services/config.service';
@@ -263,6 +264,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   remoteStream: any = [];
   localStream: any = [];
 
+
   @Input() formData!: any[];
   @Input() callbackFormData!: any[];
   preChatFormGroup!: FormGroup;
@@ -280,6 +282,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   webhookUrl: any;
   isChatTranscriptVisible = false;
 
+  formMessageTypeData: any;
   // Upload File Variables
   imageUrls: {
     filesPath: SafeUrl;
@@ -323,6 +326,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isFileSelected: any;
   isFileUploading: any = {};
   innerRichForm: FormGroup;
+  formGroupsMap: { [messageId: string]: FormGroup } = {};
   stars = [1, 2, 3, 4, 5];
 
   isStarRating = true;
@@ -352,22 +356,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     translate.setDefaultLang('en');
     translate.use('en');
 
-    this.innerRichForm = this.fb.group({
-      text: [''],
-      url: [''],
-      email: [''],
-      radios: ['option1'],
-      checkbox: [false],
-      textarea: [''],
-      date: [''],
-      time: [''],
-      range: [50],
-      rating: [0],
-      comment: [''],
-      dropdown:['']
-    });
-
-
+    // this.innerRichForm = this.fb.group({
+    //   text: [''],
+    //   url: [''],
+    //   email: [''],
+    //   radios: ['option1'],
+    //   checkbox: [false],
+    //   textarea: [''],
+    //   date: [''],
+    //   time: [''],
+    //   range: [50],
+    //   rating: [0],
+    //   comment: [''],
+    //   dropdown:['']
+    // });
   }
 
   async ngAfterViewInit(): Promise<void> {
@@ -672,8 +674,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private createFormValidationControls(
     formSchema: any[],
     formValidation: any[],
-    formType: string
+    formType: string,
+    targetFormGroup?: FormGroup
   ): void {
+
+    console.log('formSchema', formSchema);
     const sectionsArray: FormArray = this.fb.array([]); // Create the main sections FormArray
 
     formSchema.forEach((section) => {
@@ -751,8 +756,21 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (formType === 'preChatForm') {
       this.preChatFormGroup.setControl('sections', sectionsArray);
     }
+
+    if(formType === 'formMessageType') {
+      targetFormGroup.setControl('sections', sectionsArray);
+    }
+
+    console.log('targetFormGroup', targetFormGroup);
     // Set the sections array inside the main form grou
   }
+
+
+  getSectionsControls(messageId: string): AbstractControl[] {
+  const formGroup = this.formGroupsMap[messageId];
+  const sections = formGroup?.get('sections');
+  return sections && sections instanceof FormArray ? sections.controls : [];
+}
 
 
   async setWidgetConfigs(configs: any) {
@@ -787,6 +805,25 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.enabledWebhook = configs.webhook?.enableWebhook;
     }
   }
+
+    getSectionKeys(index: number): string[] {
+    const sectionGroup = (this.innerRichForm.get('sections') as FormArray).at(index) as FormGroup;
+    return Object.keys(sectionGroup.controls);
+  }
+
+    onFormMessageTypeSubmit(messageId: string): void {
+    const form = this.formGroupsMap[messageId];
+    if (form && form.valid) {
+      const payload = form.value;
+      // Handle payload per form/message
+      console.log('Submitted form for messageId:', messageId, payload);
+    } else {
+      console.warn('Form not valid for messageId:', messageId);
+    }
+  }
+
+
+
 
   private markFormGroupTouched(formGroup: FormGroup) {
     Object.values(formGroup.controls).forEach((control) => {
@@ -1711,6 +1748,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   handleCimMessage(cimMessage: any) {
 
     if (
+        cimMessage.body.type?.toLowerCase() === 'formdata' &&
+        cimMessage.header.sender?.type?.toLowerCase() === 'bot'
+      ) {
+        const messageId = cimMessage.id;
+        const formGroup = this.fb.group({
+          sections: this.fb.array([])
+        });
+
+        const sections: any[] = Array.isArray(cimMessage.body.formData?.sections)
+          ? cimMessage.body.formData.sections
+          : [];
+
+        this.formGroupsMap[messageId] = formGroup; // ✅ Save form for this message
+        this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
+      }
+
+
+    if (
       cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
       cimMessage.header.sender &&
       (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
@@ -1921,6 +1976,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     
     
     cimMessages.forEach((cimMessage) => {
+
+      if (
+          cimMessage.body.type?.toLowerCase() === 'formdata' &&
+          cimMessage.header.sender?.type?.toLowerCase() === 'bot'
+          ) {
+            const sections: any[] = Array.isArray(cimMessage.body.formData?.sections)
+              ? cimMessage.body.formData.sections
+              : [];
+
+            this.formMessageTypeData = cimMessage.body.formData; // Keep entire formData for rendering formTitle, description, action buttons
+            this.createFormValidationControls(sections, this.formValidations, 'formMessageType');
+          }
+      
       if (
         cimMessage.body.type.toLowerCase() == 'plain' &&
         cimMessage.header.sender &&
@@ -4113,19 +4181,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.innerRichForm.get('rating')?.setValue(value);
   }
 
-    handleActionButtonClick(button: any, messageId: string) {
+    handleActionButtonClick(button: any, messageId: string): void {
+    const formGroup = this.formGroupsMap[messageId];
+
+    if (!formGroup) return;
+
     if (button.action === 'submit') {
-      const formData = this.innerRichForm[messageId]?.value;
+      const formData = formGroup.value;
       console.log('Submitted form data for', messageId, formData);
-      // Optionally emit or send this data to backend
+      // TODO: Handle form submission (emit/send to API)
     } else if (button.action === 'cancel') {
       console.log('Cancelled form for', messageId);
-      // Reset or close form, depending on your use case
+      // TODO: Implement cancel logic (e.g., reset form or remove it)
     } else {
       console.log('Custom action triggered:', button.action, 'for', messageId);
-      // Handle any custom logic
+      // TODO: Handle custom actions
     }
   }
+
 
 
   handleRefreshCaseForWebRTC() {

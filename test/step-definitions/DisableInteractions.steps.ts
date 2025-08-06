@@ -62,6 +62,8 @@ defineFeature(feature, (test) => {
       mockDeliveryNotificationService,
       mockPostMessageHandlerService,
       mockTranslateService,
+      undefined,
+      undefined
     );
 
     component.customerData = {

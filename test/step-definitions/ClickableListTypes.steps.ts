@@ -59,7 +59,9 @@ defineFeature(feature, (test) => {
             mockBrowserNotificationService,
             mockDeliveryNotificationService,
             mockPostMessageHandlerService,
-            mockTranslateService
+            mockTranslateService,
+            undefined,
+            undefined
           );
 
           component.customerData = {
@@ -91,7 +93,6 @@ defineFeature(feature, (test) => {
         let clickableList: any;
         let selectedOption: any;
         given('the customer is in an active conversation with the bot', () => {
-          given('the customer is in an active conversation with the bot', () => {
             mockEvent = {
                 type: 'CHANNEL_SESSION_STARTED',
                 data: {
@@ -106,8 +107,6 @@ defineFeature(feature, (test) => {
               component.eventListener(mockEvent);
               expect(component.isChatActive).toBe(true);
               expect(localStorage.getItem('conversationId')).toBe('conv-123');
-        });
-
         });
 
         when('the customer receives a list message with text options', () => {
