@@ -718,7 +718,7 @@ function webhookNotifications(webhookUrl, additionalData, data) {
       }
     ]
   };
-  authorizedFetch(`${webhookUrl}`, {
+  fetch(`${webhookUrl}`, {
     method: 'POST',
     body: JSON.stringify(messageObj), // Formatting as a JSON object for Google Workspace webhook
     headers: {
