@@ -325,7 +325,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   isFileSelected: any;
   isFileUploading: any = {};
-  innerRichForm: FormGroup;
   formGroupsMap: { [messageId: string]: FormGroup } = {};
   stars = [1, 2, 3, 4, 5];
 
@@ -355,21 +354,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     translate.setDefaultLang('en');
     translate.use('en');
-
-    // this.innerRichForm = this.fb.group({
-    //   text: [''],
-    //   url: [''],
-    //   email: [''],
-    //   radios: ['option1'],
-    //   checkbox: [false],
-    //   textarea: [''],
-    //   date: [''],
-    //   time: [''],
-    //   range: [50],
-    //   rating: [0],
-    //   comment: [''],
-    //   dropdown:['']
-    // });
   }
 
   async ngAfterViewInit(): Promise<void> {
@@ -804,11 +788,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.webhookUrl = configs.webhook?.webhookUrl;
       this.enabledWebhook = configs.webhook?.enableWebhook;
     }
-  }
-
-    getSectionKeys(index: number): string[] {
-    const sectionGroup = (this.innerRichForm.get('sections') as FormArray).at(index) as FormGroup;
-    return Object.keys(sectionGroup.controls);
   }
 
     onFormMessageTypeSubmit(messageId: string): void {
@@ -4185,11 +4164,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-
-
-  setRating(value: number): void {
-    this.innerRichForm.get('rating')?.setValue(value);
-  }
 
   handleActionButtonClick(button: any, message: any): void {
   const messageId = message.id;
