@@ -1110,12 +1110,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
 
-  creatingSectionsforSchema(): any {
+  creatingSectionsforSchema(messageTypeFormValues?, messageType?): any {
+
+
+    let formData = this.formData;
+    let formValues = this.preChatFormGroup.value;
+
+    console.log("messageTypeFormValues", this.formMessageTypeData);
+    if (messageType === "formMessageType") {
+      formData = this.formMessageTypeData.sections || [];
+      formValues = messageTypeFormValues || formValues;
+    }
     let finalSections: any = [];
-    const formValues = this.preChatFormGroup.value;
 
-
-    this.formData.forEach((section: any, sectionIndex: number) => {
+    formData.forEach((section: any, sectionIndex: number) => {
       let newSection: any = {
         sectionId: section._id,
         sectionName: section.sectionName,
@@ -1129,6 +1137,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const currentSectionAttributes = sectionAttributes[sectionIndex]
 
 
+      console.log("currentSectionAttributes", currentSectionAttributes);
       if (currentSectionAttributes) {
         section.attributes.forEach((attribute: any) => {
           // console.log("ATTRIBUte", attribute);
@@ -4181,23 +4190,30 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.innerRichForm.get('rating')?.setValue(value);
   }
 
-    handleActionButtonClick(button: any, messageId: string): void {
-    const formGroup = this.formGroupsMap[messageId];
+  handleActionButtonClick(button: any, message: any): void {
+  const messageId = message.id;
+  const formGroup = this.formGroupsMap[messageId];
 
-    if (!formGroup) return;
+  if (!formGroup) return;
 
-    if (button.action === 'submit') {
-      const formData = formGroup.value;
-      console.log('Submitted form data for', messageId, formData);
-      // TODO: Handle form submission (emit/send to API)
-    } else if (button.action === 'cancel') {
-      console.log('Cancelled form for', messageId);
-      // TODO: Implement cancel logic (e.g., reset form or remove it)
-    } else {
-      console.log('Custom action triggered:', button.action, 'for', messageId);
-      // TODO: Handle custom actions
-    }
+  if (button.action === 'submit') {
+    const formData = formGroup.value;
+    console.log('Submitted form data for', messageId, formData);
+
+    // Step 1: Create base payload
+    let finalPayload = this.createFormDataObject();
+
+    // Step 2: Update fields from form data (if needed)
+    finalPayload.header.timestamp = Date.now();
+    finalPayload.body.sections = this.creatingSectionsforSchema(formData, "formMessageType");
+
+    // Step 3: Add custom logic if needed (optional)
+    // Example: If form has an agent rating field
+
+    console.log('Final payload for submission:', finalPayload);
   }
+}
+
 
 
 

@@ -1654,6 +1654,16 @@
                         </mat-form-field>
                       </div>
 
+                      <!-- Checkbox -->
+                      <div *ngSwitchCase="'checkbox'">
+                        <label>{{ attribute.label }}</label>
+                        <mat-checkbox [formControlName]="attribute.key">
+                          {{ attribute.label }}
+                        </mat-checkbox>
+
+                      </div>
+                      
+
                       <!-- Radio -->
                       <div *ngSwitchCase="'radio'">
                         <label>{{ attribute.label }}</label>
@@ -1683,7 +1693,7 @@
                       </div>
 
                       <!-- Date -->
-                      <div *ngSwitchCase="'date'">
+                      <div *ngSwitchCase="'data'">
                         <label>{{ attribute.label }}</label>
                         <input matInput type="date" [formControlName]="attribute.key" />
                       </div>
@@ -1720,7 +1730,7 @@
                     'mat-stroked-button': button.action !== 'submit'
                   }"
                   mat-button
-                  (click)="handleActionButtonClick(button, message.id)"
+                  (click)="handleActionButtonClick(button, message)"
                 >
                   {{ button.text }}
                 </button>
