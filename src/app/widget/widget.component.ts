@@ -1106,6 +1106,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         },
         sections: [],
       },
+      id:''
     };
   }
 
@@ -4205,8 +4206,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     // Step 2: Update fields from form data (if needed)
     finalPayload.header.timestamp = Date.now();
+    finalPayload.id = messageId;
+    finalPayload.header.intent = '';
+    finalPayload.body.formId = '';
+    finalPayload.body.formTitle= message.body.formTitle || '';
+
+
     finalPayload.body.sections = this.creatingSectionsforSchema(formData, "formMessageType");
 
+    this.sdk.sendChatMessage(finalPayload);
     // Step 3: Add custom logic if needed (optional)
     // Example: If form has an agent rating field
 
