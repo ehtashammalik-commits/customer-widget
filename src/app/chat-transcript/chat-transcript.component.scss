@@ -708,3 +708,10 @@ small.edit-message {
       }
     }
   }
+
+  .message-blurred {
+    filter: blur(2px);
+    opacity: 0.7;
+    transition: filter 0.3s ease, opacity 0.3s ease;
+}
+

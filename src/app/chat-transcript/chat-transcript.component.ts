@@ -92,6 +92,32 @@ export class TranscriptComponent implements OnInit {
 
         for (const message of data) {
           const intent = message?.header?.intent?.toLowerCase();
+          
+          if (message.body?.type === 'DELIVERYNOTIFICATION') {
+            const originalId = message.body.messageId;
+            const index = processed.findIndex((msg) => msg.id === originalId);
+
+            if (index !== -1) {
+            const status = message.body.status;
+            processed[index].isBlurred = status === 'FAILED';
+            }
+          }
+
+
+          if (intent === 'update') {
+            const originalId = message.header.originalMessageId;
+
+            const index = processed.findIndex((msg) => msg.id === originalId);
+
+            if (index !== -1) {
+              // Update the original message
+              processed[index].body.markdownText = message.body.markdownText;
+              processed[index].isEdited = true;
+            }
+          } else {
+            processed.push(message);
+          }
+
 
           if (intent === 'update') {
             const originalId = message.header.originalMessageId;
