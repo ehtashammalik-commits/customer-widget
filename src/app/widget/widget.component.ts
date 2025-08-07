@@ -790,12 +790,42 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-    onFormMessageTypeSubmit(messageId: string): void {
+    async onFormMessageTypeSubmit(message: any): Promise<void> {
+    const messageId = message.id;
     const form = this.formGroupsMap[messageId];
+    console.log('Form for messageId:', messageId, 'is', form);
     if (form && form.valid) {
       const payload = form.value;
-      // Handle payload per form/message
-      console.log('Submitted form for messageId:', messageId, payload);
+      let finalPayload = this.createFormDataObject();
+
+      // Step 2: Update fields from form data (if needed)
+      finalPayload.header.timestamp = Date.now();
+      finalPayload.id = messageId;
+      finalPayload.header.intent = '';
+      finalPayload.body.formId = '';
+      finalPayload.body.formTitle= message.body.formTitle || '';
+
+
+      finalPayload.body.sections = await this.creatingSectionsforSchema(form.value.sections, "formMessageType");
+    // this.constructCimMessage(
+    //     'FORM_DATA',
+    //     null,
+    //     null,
+    //     finalPayload.id,
+    //     null,
+    //     null,
+    //     null,
+    //     null,
+    //     null,
+    //     null,
+    //     finalPayload
+    //   );
+
+    // this.sdk.sendChatMessage(finalPayload);
+    // Step 3: Add custom logic if needed (optional)
+    // Example: If form has an agent rating field
+
+    console.log('Final payload for submission:', finalPayload);
     } else {
       console.warn('Form not valid for messageId:', messageId);
     }
@@ -1096,10 +1126,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     let formData;
     let formValues;
 
-    if (messageType === "formMessageType" && this.formMessageTypeData.sections) {
+    console.log("😃 messageTypeFormValues", messageTypeFormValues);
+    console.log("😃😃😃😃😃😃😃😃 this.formMessageTypeData", this.formMessageTypeData);
+    console.log("😃😃messageType", messageType);
+
+    if (messageType === "formMessageType" && this.formMessageTypeData) {
+      console.log("😃😃😃 condition is passed in the formMessageType", messageTypeFormValues);
       formData = this.formMessageTypeData.sections || [];
       formValues = messageTypeFormValues;
     } else {
+
+      console.log("😃😃😃😃😃😃😃😃 condition is passed in the preChatForm");
       formData = this.formData;
       formValues = this.preChatFormGroup.value;
     }
@@ -1149,6 +1186,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return finalSections;
   }
   getAnswerObj(attribute: any, possibleValues: any, selectedValue: any) {
+
+    console.log('selectedValue in getAnswerObj', selectedValue);
+    console.log('possibleValues in getAnswerObj', possibleValues);
+    console.log('attribute in getAnswerObj', attribute);
 
     if (attribute.attributeType == 'INPUT' || attribute.attributeType == 'TEXTAREA') {
       return [selectedValue]
@@ -1753,6 +1794,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         const sections: any[] = Array.isArray(cimMessage.body?.sections)
           ? cimMessage.body.sections
           : [];
+
+        console.log('Sections received in handleCimMessage:', sections);
 
         this.formMessageTypeData = sections
         this.formGroupsMap[messageId] = formGroup; // ✅ Save form for this message
@@ -2384,11 +2427,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           body: body,
           customer: this.customerData,
         };
-        this.sdk.sendChatMessage(msgPayload);
-        this.clearMessageData();
-      // } else {
-      //   console.log('Form data is empty or invalid');
-      // }
+
+
+        console.log('Form Data Message Payload:', msgPayload);
+        // this.sdk.sendChatMessage(msgPayload);
+        // this.clearMessageData();
     }
     else {
       console.log('Unable to process the file');
@@ -4208,37 +4251,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const formData = formGroup.value;
     console.log('Submitted form data for', messageId, formData);
 
-    // Step 1: Create base payload
-    let finalPayload = this.createFormDataObject();
-
-    // Step 2: Update fields from form data (if needed)
-    finalPayload.header.timestamp = Date.now();
-    finalPayload.id = messageId;
-    finalPayload.header.intent = '';
-    finalPayload.body.formId = '';
-    finalPayload.body.formTitle= message.body.formTitle || '';
-
-
-    finalPayload.body.sections = await this.creatingSectionsforSchema(formData, "formMessageType");
-    this.constructCimMessage(
-        'FORM_DATA',
-        null,
-        null,
-        finalPayload.id,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        finalPayload
-      );
-
-    // this.sdk.sendChatMessage(finalPayload);
-    // Step 3: Add custom logic if needed (optional)
-    // Example: If form has an agent rating field
-
-    console.log('Final payload for submission:', finalPayload);
   }
 }
 

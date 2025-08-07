@@ -1393,7 +1393,7 @@
                     message.header.sender.type == 'CUSTOMER' ||
                     message.header.sender.type == 'CONNECTOR'
                   ">
-                  <div class="customer-message">
+                  <div *ngIf="message.body.type != 'FORM_DATA'" class="customer-message">
                     <div class="header">
                       <span class="name" [ngStyle]="{
                           'font-size':
@@ -1618,7 +1618,7 @@
             <form
               class="compact-form"
               [formGroup]="formGroupsMap[message.id]"
-              (ngSubmit)="onFormMessageTypeSubmit(message.id)"
+              (ngSubmit)="onFormMessageTypeSubmit(message)"
               *ngIf="formGroupsMap[message.id]?.get('sections')"
             >
               <div class="main-form" formArrayName="sections">
@@ -1646,16 +1646,16 @@
                       </div>
 
                       <!-- Paragraph -->
-                      <div *ngSwitchCase="'paragraph'">
+                      <!-- <div *ngSwitchCase="'paragraph'">
                         <label>{{ attribute.label }}</label>
                         <mat-form-field appearance="outline">
                           <textarea matInput rows="3" [formControlName]="attribute.key"></textarea>
                         </mat-form-field>
-                      </div>
+                      </div> -->
 
 
                       <!-- Checkbox -->
-                      <div *ngSwitchCase="'checkbox'">
+                      <!-- <div *ngSwitchCase="'checkbox'">
                         <label>{{ attribute.label }}</label>
                         <div *ngFor="let option of attribute.attributeOptions?.attributeData[0]?.values">
                           <mat-checkbox
@@ -1665,7 +1665,7 @@
                             {{ option.label }}
                           </mat-checkbox>
                         </div>
-                      </div>
+                      </div> -->
 
                       
 
@@ -1704,21 +1704,44 @@
                       </div>
 
                       <!-- Time -->
-                      <div *ngSwitchCase="'time'">
+                      <!-- <div *ngSwitchCase="'time'">
                         <label>{{ attribute.label }}</label>
                         <input matInput type="time" [formControlName]="attribute.key" />
-                      </div>
+                      </div> -->
 
                       <!-- DateTime -->
-                      <div *ngSwitchCase="'dateTime'">
+                      <!-- <div *ngSwitchCase="'dateTime'">
                         <label>{{ attribute.label }}</label>
                         <input matInput type="datetime-local" [formControlName]="attribute.key" />
-                      </div>
+                      </div> -->
 
-                      <!-- Unsupported -->
-                      <div *ngSwitchDefault>
-                        <p>Unsupported field type: {{ attribute.valueType }}</p>
+                      <!-- color picker -->
+                      <!-- <div *ngSwitchCase="'color'">
+                        <label>{{ attribute.label }}</label>
+                        <input matInput type="color" [formControlName]="attribute.key" />
+                      </div> -->
+
+                      
+                      <!-- Interactive range slider -->
+                    <!-- <div *ngSwitchCase="'range'">
+                      <label>{{ attribute.label }}</label>
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="range"
+                              [formControlName]="attribute.key"
+                              [min]="attribute.min || 0"
+                              [max]="attribute.max || 100"
+                              [step]="attribute.step || 1" />
+                        
                       </div>
+                    </div> -->
+
+
+
+
+                      
+                      <!-- <div *ngSwitchDefault>
+                        <p>Unsupported field type: {{ attribute.valueType }}</p>
+                      </div> -->
                     </div>
                   </ng-container>
                 </ng-container>
