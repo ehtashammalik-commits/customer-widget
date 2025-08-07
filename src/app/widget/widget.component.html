@@ -1609,10 +1609,10 @@
 <!--                    Start Rich update messages-->
       <div class="rich-messages-main">
 <!--                    form type-->
-        <div *ngIf="message.body.type.toLowerCase() === 'formdata'" class="message-type-form rich-message-content pt-3 pb-3">
+        <div *ngIf="message.body.type.toLowerCase() === 'form_data'" class="message-type-form rich-message-content pt-3 pb-3">
           <!-- Form Title and Description -->
-          <p class="rich-inner-text">{{ message.body.formData.formTitle }}</p>
-          <p class="rich-inner-text">{{ message.body.formData.formDescription }}</p>
+          <p class="rich-inner-text">{{ message.body.formTitle }}</p>
+          <p class="rich-inner-text">{{ message.body.formDescription }}</p>
 
           <div class="message-inner-form">
             <form
@@ -1627,13 +1627,13 @@
                   [formGroup]="sectionGroup"
                 >
                   <!-- Section Header -->
-                  <h4>{{ message.body.formData.sections[i].sectionName }}</h4>
-                  <p *ngIf="message.body.formData.sections[i].sectionDescription">
-                    {{ message.body.formData.sections[i].sectionDescription }}
+                  <h4>{{ message.body.sections[i].sectionName }}</h4>
+                  <p *ngIf="message.body.sections[i].sectionDescription">
+                    {{ message.body.sections[i].sectionDescription }}
                   </p>
 
                   <!-- Fields Rendering -->
-                  <ng-container *ngFor="let attribute of message.body.formData.sections[i].attributes">
+                  <ng-container *ngFor="let attribute of message.body.sections[i].attributes">
                     <div class="form-group" [ngSwitch]="attribute.valueType">
                       <!-- Short Answer -->
                       <div *ngSwitchCase="'shortAnswer'">
@@ -1653,14 +1653,20 @@
                         </mat-form-field>
                       </div>
 
+
                       <!-- Checkbox -->
                       <div *ngSwitchCase="'checkbox'">
                         <label>{{ attribute.label }}</label>
-                        <mat-checkbox [formControlName]="attribute.key">
-                          {{ attribute.label }}
-                        </mat-checkbox>
-
+                        <div *ngFor="let option of attribute.attributeOptions?.attributeData[0]?.values">
+                          <mat-checkbox
+                            [checked]="isChecked(attribute.key, option.value, message.id, null)"
+                            (change)="onCheckboxChange($event, attribute.key, option.value, message.id, null, null)"
+                          >
+                            {{ option.label }}
+                          </mat-checkbox>
+                        </div>
                       </div>
+
                       
 
                       <!-- Radio -->
@@ -1719,11 +1725,11 @@
               </div>
 
               <!-- Action Buttons -->
-              <div class="button-group form-inner-action mt-2" *ngIf="message.body.formData?.additionalDetail?.actionButtons?.length">
+              <div class="button-group form-inner-action mt-2" *ngIf="message.body?.additionalDetail?.actionButtons?.length">
                 <button
-                  *ngFor="let button of message.body.formData.additionalDetail.actionButtons"
+                  *ngFor="let button of message.body.additionalDetail.actionButtons"
                   [type]="button.action === 'submit' ? 'submit' : 'button'"
-                  [disabled]="message.body.formData?.disableInteraction"
+                  [disabled]="message.body?.disableInteraction"
                   [ngClass]="{
                     'mat-flat-button': button.action === 'submit',
                     'mat-stroked-button': button.action !== 'submit'

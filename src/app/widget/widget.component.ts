@@ -1093,14 +1093,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   creatingSectionsforSchema(messageTypeFormValues?, messageType?): any {
 
 
-    let formData = this.formData;
-    let formValues = this.preChatFormGroup.value;
+    let formData;
+    let formValues;
 
-    console.log("messageTypeFormValues", this.formMessageTypeData);
-    if (messageType === "formMessageType") {
+    if (messageType === "formMessageType" && this.formMessageTypeData.sections) {
       formData = this.formMessageTypeData.sections || [];
-      formValues = messageTypeFormValues || formValues;
+      formValues = messageTypeFormValues;
+    } else {
+      formData = this.formData;
+      formValues = this.preChatFormGroup.value;
     }
+
+    
     let finalSections: any = [];
 
     formData.forEach((section: any, sectionIndex: number) => {
@@ -1112,15 +1116,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         attributes: []
       };
 
+      
+
       const sectionIndexNumber = `section_${sectionIndex}`;
       const sectionAttributes = formValues['sections'];
+      
       const currentSectionAttributes = sectionAttributes[sectionIndex]
-
-
-      console.log("currentSectionAttributes", currentSectionAttributes);
       if (currentSectionAttributes) {
         section.attributes.forEach((attribute: any) => {
-          // console.log("ATTRIBUte", attribute);
+          console.log("ATTRIBUte", attribute);
 
           const attributeData = attribute.attributeOptions?.attributeData || [];
           const possibleValues = attributeData.length > 0 ? attributeData[0].values : [];
@@ -1166,6 +1170,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }))
     }
   }
+
 
   getFormDataByPreChatForm(preChatFormData: any[]): any {
     return {
@@ -1737,7 +1742,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   handleCimMessage(cimMessage: any) {
 
     if (
-        cimMessage.body.type?.toLowerCase() === 'formdata' &&
+        cimMessage.body.type?.toLowerCase() === 'form_data' &&
         cimMessage.header.sender?.type?.toLowerCase() === 'bot'
       ) {
         const messageId = cimMessage.id;
@@ -1745,10 +1750,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           sections: this.fb.array([])
         });
 
-        const sections: any[] = Array.isArray(cimMessage.body.formData?.sections)
-          ? cimMessage.body.formData.sections
+        const sections: any[] = Array.isArray(cimMessage.body?.sections)
+          ? cimMessage.body.sections
           : [];
 
+        this.formMessageTypeData = sections
         this.formGroupsMap[messageId] = formGroup; // ✅ Save form for this message
         this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
       }
@@ -1966,17 +1972,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     
     cimMessages.forEach((cimMessage) => {
 
-      if (
-          cimMessage.body.type?.toLowerCase() === 'formdata' &&
-          cimMessage.header.sender?.type?.toLowerCase() === 'bot'
-          ) {
-            const sections: any[] = Array.isArray(cimMessage.body.formData?.sections)
-              ? cimMessage.body.formData.sections
-              : [];
+      // if (
+      //     cimMessage.body.type?.toLowerCase() === 'formdata' &&
+      //     cimMessage.header.sender?.type?.toLowerCase() === 'bot'
+      //     ) {
+      //       const sections: any[] = Array.isArray(cimMessage.body?.sections)
+      //         ? cimMessage.body.sections
+      //         : [];
 
-            this.formMessageTypeData = cimMessage.body.formData; // Keep entire formData for rendering formTitle, description, action buttons
-            this.createFormValidationControls(sections, this.formValidations, 'formMessageType');
-          }
+      //       this.formMessageTypeData = cimMessage.body; // Keep entire formData for rendering formTitle, description, action buttons
+      //       this.createFormValidationControls(sections, this.formValidations, 'formMessageType');
+      //     }
       
       if (
         cimMessage.body.type.toLowerCase() == 'plain' &&
@@ -2276,6 +2282,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     additionalText?: string,
     fileType?: string,
     carousalCardId?: null | string,
+    formMessageTypeData?: any
   ) {
     let header = {
       originalMessageId: null as null | string,
@@ -2295,6 +2302,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       caption?: string;
       additionalDetails?: any;
       attachment?: any;
+      sections?:any;
     } = {
       markdownText: '',
       type: '',
@@ -2357,7 +2365,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.fileLoading = false;
       this.imageUrls = [];
       this.selectedFile = null as any;
-    } else {
+
+
+
+      
+    } else if(messageType === 'form_data'){
+      // Handle Form Data Message Type
+      const formData = this.formMessageTypeData;
+      // if (formData && formData.sections && formData.sections.length > 0) {
+        header.originalMessageId = originalMessageId ? originalMessageId : null;
+        header.intent = intent ? intent : null;
+        body.type = 'FORM_DATA';
+        body.markdownText = '';
+        body.sections = formMessageTypeData.body.sections
+        const msgPayload = {
+          type: msgType,
+          header: header,
+          body: body,
+          customer: this.customerData,
+        };
+        this.sdk.sendChatMessage(msgPayload);
+        this.clearMessageData();
+      // } else {
+      //   console.log('Form data is empty or invalid');
+      // }
+    }
+    else {
       console.log('Unable to process the file');
       this.snackBar.open('unable to process the file', 'X');
       return;
@@ -4165,7 +4198,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
 
-  handleActionButtonClick(button: any, message: any): void {
+  async handleActionButtonClick(button: any, message: any): Promise<void> {
   const messageId = message.id;
   const formGroup = this.formGroupsMap[messageId];
 
@@ -4186,9 +4219,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     finalPayload.body.formTitle= message.body.formTitle || '';
 
 
-    finalPayload.body.sections = this.creatingSectionsforSchema(formData, "formMessageType");
+    finalPayload.body.sections = await this.creatingSectionsforSchema(formData, "formMessageType");
+    this.constructCimMessage(
+        'FORM_DATA',
+        null,
+        null,
+        finalPayload.id,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        finalPayload
+      );
 
-    this.sdk.sendChatMessage(finalPayload);
+    // this.sdk.sendChatMessage(finalPayload);
     // Step 3: Add custom logic if needed (optional)
     // Example: If form has an agent rating field
 
