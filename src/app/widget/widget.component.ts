@@ -798,15 +798,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const payload = form.value;
       let finalPayload = this.createFormDataObject();
 
+      finalPayload.body.sections = await this.creatingSectionsforSchema(form.value, "formMessageType");
+
       // Step 2: Update fields from form data (if needed)
       finalPayload.header.timestamp = Date.now();
       finalPayload.id = messageId;
       finalPayload.header.intent = '';
       finalPayload.body.formId = '';
       finalPayload.body.formTitle= message.body.formTitle || '';
-
-
-      finalPayload.body.sections = await this.creatingSectionsforSchema(form.value.sections, "formMessageType");
+      
     // this.constructCimMessage(
     //     'FORM_DATA',
     //     null,
@@ -1126,22 +1126,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     let formData;
     let formValues;
 
-    console.log("😃 messageTypeFormValues", messageTypeFormValues);
-    console.log("😃😃😃😃😃😃😃😃 this.formMessageTypeData", this.formMessageTypeData);
-    console.log("😃😃messageType", messageType);
-
     if (messageType === "formMessageType" && this.formMessageTypeData) {
-      console.log("😃😃😃 condition is passed in the formMessageType", messageTypeFormValues);
-      formData = this.formMessageTypeData.sections || [];
+      formData = this.formMessageTypeData || [];
       formValues = messageTypeFormValues;
     } else {
-
-      console.log("😃😃😃😃😃😃😃😃 condition is passed in the preChatForm");
       formData = this.formData;
       formValues = this.preChatFormGroup.value;
     }
 
-    
     let finalSections: any = [];
 
     formData.forEach((section: any, sectionIndex: number) => {
@@ -1161,7 +1153,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const currentSectionAttributes = sectionAttributes[sectionIndex]
       if (currentSectionAttributes) {
         section.attributes.forEach((attribute: any) => {
-          console.log("ATTRIBUte", attribute);
 
           const attributeData = attribute.attributeOptions?.attributeData || [];
           const possibleValues = attributeData.length > 0 ? attributeData[0].values : [];
@@ -1186,10 +1177,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return finalSections;
   }
   getAnswerObj(attribute: any, possibleValues: any, selectedValue: any) {
-
-    console.log('selectedValue in getAnswerObj', selectedValue);
-    console.log('possibleValues in getAnswerObj', possibleValues);
-    console.log('attribute in getAnswerObj', attribute);
 
     if (attribute.attributeType == 'INPUT' || attribute.attributeType == 'TEXTAREA') {
       return [selectedValue]
