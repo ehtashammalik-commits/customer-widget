@@ -18,6 +18,19 @@
     "invalid-session-code": "رمز الجلسة غير صالح!",
     "html5-not-supported": "متصفحك لا يدعم فيديو HTML5."
   },
+  "session-end-reasons": {
+    "agent": "session ended due to agent left",
+    "customer": "session ended due to customer left conversation",
+    "force-closed": "session ended due to customer's inactivity",
+    "inactivity": "session ended due to customer's inactivity",
+    "network": "session ended due to customer's network issue",
+    "unknown": "session ended due to unknown reason"
+  },
+  "agent-notifications": {
+    "joined": "has joined",
+    "left": "has left",
+    "started": "session started"
+  },
   "composer-placeholder": "اكتب الرسالة هنا ...",
   "button": {
     "live-chat": "دردشة مباشرة",
