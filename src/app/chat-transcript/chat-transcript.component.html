@@ -234,7 +234,7 @@
       <ng-container *ngIf="message.header.sender.type === 'AGENT'">
           <div [ngSwitch]="message.body.type">
 
-            <div *ngSwitchCase="'EMAIL'" class="chat-message user-message email-case user-activity">
+            <div *ngSwitchCase="'EMAIL'" class="chat-message user-message email-case user-activity" [ngClass]="{'message-blurred': message.isBlurred}">
               <div class="profile-pic">
                       <!--                <div class="active-channel channel-icon web">-->
                       <!--                  <img-->
@@ -294,7 +294,7 @@
             </div>
 
 
-            <div *ngSwitchCase="'PLAIN'" class="chat-message agent-message">
+            <div *ngSwitchCase="'PLAIN'" class="chat-message agent-message" [ngClass]="{'message-blurred': message.isBlurred}">
               <div class="profile-pic">
                 <div class="profile-pic-area user-img">
                   {{ getInitialsFromFullName(message.header.sender.senderName) }}
@@ -317,7 +317,7 @@
              </div>
            </div>
 
-            <div *ngSwitchCase="'VIDEO'" class="chat-message user-message">
+            <div *ngSwitchCase="'VIDEO'" class="chat-message user-message" [ngClass]="{'message-blurred': message.isBlurred}">
               <div class="profile-pic">
                 <div class="profile-pic-area user-img">
                   {{ getInitialsFromFullName(message.header.sender.senderName) }}
@@ -345,7 +345,7 @@
             </div>
 
 
-            <div *ngSwitchCase="'AUDIO'" class="chat-message user-message">
+            <div *ngSwitchCase="'AUDIO'" class="chat-message user-message" [ngClass]="{'message-blurred': message.isBlurred}">
               <div class="profile-pic">
                 <div class="profile-pic-area user-img">
                   {{ getInitialsFromFullName(message.header.sender.senderName) }}
@@ -372,7 +372,7 @@
              </div>
             </div>
 
-              <div *ngSwitchCase="'IMAGE'" class="chat-message agent-message">
+              <div *ngSwitchCase="'IMAGE'" class="chat-message agent-message" [ngClass]="{'message-blurred': message.isBlurred}">
                 <div class="profile-pic">
                   <div class="profile-pic-area user-img">
                   {{ getInitialsFromFullName(message.header.sender.senderName) }}
@@ -401,7 +401,7 @@
 
               </div>
 
-            <div *ngSwitchCase="'FILE'" class="chat-message agent-message">
+            <div *ngSwitchCase="'FILE'" class="chat-message agent-message" [ngClass]="{'message-blurred': message.isBlurred}">
               <div class="profile-pic">
                 <div class="profile-pic-area user-img">
                   {{ getInitialsFromFullName(message.header.sender.senderName) }}
@@ -446,7 +446,7 @@
 
          <ngswitch [ngSwitch]="message.body.type">
 
-           <div *ngSwitchCase="'EMAIL'" class="chat-message user-message email-case user-activity">
+           <div *ngSwitchCase="'EMAIL'" class="chat-message user-message email-case user-activity" [ngClass]="{'message-blurred': message.isBlurred}">
 
              <div class="profile-pic">
                <div class="active-channel channel-icon web">
@@ -493,7 +493,7 @@
              </div>
            </div>
 
-           <div *ngSwitchCase="'PLAIN'" class="chat-message user-message">
+           <div *ngSwitchCase="'PLAIN'" class="chat-message user-message" [ngClass]="{'message-blurred': message.isBlurred}">
              <div class="profile-pic">
                 <div class="active-channel channel-icon web">
                   <img
@@ -518,7 +518,7 @@
              </div>
            </div>
 
-           <div *ngSwitchCase="'VIDEO'" class="chat-message user-message">
+           <div *ngSwitchCase="'VIDEO'" class="chat-message user-message" [ngClass]="{'message-blurred': message.isBlurred}">
              <div class="profile-pic">
                <div class="active-channel channel-icon web">
                  <img
@@ -551,7 +551,7 @@
               </div>
            </div>
 
-           <div *ngSwitchCase="'AUDIO'" class="chat-message user-message">
+           <div *ngSwitchCase="'AUDIO'" class="chat-message user-message" [ngClass]="{'message-blurred': message.isBlurred}">
               <div class="profile-pic">
                 <div class="active-channel channel-icon web">
                   <img
@@ -586,7 +586,7 @@
               </div>
             </div>
 
-            <div *ngSwitchCase="'IMAGE'" class="chat-message user-message">
+            <div *ngSwitchCase="'IMAGE'" class="chat-message user-message" [ngClass]="{'message-blurred': message.isBlurred}">
               <div class="profile-pic">
                 <div class="active-channel channel-icon web">
                   <img
@@ -620,7 +620,7 @@
               </div>
             </div>
 
-            <div *ngSwitchCase="'File'" class="chat-message user-message">
+            <div *ngSwitchCase="'File'" class="chat-message user-message" [ngClass]="{'message-blurred': message.isBlurred}">
               <div class="profile-pic">
                 <div class="active-channel channel-icon web">
                   <img
