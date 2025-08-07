@@ -214,7 +214,7 @@ export class SdkService implements OnInit {
     preChatFormData: any,
   ) {
     setConversationDataByCustomerIdentifier(
-      this.ConfigData.CONVERSATIONAL_URL,
+      this.ConfigData.SOCKET_URL,
       customerChannelIdentifier,
       preChatFormData,
       (res: any) => {
