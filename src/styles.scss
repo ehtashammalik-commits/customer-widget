@@ -6,7 +6,7 @@ body {
 }
 
 :root {
-  --main-color: #eff2f7;
+  --main-color: rgba(239, 242, 247, 0.16);
 }
 
 body {
@@ -14,3 +14,54 @@ body {
   font-size: 12px;
   font-weight: 400;
 }
+
+
+
+.mat-radio-button {
+
+  &.mat-accent.mat-radio-checked .mat-radio-outer-circle {
+    border-color: #000000;
+  }
+
+  &.mat-accent .mat-radio-inner-circle,
+  .mat-radio-ripple .mat-ripple-element:not(.mat-radio-persistent-ripple),
+  &.mat-radio-checked .mat-radio-persistent-ripple,
+  &.mat-accent:active .mat-radio-persistent-ripple {
+    background-color: #000000;
+  }
+
+
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px !important;
+}
+
+.mat-select {
+  border: 1px solid #E3E3E3;
+  border-radius: 5px !important;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.error-snackbar {
+    bottom: 150px;
+    position: relative;
+    right: -1px;
+    min-width: 319px !important;
+}
+
+@media print {
+  blockquote {
+    box-shadow: none;
+    border: none;
+    }
+  }
+.email-preview-main{
+  blockquote {
+    margin: 0 0 0 10px;
+    border-left: 1px solid rgb(211 211 211);
+    padding-left: 10px;
+    }
+  }

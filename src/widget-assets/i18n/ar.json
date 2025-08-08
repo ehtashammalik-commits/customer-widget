@@ -1,0 +1,65 @@
+{
+  "pleasureful-feedback": "كان من دواعي سرورنا مساعدتك في استفسارك.",
+  "videocam": "كاميرا فيديو",
+  "session-code": "رمز الجلسة",
+  "tagline": "اطرح علينا سؤالاً، فريق الدعم لدينا سعيد بمساعدتك.",
+  "fill-widget-form-to-start-conversation-with-agent": "يرجى ملء النموذج أدناه لبدء الدردشة مع وكيل الآن!",
+  "error": {
+    "server-down": "نواجه بعض المشاكل الفنية مع الخادم الخاص بنا. تم تعطيل الدردشة مع الوكيل / البوت.",
+    "get-back-to-you": "سوف نعود إليك في أقرب وقت يتم حل المشكلة.",
+    "suggestion-when-server-down": "ومع ذلك، يمكنك عرض جلسة الدردشة الخاصة بك.",
+    "incomplete-required-fields": "يرجى ملء جميع الحقول المطلوبة",
+    "short-answer-required": "إجابة قصيرة مطلوبة",
+    "is-required": "مطلوب",
+    "invalid-format": "لا يتطابق مع التنسيق المطلوب",
+    "invalid-password": "يجب أن تتضمن كلمة المرور أحرف كبيرة وصغيرة وأرقامًا ورموزًا خاصة",
+    "required-password-format": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
+    "maximum-limit": "تم الوصول إلى الحد الأقصى",
+    "invalid-session-code": "رمز الجلسة غير صالح!",
+    "html5-not-supported": "متصفحك لا يدعم فيديو HTML5."
+  },
+  "composer-placeholder": "اكتب الرسالة هنا ...",
+  "button": {
+    "live-chat": "دردشة مباشرة",
+    "callback": "طلب اتصال",
+    "help": "بحاجة إلى مساعدة",
+    "connect-with-us": "تواصل معنا",
+    "minimize": "تصغير",
+    "download-transcript": "تنزيل المحادثة",
+    "start-chat": "بدء الدردشة",
+    "file-transfer": "نقل الملفات",
+    "web-chat": "دردشة الويب",
+    "change-font-size": "تغيير حجم الخط",
+    "end-conversation": "إنهاء المحادثة",
+    "click-here": "انقر هنا",
+    "close": "إغلاق",
+    "send-me-transcript": "أرسل لي المحادثة",
+    "call-on-my-number": "اتصل على رقمي",
+    "request-callback": "طلب اتصال",
+    "video-call": "مكالمة فيديو"
+  },
+  "callback": {
+    "title": "طلب اتصال",
+    "request": "طلب اتصال",
+    "request-description": "يرجى ملء النموذج أدناه لإعداد طلب اتصال."
+  },
+  "notification": {
+    "participant-joined": "قد انضم إلى الدردشة",
+    "participant-left": "قد غادر الدردشة",
+    "agents-not-available": "لا يوجد وكلاء متاحون في الوقت الحالي",
+    "transfering-request-to": "يتم نقل طلبك إلى",
+    "queue-please-wait": "قائمة الانتظار، يرجى الانتظار!",
+    "supported-file-types-allowed": "جميع أنواع الملفات المدعومة مسموح بها"
+  },
+  "dialog": {
+    "confirm": "تأكيد",
+    "end-conversation-confirmation": "هل أنت متأكد من إنهاء المحادثة؟",
+    "yes": "نعم",
+    "no": "لا"
+  },
+  "label": {
+    "choose-file": "اختر ملف",
+    "sorry": "عذرًا!",
+    "thankyou": "شكرًا لك!"
+  }
+}
