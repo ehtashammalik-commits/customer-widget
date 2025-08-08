@@ -67,7 +67,7 @@
                 <span>
                   <video class="videoPlayer" autoplay muted>
                     <source
-                      [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                      [src]="message.body.attachment.mediaUrl | safeFileURL"
                       type="video/mp4"
                     />
                     Your browser does not support the video tag.
@@ -90,11 +90,11 @@
               <p>
                 <span>{{ message.body.caption }}</span>
                 <a
-                  [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                  [href]="message.body.attachment.mediaUrl | safeFileURL"
                   target="_blank"
                 >
                   <img
-                    [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                    [src]="message.body.attachment.mediaUrl | safeFileURL"
                     class="imageViewer"
                   />
                 </a>
@@ -133,7 +133,7 @@
                 <span class="card-description">
                   <a
                     class="file-download"
-                    [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                    [href]="message.body.attachment.mediaUrl | safeFileURL"
                     download
                     target="_blank"
                   >
@@ -331,7 +331,7 @@
                   <span>
                     <video class="videoPlayer" controls>
                       <source
-                        [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                        [src]="message.body.attachment.mediaUrl | safeFileURL"
                         type="video/mp4"
                       />
                       Your browser does not support the video tag.
@@ -359,7 +359,7 @@
                   <span>
                     <audio class="audioPlayer" controls>
                       <source
-                        [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                        [src]="message.body.attachment.mediaUrl | safeFileURL"
                         type="audio/mpeg"
                       />
                       Your browser does not support the audio tag.
@@ -385,10 +385,10 @@
                       <p>
                         <a
                           target="_blank"
-                          [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                          [href]="message.body.attachment.mediaUrl | safeFileURL"
                         >
                           <img
-                            [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                            [src]="message.body.attachment.mediaUrl | safeFileURL"
                             class="imageViewer"
                           />
                         </a>
@@ -427,7 +427,7 @@
                   <span class="card-description">
                     <a
                       class="file-download"
-                      [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                      [href]="message.body.attachment.mediaUrl | safeFileURL"
                       >Download</a
                     >
                   </span>
@@ -538,7 +538,7 @@
                   <span>
                     <video class="videoPlayer" controls>
                       <source
-                        [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                        [src]="message.body.attachment.mediaUrl | safeFileURL"
                         type="video/mp4"
                       />
                       Your browser does not support the video tag.
@@ -573,7 +573,7 @@
                     <span>
                       <audio class="audioPlayer" controls>
                         <source
-                          [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                          [src]="message.body.attachment.mediaUrl | safeFileURL"
                           type="audio/mpeg"
                         />
                         Your browser does not support the audio tag.
@@ -605,10 +605,10 @@
                 <p>
                   <a
                     target="_blank"
-                    [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                    [href]="message.body.attachment.mediaUrl | safeFileURL"
                   >
                     <img
-                      [src]="getSafeUrl(message.body.attachment.mediaUrl)"
+                      [src]="message.body.attachment.mediaUrl | safeFileURL"
                       class="imageViewer"
                     />
                   </a>
@@ -652,7 +652,7 @@
                   <span class="card-description">
                     <a
                       class="file-download"
-                      [href]="getSafeUrl(message.body.attachment.mediaUrl)"
+                      [href]="message.body.attachment.mediaUrl | safeFileURL"
                       >Download</a
                     >
                   </span>
