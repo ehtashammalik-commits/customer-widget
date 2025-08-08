@@ -8,6 +8,14 @@ export class SanitizeHtmlPipe implements PipeTransform {
 
   transform(html: string): SafeHtml {
     if (!html) return "";
+
+    html = html.replace(/&(?!amp;|lt;|gt;|quot;|#039;)/g, '&amp;');
+  html = html.replace(/</g, '&lt;');
+  html = html.replace(/>/g, '&gt;');
+  html = html.replace(/"/g, '&quot;');
+  html = html.replace(/'/g, '&#039;');
+
+
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 }

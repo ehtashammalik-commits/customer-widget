@@ -167,7 +167,7 @@
           </div>
           <div class="chat-message-content">
             <p>
-              <span>{{ message.body.markdownText }}</span>
+              <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
               </span>
@@ -278,7 +278,7 @@
               <span>{{ message.header.sender.senderName }}</span>
             </div>
             <p>
-              <span>{{ message.body.markdownText }}</span>
+              <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
               <span class="message-stamp">
                 <span class="chat-time">
                   <span *ngIf="message.isEdited" class="edit-message">Edited </span>{{ message.header.timestamp |
@@ -460,7 +460,7 @@
           </div>
           <div class="chat-message-content">
             <p>
-              <span>{{ message.body.markdownText }}</span>
+              <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
               </span>
