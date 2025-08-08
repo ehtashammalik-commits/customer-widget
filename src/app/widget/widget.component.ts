@@ -1183,7 +1183,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.additionalPanel = false;
           this.isIconWidget = false;
         } else {
-          this.additionalPanel = false;
+
           this.isIconWidget = true;
           this.resizeWidget('icon-view');
         }
