@@ -239,6 +239,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     file: 'File',
   };
 
+  private formStateMap = new Map<string, { values: any; status: string; schema: any }>();
 
 
   // Widget Configuration
@@ -2004,13 +2005,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     
     cimMessages.forEach((cimMessage) => {
 
-      if (
-          cimMessage.body.type?.toLowerCase() === 'formdata' &&
-          cimMessage.header.sender?.type?.toLowerCase() === 'customer'
-          ) {
+      if (cimMessage.body.type?.toLowerCase() === 'form_data' &&
+          cimMessage.body.additionalDetails?.status?.toLowerCase() === 'filled') 
+          {
+          const formGroup = this.buildFormMessage(cimMessage);
+          this.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
 
-            console.log("🥵🥵🥵🥵🥵🥵 Received form data message:", cimMessage);
-          }
+          this.handleFormMessageType(cimMessage);
+        }
       
       if (
         cimMessage.body.type.toLowerCase() == 'plain' &&
@@ -2073,6 +2075,70 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     });
   }
+
+
+  private buildFormMessage(cimMessage: any) {
+    const originalMessageId = cimMessage.header.originalMessageId;
+    const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
+
+    if (!originalMessage) {
+      console.warn(`Original message with ID ${originalMessageId} not found.`);
+      return;
+    }
+
+    const formGroup = this.fb.group({
+      sections: this.fb.array([])
+    });
+
+    const sections: any[] = Array.isArray(originalMessage.body?.sections)
+      ? originalMessage.body.sections
+      : [];
+
+    console.log('Sections received:', sections);
+
+    this.formGroupsMap[originalMessageId] = formGroup;
+    this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
+    return formGroup;
+}
+
+private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
+  const sectionArray = formGroup.get('sections') as FormArray;
+  if (!sectionArray || sectionArray.length === 0) return;
+
+  cimMessage.body.sections.forEach((sectionData: any, sectionIndex: number) => {
+    const sectionGroup = sectionArray.at(sectionIndex) as FormGroup;
+    if (!sectionGroup || !sectionData?.attributes) return;
+
+    sectionData.attributes.forEach(attr => {
+      const controlKey = attr.key;
+
+      if (attr.attributeType?.toUpperCase() === 'OPTIONS') {
+        // Multiple choice options
+        const selectedValues = (attr.answer || [])
+          .filter(opt => opt.isSelected)
+          .map(opt => opt.value);
+
+        const controlValue = selectedValues.length <= 1 ? selectedValues[0] || '' : selectedValues;
+
+        if (sectionGroup.get(controlKey)) {
+          sectionGroup.get(controlKey)?.patchValue(controlValue);
+        }
+      }
+      else if (['INPUT', 'TEXT'].includes(attr.attributeType?.toUpperCase())) {
+        // Text / input type answers
+        const value = Array.isArray(attr.answer) ? attr.answer[0] || '' : attr.answer || '';
+        if (sectionGroup.get(controlKey)) {
+          sectionGroup.get(controlKey)?.patchValue(value);
+        }
+      }
+    });
+  });
+}
+
+
+
+
+
   getAgentDisplayName(user: any): string {
     if (user) {
       const { firstName, lastName } = user;
