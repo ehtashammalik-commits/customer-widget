@@ -2004,17 +2004,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     
     cimMessages.forEach((cimMessage) => {
 
-      // if (
-      //     cimMessage.body.type?.toLowerCase() === 'formdata' &&
-      //     cimMessage.header.sender?.type?.toLowerCase() === 'bot'
-      //     ) {
-      //       const sections: any[] = Array.isArray(cimMessage.body?.sections)
-      //         ? cimMessage.body.sections
-      //         : [];
+      if (
+          cimMessage.body.type?.toLowerCase() === 'formdata' &&
+          cimMessage.header.sender?.type?.toLowerCase() === 'customer'
+          ) {
 
-      //       this.formMessageTypeData = cimMessage.body; // Keep entire formData for rendering formTitle, description, action buttons
-      //       this.createFormValidationControls(sections, this.formValidations, 'formMessageType');
-      //     }
+            console.log("🥵🥵🥵🥵🥵🥵 Received form data message:", cimMessage);
+          }
       
       if (
         cimMessage.body.type.toLowerCase() == 'plain' &&
@@ -2666,16 +2662,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleFormMessageType(cimMessage: any) {
-    console.log('Received form message type:', cimMessage);
     const originalMessageId = cimMessage.header.originalMessageId;
 
     const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
-    console.log('Original message:', originalMessage);
-
     if (originalMessage) {
 
       const fg = this.formGroupsMap[originalMessageId];
-      if(fg && originalMessage.body.additionalDetails.disableInteraction === true) {
+      if(fg && originalMessage.body.additionalDetail.disableInteraction === true) {
+
         fg.disable({ emitEvent: false }); // disables all fields & buttons bound via form controls
         originalMessage.body.disableFormMessageInteraction = true;
       }
