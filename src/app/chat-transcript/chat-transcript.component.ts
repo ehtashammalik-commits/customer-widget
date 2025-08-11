@@ -100,6 +100,17 @@ export class TranscriptComponent implements OnInit {
 
         for (const message of data) {
           const intent = message?.header?.intent?.toLowerCase();
+          
+          if (message.body?.type === 'DELIVERYNOTIFICATION') {
+            const originalId = message.body.messageId;
+            const index = processed.findIndex((msg) => msg.id === originalId);
+
+            if (index !== -1) {
+            const status = message.body.status;
+            processed[index].isBlurred = status === 'FAILED';
+            }
+          }
+
 
           if (intent === 'update') {
             const originalId = message.header.originalMessageId;
@@ -163,13 +174,6 @@ export class TranscriptComponent implements OnInit {
     window.print();
   }, 2000);
 }
-
-
-
-  getSafeUrl(url: string): string {
-    // You can sanitize this later if needed via DomSanitizer
-    return url;
-  }
 
   getInitialsFromFullName(name: string = ''): string {
     const trimmedName = name.trim();
