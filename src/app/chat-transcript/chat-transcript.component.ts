@@ -5,6 +5,7 @@ import { ConfigService } from '../services/config.service';
 import { firstValueFrom } from 'rxjs';
 import {DomSanitizer, SafeResourceUrl, SafeUrl, Title} from '@angular/platform-browser';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
+import { TranslateService } from '@ngx-translate/core';
 
 
 @Component({
@@ -19,6 +20,7 @@ export class TranscriptComponent implements OnInit {
   browserLang = '';
   conversationAreaClass = '';
   state : string = '';
+  enableTranscriptNotifications: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -26,10 +28,16 @@ export class TranscriptComponent implements OnInit {
     public __appConfig: ConfigService,
     private sanitizer: DomSanitizer,
     private ngxLoader: NgxUiLoaderService,
-    private title: Title
-  ) {}
+    private title: Title,
+    private translate: TranslateService,
+    
+  ) {
+    translate.setDefaultLang('en');
+    translate.use('en');
+  }
 
   ngOnInit(): void {
+    this.enableTranscriptNotifications = this.__appConfig.appConfig.ENABLE_TRANSCRIPT_NOTIFICATIONS || false;
     this.title.setTitle('Conversation Transcript');
   this.route.queryParams.subscribe(async params => {
     const conversationId = params['conversationId'] || '';
