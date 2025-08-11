@@ -32,6 +32,7 @@ import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import { DOCUMENT } from '@angular/common';
 import { Inject } from '@angular/core';
+import { FormMessageTypeService } from '../services/form-message-type.service';
 
 interface Shift {
   id: string;
@@ -348,6 +349,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private translate: TranslateService,
     private router: Router,
     @Inject(DOCUMENT) private doc: Document,
+    private formMessageTypeService: FormMessageTypeService
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
@@ -733,11 +735,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         // Add the control to the section group
         sectionGroup.addControl(attribute.key, this.fb.control('', validators));
       });
-      console.log('section', section)
 
       // Add the section group to the sections FormArray
       sectionsArray.push(sectionGroup);
-      console.log(">>>>>>>>>>>>>>>section array", sectionsArray)
     });
     if (formType === 'preChatForm') {
       this.preChatFormGroup.setControl('sections', sectionsArray);
@@ -746,9 +746,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if(formType === 'formMessageType') {
       targetFormGroup.setControl('sections', sectionsArray);
     }
-
-    console.log('targetFormGroup', targetFormGroup);
-    // Set the sections array inside the main form grou
   }
 
 
@@ -820,7 +817,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         null,
         null,
         null,
-        finalPayload
+        finalPayload,
+        'filled'
       );
 
     } else {
@@ -2009,6 +2007,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           }
         }
       }
+
+      if(type === 'form_data') {
+        const disableInteraction = message.body?.additionalDetails?.disableInteraction;
+        if(disableInteraction) {
+          message.body.additionalDetails = {
+            ...(message.body.additionalDetails || {}),
+            disableFormMessageInteraction: true,
+          }
+        }
+      }
     });
   }
 
@@ -2044,14 +2052,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     
     cimMessages.forEach((cimMessage) => {
 
-      if (cimMessage.body.type?.toLowerCase() === 'form_data' &&
-          cimMessage.body.additionalDetails?.status?.toLowerCase() === 'filled') 
-          {
-          const formGroup = this.buildFormMessage(cimMessage);
-          this.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
+      if (cimMessage.body.type?.toLowerCase() === 'form_data') {
+          
+          if(cimMessage.header.originalMessageId) {
+            const formGroup = this.buildFormMessage(cimMessage);
+            this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
+            this.handleFormMessageType(cimMessage);
+          } else {
+            const messageId = cimMessage.id;
+            const formGroup = this.fb.group({
+            sections: this.fb.array([])
+           });
 
-          this.handleFormMessageType(cimMessage);
-        }
+            const sections: any[] = Array.isArray(cimMessage.body?.sections)
+              ? cimMessage.body.sections
+              : [];
+
+            this.formMessageTypeData = sections
+            this.formGroupsMap[messageId] = formGroup; // ✅ Save form for this message
+            this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
+          }
+      }
       
       if (
         cimMessage.body.type.toLowerCase() == 'plain' &&
@@ -2133,67 +2154,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       ? originalMessage.body.sections
       : [];
 
-    console.log('Sections received:', sections);
 
     this.formGroupsMap[originalMessageId] = formGroup;
     this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
     return formGroup;
-}
-
-private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
-  const sectionArray = formGroup.get('sections') as FormArray;
-  if (!sectionArray || sectionArray.length === 0) return;
-
-  cimMessage.body.sections.forEach((sectionData: any, sectionIndex: number) => {
-    const sectionGroup = sectionArray.at(sectionIndex) as FormGroup;
-    if (!sectionGroup || !sectionData?.attributes) return;
-
-    sectionData.attributes.forEach(attr => {
-      const controlKey = attr.key;
-
-      if (attr.attributeType?.toUpperCase() === 'OPTIONS') {
-
-
-          if (attr.valueType?.toLowerCase() === 'checkbox') {
-            const selectedValues = (attr.answer || [])
-            .filter((opt: any) => opt.isSelected && opt.label === opt.value) // match label with value
-            .map((opt: any) => opt.value);
-
-            const controlValue =
-            selectedValues.length <= 1 ? selectedValues[0] || '' : selectedValues;
-            console.log("OKAY attriute key", attr)
-            console.log("OKAY selected Values", selectedValues)
-            console.log("OKAY section groups", sectionGroup)
-            if (sectionGroup.get(controlKey)) {
-
-            console.log("OKAY",sectionGroup.get(controlKey))
-            console.log("OKAY consition isfulfilled..")
-            sectionGroup.get(controlKey)?.patchValue(controlValue);
-            
-          }
-        } else {
-          // 🎯 PATCH RADIO / DROPDOWN
-          const selectedValues = (attr.answer || [])
-            .filter(opt => opt.isSelected)
-            .map(opt => opt.value);
-
-          const controlValue =
-            selectedValues.length <= 1 ? selectedValues[0] || '' : selectedValues;
-
-          if (sectionGroup.get(controlKey)) {
-            sectionGroup.get(controlKey)?.patchValue(controlValue);
-          }
-        }
-      }
-      else if (['INPUT', 'TEXTAREA'].includes(attr.attributeType?.toUpperCase())) {
-        // Text / input type answers
-        const value = Array.isArray(attr.answer) ? attr.answer[0] || '' : attr.answer || '';
-        if (sectionGroup.get(controlKey)) {
-          sectionGroup.get(controlKey)?.patchValue(value);
-        }
-      }
-    });
-  });
 }
 
 
@@ -2437,7 +2401,8 @@ private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
     additionalText?: string,
     fileType?: string,
     carousalCardId?: null | string,
-    formMessageTypeData?: any
+    formMessageTypeData?: any,
+    status?: 'filled' | 'cancelled',
   ) {
     let header = {
       originalMessageId: null as null | string,
@@ -2525,17 +2490,18 @@ private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
 
       
     } else if(messageType === 'form_data'){
-      // Handle Form Data Message Type
       const formData = formMessageTypeData;
       console.log('Form Data:', formData);
-      // if (formData && formData.sections && formData.sections.length > 0) {
         header.originalMessageId = originalMessageId ? originalMessageId : null;
         header.intent = intent ? intent : null;
         body.type = 'FORM_DATA';
         body.markdownText = '';
-        body.sections = formData.body.sections
-        body.additionalDetails = formData.body.additionalDetails || {};
-        body.additionalDetails.status = 'filled';
+        body.sections = formMessageTypeData?.body?.sections || [];
+        body.additionalDetails = formMessageTypeData?.body?.additionalDetails || {};
+        if (status) {
+          body.additionalDetails.status = status;
+        }
+        body.additionalDetails.status = status;
         const msgPayload = {
           type: msgType,
           header: header,
@@ -2795,7 +2761,7 @@ private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
     if (originalMessage) {
 
       const fg = this.formGroupsMap[originalMessageId];
-      if(fg && originalMessage.body.additionalDetail.disableInteraction === true) {
+      if(fg && originalMessage.body.additionalDetails.disableInteraction === true) {
 
         fg.disable({ emitEvent: false }); // disables all fields & buttons bound via form controls
         originalMessage.body.disableFormMessageInteraction = true;
@@ -4365,17 +4331,35 @@ private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
 
 
   async handleActionButtonClick(button: any, message: any): Promise<void> {
-    const messageId = message.id;
-    const formGroup = this.formGroupsMap[messageId];
+  const messageId = message.id;
+  const formGroup = this.formGroupsMap[messageId];
 
-    if (!formGroup) return;
+  if (!formGroup) return;
 
-    if (button.action === 'submit') {
-      const formData = formGroup.value;
-      console.log('Submitted form data for', messageId, formData);
+  if (button.action === 'cancel') {
+    const finalPayload = this.createFormDataObject();
+    finalPayload.body.sections = []; // No data for cancelled
+    finalPayload.header.timestamp = Date.now();
+    finalPayload.id = messageId;
+    finalPayload.body.formTitle = message.body.formTitle || '';
 
-    }
+    this.constructCimMessage(
+      'FORM_DATA',
+      null,
+      null,
+      finalPayload.id,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      finalPayload,
+      'cancelled',   // status
+    );
+  }
 }
+
 
 replaceSpacesWithUnderscores(input: string): string {
     return input.replace(/\s+/g, '_');
