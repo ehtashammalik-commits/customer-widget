@@ -117,21 +117,6 @@ export class TranscriptComponent implements OnInit {
           } else {
             processed.push(message);
           }
-
-
-          if (intent === 'update') {
-            const originalId = message.header.originalMessageId;
-
-            const index = processed.findIndex((msg) => msg.id === originalId);
-
-            if (index !== -1) {
-              // Update the original message
-              processed[index].body.markdownText = message.body.markdownText;
-              processed[index].isEdited = true;
-            }
-          } else {
-            processed.push(message);
-          }
         }
 
         const rawTimestamp = processed[0]?.header?.timestamp;
