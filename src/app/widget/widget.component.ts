@@ -1164,8 +1164,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             skipType: attribute.skipType || null,
             key: attribute.key || null,
             attributeAttachment: attribute.attributeAttachment || "",
-
-            answer: this.getAnswerObj(attribute, possibleValues, selectedValue)
+            answer: this.getAnswerObj(attribute, possibleValues, selectedValue, currentSectionAttributes)
           };
           newSection.attributes.push(newAttribute);
         });
@@ -1174,26 +1173,67 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     });
     return finalSections;
   }
-  getAnswerObj(attribute: any, possibleValues: any, selectedValue: any) {
+  
+
+  getAnswerObj(attribute: any, possibleValues: any[], selectedValue: any, currentSectionAttributes: any) {
 
     if (attribute.attributeType == 'INPUT' || attribute.attributeType == 'TEXTAREA') {
       return [selectedValue]
     }
-    else {
-      selectedValue = selectedValue ? (selectedValue.value ?? selectedValue) : null;
+    else if (attribute.valueType === 'checkbox') {
+      const rawValue = currentSectionAttributes?.[attribute.key];
 
-      return possibleValues.map(
-        (option: any) => ({
+      const enableCategory = attribute.attributeOptions?.enableCategory || false;
+      const attributeData = attribute.attributeOptions?.attributeData || [];
+
+      if (enableCategory) {
+        return attributeData.map(category => {
+          const categoryLabel = category.label;
+          const selectedValues = rawValue?.[categoryLabel] || [];
+
+          return {
+            category: categoryLabel,
+            options: category.values.map((option: any) => ({
+              label: option.label,
+              value: option.value || option.label,
+              isSelected: selectedValues.includes(option.label),
+              additionalAttributes: {
+                optionWeightage: option.optionWeightage || null,
+                enableStyle: attribute.attributeOptions?.enableStyle || false,
+                optionStyle: option.optionStyle || null
+              }
+            }))
+          };
+        });
+      } else {
+        const selectedValues = Array.isArray(rawValue) ? rawValue : [];
+
+        return possibleValues.map(option => ({
           label: option.label,
-          value: option.value || option.label, // Use `value` if available, fallback to `label`
-          isSelected: option.label === selectedValue || option.value === selectedValue,
+          value: option.value || option.label,
+          isSelected: selectedValues.includes(option.label),
           additionalAttributes: {
             optionWeightage: option.optionWeightage || null,
             enableStyle: attribute.attributeOptions?.enableStyle || false,
-            optionStyle: option.optionStyle || null,
-
+            optionStyle: option.optionStyle || null
           }
-        }))
+        }));
+      }
+    }
+    else {
+      selectedValue = selectedValue ? (selectedValue.value ?? selectedValue) : null;
+
+      return possibleValues.map(option => ({
+        label: option.label,
+        value: option.value || option.label,
+        isSelected: option.label === selectedValue || option.value === selectedValue,
+        additionalAttributes: {
+          optionWeightage: option.optionWeightage || null,
+          enableStyle: attribute.attributeOptions?.enableStyle || false,
+          optionStyle: option.optionStyle || null,
+
+        }
+      }))
     }
   }
 
@@ -2124,7 +2164,7 @@ private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
           sectionGroup.get(controlKey)?.patchValue(controlValue);
         }
       }
-      else if (['INPUT', 'TEXT'].includes(attr.attributeType?.toUpperCase())) {
+      else if (['INPUT', 'TEXTAREA'].includes(attr.attributeType?.toUpperCase())) {
         // Text / input type answers
         const value = Array.isArray(attr.answer) ? attr.answer[0] || '' : attr.answer || '';
         if (sectionGroup.get(controlKey)) {
@@ -3811,20 +3851,22 @@ private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
   }
 
   onCheckboxChange(
-    event: Event,
-    controlName: string,
-    sectionIndex: number,
-    optionValue: string | null,
-    categoryLabel: string,
-    hasCategory: boolean
-  ): void {
+      event: Event,
+      controlName: string,
+      sectionIndex: number,
+      optionValue: string | null,
+      categoryLabel: string,
+      hasCategory: boolean,
+      messageId? : string
+    ): void {
     if (!optionValue) return;
 
+    const formGroup =this.formGroupsMap?.[messageId] || this.preChatFormGroup;
     const checkbox = event.target as HTMLInputElement;
     const isChecked = checkbox.checked;
 
     const controlPath = `sections.${sectionIndex}.${controlName}`;
-    const control = this.preChatFormGroup.get(controlPath);
+    const control = formGroup.get(controlPath);
 
     if (!control) {
       console.warn(`Control '${controlPath}' not found.`);
@@ -3833,31 +3875,50 @@ private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
 
     control.markAsTouched();
 
-    //  Get existing value and parse
-    let selectedValues = this.parseCheckboxValue(control.value);
+    let selectedValues: any;
 
-    if (isChecked) {
-      // Add value
-      if (!selectedValues[categoryLabel]) {
-        selectedValues[categoryLabel] = [];
-      }
-      if (!selectedValues[categoryLabel].includes(optionValue)) {
-        selectedValues[categoryLabel].push(optionValue);
-      }
-    } else {
-      // Remove value
-      const updated = selectedValues[categoryLabel]?.filter(v => v !== optionValue) || [];
-      if (updated.length > 0) {
-        selectedValues[categoryLabel] = updated;
+    if (hasCategory) {
+      selectedValues = typeof control.value === 'object' && !Array.isArray(control.value)
+        ? { ...control.value }
+        : {};
+
+      if (isChecked) {
+        if (!Array.isArray(selectedValues[categoryLabel])) {
+          selectedValues[categoryLabel] = [];
+        }
+        if (!selectedValues[categoryLabel].includes(optionValue)) {
+          selectedValues[categoryLabel].push(optionValue);
+        }
       } else {
-        delete selectedValues[categoryLabel];
+        selectedValues[categoryLabel] = (selectedValues[categoryLabel] || []).filter(
+          (v: string) => v !== optionValue
+        );
+        if (selectedValues[categoryLabel].length === 0) {
+          delete selectedValues[categoryLabel];
+        }
       }
+
+      const isEmpty = Object.keys(selectedValues).length === 0;
+      control.setValue(isEmpty ? '' : selectedValues, { emitEvent: true });
+
+    } else {
+      selectedValues = Array.isArray(control.value) ? [...control.value] : [];
+
+      if (isChecked) {
+        if (!selectedValues.includes(optionValue)) {
+          selectedValues.push(optionValue);
+        }
+      } else {
+        selectedValues = selectedValues.filter((v: string) => v !== optionValue);
+      }
+
+      control.setValue(selectedValues.length === 0 ? '' : selectedValues, { emitEvent: true });
     }
 
-    //  Update form control with stringified object
-    const newValue = Object.keys(selectedValues).length > 0 ? JSON.stringify(selectedValues) : '';
-    control.setValue(newValue, { emitEvent: true });
+
   }
+
+
   parseCheckboxValue(val: string): { [key: string]: string[] } {
     try {
       return val ? JSON.parse(val) : {};
@@ -3865,40 +3926,6 @@ private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
       return {};
     }
   }
-
-
-
-  isChecked(
-    controlName: string,
-    sectionIndex: number,
-    optionValue: string,
-    categoryLabel: string
-  ): boolean {
-    const controlPath = `sections.${sectionIndex}.${controlName}`;
-    const control = this.preChatFormGroup.get(controlPath);
-
-    if (!control || !control.value) return false;
-
-    const parts: string[] = control.value
-      .split(',')
-      .map((p: any) => p.trim())
-      .filter((p: any) => p);
-
-    let currentCategory: string | null = null;
-
-    for (const part of parts) {
-      if (part.startsWith('Category')) {
-        currentCategory = part;
-      } else if (currentCategory === categoryLabel && part === optionValue) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-
-
 
   booleanEmojiSet(sectionIndex: number, attributeIndex: number, itemIndex: number) {
     console.log("boooean emoji set", itemIndex);
@@ -4329,6 +4356,9 @@ private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
     }
 }
 
+replaceSpacesWithUnderscores(input: string): string {
+    return input.replace(/\s+/g, '_');
+  }
 
 
 
