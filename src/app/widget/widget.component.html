@@ -1645,7 +1645,10 @@
                   <!-- Fields Rendering -->
                   <ng-container *ngFor="let attribute of message.body.sections[i].attributes">
                     <div class="form-group" [ngSwitch]="attribute.valueType">
+
+
                       <!-- Short Answer -->
+
                       <div *ngSwitchCase="'shortAnswer'">
                         <label>
                           {{ attribute.label }} <span *ngIf="attribute.isRequired">*</span>
@@ -1656,12 +1659,12 @@
                       </div>
 
                       <!-- Paragraph -->
-                      <div *ngSwitchCase="'paragraph'">
+                      <!-- <div *ngSwitchCase="'paragraph'">
                         <label>{{ attribute.label }}</label>
                         <mat-form-field appearance="outline">
                           <textarea matInput rows="3" [formControlName]="attribute.key"></textarea>
                         </mat-form-field>
-                      </div>
+                      </div> -->
 
 
                       <!-- Checkbox -->
@@ -1704,7 +1707,7 @@
                       
 
                       <!-- Radio -->
-                      <div *ngSwitchCase="'radio'">
+                      <!-- <div *ngSwitchCase="'radio'">
                         <label>{{ attribute.label }}</label>
                         <mat-radio-group [formControlName]="attribute.key">
                           <mat-radio-button
@@ -1714,10 +1717,10 @@
                             {{ option.label }}
                           </mat-radio-button>
                         </mat-radio-group>
-                      </div>
+                      </div> -->
 
                       <!-- Dropdown -->
-                      <div *ngSwitchCase="'dropdown'">
+                      <!-- <div *ngSwitchCase="'dropdown'">
                         <label>{{ attribute.label }}</label>
                         <mat-form-field appearance="outline">
                           <mat-select [formControlName]="attribute.key">
@@ -1729,35 +1732,35 @@
                             </mat-option>
                           </mat-select>
                         </mat-form-field>
-                      </div>
+                      </div> -->
 
                       <!-- Date -->
-                      <div *ngSwitchCase="'data'">
+                      <!-- <div *ngSwitchCase="'data'">
                         <label>{{ attribute.label }}</label>
                         <input matInput type="date" [formControlName]="attribute.key" />
-                      </div>
+                      </div> -->
 
                       <!-- Time -->
-                      <div *ngSwitchCase="'time'">
+                      <!-- <div *ngSwitchCase="'time'">
                         <label>{{ attribute.label }}</label>
                         <input matInput type="time" [formControlName]="attribute.key" />
-                      </div>
+                      </div> -->
 
                       <!-- DateTime -->
-                      <div *ngSwitchCase="'dateTime'">
+                      <!-- <div *ngSwitchCase="'dateTime'">
                         <label>{{ attribute.label }}</label>
                         <input matInput type="datetime-local" [formControlName]="attribute.key" />
-                      </div>
+                      </div> -->
 
                       <!-- color picker -->
-                      <div *ngSwitchCase="'color'">
+                      <!-- <div *ngSwitchCase="'color'">
                         <label>{{ attribute.label }}</label>
                         <input matInput type="color" [formControlName]="attribute.key" />
-                      </div>
+                      </div> -->
 
                       
                       <!-- Interactive range slider -->
-                    <div *ngSwitchCase="'range'">
+                    <!-- <div *ngSwitchCase="'range'">
                       <label>{{ attribute.label }}</label>
                       <div style="display: flex; align-items: center; gap: 10px;">
                         <input type="range"
@@ -1767,7 +1770,7 @@
                               [step]="attribute.step || 1" />
                         
                       </div>
-                    </div>
+                    </div> -->
                       
                       <!-- <div *ngSwitchDefault>
                         <p>Unsupported field type: {{ attribute.valueType }}</p>

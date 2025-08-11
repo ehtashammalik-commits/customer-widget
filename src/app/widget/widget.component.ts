@@ -737,6 +737,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       // Add the section group to the sections FormArray
       sectionsArray.push(sectionGroup);
+      console.log(">>>>>>>>>>>>>>>section array", sectionsArray)
     });
     if (formType === 'preChatForm') {
       this.preChatFormGroup.setControl('sections', sectionsArray);
@@ -1820,8 +1821,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           ? cimMessage.body.sections
           : [];
 
-        console.log('Sections received in handleCimMessage:', sections);
-
         this.formMessageTypeData = sections
         this.formGroupsMap[messageId] = formGroup; // ✅ Save form for this message
         this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
@@ -2154,15 +2153,23 @@ private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
 
       if (attr.attributeType?.toUpperCase() === 'OPTIONS') {
 
-        if (attr.valueType?.toLowerCase() === 'checkbox') {
-          // ✅ PATCH CHECKBOXES
-          const optionsControl = sectionGroup.get(controlKey);
-          if (optionsControl) {
-            const patchedOptions = attr.answer.map((option: any) => ({
-              ...option,
-              isSelected: !!option.isSelected // ensure boolean
-            }));
-            optionsControl.patchValue(patchedOptions);
+
+          if (attr.valueType?.toLowerCase() === 'checkbox') {
+            const selectedValues = (attr.answer || [])
+            .filter((opt: any) => opt.isSelected && opt.label === opt.value) // match label with value
+            .map((opt: any) => opt.value);
+
+            const controlValue =
+            selectedValues.length <= 1 ? selectedValues[0] || '' : selectedValues;
+            console.log("OKAY attriute key", attr)
+            console.log("OKAY selected Values", selectedValues)
+            console.log("OKAY section groups", sectionGroup)
+            if (sectionGroup.get(controlKey)) {
+
+            console.log("OKAY",sectionGroup.get(controlKey))
+            console.log("OKAY consition isfulfilled..")
+            sectionGroup.get(controlKey)?.patchValue(controlValue);
+            
           }
         } else {
           // 🎯 PATCH RADIO / DROPDOWN
