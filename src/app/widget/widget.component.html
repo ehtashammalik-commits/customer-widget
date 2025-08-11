@@ -1656,12 +1656,12 @@
                       </div>
 
                       <!-- Paragraph -->
-                      <!-- <div *ngSwitchCase="'paragraph'">
+                      <div *ngSwitchCase="'paragraph'">
                         <label>{{ attribute.label }}</label>
                         <mat-form-field appearance="outline">
                           <textarea matInput rows="3" [formControlName]="attribute.key"></textarea>
                         </mat-form-field>
-                      </div> -->
+                      </div>
 
 
                       <!-- Checkbox -->
@@ -1681,6 +1681,7 @@
                             >
                               <input
                                 type="checkbox"
+                                [disabled]="message.body.disableFormMessageInteraction"
                                 [id]="'checkbox_' + attribute.key + '_' + i + '_' + replaceSpacesWithUnderscores(category.label) + '_' + replaceSpacesWithUnderscores(option.label)"
                                 (change)="onCheckboxChange(
                                   $event,

@@ -2153,15 +2153,29 @@ private patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
       const controlKey = attr.key;
 
       if (attr.attributeType?.toUpperCase() === 'OPTIONS') {
-        // Multiple choice options
-        const selectedValues = (attr.answer || [])
-          .filter(opt => opt.isSelected)
-          .map(opt => opt.value);
 
-        const controlValue = selectedValues.length <= 1 ? selectedValues[0] || '' : selectedValues;
+        if (attr.valueType?.toLowerCase() === 'checkbox') {
+          // ✅ PATCH CHECKBOXES
+          const optionsControl = sectionGroup.get(controlKey);
+          if (optionsControl) {
+            const patchedOptions = attr.answer.map((option: any) => ({
+              ...option,
+              isSelected: !!option.isSelected // ensure boolean
+            }));
+            optionsControl.patchValue(patchedOptions);
+          }
+        } else {
+          // 🎯 PATCH RADIO / DROPDOWN
+          const selectedValues = (attr.answer || [])
+            .filter(opt => opt.isSelected)
+            .map(opt => opt.value);
 
-        if (sectionGroup.get(controlKey)) {
-          sectionGroup.get(controlKey)?.patchValue(controlValue);
+          const controlValue =
+            selectedValues.length <= 1 ? selectedValues[0] || '' : selectedValues;
+
+          if (sectionGroup.get(controlKey)) {
+            sectionGroup.get(controlKey)?.patchValue(controlValue);
+          }
         }
       }
       else if (['INPUT', 'TEXTAREA'].includes(attr.attributeType?.toUpperCase())) {
