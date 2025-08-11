@@ -167,13 +167,6 @@ export class TranscriptComponent implements OnInit {
   }, 2000);
 }
 
-
-
-  getSafeUrl(url: string): string {
-    // You can sanitize this later if needed via DomSanitizer
-    return url;
-  }
-
   getInitialsFromFullName(name: string = ''): string {
     const trimmedName = name.trim();
     if (!trimmedName) return ''; // safeguard for empty input
