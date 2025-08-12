@@ -1659,12 +1659,12 @@
                       </div>
 
                       <!-- Paragraph -->
-                      <!-- <div *ngSwitchCase="'paragraph'">
+                      <div *ngSwitchCase="'paragraph'">
                         <label>{{ attribute.label }}</label>
                         <mat-form-field appearance="outline">
                           <textarea matInput rows="3" [formControlName]="attribute.key"></textarea>
                         </mat-form-field>
-                      </div> -->
+                      </div>
 
 
                       <!-- Checkbox -->
@@ -1735,7 +1735,7 @@
                       </div>
 
                       <!-- Date -->
-                      <div *ngSwitchCase="'data'">
+                      <div *ngSwitchCase="'date'">
                         <label>{{ attribute.label }}</label>
                         <input matInput type="date" [formControlName]="attribute.key" />
                       </div>

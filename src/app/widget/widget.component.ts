@@ -1121,10 +1121,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     let formData : any[] = [];
     let formValues: any[] = [];
 
-    if (messageType === "formMessageType" && this.formMessageTypeData) {
+    if (messageType === "formMessageType" && this.formMessageTypeData && this.isChatActive) {
       formData = this.formMessageTypeData || [];
       formValues = messageTypeFormValues;
-    } else {
+    } else if( this.preChatFormInfo && !this.isChatActive) {
       formData = this.formData;
       formValues = this.preChatFormGroup.value;
     }
@@ -1806,24 +1806,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   handleCimMessage(cimMessage: any) {
 
-    if (
-        cimMessage.body.type?.toLowerCase() === 'form_data' &&
-        cimMessage.header.sender?.type?.toLowerCase() === 'bot'
-      ) {
-        const messageId = cimMessage.id;
-        const formGroup = this.fb.group({
-          sections: this.fb.array([])
-        });
-
-        const sections: any[] = Array.isArray(cimMessage.body?.sections)
-          ? cimMessage.body.sections
-          : [];
-
-        this.formMessageTypeData = sections
-        this.formGroupsMap[messageId] = formGroup; // ✅ Save form for this message
-        this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
+     if (cimMessage.body.type?.toLowerCase() === 'form_data' &&
+       cimMessage.header.sender?.type?.toLowerCase() === 'bot') {
+        this.createFromMapGroup(cimMessage);
       }
-
 
     if (
       cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
@@ -2052,28 +2038,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   handleResumedMessages(cimMessages: any[]) {
     
     
-    cimMessages.forEach((cimMessage) => {
+    cimMessages.forEach(async (cimMessage) => {
 
       if (cimMessage.body.type?.toLowerCase() === 'form_data') {
-          
-          if(cimMessage.header.originalMessageId) {
-            const formGroup = this.buildFormMessage(cimMessage);
-            this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
-            this.handleFormMessageType(cimMessage);
-          } else {
-            const messageId = cimMessage.id;
-            const formGroup = this.fb.group({
-            sections: this.fb.array([])
-           });
-
-            const sections: any[] = Array.isArray(cimMessage.body?.sections)
-              ? cimMessage.body.sections
-              : [];
-
-            this.formMessageTypeData = sections
-            this.formGroupsMap[messageId] = formGroup; // ✅ Save form for this message
-            this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
-          }
+        this.handleRefreshCasesofFormMessageType(cimMessage);
       }
       
       if (
@@ -2137,33 +2105,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     });
   }
-
-
-  private buildFormMessage(cimMessage: any) {
-    const originalMessageId = cimMessage.header.originalMessageId;
-    const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
-
-    if (!originalMessage) {
-      console.warn(`Original message with ID ${originalMessageId} not found.`);
-      return;
-    }
-
-    const formGroup = this.fb.group({
-      sections: this.fb.array([])
-    });
-
-    const sections: any[] = Array.isArray(originalMessage.body?.sections)
-      ? originalMessage.body.sections
-      : [];
-
-
-    this.formGroupsMap[originalMessageId] = formGroup;
-    this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
-    return formGroup;
-}
-
-
-
 
 
   getAgentDisplayName(user: any): string {
@@ -4316,6 +4257,61 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       );
     }
   }
+  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TENEO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 
+
+  async handleRefreshCasesofFormMessageType(cimMessage: any) {
+
+    if(cimMessage.header.originalMessageId) {
+      const formGroup = this.buildFormMessage(cimMessage);
+      if(cimMessage.body.additionalDetails?.status === 'filled') {
+        await this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
+      }
+      
+      this.handleFormMessageType(cimMessage);
+      } else {
+            this.createFromMapGroup(cimMessage);
+      }
+  }
+
+
+   createFromMapGroup(cimMessage: any) {
+
+    // This method is used to create a form group for the form message type against the message id
+      const messageId = cimMessage.id;
+      const formGroup = this.fb.group({
+      sections: this.fb.array([])});
+
+      const sections: any[] = Array.isArray(cimMessage.body?.sections)
+      ? cimMessage.body.sections
+      : [];
+
+      this.formMessageTypeData = sections
+      this.formGroupsMap[messageId] = formGroup;
+      this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
+   }
+
+  private buildFormMessage(cimMessage: any) {
+    const originalMessageId = cimMessage.header.originalMessageId;
+    const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
+
+    if (!originalMessage) {
+      console.warn(`Original message with ID ${originalMessageId} not found.`);
+      return;
+    }
+
+    const formGroup = this.fb.group({
+      sections: this.fb.array([])
+    });
+
+    const sections: any[] = Array.isArray(originalMessage.body?.sections)
+      ? originalMessage.body.sections
+      : [];
+
+
+    this.formGroupsMap[originalMessageId] = formGroup;
+    this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
+    return formGroup;
+}
 //  carousel function
   currentIndex = 0;
 
