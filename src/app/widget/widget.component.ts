@@ -148,7 +148,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   // Teneo 
 
-  INTERACTIVE_TYPES = ['button', 'carousel'];
+  INTERACTIVE_TYPES = ['button', 'carousel','form_data'];
   // Variables for Call Controls
   isCallMute = false;
   isVideoHide = false;
@@ -1982,6 +1982,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   disableOldInteractiveMessages(cimMessages: any[]) {
     cimMessages.forEach((message: any) => {
+
+      console.log("=================>>>>>>>>>>>>>>>>>Disabling Old Interactive Messages", message);
+
       const isFromBot = message.header?.sender?.type?.toLowerCase() === 'bot';
       const type = message.body?.type?.toLowerCase();
 
@@ -2009,12 +2012,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
 
       if(type === 'form_data') {
+        const fg = this.formGroupsMap[message.id];
         const disableInteraction = message.body?.additionalDetails?.disableInteraction;
         if(disableInteraction) {
-          message.body.additionalDetails = {
-            ...(message.body.additionalDetails || {}),
-            disableFormMessageInteraction: true,
-          }
+          fg.disable({ emitEvent: false });
+          message.body.disableFormMessageInteraction = true
         }
       }
     });
