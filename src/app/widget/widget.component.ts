@@ -437,6 +437,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe(
       (configs: { form: string }) => {
+        console.log("SUBSCRIBERS: first conigs", configs)
         this.setWidgetConfigs(configs);
 
         this.loadBrowserLanguage();
@@ -453,9 +454,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
 
     this.sdk.validationsSubcription.subscribe((res) => {
+      console.log("SUBSCRIBERS: second response of validations", res)
       this.formValidations = res;
       this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
         (formData: { sections: { attributes: any[] }[], formTitle: string, formDescription: string }) => {
+           console.log("SUBSCRIBERS: third response of formData", formData)
           this.preChatFormInfo = formData;
           console.log('preChatFormInfo========>', this.preChatFormInfo)
           this.formData = formData.sections;
@@ -473,6 +476,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.callbackFormSubscription = this.sdk.renderCallbackForm$.subscribe(
       (formData: { sections: { attributes: any[] }[] }) => {
+        console.log("SUBSCRIBERS before fourth callback form data this.validations ", this.formValidations)
+        console.log('SUBSCRIBERS fourth callback form data:', formData);
         this.callbackFormData = formData.sections[0].attributes.filter(
           (item: any) => {
             return item.valueType != 'checkbox';
@@ -488,6 +493,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.onChatResumedSubject = this.sdk.onChatResumedResponse$.subscribe(
       (data: { isChatAvailable: boolean; data: any[] }) => {
+
+         console.log("SUBSCRIBERS before onChatResumse this.validations ", this.formValidations)
+         console.log('SUBSCRIBERS onChatResumse fifth callback form data:', data);
         if (data.isChatAvailable == true) {
           this.changeScreen('chat');
           console.log('on Chat Resumed Response:', data.data);
@@ -1967,9 +1975,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   disableOldInteractiveMessages(cimMessages: any[]) {
     cimMessages.forEach((message: any) => {
-
-      console.log("=================>>>>>>>>>>>>>>>>>Disabling Old Interactive Messages", message);
-
       const isFromBot = message.header?.sender?.type?.toLowerCase() === 'bot';
       const type = message.body?.type?.toLowerCase();
 
