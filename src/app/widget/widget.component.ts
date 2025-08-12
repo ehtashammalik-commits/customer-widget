@@ -793,8 +793,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const messageId = message.id;
     const form = this.formGroupsMap[messageId];
     console.log('Form for messageId:', messageId, 'is', form);
-    if (form && form.valid) {
-      const payload = form.value;
+      if (form.invalid) {
+        form.markAllAsTouched(); // Mark all fields touched so errors show
+        return; // Stop submission
+      }
+
       let finalPayload = this.createFormDataObject();
 
       finalPayload.body.sections = await this.creatingSectionsforSchema(form.value, "formMessageType");
@@ -806,24 +809,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       finalPayload.body.formId = '';
       finalPayload.body.formTitle= message.body.formTitle || '';
       
-    this.constructCimMessage(
-        'FORM_DATA',
-        null,
-        null,
-        finalPayload.id,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        finalPayload,
-        'filled'
-      );
-
-    } else {
-      console.warn('Form not valid for messageId:', messageId);
-    }
+      this.constructCimMessage(
+          'FORM_DATA',
+          null,
+          null,
+          finalPayload.id,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          finalPayload,
+          'filled'
+        );
   }
 
 
@@ -1808,7 +1807,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
      if (cimMessage.body.type?.toLowerCase() === 'form_data' &&
        cimMessage.header.sender?.type?.toLowerCase() === 'bot') {
-        this.createFromMapGroup(cimMessage);
+        this.createFormMapGroup(cimMessage);
       }
 
     if (
@@ -2041,7 +2040,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     cimMessages.forEach(async (cimMessage) => {
 
       if (cimMessage.body.type?.toLowerCase() === 'form_data') {
-        this.handleRefreshCasesofFormMessageType(cimMessage);
+        await this.handleRefreshCasesofFormMessageType(cimMessage);
       }
       
       if (
@@ -4262,7 +4261,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   async handleRefreshCasesofFormMessageType(cimMessage: any) {
     if (cimMessage.header.originalMessageId) {
       const formGroup = this.buildFormMessage(cimMessage);
-      
+
       const status = cimMessage.body.additionalDetails?.status?.toLowerCase();
       if (status === 'filled') {
         await this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
@@ -4271,13 +4270,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       // ✅ Always runs regardless of status
       this.handleFormMessageType(cimMessage);
     } else {
-      this.createFromMapGroup(cimMessage);
+      this.createFormMapGroup(cimMessage);
     }
 }
 
 
 
-   createFromMapGroup(cimMessage: any) {
+   createFormMapGroup(cimMessage: any) {
 
     // This method is used to create a form group for the form message type against the message id
       const messageId = cimMessage.id;

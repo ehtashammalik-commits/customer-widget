@@ -1624,6 +1624,13 @@
           <p class="rich-inner-text">{{ message.body.formTitle }}</p>
           <p class="rich-inner-text">{{ message.body.formDescription }}</p>
 
+          <!-- Global error for this specific message form -->
+          <div class="fields-validation-error mr-2" *ngIf="formGroupsMap[message.id]?.invalid && formGroupsMap[message.id]?.touched">
+            <span class="field-error error_text_for_filling">
+              {{ 'error.incomplete-required-fields' | translate }}
+            </span>
+          </div>
+
           <div class="message-inner-form">
             <form
               class="compact-form"
@@ -1651,7 +1658,8 @@
 
                       <div *ngSwitchCase="'shortAnswer'">
                         <label>
-                          {{ attribute.label }} <span *ngIf="attribute.isRequired">*</span>
+                          {{ attribute.label }}
+                          <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
                         <mat-form-field appearance="outline">
                           <input matInput type="text" [formControlName]="attribute.key" />
@@ -1661,6 +1669,7 @@
                       <!-- Paragraph -->
                       <div *ngSwitchCase="'paragraph'">
                         <label>{{ attribute.label }}</label>
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         <mat-form-field appearance="outline">
                           <textarea matInput rows="3" [formControlName]="attribute.key"></textarea>
                         </mat-form-field>
@@ -1670,7 +1679,7 @@
                       <!-- Checkbox -->
                       <div *ngSwitchCase="'checkbox'">
                         <label>{{ attribute.label }}</label>
-                        
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         <div *ngFor="let category of attribute.attributeOptions?.attributeData; let categoryIndex = index">
                           <!-- Show category label if categories are enabled -->
                           <h3 *ngIf="attribute.attributeOptions.enableCategory" class="category-label">
@@ -1709,6 +1718,7 @@
                       <!-- Radio -->
                       <div *ngSwitchCase="'radio'">
                         <label>{{ attribute.label }}</label>
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         <mat-radio-group [formControlName]="attribute.key">
                           <mat-radio-button
                             *ngFor="let option of attribute.attributeOptions?.attributeData[0]?.values"
@@ -1722,6 +1732,7 @@
                       <!-- Dropdown -->
                       <div *ngSwitchCase="'dropdown'">
                         <label>{{ attribute.label }}</label>
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         <mat-form-field appearance="outline">
                           <mat-select [formControlName]="attribute.key">
                             <mat-option
@@ -1737,24 +1748,28 @@
                       <!-- Date -->
                       <div *ngSwitchCase="'date'">
                         <label>{{ attribute.label }}</label>
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         <input matInput type="date" [formControlName]="attribute.key" />
                       </div>
 
                       <!-- Time -->
                       <div *ngSwitchCase="'time'">
                         <label>{{ attribute.label }}</label>
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         <input matInput type="time" [formControlName]="attribute.key" />
                       </div>
 
                       <!-- DateTime -->
                       <div *ngSwitchCase="'dateTime'">
                         <label>{{ attribute.label }}</label>
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         <input matInput type="datetime-local" [formControlName]="attribute.key" />
                       </div>
 
                       <!-- color picker -->
                       <div *ngSwitchCase="'color'">
                         <label>{{ attribute.label }}</label>
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         <input matInput type="color" [formControlName]="attribute.key" />
                       </div>
 
@@ -1763,6 +1778,7 @@
 
                     <div *ngSwitchCase="'range'">
                       <label>{{ attribute.label }}</label>
+                      <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                       <div style="display: flex; align-items: center; gap: 10px;">
                         <input type="range"
                               [formControlName]="attribute.key"
