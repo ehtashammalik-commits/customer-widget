@@ -8,6 +8,7 @@ export class FormMessageTypeService {
 
   constructor() { }
     patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
+      console.log("OKAY sections", formGroup)
       const sectionArray = formGroup.get('sections') as FormArray;
       if (!sectionArray || sectionArray.length === 0) return;
 

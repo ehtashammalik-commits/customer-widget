@@ -2037,10 +2037,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   handleResumedMessages(cimMessages: any[]) {
     
     
-    cimMessages.forEach(async (cimMessage) => {
+    cimMessages.forEach((cimMessage) => {
 
       if (cimMessage.body.type?.toLowerCase() === 'form_data') {
-        await this.handleRefreshCasesofFormMessageType(cimMessage);
+        this.handleRefreshCasesofFormMessageType(cimMessage);
       }
       
       if (
@@ -4260,7 +4260,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   async handleRefreshCasesofFormMessageType(cimMessage: any) {
     if (cimMessage.header.originalMessageId) {
-      const formGroup = this.buildFormMessage(cimMessage);
+      const formGroup = await this.buildFormMessage(cimMessage);
+      console.log("here is formGroup", formGroup)
 
       const status = cimMessage.body.additionalDetails?.status?.toLowerCase();
       if (status === 'filled') {
@@ -4292,12 +4293,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
    }
 
-  private buildFormMessage(cimMessage: any) {
-    const originalMessageId = cimMessage.header.originalMessageId;
-    const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
+  private async buildFormMessage(cimMessage: any) {
+    const originalMessageId = cimMessage.header?.originalMessageId;
+    if (!originalMessageId) {
+      console.warn("No originalMessageId found in message header.");
+      return;
+    }
 
+    const originalMessage = await this.waitForMessageById(originalMessageId);
     if (!originalMessage) {
-      console.warn(`Original message with ID ${originalMessageId} not found.`);
+      console.warn(`Original message with ID ${originalMessageId} not found after retries.`);
       return;
     }
 
@@ -4305,15 +4310,29 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       sections: this.fb.array([])
     });
 
-    const sections: any[] = Array.isArray(originalMessage.body?.sections)
+    const sections = Array.isArray(originalMessage.body?.sections)
       ? originalMessage.body.sections
       : [];
-
 
     this.formGroupsMap[originalMessageId] = formGroup;
     this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
     return formGroup;
 }
+
+  private async waitForMessageById(id: any, timeoutMs = 2000) {
+    const normalizeId = (val: any) => String(val ?? '').trim().toLowerCase();
+    const targetId = normalizeId(id);
+
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      const found = this.cimMessage.find(msg => normalizeId(msg.id) === targetId);
+      if (found) return found;
+      await new Promise(r => setTimeout(r, 100)); // wait a bit before retrying
+    }
+    return null;
+  }
+
+
 //  carousel function
   currentIndex = 0;
 
