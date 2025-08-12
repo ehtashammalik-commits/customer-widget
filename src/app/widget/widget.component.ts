@@ -4260,18 +4260,21 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TENEO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 
 
   async handleRefreshCasesofFormMessageType(cimMessage: any) {
-
-    if(cimMessage.header.originalMessageId) {
+    if (cimMessage.header.originalMessageId) {
       const formGroup = this.buildFormMessage(cimMessage);
-      if(cimMessage.body.additionalDetails?.status === 'filled') {
+      
+      const status = cimMessage.body.additionalDetails?.status?.toLowerCase();
+      if (status === 'filled') {
         await this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
       }
-      
+
+      // ✅ Always runs regardless of status
       this.handleFormMessageType(cimMessage);
-      } else {
-            this.createFromMapGroup(cimMessage);
-      }
-  }
+    } else {
+      this.createFromMapGroup(cimMessage);
+    }
+}
+
 
 
    createFromMapGroup(cimMessage: any) {
