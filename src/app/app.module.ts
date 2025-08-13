@@ -38,6 +38,7 @@ import { FormatTimePipe } from './pipes/format-time.pipe';
 import { NgxUiLoaderModule, NgxUiLoaderConfig } from 'ngx-ui-loader';
 import { SanitizeHtmlPipe } from './sanitizeHtml.pipe';
 import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
+import { SanitizeHtmlForEmail } from './pipes/sanitize-html-for-email.pipe';
 
 
 export function initializeApp1(appConfigService: ConfigService) {
@@ -66,7 +67,8 @@ export function initializeApp1(appConfigService: ConfigService) {
     TranscriptComponent,
     FormatTimePipe,
     SanitizeHtmlPipe,
-    SafeAttachmentUrlPipe
+    SafeAttachmentUrlPipe,
+    SanitizeHtmlForEmail
   ],
   imports: [
     NgxLinkifyjsModule.forRoot({

@@ -251,7 +251,7 @@
                 </ul>
               </div>
               <div class="email-inner-content activity-inner-content">
-                <div class="email-preview-main" [innerHTML]="message.body.htmlBody | sanitizeHtml"></div>
+                <div class="email-preview-main" [innerHTML]="message.body.htmlBody | sanitizeHtmlForEmail"></div>
                 <div class="attach-file-preview" *ngFor="let attachment of message.body.attachments">
                   <ng-container *ngIf="attachment.mediaUrl | safeAttachmentUrl as safeUrl">
 
@@ -459,7 +459,7 @@
 
             </div>
             <div class="email-inner-content activity-inner-content">
-              <div class="email-preview-main" [innerHTML]="message.body.htmlBody | sanitizeHtml"></div>
+              <div class="email-preview-main" [innerHTML]="message.body.htmlBody | sanitizeHtmlForEmail"></div>
 
               <div class="attach-file-preview" *ngFor="let attachment of message.body.attachments">
                 <ng-container *ngIf="attachment.mediaUrl | safeAttachmentUrl as safeUrl">
