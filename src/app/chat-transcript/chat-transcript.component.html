@@ -395,6 +395,7 @@
                     <a target="_blank" [href]="message.body.attachment?.mediaUrl | safeFileURL">
                       <img [src]="message.body.attachment?.mediaUrl | safeFileURL" class="imageViewer" />
                     </a>
+                    <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
                       <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                     </span>
@@ -409,6 +410,7 @@
                         Your browser does not support the video tag.
                       </video>
                     </span>
+                    <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
                       <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                     </span>
@@ -423,6 +425,7 @@
                         Your browser does not support the audio tag.
                       </audio>
                     </span>
+                    <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
                       <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                     </span>
@@ -657,6 +660,7 @@
                     <a target="_blank" [href]="message.body.attachment?.mediaUrl | safeFileURL">
                       <img [src]="message.body.attachment?.mediaUrl | safeFileURL" class="imageViewer" />
                     </a>
+                    <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
                       <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                     </span>
@@ -671,6 +675,7 @@
                         Your browser does not support the video tag.
                       </video>
                     </span>
+                    <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
                       <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                     </span>
@@ -685,6 +690,7 @@
                         Your browser does not support the audio tag.
                       </audio>
                     </span>
+                    <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
                       <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
                     </span>
