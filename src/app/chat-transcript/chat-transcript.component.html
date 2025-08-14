@@ -367,69 +367,71 @@
           </div>
         </div>
 
-        <div *ngSwitchCase="'COMMENT'" class="chat-message agent-message"
-          [ngClass]="{'message-blurred': message.isBlurred}">
-          <div class="profile-pic">
-            <div class="profile-pic-area user-img">
-              {{ getInitialsFromFullName(message.header.sender.senderName) }}
+        <ng-container *ngIf="['TEXT', 'AUDIO', 'VIDEO', 'IMAGE'].includes(message.body.itemType)">
+          <div *ngSwitchCase="'COMMENT'" class="chat-message agent-message"
+            [ngClass]="{'message-blurred': message.isBlurred}">
+            <div class="profile-pic">
+              <div class="profile-pic-area user-img">
+                {{ getInitialsFromFullName(message.header.sender.senderName) }}
+              </div>
+            </div>
+            <div class="chat-message-content">
+              <div class="user-name">
+                <span>{{ message.header.sender.senderName }}</span>
+              </div>
+              <ng-container [ngSwitch]="message.body.itemType">
+                <!-- TEXT comment -->
+                <div *ngSwitchCase="'TEXT'">
+                  <p>
+                    <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
+                    <span class="message-stamp">
+                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                    </span>
+                  </p>
+                </div>
+                <!-- IMAGE comment -->
+                <div *ngSwitchCase="'IMAGE'">
+                  <p>
+                    <a target="_blank" [href]="message.body.attachment?.mediaUrl | safeFileURL">
+                      <img [src]="message.body.attachment?.mediaUrl | safeFileURL" class="imageViewer" />
+                    </a>
+                    <span class="message-stamp">
+                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                    </span>
+                  </p>
+                </div>
+                <!-- VIDEO comment -->
+                <div *ngSwitchCase="'VIDEO'" class="file-type-message image-type">
+                  <p>
+                    <span>
+                      <video class="videoPlayer" controls>
+                        <source [src]="message.body.attachment?.mediaUrl | safeFileURL" type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    </span>
+                    <span class="message-stamp">
+                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                    </span>
+                  </p>
+                </div>
+                <!-- AUDIO comment -->
+                <div *ngSwitchCase="'AUDIO'" class="file-type-message image-type">
+                  <p>
+                    <span>
+                      <audio class="audioPlayer" controls>
+                        <source [src]="message.body.attachment?.mediaUrl | safeFileURL" type="audio/mpeg" />
+                        Your browser does not support the audio tag.
+                      </audio>
+                    </span>
+                    <span class="message-stamp">
+                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                    </span>
+                  </p>
+                </div>
+              </ng-container>
             </div>
           </div>
-          <div class="chat-message-content">
-            <div class="user-name">
-              <span>{{ message.header.sender.senderName }}</span>
-            </div>
-            <ng-container [ngSwitch]="message.body.itemType">
-              <!-- TEXT comment -->
-              <div *ngSwitchCase="'TEXT'">
-                <p>
-                  <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
-                  <span class="message-stamp">
-                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
-                  </span>
-                </p>
-              </div>
-              <!-- IMAGE comment -->
-              <div *ngSwitchCase="'IMAGE'">
-                <p>
-                  <a target="_blank" [href]="message.body.attachment?.mediaUrl | safeFileURL">
-                    <img [src]="message.body.attachment?.mediaUrl | safeFileURL" class="imageViewer" />
-                  </a>
-                  <span class="message-stamp">
-                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
-                  </span>
-                </p>
-              </div>
-              <!-- VIDEO comment -->
-              <div *ngSwitchCase="'VIDEO'" class="file-type-message image-type">
-                <p>
-                  <span>
-                    <video class="videoPlayer" controls>
-                      <source [src]="message.body.attachment?.mediaUrl | safeFileURL" type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                  </span>
-                  <span class="message-stamp">
-                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
-                  </span>
-                </p>
-              </div>
-              <!-- AUDIO comment -->
-              <div *ngSwitchCase="'AUDIO'" class="file-type-message image-type">
-                <p>
-                  <span>
-                    <audio class="audioPlayer" controls>
-                      <source [src]="message.body.attachment?.mediaUrl | safeFileURL" type="audio/mpeg" />
-                      Your browser does not support the audio tag.
-                    </audio>
-                  </span>
-                  <span class="message-stamp">
-                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
-                  </span>
-                </p>
-              </div>
-            </ng-container>
-          </div>
-        </div>
+        </ng-container>
 
         <div *ngSwitchCase="'FILE'" class="chat-message agent-message"
           [ngClass]="{'message-blurred': message.isBlurred}">
@@ -624,73 +626,75 @@
           </div>
         </div>
 
-        <div *ngSwitchCase="'COMMENT'" class="chat-message user-message"
-          [ngClass]="{'message-blurred': message.isBlurred}">
-          <div class="profile-pic">
-            <div class="active-channel channel-icon web">
-              <img [src]="getChannelIconURL(
-                      message.header.sender.senderName,
-                      message.header.sender.id
-                    )" width="20" />
+        <ng-container *ngIf="['TEXT', 'AUDIO', 'VIDEO', 'IMAGE'].includes(message.body.itemType)">
+          <div *ngSwitchCase="'COMMENT'" class="chat-message user-message"
+            [ngClass]="{'message-blurred': message.isBlurred}">
+            <div class="profile-pic">
+              <div class="active-channel channel-icon web">
+                <img [src]="getChannelIconURL(
+                        message.header.sender.senderName,
+                        message.header.sender.id
+                      )" width="20" />
+              </div>
+              <div class="profile-pic-area user-img">
+                {{ getInitialsFromFullName(message.header.customer.firstName) }}
+              </div>
             </div>
-            <div class="profile-pic-area user-img">
-              {{ getInitialsFromFullName(message.header.customer.firstName) }}
+            <div class="chat-message-content">
+              <ng-container [ngSwitch]="message.body.itemType">
+                <!-- TEXT comment -->
+                <div *ngSwitchCase="'TEXT'">
+                  <p>
+                    <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
+                    <span class="message-stamp">
+                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                    </span>
+                  </p>
+                </div>
+                <!-- IMAGE comment -->
+                <div *ngSwitchCase="'IMAGE'">
+                  <p>
+                    <a target="_blank" [href]="message.body.attachment?.mediaUrl | safeFileURL">
+                      <img [src]="message.body.attachment?.mediaUrl | safeFileURL" class="imageViewer" />
+                    </a>
+                    <span class="message-stamp">
+                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                    </span>
+                  </p>
+                </div>
+                <!-- VIDEO comment -->
+                <div *ngSwitchCase="'VIDEO'" class="file-type-message image-type">
+                  <p>
+                    <span>
+                      <video class="videoPlayer" controls>
+                        <source [src]="message.body.attachment?.mediaUrl | safeFileURL" type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    </span>
+                    <span class="message-stamp">
+                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                    </span>
+                  </p>
+                </div>
+                <!-- AUDIO comment -->
+                <div *ngSwitchCase="'AUDIO'" class="file-type-message image-type">
+                  <p>
+                    <span>
+                      <audio class="audioPlayer" controls>
+                        <source [src]="message.body.attachment?.mediaUrl | safeFileURL" type="audio/mpeg" />
+                        Your browser does not support the audio tag.
+                      </audio>
+                    </span>
+                    <span class="message-stamp">
+                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                    </span>
+                  </p>
+                </div>
+              </ng-container>
             </div>
           </div>
-          <div class="chat-message-content">
-            <ng-container [ngSwitch]="message.body.itemType">
-              <!-- TEXT comment -->
-              <div *ngSwitchCase="'TEXT'">
-                <p>
-                  <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
-                  <span class="message-stamp">
-                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
-                  </span>
-                </p>
-              </div>
-              <!-- IMAGE comment -->
-              <div *ngSwitchCase="'IMAGE'">
-                <p>
-                  <a target="_blank" [href]="message.body.attachment?.mediaUrl | safeFileURL">
-                    <img [src]="message.body.attachment?.mediaUrl | safeFileURL" class="imageViewer" />
-                  </a>
-                  <span class="message-stamp">
-                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
-                  </span>
-                </p>
-              </div>
-              <!-- VIDEO comment -->
-              <div *ngSwitchCase="'VIDEO'" class="file-type-message image-type">
-                <p>
-                  <span>
-                    <video class="videoPlayer" controls>
-                      <source [src]="message.body.attachment?.mediaUrl | safeFileURL" type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                  </span>
-                  <span class="message-stamp">
-                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
-                  </span>
-                </p>
-              </div>
-              <!-- AUDIO comment -->
-              <div *ngSwitchCase="'AUDIO'" class="file-type-message image-type">
-                <p>
-                  <span>
-                    <audio class="audioPlayer" controls>
-                      <source [src]="message.body.attachment?.mediaUrl | safeFileURL" type="audio/mpeg" />
-                      Your browser does not support the audio tag.
-                    </audio>
-                  </span>
-                  <span class="message-stamp">
-                    <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
-                  </span>
-                </p>
-              </div>
-            </ng-container>
-          </div>
-        </div>
-
+        </ng-container>
+        
         <div *ngSwitchCase="'File'" class="chat-message user-message"
           [ngClass]="{'message-blurred': message.isBlurred}">
           <div class="profile-pic">

@@ -1626,8 +1626,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               this.clearSession();
             } else {
               this.cimMessage = [];
+              this.storageService.removeItem('user', this.storageType);
             }
-            this.storageService.removeItem('user', this.storageType);
             this.composerDisable();
             break;
           case 'SOCKET_RECONNECTED':
@@ -1721,6 +1721,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'SOCKET_DISCONNECTED':
           case 'SOCKET_REPLACED':
             console.log('event response:', event.data);
+            this.cimMessage = [];
+            this.clearMessageData();
+            this.isChatActive = false;
+            this.composerDisable();
             this.changeScreen('end');
             break;
           case 'CONNECT_ERROR':
