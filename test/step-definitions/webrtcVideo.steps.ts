@@ -1,4 +1,4 @@
-import { ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, ElementRef, Renderer2 } from '@angular/core';
 import { defineFeature, loadFeature } from 'jest-cucumber';
 import { WidgetComponent } from 'src/app/widget/widget.component';
 
@@ -60,6 +60,8 @@ const mockMediaDevices = {
 
 // Helper function to create a mock component
 const createMockComponent = () => {
+  const mockStorageService = {} as any;
+  const mockRouter = {} as any;
   const mockChangeDetectorRef = {
     detectChanges: jest.fn(),
   } as unknown as ChangeDetectorRef;
@@ -84,8 +86,8 @@ const createMockComponent = () => {
   } as any;
 
   const webRTCConfig = { sipExtension: '1234' };
-  const mockElementRef = {} as any;
-  const mockRenderer2 = {} as any;
+  const mockElementRef = {} as ElementRef;
+  const mockRenderer2 = {} as Renderer2;
   const mockSanitizer = {} as any;
   const mockSnackBar = {} as any;
   const mockDialog = {} as any;
@@ -97,23 +99,25 @@ const createMockComponent = () => {
   const mockDeliveryNotificationService = {} as any;
   const mockPostMessageHandlerService = {} as any;
 
+  const mockDocument = {} as Document;
   const comp = new WidgetComponent(
-    mockActivatedRoute,
-    mockFormBuilder,
-    mockSdkService,
-    mockAppConfig,
-    mockElementRef,
-    mockRenderer2,
-    mockChangeDetectorRef,
-    mockSanitizer,
-    mockSnackBar,
-    mockDialog,
-    mockBrowserNotificationService,
-    mockDeliveryNotificationService,
-    mockPostMessageHandlerService,
-    mockTranslateService,
-    undefined,
-    undefined,
+  mockActivatedRoute, // ActivatedRoute
+  mockFormBuilder, // FormBuilder
+  mockSdkService, // SdkService
+  mockAppConfig, // ConfigService
+  mockStorageService, // StorageService
+  mockElementRef, // ElementRef
+  mockRenderer2, // Renderer2
+  mockChangeDetectorRef, // ChangeDetectorRef
+  mockSanitizer, // DomSanitizer
+  mockSnackBar, // MatSnackBar
+  mockDialog, // MatDialog
+  mockBrowserNotificationService, // BrowserNotificationService
+  mockDeliveryNotificationService, // DeliveryNotificationService
+  mockPostMessageHandlerService, // PostMessageHandlerService
+  mockTranslateService, // TranslateService
+  mockRouter, // Router
+  mockDocument, // Document
   );
 
   (comp as any).elementView = {
