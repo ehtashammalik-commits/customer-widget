@@ -101,23 +101,23 @@ const createMockComponent = () => {
 
   const mockDocument = {} as Document;
   const comp = new WidgetComponent(
-  mockActivatedRoute, // ActivatedRoute
-  mockFormBuilder, // FormBuilder
-  mockSdkService, // SdkService
-  mockAppConfig, // ConfigService
-  mockStorageService, // StorageService
-  mockElementRef, // ElementRef
-  mockRenderer2, // Renderer2
-  mockChangeDetectorRef, // ChangeDetectorRef
-  mockSanitizer, // DomSanitizer
-  mockSnackBar, // MatSnackBar
-  mockDialog, // MatDialog
-  mockBrowserNotificationService, // BrowserNotificationService
-  mockDeliveryNotificationService, // DeliveryNotificationService
-  mockPostMessageHandlerService, // PostMessageHandlerService
-  mockTranslateService, // TranslateService
-  mockRouter, // Router
-  mockDocument, // Document
+    mockActivatedRoute, // ActivatedRoute
+    mockFormBuilder, // FormBuilder
+    mockSdkService, // SdkService
+    mockAppConfig, // ConfigService
+    mockStorageService, // StorageService
+    mockElementRef, // ElementRef
+    mockRenderer2, // Renderer2
+    mockChangeDetectorRef, // ChangeDetectorRef
+    mockSanitizer, // DomSanitizer
+    mockSnackBar, // MatSnackBar
+    mockDialog, // MatDialog
+    mockBrowserNotificationService, // BrowserNotificationService
+    mockDeliveryNotificationService, // DeliveryNotificationService
+    mockPostMessageHandlerService, // PostMessageHandlerService
+    mockTranslateService, // TranslateService
+    mockRouter, // Router
+    mockDocument, // Document
   );
 
   (comp as any).elementView = {
