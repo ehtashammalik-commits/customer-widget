@@ -1719,6 +1719,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             console.log('Cim Message Array: ', this.cimMessage);
             break;
           case 'SOCKET_DISCONNECTED':
+            console.log('event response:', event.data);
+            if (messageType !== 'survey') {
+              this.cimMessage = [];
+              this.clearMessageData();
+              this.isChatActive = false;
+              this.composerDisable();
+              this.changeScreen('end');
+            }
+            break;
           case 'SOCKET_REPLACED':
             console.log('event response:', event.data);
             this.cimMessage = [];
