@@ -175,6 +175,16 @@ function eventListeners(callback) {
     callback({ type: "SOCKET_DISCONNECTED", data: reason });
   });
 
+  this.socket.on('SESSION_REPLACED', (data) => {
+    console.log(`SESSION_REPLACED received: `, data);
+    callback({ type: "SESSION_REPLACED", data: data });
+  });
+
+  this.socket.on('CONVERSATION_RESUMED', (data) => {
+    console.log(`CONVERSATION_RESUMED received: `, data);
+    callback({ type: "CONVERSATION_RESUMED", data: data });
+  });
+
   this.socket.on('connect_error', (error) => {
     console.log(`unable to establish connection with the server: `, error.message);
     localStorage.setItem("widget-error", "1");
@@ -718,7 +728,7 @@ function webhookNotifications(webhookUrl, additionalData, data) {
       }
     ]
   };
-  authorizedFetch(`${webhookUrl}`, {
+  fetch(`${webhookUrl}`, {
     method: 'POST',
     body: JSON.stringify(messageObj), // Formatting as a JSON object for Google Workspace webhook
     headers: {

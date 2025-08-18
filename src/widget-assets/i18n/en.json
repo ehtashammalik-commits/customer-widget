@@ -17,7 +17,20 @@
         "maximum-limit": "Maximum limit reached",
         "invalid-session-code": "Invalid Session Code!",
         "html5-not-supported": "Your browser does not support HTML5 video."
-
+    },
+    "session-end-reasons": {
+        "agent" :"session ended because the agent left the conversation",
+"customer" :"session ended because the customer left the conversation",
+"force-closed":"session ended due to customer's inactivity",
+"force_closed":"session ended due to customer's inactivity",
+"inactivity":"session ended due to customer's inactivity",
+"network":"session ended due to customer's network connectivity issue",
+"unknown":"session ended due to an unknown or unspecified reason"
+    },
+     "agent-notifications": {
+        "joined": "has joined",
+        "left": "has left",
+        "started": "session started"
     },
     "composer-placeholder": "Type message here ...",
     "button": {
@@ -57,12 +70,10 @@
         "end-conversation-confirmation": "Are you sure to end the conversation?",
         "yes": "Yes",
         "no": "No"
-
     },
     "label": {
         "choose-file": "Choose File",
         "sorry": "Sorry!",
         "thankyou": "Thank You!"
     }
-
 }
