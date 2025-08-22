@@ -64,6 +64,7 @@ defineFeature(feature, (test) => {
             mockPostMessageHandlerService,
             mockTranslateService,
             undefined,
+            undefined,
             undefined
           );
 
