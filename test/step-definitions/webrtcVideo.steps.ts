@@ -113,6 +113,7 @@ const createMockComponent = () => {
     mockPostMessageHandlerService,
     mockTranslateService,
     undefined,
+    undefined,
     undefined
   );
 

@@ -62,6 +62,7 @@ defineFeature(feature, (test) => {
       mockTranslateService,
       undefined,
       undefined,
+      undefined
     );
 
     component.customerData = {
