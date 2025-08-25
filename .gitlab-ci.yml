@@ -1,6 +1,7 @@
 variables:
   IMAGE_NAME: "${CI_REGISTRY_IMAGE}/build:${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}-${TIME_TOKEN}"
-  IMAGE_NAME_BRANCH: "${CI_REGISTRY_IMAGE}/build:${CI_COMMIT_BRANCH}-${CI_COMMIT_SHA}"
+  #IMAGE_NAME_BRANCH: "${CI_REGISTRY_IMAGE}/build:${CI_COMMIT_BRANCH}-${CI_COMMIT_SHA}"
+  IMAGE_NAME_BRANCH: "${CI_REGISTRY_IMAGE}/build:${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
 
 include:
   - project: 'cim/ci-templates'
@@ -163,7 +164,7 @@ sonarqube-test:
 
 
    # - sonar-scanner -X -Dsonar.testExecutionReportPaths=coverage/test-report.xml -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info -Dsonar.sources=src -Dsonar.sourceEncoding=UTF-8 -Dsonar.exclusions=**/node_modules/** -Dsonar.tests=src -Dsonar.test.inclusions=**/*.spec.ts  -Dsonar.projectKey=customer-widget-cim -Dsonar.qualitygate.wait=true -Dsonar.projectName=${CI_PROJECT_NAME}
-  allow_failure: true
+  allow_failure: false
 
 #+==================Runs onevery commit and tags manual========================+
 gitlab_build_branch:

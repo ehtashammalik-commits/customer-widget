@@ -5,6 +5,7 @@ import { ConfigService } from '../services/config.service';
 import { firstValueFrom } from 'rxjs';
 import {DomSanitizer, SafeResourceUrl, SafeUrl, Title} from '@angular/platform-browser';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
+import { TranslateService } from '@ngx-translate/core';
 
 
 @Component({
@@ -19,6 +20,7 @@ export class TranscriptComponent implements OnInit {
   browserLang = '';
   conversationAreaClass = '';
   state : string = '';
+  enableTranscriptNotifications: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -26,10 +28,16 @@ export class TranscriptComponent implements OnInit {
     public __appConfig: ConfigService,
     private sanitizer: DomSanitizer,
     private ngxLoader: NgxUiLoaderService,
-    private title: Title
-  ) {}
+    private title: Title,
+    private translate: TranslateService,
+    
+  ) {
+    translate.setDefaultLang('en');
+    translate.use('en');
+  }
 
   ngOnInit(): void {
+    this.enableTranscriptNotifications = this.__appConfig.appConfig.ENABLE_TRANSCRIPT_NOTIFICATIONS || false;
     this.title.setTitle('Conversation Transcript');
   this.route.queryParams.subscribe(async params => {
     const conversationId = params['conversationId'] || '';
@@ -92,6 +100,17 @@ export class TranscriptComponent implements OnInit {
 
         for (const message of data) {
           const intent = message?.header?.intent?.toLowerCase();
+          
+          if (message.body?.type === 'DELIVERYNOTIFICATION') {
+            const originalId = message.body.messageId;
+            const index = processed.findIndex((msg) => msg.id === originalId);
+
+            if (index !== -1) {
+            const status = message.body.status;
+            processed[index].isBlurred = status === 'FAILED';
+            }
+          }
+
 
           if (intent === 'update') {
             const originalId = message.header.originalMessageId;
@@ -155,13 +174,6 @@ export class TranscriptComponent implements OnInit {
     window.print();
   }, 2000);
 }
-
-
-
-  getSafeUrl(url: string): string {
-    // You can sanitize this later if needed via DomSanitizer
-    return url;
-  }
 
   getInitialsFromFullName(name: string = ''): string {
     const trimmedName = name.trim();
