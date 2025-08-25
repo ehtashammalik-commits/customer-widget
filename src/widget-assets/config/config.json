@@ -14,11 +14,6 @@
   "VIDEO": true,
   "USERNAME_ENABLED": true,
   "MUTE_NOTIFICATIONS": false,
-<<<<<<< HEAD
-  "IS_DIRECT_WEBRTC_CALL_ENABLED": true
-}
-=======
   "IS_DIRECT_WEBRTC_CALL_ENABLED": true,
   "ENABLE_TRANSCRIPT_NOTIFICATIONS": true
 }
->>>>>>> origin/develop
