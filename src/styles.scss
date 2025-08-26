@@ -100,3 +100,19 @@ body {
         }
       }
   }
+.custom-radio-action{
+  mat-radio-button {
+    margin-right: 10px;
+    }
+  .mat-radio-label-content{
+    font-size: 14px;
+    padding-left: 5px;
+    }
+  }
+.custom-dropdown-field{
+  .mat-select{
+    border: none;
+    padding: 0;
+    margin-bottom: 0;
+}
+}

@@ -1416,7 +1416,7 @@
                         }">YOU</span>
                     </div>
 
-                    
+
                     <div *ngIf="message.header?.quotedType === 'Carousel'" class="quoted-reply-info quoted-message-area">
                       <!-- Replace with whatever data or HTML structure you want to show -->
                       <span class="quoted-sender-name">{{message.senderType}}</span>
@@ -1669,8 +1669,8 @@
 
                       <!-- Paragraph -->
                       <div *ngSwitchCase="'paragraph'">
-                        <label>{{ attribute.label }}</label>
-                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
                         <mat-form-field appearance="outline">
                           <textarea matInput rows="3" [formControlName]="attribute.key"></textarea>
                         </mat-form-field>
@@ -1679,8 +1679,8 @@
 
                       <!-- Checkbox -->
                       <div *ngSwitchCase="'checkbox'">
-                        <label>{{ attribute.label }}</label>
-                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
                         <div *ngFor="let category of attribute.attributeOptions?.attributeData; let categoryIndex = index">
                           <!-- Show category label if categories are enabled -->
                           <h3 *ngIf="attribute.attributeOptions.enableCategory" class="category-label">
@@ -1715,12 +1715,12 @@
 
 
 
-                      
+
 
                       <!-- Radio -->
-                      <div *ngSwitchCase="'radio'">
-                        <label>{{ attribute.label }}</label>
-                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                      <div *ngSwitchCase="'radio'" class="form-group custom-radio-action">
+                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
                         <mat-radio-group [formControlName]="attribute.key">
                           <mat-radio-button
                             *ngFor="let option of attribute.attributeOptions?.attributeData[0]?.values"
@@ -1732,9 +1732,9 @@
                       </div>
 
                       <!-- Dropdown -->
-                      <div *ngSwitchCase="'dropdown'">
-                        <label>{{ attribute.label }}</label>
-                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                      <div *ngSwitchCase="'dropdown'" class="form-group custom-dropdown-field">
+                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
                         <mat-form-field appearance="outline">
                           <mat-select [formControlName]="attribute.key">
                             <mat-option
@@ -1749,13 +1749,11 @@
 
                       <!-- Date -->
                       <div *ngSwitchCase="'date'" class="form-group custom-datentime">
-                        <label>{{ attribute.label }}
-                          <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
-                        
-                        <mat-form-field appearance="outline">
+
+
                           <input
-                            matInput
                             [owlDateTime]="dtPicker"
                             [owlDateTimeTrigger]="dtPicker"
                             [formControlName]="attribute.key"
@@ -1764,18 +1762,15 @@
                           <span [owlDateTimeTrigger]="dtPicker">
                                 <mat-icon>today</mat-icon>
                           </span>
-                        </mat-form-field>
                         <owl-date-time pickerType="calendar" #dtPicker></owl-date-time>
                       </div>
 
                       <!-- Time -->
                       <div *ngSwitchCase="'time'" class="form-group custom-datentime">
-                        <label>{{ attribute.label }}
-                          <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
-                        <mat-form-field appearance="outline">
+
                           <input
-                            matInput
                             [owlDateTime]="timePicker"
                             [owlDateTimeTrigger]="timePicker"
                             [formControlName]="attribute.key"
@@ -1784,7 +1779,6 @@
                           <span [owlDateTimeTrigger]="timePicker">
                             <mat-icon>access_time</mat-icon>
                           </span>
-                          </mat-form-field>
                         <owl-date-time pickerType="timer" #timePicker></owl-date-time>
                       </div>
 
@@ -1792,14 +1786,9 @@
 
                       <!-- DateTime -->
                       <div *ngSwitchCase="'dateTime'" class="form-group custom-datentime">
-                        <label>{{ attribute.label }}
-
-                          <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
-                        <mat-form-field appearance="outline">
-                        
                           <input
-                            matInput
                             [owlDateTime]="dateTimePicker"
                             [owlDateTimeTrigger]="dateTimePicker"
                             [formControlName]="attribute.key"
@@ -1808,7 +1797,6 @@
                           <span [owlDateTimeTrigger]="dateTimePicker">
                             <mat-icon>calendar_month</mat-icon>
                           </span>
-                          </mat-form-field>
                         <owl-date-time #dateTimePicker></owl-date-time>
                       </div>
 
@@ -1819,22 +1807,27 @@
                         <input matInput type="color" [formControlName]="attribute.key" />
                       </div>
 
-                      
+
                       <!-- Interactive range slider -->
 
-                    <div *ngSwitchCase="'range'">
-                      <label>{{ attribute.label }}</label>
-                      <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                    <div *ngSwitchCase="'range'" class="form-group">
+                      <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span></label>
+                      <mat-slider min="0" max="100000" step="1000" showTickMarks discrete [displayWith]="formatLabel">
+                        <input matSliderThumb>
+                      </mat-slider>
+
                       <div style="display: flex; align-items: center; gap: 10px;">
                         <input type="range"
                               [formControlName]="attribute.key"
                               [min]="attribute.min || 0"
                               [max]="attribute.max || 100"
                               [step]="attribute.step || 1" />
-                        
+
                       </div>
+
+
                     </div>
-                      
+
                       <!-- <div *ngSwitchDefault>
                         <p>Unsupported field type: {{ attribute.valueType }}</p>
                       </div> -->
@@ -1882,13 +1875,13 @@
                               <div class="carousel-actions">
                                 <ng-container *ngFor="let button of item.buttons">
                                   <!-- If link type -->
-                                  <a *ngIf="button.type === 'linkButton'" 
-                                    [href]="button.additionalButtonDetails?.url" 
+                                  <a *ngIf="button.type === 'linkButton'"
+                                    [href]="button.additionalButtonDetails?.url"
                                     [attr.target]="button.additionalButtonDetails?.target"
                                     class="link-button">
                                     {{ button.payload }}
                                   </a>
-                    
+
                                   <!-- If normal button -->
                                   <!-- [disabled]="isSubmitted" -->
                                   <button mat-stroked-button

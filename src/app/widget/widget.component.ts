@@ -146,8 +146,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isScreenShareActive = false;
 
 
-  // Teneo 
+  // Teneo
+  formatLabel(value: number): string {
+    if (value >= 1000) {
+      return Math.round(value / 1000) + 'k';
+    }
 
+    return `${value}`;
+  }
   INTERACTIVE_TYPES = ['button', 'carousel','form_data'];
   // Variables for Call Controls
   isCallMute = false;
@@ -816,7 +822,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       finalPayload.header.intent = '';
       finalPayload.body.formId = '';
       finalPayload.body.formTitle= message.body.formTitle || '';
-      
+
       this.constructCimMessage(
           'FORM_DATA',
           null,
@@ -1147,11 +1153,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         attributes: []
       };
 
-      
+
 
       const sectionIndexNumber = `section_${sectionIndex}`;
       const sectionAttributes = formValues['sections'];
-      
+
       const currentSectionAttributes = sectionAttributes[sectionIndex]
       if (currentSectionAttributes) {
         section.attributes.forEach((attribute: any) => {
@@ -1179,7 +1185,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     });
     return finalSections;
   }
-  
+
 
   getAnswerObj(attribute: any, possibleValues: any[], selectedValue: any, currentSectionAttributes: any) {
 
@@ -1876,15 +1882,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
         this.editMessage(cimMessage);
         this.handleMessageReport(cimMessage);
-      } 
-      
+      }
+
       else {
         this.cimMessage.push(cimMessage);
         this.browserNotificationService.notify(cimMessage);
         this.scrollToBottom();
         this.handleMessageReport(cimMessage);
       }
-    } 
+    }
 
 
     // For Teneo Bot
@@ -1895,18 +1901,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (
         cimMessage.header.originalMessageId &&
         cimMessage.header.intent &&
-        cimMessage.header.intent.toLowerCase() !== 'update' && 
+        cimMessage.header.intent.toLowerCase() !== 'update' &&
         cimMessage.header.additionalData?.carousalCardId
       ) {
         this.handleCarousalQuotedMessage(cimMessage);
-      } 
+      }
 
-      
+
 
       else if(cimMessage.header.originalMessageId &&
         cimMessage.header.intent && cimMessage.header.intent.toLowerCase() !== 'update') {
           this.handleClickableList(cimMessage);
-      }  
+      }
 
       else if(cimMessage.body.type.toLowerCase() === 'form_data') {
         console.log("CONDITION PASSED")
@@ -1919,8 +1925,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
        this.scrollToBottom();
        this.handleMessageReport(cimMessage);
       }
-    } 
-    
+    }
+
     else {
       if (
         cimMessage.body.type.toLowerCase() != 'notification' &&
@@ -2040,14 +2046,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleResumedMessages(cimMessages: any[]) {
-    
-    
+
+
     cimMessages.forEach((cimMessage) => {
 
       if (cimMessage.body.type?.toLowerCase() === 'form_data') {
         this.handleRefreshCasesofFormMessageType(cimMessage);
       }
-      
+
       if (
         cimMessage.body.type.toLowerCase() == 'plain' &&
         cimMessage.header.sender &&
@@ -2071,7 +2077,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
           this.editMessage(cimMessage);
-        } 
+        }
         else {
 
         this.cimMessage.push(cimMessage);
@@ -2090,18 +2096,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
           this.editMessage(cimMessage);
-        } 
+        }
 
         if(cimMessage.header.additionalData?.carousalCardId) {
-          
+
           this.handleCarousalQuotedMessage(cimMessage);
-        } 
+        }
 
         if(cimMessage.header.originalMessageId && cimMessage.header.intent && !cimMessage.header.additionalData?.carousalCardId) {
           this.handleClickableList(cimMessage)
         }
 
-        
+
         this.cimMessage.push(cimMessage);
         this.isChatActive = true;
         this.processSeenMessages();
@@ -2435,7 +2441,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
 
 
-      
+
     } else if(messageType === 'form_data'){
       const formData = formMessageTypeData;
       console.log('Form Data:', formData);
@@ -2659,18 +2665,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleCarousalQuotedMessage(cimMessage: any) {
-  
+
     const originalMessageId = cimMessage.header.originalMessageId;
     const carousalCardId = cimMessage.header.additionalData?.carousalCardId;
 
     const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
-  
+
     if (originalMessage) {
       cimMessage.body.quotedText = originalMessage.body?.markdownText || '';
       cimMessage.body.quotedTime = originalMessage.header?.timestamp || '';
       cimMessage.header.quotedType = originalMessage.body?.type;
       cimMessage.senderType = originalMessage.header.sender.type
-  
+
       const elements = originalMessage.body?.elements || [];
       // Find the carousel element matching the carousalCardId
       const matchedElement = elements.find(
@@ -2681,7 +2687,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (matchedElement?.additionalCarouselElementDetails?.disableInteraction === true) {
         originalMessage.body.disableAllButtons = true;
       }
-  
+
       if (matchedElement) {
         cimMessage.body.quotedText = matchedElement.text
         cimMessage.body.quotedCardTitle = matchedElement.additionalCarouselElementDetails?.title;
@@ -2690,8 +2696,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         cimMessage.body.quotedButtons = matchedElement.buttons || [];
       }
     }
-  
-    
+
+
     if(cimMessage.header.sender.type.toLowerCase() === "customer" && cimMessage.header.additionalData?.carousalCardId) {
 
       this.cimMessage.push(cimMessage);
@@ -2739,7 +2745,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.handleMessageReport(cimMessage);
        }
   }
-  
+
 
   endChat(): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent);
@@ -4149,16 +4155,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   isCheckboxChecked(
-    sectionIndex: number, 
-    controlName: string, 
-    optionValue: string, 
-    categoryLabel?: string, 
+    sectionIndex: number,
+    controlName: string,
+    optionValue: string,
+    categoryLabel?: string,
     hasCategory?: boolean,
     messageId?: string
   ): boolean {
     const formGroup = this.formGroupsMap?.[messageId] || this.preChatFormGroup;
     const control = formGroup.get(`sections.${sectionIndex}.${controlName}`);
-    
+
     if (!control) {
       return false;
     }
@@ -4283,7 +4289,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       );
     }
   }
-  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TENEO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 
+  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TENEO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   async handleRefreshCasesofFormMessageType(cimMessage: any) {
     if (cimMessage.header.originalMessageId) {
