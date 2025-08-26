@@ -165,12 +165,35 @@ export class SdkService implements OnInit {
     });
   }
 
-  getFormValidation(callback: any) {
+    getFormValidation(callback: any) {
+    // Try cache first
+      const cached = localStorage.getItem('formValidations');
+      if (cached) {
+        console.log('Using cached validations ✅');
+        const parsed = JSON.parse(cached);
+        this.preChatFormValidationSubject.next(parsed);
+        callback();
+        return;
+    }
+
+    // Otherwise, hit API
     formValidation(this.ConfigData.FORM_URL, (res: any) => {
+      console.log('Fetched validations from API 🌐', res);
+      localStorage.setItem('formValidations', JSON.stringify(res)); // cache it
       this.preChatFormValidationSubject.next(res);
       callback();
     });
   }
+
+  // getFormValidation(callback: any) { 
+  //   formValidation(this.ConfigData.FORM_URL, (res: any) => { 
+  //     this.preChatFormValidationSubject.next(res); 
+  //     callback(); 
+  //   }); 
+  // }
+
+
+ 
 
   renderCallbackForm(form_id: any) {
     getPreChatForm(this.ConfigData.FORM_URL, form_id, (res: any) => {

@@ -460,13 +460,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
 
     this.sdk.validationsSubcription.subscribe((res) => {
-      console.log("SUBSCRIBERS: second response of validations", res)
       this.formValidations = res;
       this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
         (formData: { sections: { attributes: any[] }[], formTitle: string, formDescription: string }) => {
-           console.log("SUBSCRIBERS: third response of formData", formData)
           this.preChatFormInfo = formData;
-          console.log('preChatFormInfo========>', this.preChatFormInfo)
           this.formData = formData.sections;
           this.preChatformTitle = formData?.formTitle;
           this.preChatformDescription = formData?.formDescription;
@@ -482,8 +479,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.callbackFormSubscription = this.sdk.renderCallbackForm$.subscribe(
       (formData: { sections: { attributes: any[] }[] }) => {
-        console.log("SUBSCRIBERS before fourth callback form data this.validations ", this.formValidations)
-        console.log('SUBSCRIBERS fourth callback form data:', formData);
         this.callbackFormData = formData.sections[0].attributes.filter(
           (item: any) => {
             return item.valueType != 'checkbox';
@@ -500,8 +495,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.onChatResumedSubject = this.sdk.onChatResumedResponse$.subscribe(
       (data: { isChatAvailable: boolean; data: any[] }) => {
 
-         console.log("SUBSCRIBERS before onChatResumse this.validations ", this.formValidations)
-         console.log('SUBSCRIBERS onChatResumse fifth callback form data:', data);
         if (data.isChatAvailable == true) {
           this.changeScreen('chat');
           console.log('on Chat Resumed Response:', data.data);
@@ -1285,6 +1278,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   changeScreen(screen: any) {
+    console.log("change screen called along with validataions", this.formValidations)
     console.log('Change Screen:', screen);
     switch (screen) {
       case 'widget':
@@ -1712,6 +1706,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'SOCKET_DISCONNECTED':
             if (event.data == 'io server disconnect') {
               localStorage.removeItem('user');
+              localStorage.removeItem('formValidations');
               if (messageType !== 'survey') {
                 this.clearSession();
               }
