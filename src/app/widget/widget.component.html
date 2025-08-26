@@ -1734,6 +1734,9 @@
                       </div>
 
 
+
+
+
                       <!-- Radio -->
                       <div *ngSwitchCase="'radio'" class="form-group custom-radio-action">
                         <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -1825,23 +1828,23 @@
 
 
                       <!-- Interactive range slider -->
-                      <div *ngSwitchCase="'range'" class="form-group">
-                        <label>
-                          {{ attribute.label }}
-                          <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
-                        </label>
+                    <div *ngSwitchCase="'range'" class="form-group">
+                      <label>
+                        {{ attribute.label }}
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                      </label>
 
-                        <mat-slider
-                          [formControlName]="attribute.key"
-                          [min]="attribute.min || 0"
-                          [max]="attribute.max || 100"
-                          [step]="attribute.step || 1"
-                          showTickMarks
-                          discrete
-                          [displayWith]="formatLabel">
-                          <input matSliderThumb>
-                        </mat-slider>
-                      </div>
+                      <mat-slider
+                        thumbLabel
+                        [displayWith]="formatLabel"
+                        [formControlName]="attribute.key"
+                        [min]="attribute.min || 0"
+                        [max]="attribute.max || 100"
+                        [step]="attribute.step || 1"
+                        aria-label="units"
+                        tickInterval="auto">
+                      </mat-slider>
+                    </div>
 
 
                       <!-- <div *ngSwitchDefault>
