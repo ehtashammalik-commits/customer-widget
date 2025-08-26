@@ -805,6 +805,7 @@
                                           <input type="checkbox"
                                           class="input-checkbox"
                                           [id]="'checkbox_' + attribute.key + '_' + i + '_' + replaceSpacesWithUnderscores(category.label) + '_' + replaceSpacesWithUnderscores(option.label)"
+                                          [checked]="isCheckboxChecked(i, attribute.key, option.label, category.label, attribute.attributeOptions.enableCategory)"
                                           (change)="
                                           onCheckboxChange(
                                           $event,
@@ -1695,6 +1696,7 @@
                                 type="checkbox"
                                 [disabled]="message.body.disableFormMessageInteraction"
                                 [id]="'checkbox_' + attribute.key + '_' + i + '_' + replaceSpacesWithUnderscores(category.label) + '_' + replaceSpacesWithUnderscores(option.label)"
+                                [checked]="isCheckboxChecked(i, attribute.key, option.value, category.label, attribute.attributeOptions.enableCategory, message.id)"
                                 (change)="onCheckboxChange(
                                   $event,
                                   attribute.key,

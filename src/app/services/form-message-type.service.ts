@@ -7,60 +7,75 @@ import { FormGroup, FormArray } from '@angular/forms';
 export class FormMessageTypeService {
 
   constructor() { }
-    patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
-      console.log("OKAY sections", formGroup)
-      const sectionArray = formGroup.get('sections') as FormArray;
-      if (!sectionArray || sectionArray.length === 0) return;
+  patchFromMessageTypeUponRefresh(formGroup: FormGroup, cimMessage: any) {
+    const sectionArray = formGroup.get('sections') as FormArray;
+    if (!sectionArray || sectionArray.length === 0) return;
 
-      cimMessage.body.sections.forEach((sectionData: any, sectionIndex: number) => {
-        const sectionGroup = sectionArray.at(sectionIndex) as FormGroup;
-        if (!sectionGroup || !sectionData?.attributes) return;
+    cimMessage.body.sections.forEach((sectionData: any, sectionIndex: number) => {
+      const sectionGroup = sectionArray.at(sectionIndex) as FormGroup;
+      if (!sectionGroup || !sectionData?.attributes) return;
 
-        sectionData.attributes.forEach(attr => {
-          const controlKey = attr.key;
+      sectionData.attributes.forEach(attr => {
+        const controlKey = attr.key;
 
-          if (attr.attributeType?.toUpperCase() === 'OPTIONS') {
+        if (attr.attributeType?.toUpperCase() === 'OPTIONS') {
+          if (attr.valueType?.toLowerCase() === 'checkbox') {
+            const control = sectionGroup.get(controlKey);
+            if (!control) return;
 
+            const hasCategory = attr.attributeOptions?.enableCategory;
+            
+            if (hasCategory) {
+              // Handle categorized checkboxes - build object structure like { categoryName: [values] }
+              const selectedByCategory: any = {};
+              
+              (attr.answer || []).forEach((opt: any) => {
+                if (opt.isSelected) {
+                  const categoryLabel = opt.category || 'default';
+                  if (!selectedByCategory[categoryLabel]) {
+                    selectedByCategory[categoryLabel] = [];
+                  }
+                  selectedByCategory[categoryLabel].push(opt.value);
+                }
+              });
 
-              if (attr.valueType?.toLowerCase() === 'checkbox') {
-                const selectedValues = (attr.answer || [])
-                .filter((opt: any) => opt.isSelected && opt.label === opt.value) // match label with value
+              const isEmpty = Object.keys(selectedByCategory).length === 0;
+              const controlValue = isEmpty ? '' : selectedByCategory;
+              control.patchValue(controlValue);
+              
+            } else {
+              // Handle simple checkboxes - build array structure like [value1, value2]
+              const selectedValues = (attr.answer || [])
+                .filter((opt: any) => opt.isSelected)
                 .map((opt: any) => opt.value);
 
-                const controlValue =
-                selectedValues.length <= 1 ? selectedValues[0] || '' : selectedValues;
-                console.log("OKAY attriute key", attr)
-                console.log("OKAY selected Values", selectedValues)
-                console.log("OKAY section groups", sectionGroup)
-                if (sectionGroup.get(controlKey)) {
+              const controlValue = selectedValues.length === 0 ? '' : selectedValues;
+              control.patchValue(controlValue);
+            }
 
-                console.log("OKAY",sectionGroup.get(controlKey))
-                console.log("OKAY consition isfulfilled..")
-                sectionGroup.get(controlKey)?.patchValue(controlValue);
-                
-              }
-            } else {
-              // 🎯 PATCH RADIO / DROPDOWN
-              const selectedValues = (attr.answer || [])
-                .filter(opt => opt.isSelected)
-                .map(opt => opt.value);
+          } else {
+            // Handle radio / dropdown
+            const selectedValues = (attr.answer || [])
+              .filter(opt => opt.isSelected)
+              .map(opt => opt.value);
 
-              const controlValue =
-                selectedValues.length <= 1 ? selectedValues[0] || '' : selectedValues;
+            const controlValue = selectedValues.length <= 1 ? selectedValues[0] || '' : selectedValues;
 
-              if (sectionGroup.get(controlKey)) {
-                sectionGroup.get(controlKey)?.patchValue(controlValue);
-              }
+            const control = sectionGroup.get(controlKey);
+            if (control) {
+              control.patchValue(controlValue);
             }
           }
-          else if (['INPUT', 'TEXTAREA'].includes(attr.attributeType?.toUpperCase())) {
-            // Text / input type answers
-            const value = Array.isArray(attr.answer) ? attr.answer[0] || '' : attr.answer || '';
-            if (sectionGroup.get(controlKey)) {
-              sectionGroup.get(controlKey)?.patchValue(value);
-            }
+        }
+        else if (['INPUT', 'TEXTAREA'].includes(attr.attributeType?.toUpperCase())) {
+          // Text / input type answers
+          const value = Array.isArray(attr.answer) ? attr.answer[0] || '' : attr.answer || '';
+          const control = sectionGroup.get(controlKey);
+          if (control) {
+            control.patchValue(value);
           }
-        });
+        }
       });
-    }
+    });
+  }
 }
