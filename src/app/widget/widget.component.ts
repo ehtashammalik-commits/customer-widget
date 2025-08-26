@@ -3780,7 +3780,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     });
 
     control.setValue(value);
-    console.log(`Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`);
   }
 
   onCheckboxChange(
@@ -3802,7 +3801,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const control = formGroup.get(controlPath);
 
     if (!control) {
-      console.warn(`Control '${controlPath}' not found.`);
       return;
     }
 
@@ -4132,14 +4130,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   hasRequiredError(controlName: string, sectionIndex: number): boolean {
     const control = this.preChatFormGroup.get(['sections', sectionIndex])?.get(controlName);
-    console.log('control===>', control)
     return !!(
       control &&
       control.hasError('required') &&
       (control.touched || control.dirty)
     );
   }
-
 
   getTextAlignment(alignment: string | undefined) {
     // by default, the text alignment is center from scss
@@ -4151,6 +4147,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
+  isCheckboxChecked(
+    sectionIndex: number, 
+    controlName: string, 
+    optionValue: string, 
+    categoryLabel?: string, 
+    hasCategory?: boolean,
+    messageId?: string
+  ): boolean {
+    const formGroup = this.formGroupsMap?.[messageId] || this.preChatFormGroup;
+    const control = formGroup.get(`sections.${sectionIndex}.${controlName}`);
+    
+    if (!control) {
+      return false;
+    }
+
+    const controlValue = control.value;
+
+    if (hasCategory && categoryLabel) {
+      // For categorized checkboxes: { categoryName: [values] }
+      const categoryValues = controlValue?.[categoryLabel];
+      return Array.isArray(categoryValues) && categoryValues.includes(optionValue);
+    } else {
+      // For simple checkboxes: [value1, value2]
+      return Array.isArray(controlValue) && controlValue.includes(optionValue);
+    }
+  }
 
   // Common helper function for uploading a file to server
   private uploadToFileServer(
