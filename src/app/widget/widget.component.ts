@@ -1909,6 +1909,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }  
 
       else if(cimMessage.body.type.toLowerCase() === 'form_data') {
+        console.log("CONDITION PASSED")
         this.handleFormMessageType(cimMessage);
       }
 
