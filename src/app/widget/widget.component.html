@@ -1655,13 +1655,33 @@
                     <div class="form-group" [ngSwitch]="attribute.valueType">
 
 
-                      <!-- Short Answer -->
-
-                      <div *ngSwitchCase="'shortAnswer'">
+                      <!-- Number -->
+                      <div *ngSwitchCase="'number'">
                         <label>
                           {{ attribute.label }}
                           <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
+                        <mat-form-field appearance="outline">
+                          <input matInput type="number" [formControlName]="attribute.key" />
+                        </mat-form-field>
+                      </div>
+
+                      <!-- Email -->
+                      <div *ngSwitchCase="'email'">
+                        <label>
+                          {{ attribute.label }}
+                          <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
+                        <mat-form-field appearance="outline">
+                          <input matInput type="email" [formControlName]="attribute.key" />
+                        </mat-form-field>
+                      </div>
+
+                      <!-- Short Answer -->
+
+                      <div *ngSwitchCase="'shortAnswer'">
+                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                          </label>
                         <mat-form-field appearance="outline">
                           <input matInput type="text" [formControlName]="attribute.key" />
                         </mat-form-field>
@@ -1712,9 +1732,6 @@
                           </div>
                         </div>
                       </div>
-
-
-
 
 
                       <!-- Radio -->
@@ -1802,31 +1819,30 @@
 
                       <!-- color picker -->
                       <div *ngSwitchCase="'color'">
-                        <label>{{ attribute.label }}</label>
-                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span></label>
                         <input matInput type="color" [formControlName]="attribute.key" />
                       </div>
 
 
                       <!-- Interactive range slider -->
+                      <div *ngSwitchCase="'range'" class="form-group">
+                        <label>
+                          {{ attribute.label }}
+                          <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
 
-                    <div *ngSwitchCase="'range'" class="form-group">
-                      <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span></label>
-                      <mat-slider min="0" max="100000" step="1000" showTickMarks discrete [displayWith]="formatLabel">
-                        <input matSliderThumb>
-                      </mat-slider>
-
-                      <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="range"
-                              [formControlName]="attribute.key"
-                              [min]="attribute.min || 0"
-                              [max]="attribute.max || 100"
-                              [step]="attribute.step || 1" />
-
+                        <mat-slider
+                          [formControlName]="attribute.key"
+                          [min]="attribute.min || 0"
+                          [max]="attribute.max || 100"
+                          [step]="attribute.step || 1"
+                          showTickMarks
+                          discrete
+                          [displayWith]="formatLabel">
+                          <input matSliderThumb>
+                        </mat-slider>
                       </div>
 
-
-                    </div>
 
                       <!-- <div *ngSwitchDefault>
                         <p>Unsupported field type: {{ attribute.valueType }}</p>

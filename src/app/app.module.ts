@@ -44,6 +44,7 @@ import { NgxUiLoaderModule, NgxUiLoaderConfig } from 'ngx-ui-loader';
 import { SanitizeHtmlPipe } from './sanitizeHtml.pipe';
 import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
 import { SanitizeHtmlForEmail } from './pipes/sanitize-html-for-email.pipe';
+import {MatSliderModule} from "@angular/material/slider";
 
 
 export function initializeApp1(appConfigService: ConfigService) {
@@ -118,6 +119,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatCheckboxModule,
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
+    MatSliderModule
   ],
   exports: [getMediaFromTask,TranscriptComponent],
   providers: [{
