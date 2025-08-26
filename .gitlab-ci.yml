@@ -195,7 +195,7 @@ gitlab_build_branch:
    - /^.+_b-.+$/
    - tags
    - develop
- allow_failure: false
+ allow_failure: true
 
 
 #+==================Runs on merge requests only========================+

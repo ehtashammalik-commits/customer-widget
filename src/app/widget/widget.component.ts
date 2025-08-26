@@ -1278,7 +1278,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   changeScreen(screen: any) {
-    console.log("change screen called along with validataions", this.formValidations)
     console.log('Change Screen:', screen);
     switch (screen) {
       case 'widget':

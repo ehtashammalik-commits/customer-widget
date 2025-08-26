@@ -1863,7 +1863,8 @@
                   [disabled]="message.body?.disableFormMessageInteraction"
                   [ngClass]="{
                     'mat-flat-button': button.action === 'submit',
-                    'mat-stroked-button': button.action !== 'submit'
+                    'mat-stroked-button': button.action !== 'submit',
+                    'disabled': message.body?.disableFormMessageInteraction
                   }"
                   mat-button
                   (click)="handleActionButtonClick(button, message)"
@@ -1906,7 +1907,12 @@
                                   <button mat-stroked-button
                                     *ngIf="button.type === 'button' || button.type === 'clickableList'"
                                     (click)="sendCarousalMessage(button, message.id, item.additionalCarouselElementDetails.id)"
-                                    [disabled]="message.body.disableAllButtons || message.body.additionalDetails?.disableButtonType">
+                                    [disabled]="message.body.disableAllButtons || message.body.additionalDetails?.disableButtonType"
+                                    [ngClass]="{
+                                      'disabled': message.body.disableAllButtons || message.body.additionalDetails?.disableButtonType
+                                    }"
+                                    >
+
                                     {{ button.title }}
                                   </button>
                                 </ng-container>

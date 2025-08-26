@@ -165,7 +165,7 @@ export class SdkService implements OnInit {
     });
   }
 
-    getFormValidation(callback: any) {
+  getFormValidation(callback: any) {
     // Try cache first
       const cached = localStorage.getItem('formValidations');
       if (cached) {
@@ -183,6 +183,7 @@ export class SdkService implements OnInit {
       this.preChatFormValidationSubject.next(res);
       callback();
     });
+    
   }
 
   // getFormValidation(callback: any) { 
