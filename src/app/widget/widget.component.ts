@@ -737,10 +737,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
 
 
-        // console.log('Adding control:', attribute.key, 'with validators:', validators);
+        // 🔑 Compute default value only for formMessageType
+      const defaultValue =
+        formType === 'formMessageType' ? this.formMessageTypeService.getDefaultValue(attribute) : '';
 
-        // Add the control to the section group
-        sectionGroup.addControl(attribute.key, this.fb.control('', validators));
+      sectionGroup.addControl(attribute.key, this.fb.control(defaultValue, validators));
       });
 
       // Add the section group to the sections FormArray
@@ -754,7 +755,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       targetFormGroup.setControl('sections', sectionsArray);
     }
   }
-
 
   getSectionsControls(messageId: string): AbstractControl[] {
   const formGroup = this.formGroupsMap[messageId];
@@ -4375,11 +4375,34 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
 
-  async handleActionButtonClick(button: any, message: any): Promise<void> {
+async handleActionButtonClick(button: any, message: any): Promise<void> {
   const messageId = message.id;
   const formGroup = this.formGroupsMap[messageId];
 
   if (!formGroup) return;
+
+   if (button.action === 'reset') {
+    const formGroup = this.formGroupsMap[message.id];
+    if (formGroup) {
+      // Get schema of attributes again
+      const sections: any[] = Array.isArray(message.body?.sections) ? message.body.sections : [];
+
+      sections.forEach((section, sectionIndex) => {
+        section.attributes.forEach((attribute: any) => {
+          const control = (formGroup.get('sections') as FormArray)
+            .at(sectionIndex)
+            .get(attribute.key);
+
+          if (control) {
+            control.setValue(this.formMessageTypeService.getDefaultValue(attribute));
+          }
+        });
+      });
+    }
+    return;
+  }
+
+
 
   if (button.action === 'cancel') {
     const finalPayload = this.createFormDataObject();

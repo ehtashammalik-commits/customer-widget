@@ -78,4 +78,17 @@ export class FormMessageTypeService {
       });
     });
   }
+
+  getDefaultValue(attribute: any): any {
+    switch (attribute.valueType?.toLowerCase()) {
+      case 'color':
+        return '#000000'; // default black
+      case 'dropdown':
+        return attribute.attributeOptions?.attributeData?.[0]?.values?.[0]?.value || null;
+      case 'range':
+        return attribute.min ?? 0;
+      default:
+        return '';
+    }
+  }
 }
