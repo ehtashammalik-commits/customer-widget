@@ -4,12 +4,12 @@ import { ConfigService } from '../services/config.service';
 
 @Pipe({
   name: 'safeAttachmentUrl',
-  pure: true // can be true since it's a pure transform
+  pure: true, // can be true since it's a pure transform
 })
 export class SafeAttachmentUrlPipe implements PipeTransform {
   constructor(
     private sanitizer: DomSanitizer,
-    private appConfigService: ConfigService
+    private appConfigService: ConfigService,
   ) {}
 
   transform(mediaUrl: string): SafeUrl | null {

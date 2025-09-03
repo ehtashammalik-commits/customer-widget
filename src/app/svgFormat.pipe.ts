@@ -5,17 +5,33 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 @Pipe({
-  name: 'svgFormat'
+  name: 'svgFormat',
 })
 export class SvgNpsFormatPipe implements PipeTransform {
+  constructor(
+    private sanitizer: DomSanitizer,
+    private http: HttpClient,
+  ) {}
 
-
-  constructor(private sanitizer: DomSanitizer, private http: HttpClient) { }
-
-  transform(value: any, type: 'imageSvg', width?: string, height?: string, className?: string, fillColor?: string, inputText?: any): any {
+  transform(
+    value: any,
+    type: 'imageSvg',
+    width?: string,
+    height?: string,
+    className?: string,
+    fillColor?: string,
+    inputText?: any,
+  ): any {
     switch (type) {
       case 'imageSvg':
-        return this.imageUrlToSvgTag(value, width || '', height || '', className || '', fillColor || '', inputText || '');
+        return this.imageUrlToSvgTag(
+          value,
+          width || '',
+          height || '',
+          className || '',
+          fillColor || '',
+          inputText || '',
+        );
       default:
         return value;
     }
@@ -28,7 +44,7 @@ export class SvgNpsFormatPipe implements PipeTransform {
     height: string,
     className: string = '',
     fillColor: string = '',
-    inputText: string = ''
+    inputText: string = '',
   ): Observable<any> {
     return this.http.get(imageUrl, { responseType: 'text' }).pipe(
       map((svgData: any) => {
@@ -50,7 +66,10 @@ export class SvgNpsFormatPipe implements PipeTransform {
         }
 
         if (inputText) {
-          const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          const textElement = document.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'text',
+          );
           textElement.setAttribute('x', '50%');
           textElement.setAttribute('y', '50%');
           textElement.setAttribute('text-anchor', 'middle');
@@ -66,8 +85,7 @@ export class SvgNpsFormatPipe implements PipeTransform {
       catchError((error) => {
         console.error(`Failed to fetch SVG from ${imageUrl}`, error);
         return of(null);
-      })
+      }),
     );
   }
-
 }

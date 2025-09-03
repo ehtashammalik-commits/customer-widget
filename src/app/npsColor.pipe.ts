@@ -2,14 +2,14 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'npsColor',
-  pure: true
+  pure: true,
 })
-
 export class NpsColorPipe implements PipeTransform {
   transform(
     attributeIndex: number,
     optionIndex: number,
-    selectedIndices: any): string {
+    selectedIndices: any,
+  ): string {
     const selectedIndex = selectedIndices[attributeIndex];
     if (typeof selectedIndex === 'undefined') {
       return this.getColorByIndex(optionIndex);

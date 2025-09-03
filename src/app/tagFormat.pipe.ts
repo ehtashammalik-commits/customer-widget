@@ -7,16 +7,17 @@ import { ibsFormat } from 'ibs-format';
 })
 export class tagFormatPipe implements PipeTransform {
   transform(value: string, enableDynamicLink: boolean): string {
-    value = ibsFormat(value,
+    value = ibsFormat(
+      value,
       [
-        ["em", "`"],
-        ["b", "*"],
-        ["i", "_"],
-        ["strike", "~"],
-        ["mark", "!"]
+        ['em', '`'],
+        ['b', '*'],
+        ['i', '_'],
+        ['strike', '~'],
+        ['mark', '!'],
       ],
-      { detectLinks: enableDynamicLink, target: "_blank"},
-      { allowXssEscaping: true }
+      { detectLinks: enableDynamicLink, target: '_blank' },
+      { allowXssEscaping: true },
     );
     return value;
   }
