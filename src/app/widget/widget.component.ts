@@ -1806,7 +1806,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const urls = cimMessage.body.markdownText.match(urlRegex);
       if (urls) {
         for (let url of urls) {
-          if (url.includes('&amp;type=survey')) {
+          if (url.includes('type=survey')) {
             cimMessage.body.subType = 'SURVEY';
             cimMessage.body.surveyLink = url;
             const normalText = cimMessage.body.markdownText
@@ -1946,7 +1946,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         // Check if any URLs are found
         if (urls) {
           urls.forEach((url: string | string[]) => {
-            if (url.includes('&amp;type=survey')) {
+            if (url.includes('type=survey')) {
               cimMessage.body.subType = 'SURVEY';
               cimMessage.body.surveyLink = url;
               cimMessage.body.markdownText = cimMessage.body.markdownText
