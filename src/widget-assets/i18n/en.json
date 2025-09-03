@@ -22,6 +22,7 @@
         "agent" :"session ended because the agent left the conversation",
 "customer" :"session ended because the customer left the conversation",
 "force-closed":"session ended due to customer's inactivity",
+"force_closed":"session ended due to customer's inactivity",
 "inactivity":"session ended due to customer's inactivity",
 "network":"session ended due to customer's network connectivity issue",
 "unknown":"session ended due to an unknown or unspecified reason"

@@ -17,6 +17,8 @@ import {
 } from '@angular/forms';
 import { SdkService } from '../services/sdk.service';
 import { ConfigService } from '../services/config.service';
+import { StorageService } from '../services/storage.service';
+import { StorageType } from './../services/storage.service';
 import { BrowserNotificationService } from '../services/browser-notification.service';
 import { DeliveryNotificationService } from '../services/delivery-notification.service';
 import { PostMessageHandlerService } from '../post-message-handler.service';
@@ -132,7 +134,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   typingIndicatorTimer: any = null;
   lastSeenMessageId: any = null;
   conversationId = '';
-  customerId: string = ''
+  customerId: string = '';
   formValidations: any;
   // If this flag is 'true' than that's mean Chat is Active
   isChatActive = false;
@@ -188,7 +190,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   standaloneWebRtc: boolean = false; //If true than it will enable standalone webRtc Video Call and hide Chat Features
   isSecureWebCall: boolean = false;
   errorDuringWebRTCCall: boolean = false;
-  errorMessage: string = "";
+  errorMessage: string = '';
 
   fontDropDown = false;
   positionOptions: TooltipPosition[] = [
@@ -234,8 +236,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     file: 'File',
   };
 
-
-
   // Widget Configuration
   title = '';
   subtitle = '';
@@ -253,8 +253,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   composer_input_disabled: boolean = false;
   isTyping: boolean = true;
   surveyTitle: any = 'Survey Form';
-  preChatformTitle: string = ''
-  preChatformDescription: string = ''
+  preChatformTitle: string = '';
+  preChatformDescription: string = '';
   preChatFormInfo: any;
   remoteStream: any = [];
   localStream: any = [];
@@ -266,12 +266,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   preChatFormLoader = false;
   callbackLoader = false;
   callbackConfig: any;
-  todayShifts: { eventId: string, shiftName: string | null, startTime: string, endTime: string }[] = [];
+  todayShifts: {
+    eventId: string;
+    shiftName: string | null;
+    startTime: string;
+    endTime: string;
+  }[] = [];
   events: EventData[] = [];
   orderedEvents: any[] = [];
   daySummary: { startOfDay: Date | null; endOfDay: Date | null } | null = null;
-
-
 
   webhookUrl: any;
   isChatTranscriptVisible = false;
@@ -286,7 +289,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   fileLoading = false;
   selectedFile: any;
-  fileUrl: any = "";
+  fileUrl: any = '';
   fileName: string | null = null;
   // Variables for handling chat messages language and text directions
   selectedLanguage: any;
@@ -299,22 +302,34 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // Handle Composer Field
   isComposerDisable: boolean = false;
   source: any;
-
+  storageType: StorageType = 'localStorage';
 
   // file preview
   filePreviewUrl: { [key: string]: any } = {};
-  fileHistory: { [key: string]: { isImage: boolean } } = {}
+  fileHistory: { [key: string]: { isImage: boolean } } = {};
   // Add a new property to store text content
   fileContent: { [key: string]: string } = {};
   isSecureLinkExpired: boolean = false;
   IsRegisteredInFreeSwitch: boolean = false;
 
-
   // file properties
   fileExtensons: any[] = [
-    'txt', 'png', 'jpg', 'jpeg', 'pdf', 'ppt', 'pptx', 'xlsx', 'xls',
-    'doc', 'docx', 'rtf', 'mp3', 'mp4', 'webp'
-  ]
+    'txt',
+    'png',
+    'jpg',
+    'jpeg',
+    'pdf',
+    'ppt',
+    'pptx',
+    'xlsx',
+    'xls',
+    'doc',
+    'docx',
+    'rtf',
+    'mp3',
+    'mp4',
+    'webp',
+  ];
 
   isFileSelected: any;
   isFileUploading: any = {};
@@ -323,6 +338,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     public sdk: SdkService,
     public __appConfig: ConfigService,
+    private storageService: StorageService,
     private el: ElementRef,
     private renderer: Renderer2,
     private cdRef: ChangeDetectorRef,
@@ -338,7 +354,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
-    this.isUsernameEnabled = __appConfig.appConfig.USERNAME_ENABLED
+    this.isUsernameEnabled = __appConfig.appConfig.USERNAME_ENABLED;
+    this.storageType = this.__appConfig.appConfig.AUTO_RESUME_ON_NEW_TAB
+      ? 'localStorage'
+      : 'sessionStorage';
 
     translate.setDefaultLang('en');
     translate.use('en');
@@ -352,13 +371,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     // Set the Customer Widget Theme Color based on Configurations from Unified Admin's Web Widget settings
     setTimeout(() => {
-      (this.el.nativeElement as HTMLElement).style.setProperty('--main-color', this.theme);
+      (this.el.nativeElement as HTMLElement).style.setProperty(
+        '--main-color',
+        this.theme,
+      );
     }, 1000);
   }
 
-
   ngOnInit(): void {
-    this.initPrechatform()
+    this.initPrechatform();
     this.route.queryParams.subscribe((params: { [x: string]: any }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
@@ -367,11 +388,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
 
-      const rawEncryptedKey = params['encryptedKey'] ? params['encryptedKey'] : null;
+      const rawEncryptedKey = params['encryptedKey']
+        ? params['encryptedKey']
+        : null;
 
       if (rawEncryptedKey !== null) {
         const preservedKey = decodeURIComponent(rawEncryptedKey);
-        this.webRtcSecureLink = preservedKey
+        this.webRtcSecureLink = preservedKey;
       } else {
         this.webRtcSecureLink = null;
       }
@@ -414,7 +437,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
       // Pass parameters to service after you have received them.
       this.passUrlParamsToServices();
-      this.getCalendarEvents()
+      this.getCalendarEvents();
     });
 
     this.preChatFormGroup = this.fb.group({});
@@ -427,22 +450,25 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.loadBrowserLanguage();
         console.log('Widget configurations:', configs);
         if (this.enabledCallback) {
-
           this.sdk.renderCallbackForm(this.callbackConfig.callBackForm);
         }
         this.sdk.getFormValidation(() => {
-          if (configs.form !== '') this.sdk.renderPreChatForm(this.preChatFormId);
+          if (configs.form !== '')
+            this.sdk.renderPreChatForm(this.preChatFormId);
         });
-
       },
     );
 
     this.sdk.validationsSubcription.subscribe((res) => {
       this.formValidations = res;
       this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
-        (formData: { sections: { attributes: any[] }[], formTitle: string, formDescription: string }) => {
+        (formData: {
+          sections: { attributes: any[] }[];
+          formTitle: string;
+          formDescription: string;
+        }) => {
           this.preChatFormInfo = formData;
-          console.log('preChatFormInfo========>', this.preChatFormInfo)
+          console.log('preChatFormInfo========>', this.preChatFormInfo);
           this.formData = formData.sections;
           this.preChatformTitle = formData?.formTitle;
           this.preChatformDescription = formData?.formDescription;
@@ -454,7 +480,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         },
       );
     });
-
 
     this.callbackFormSubscription = this.sdk.renderCallbackForm$.subscribe(
       (formData: { sections: { attributes: any[] }[] }) => {
@@ -476,10 +501,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (data.isChatAvailable == true) {
           this.changeScreen('chat');
           console.log('on Chat Resumed Response:', data.data);
-          data.data && this.handleResumedMessages(data.data);
+          if (data.data && data.data.length > 0) {
+            this.handleResumedMessages(data.data);
+          } else {
+            this.clearSession();
+          }
         } else if (data.isChatAvailable == false) {
-          localStorage.removeItem('widget-error');
-          this.changeScreen('end');
+          this.storageService.removeItem('widget-error', 'localStorage');
+          this.clearSession();
         }
         this.scrollToBottom();
       },
@@ -513,7 +542,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (response: any) => {
         console.log('Connection Response:', response);
         if (response) {
-
           this.eventListener(response);
           console.log('event listener:', response);
         }
@@ -532,15 +560,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   initPrechatform() {
     this.preChatFormGroup = this.fb.group({
-      sections: this.fb.array([])
-    })
+      sections: this.fb.array([]),
+    });
   }
 
   async getCalendarEvents() {
     this.sdk
       .fetchBusinessCalendarId()
       .then((calendarId: string) => {
-
         return this.sdk.getCalendarEvents(calendarId);
       })
       .then((events) => {
@@ -557,12 +584,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getTodayEvent(): Promise<any[]> {
     return new Promise((resolve, reject) => {
       try {
-
         const today = new Date();
-        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // Start of today in local time
+        const todayStart = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+        ); // Start of today in local time
         const todayEnd = new Date(todayStart);
         todayEnd.setDate(todayStart.getDate() + 1); // Start of tomorrow in local time
-
 
         // Filter events happening today and of type BUSINESS_HOURS
         const todayEvents = this.events.filter(
@@ -577,7 +606,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
                 (shiftStart >= todayStart && shiftStart < todayEnd) ||
                 (shiftEnd >= todayStart && shiftEnd < todayEnd)
               );
-            })
+            }),
         );
 
         // Flatten all shifts into a single array
@@ -587,7 +616,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             shiftName: shift.name,
             startTime: shift.startTime,
             endTime: shift.endTime,
-          }))
+          })),
         );
 
         // If no shifts are available, handle accordingly
@@ -597,16 +626,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         const minStartTime = new Date(
           Math.min(
-            ...allShifts
-              .map((shift) => (shift?.startTime ? new Date(shift.startTime).getTime() : Infinity))
-          )
+            ...allShifts.map((shift) =>
+              shift?.startTime ? new Date(shift.startTime).getTime() : Infinity,
+            ),
+          ),
         );
 
         const maxEndTime = new Date(
           Math.max(
-            ...allShifts
-              .map((shift) => (shift?.endTime ? new Date(shift.endTime).getTime() : -Infinity))
-          )
+            ...allShifts.map((shift) =>
+              shift?.endTime ? new Date(shift.endTime).getTime() : -Infinity,
+            ),
+          ),
         );
 
         // Set the day summary with the minimum and maximum times
@@ -619,22 +650,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
         resolve(this.orderedEvents);
       } catch (error) {
-        reject("Error processing Business Hours events: " + error);
+        reject('Error processing Business Hours events: ' + error);
       }
     });
   }
 
-
-
-
-
-
-
   formatTime(dateTime: string): string {
     const date = new Date(dateTime);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
   }
-
 
   async passUrlParamsToServices() {
     await this.sdk.receiveUrlParamsValue(
@@ -646,21 +674,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private createFormValidationControls(
     formSchema: any[],
     formValidation: any[],
-    formType: string
+    formType: string,
   ): void {
     const sectionsArray: FormArray = this.fb.array([]); // Create the main sections FormArray
 
     formSchema.forEach((section) => {
-
       const sectionGroup = this.fb.group({}); // Create a FormGroup for each section
       section.attributes.forEach((attribute: any) => {
         const matchingValidation = formValidation.find(
-          (validation: any) => validation.type === attribute.valueType
+          (validation: any) => validation.type === attribute.valueType,
         );
 
         // Initialize validators array
         const validators = [];
-        console.log(attribute.isRequired)
+        console.log(attribute.isRequired);
         if (attribute.isRequired) {
           validators.push(Validators.required);
         }
@@ -671,7 +698,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
         if (matchingValidation?.regex) {
           switch (matchingValidation.type.toLowerCase()) {
-
             case 'boolean':
             case 'mcq':
             case 'dropdown':
@@ -684,18 +710,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             case 'number':
             case 'positivenumber':
             case 'phonenumber':
-              extractedLength = this.extractMinMaxLength(matchingValidation.regex);
-              validators.push(Validators.minLength(extractedLength.minLength ?? minLength));
-              validators.push(Validators.maxLength(extractedLength.maxLength ?? maxLength));
+              extractedLength = this.extractMinMaxLength(
+                matchingValidation.regex,
+              );
+              validators.push(
+                Validators.minLength(extractedLength.minLength ?? minLength),
+              );
+              validators.push(
+                Validators.maxLength(extractedLength.maxLength ?? maxLength),
+              );
 
-              if (!['shortanswer', 'paragraph'].includes(matchingValidation.type.toLowerCase())) {
+              if (
+                !['shortanswer', 'paragraph'].includes(
+                  matchingValidation.type.toLowerCase(),
+                )
+              ) {
                 validators.push(
                   Validators.pattern(
                     matchingValidation.type.toLowerCase() === 'password'
                       ? /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,256}$/
-                      : new RegExp(matchingValidation.regex)
-                  )
-
+                      : new RegExp(matchingValidation.regex),
+                  ),
                 );
               }
               break;
@@ -706,18 +741,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               break; // No validation needed
 
             default:
-              validators.push(Validators.pattern(new RegExp(matchingValidation.regex)));
+              validators.push(
+                Validators.pattern(new RegExp(matchingValidation.regex)),
+              );
               break;
           }
         }
-
 
         // console.log('Adding control:', attribute.key, 'with validators:', validators);
 
         // Add the control to the section group
         sectionGroup.addControl(attribute.key, this.fb.control('', validators));
       });
-      console.log('section', section)
+      console.log('section', section);
 
       // Add the section group to the sections FormArray
       sectionsArray.push(sectionGroup);
@@ -727,7 +763,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
     // Set the sections array inside the main form grou
   }
-
 
   async setWidgetConfigs(configs: any) {
     this.title = configs.title;
@@ -748,7 +783,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         await this.authenticateSecureLinkKey(false);
         this.changeScreen('webRtcScreen');
       }
-
     }
 
     this.callbackConfig = configs.callback;
@@ -847,8 +881,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     } else if (eventType == 'startChat') {
       this.eventTriggerType = 'startChat';
       let user = { data: this.customerData };
-      localStorage.setItem('user', JSON.stringify(user));
-      if (localStorage.getItem('user')) {
+      this.storageService.setItem('user', user, this.storageType);
+      if (this.storageService.getItem('user', this.storageType)) {
         this.sdk.makeConnection(
           this.customerData.serviceIdentifier,
           this.customerData.channelCustomerIdentifier,
@@ -863,14 +897,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('formData--------->', formData.sections);
 
     for (const section of formData.sections) {
-      if (Object.prototype.hasOwnProperty.call(section, field) && section[field] !== null) {
+      if (
+        Object.prototype.hasOwnProperty.call(section, field) &&
+        section[field] !== null
+      ) {
         return { error: false, data: section[field] }; // Field is found in at least one section with a non-null value
       }
     }
 
-    return { error: true, data: `Error: The field "${field}" is required or does not exist in the pre-chat form.` };
+    return {
+      error: true,
+      data: `Error: The field "${field}" is required or does not exist in the pre-chat form.`,
+    };
   }
-
 
   getEventPayload(preChatFormData: any) {
     const channelIdentifierData = this.checkFieldValue(
@@ -933,8 +972,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return attributes;
   }
 
-
-
   pushPrechatDataAsActivity() {
     let finalPayload = this.createFormDataObject();
     finalPayload.body.sections = this.creatingSectionsforSchema();
@@ -942,53 +979,66 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.calculateAttributeScore(finalPayload);
     this.calculateSectionScores(finalPayload);
     this.calculateFormScore(finalPayload);
-    this.sdk.postFormDataAsActivity(finalPayload)
-
+    this.sdk.postFormDataAsActivity(finalPayload);
   }
 
   calculateAttributeScore(formData: any) {
-
     formData.body.sections.forEach((section: any) => {
       // console.log(section);
       section.attributes.forEach((attribute: any) => {
         //  console.log(attribute);
-        let selectedOption = attribute?.answer.find((option: any) => option?.isSelected === true);
+        let selectedOption = attribute?.answer.find(
+          (option: any) => option?.isSelected === true,
+        );
         // console.log(selectedOption.additionalAttributes.optionWeightage, "SELECTED OPTIONS");
         if (selectedOption) {
-          let selectedOptionWeightage = selectedOption?.additionalAttributes?.optionWeightage;
-          attribute.attributeScore = parseFloat(((selectedOptionWeightage / 100) * attribute?.attributeWeightage).toFixed(1));
+          let selectedOptionWeightage =
+            selectedOption?.additionalAttributes?.optionWeightage;
+          attribute.attributeScore = parseFloat(
+            (
+              (selectedOptionWeightage / 100) *
+              attribute?.attributeWeightage
+            ).toFixed(1),
+          );
         } else {
-          attribute.attributeScore = 0
+          attribute.attributeScore = 0;
         }
 
         // console.log(attribute.attributeScore, "ATTRIBUTE SCORE");
-      })
+      });
     });
   }
 
-
   calculateSectionScores(formData: any) {
     formData.body.sections.forEach((section: any) => {
-      let totalAttributeWeightage = 0
+      let totalAttributeWeightage = 0;
       section.attributes.forEach((attribute: any) => {
         totalAttributeWeightage += attribute.attributeScore;
-      })
+      });
       // console.log('totalAttributeWeightage', totalAttributeWeightage)
-      section.sectionScore = parseFloat(((totalAttributeWeightage / 100) * section.sectionWeightage).toFixed(1));
-    })
+      section.sectionScore = parseFloat(
+        ((totalAttributeWeightage / 100) * section.sectionWeightage).toFixed(1),
+      );
+    });
   }
 
   calculateFormScore(formData: any): any {
     // console.log(sections);
     if (!formData) return;
 
-    let totalSectionWeightages = 0
+    let totalSectionWeightages = 0;
     formData.body.sections.forEach((section: any) => {
-      console.log(section)
+      console.log(section);
       totalSectionWeightages += section.sectionScore;
-    })
+    });
 
-    formData.body.formScore = parseFloat(((totalSectionWeightages / 100) * formData?.body?.formWeightage).toFixed(1)) || null
+    formData.body.formScore =
+      parseFloat(
+        (
+          (totalSectionWeightages / 100) *
+          formData?.body?.formWeightage
+        ).toFixed(1),
+      ) || null;
   }
   createFormDataObject() {
     return {
@@ -1003,39 +1053,38 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         timestamp: Date.now(),
         securityInfo: {},
         stamps: [],
-        intent: "WIDGET_FORM_ACTIVITY",
+        intent: 'WIDGET_FORM_ACTIVITY',
         entities: {},
-        channelSessionId: "",
+        channelSessionId: '',
         conversationId: this.conversationId,
         customer: {
-          _id: this.customerId
+          _id: this.customerId,
         },
         schedulingMetaData: null,
         originalMessageId: null,
         providerMessageId: null,
         sender: {
-          id: "f1370ff7-43fa-496e-9966-e64061d35f5c",
-          type: "APP",
-          senderName: "WIDGET_PRECHAT_FORM",
+          id: 'f1370ff7-43fa-496e-9966-e64061d35f5c',
+          type: 'APP',
+          senderName: 'WIDGET_PRECHAT_FORM',
           additionalDetail: null,
         },
       },
       body: {
         formId: this.preChatFormInfo?.id,
         formTitle: this.preChatFormInfo?.formTitle,
-        type: "FORM_DATA",
+        type: 'FORM_DATA',
         formWeightage: this.preChatFormInfo?.formWeightage,
         formScore: '',
         additionalDetail: {
           actor: {
             type: 'Customer',
-            id: this.customerId
+            id: this.customerId,
           },
           submissionSource: 'Pre-chat',
           review: null,
           reviewer: null,
-          agentReviewed: null
-
+          agentReviewed: null,
         },
         sentiment: {
           result: null,
@@ -1046,11 +1095,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     };
   }
 
-
   creatingSectionsforSchema(): any {
     let finalSections: any = [];
     const formValues = this.preChatFormGroup.value;
-
 
     this.formData.forEach((section: any, sectionIndex: number) => {
       let newSection: any = {
@@ -1058,20 +1105,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         sectionName: section.sectionName,
         sectionWeightage: section.sectionWeightage || null,
         sectionScore: null,
-        attributes: []
+        attributes: [],
       };
 
       const sectionIndexNumber = `section_${sectionIndex}`;
       const sectionAttributes = formValues['sections'];
-      const currentSectionAttributes = sectionAttributes[sectionIndex]
-
+      const currentSectionAttributes = sectionAttributes[sectionIndex];
 
       if (currentSectionAttributes) {
         section.attributes.forEach((attribute: any) => {
           // console.log("ATTRIBUte", attribute);
 
           const attributeData = attribute.attributeOptions?.attributeData || [];
-          const possibleValues = attributeData.length > 0 ? attributeData[0].values : [];
+          const possibleValues =
+            attributeData.length > 0 ? attributeData[0].values : [];
           const selectedValue = currentSectionAttributes[attribute.key] || null;
 
           let newAttribute: any = {
@@ -1080,10 +1127,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             valueType: attribute.valueType,
             attributeWeightage: attribute.attributeWeightage || null,
             attributeScore: null,
-            attributeType: attribute.attributeType || "OPTIONS",
+            attributeType: attribute.attributeType || 'OPTIONS',
             skipType: attribute.skipType || null,
-            attributeAttachment: attribute.attributeAttachment || "",
-            answer: this.getAnswerObj(attribute, possibleValues, selectedValue)
+            attributeAttachment: attribute.attributeAttachment || '',
+            answer: this.getAnswerObj(attribute, possibleValues, selectedValue),
           };
           newSection.attributes.push(newAttribute);
         });
@@ -1093,25 +1140,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return finalSections;
   }
   getAnswerObj(attribute: any, possibleValues: any, selectedValue: any) {
+    if (
+      attribute.attributeType == 'INPUT' ||
+      attribute.attributeType == 'TEXTAREA'
+    ) {
+      return [selectedValue];
+    } else {
+      selectedValue = selectedValue
+        ? (selectedValue.value ?? selectedValue)
+        : null;
 
-    if (attribute.attributeType == 'INPUT' || attribute.attributeType == 'TEXTAREA') {
-      return [selectedValue]
-    }
-    else {
-      selectedValue = selectedValue ? (selectedValue.value ?? selectedValue) : null;
-
-      return possibleValues.map(
-        (option: any) => ({
-          label: option.label,
-          value: option.value || option.label, // Use `value` if available, fallback to `label`
-          isSelected: option.label === selectedValue || option.value === selectedValue,
-          additionalAttributes: {
-            optionWeightage: option.optionWeightage || null,
-            enableStyle: attribute.attributeOptions?.enableStyle || false,
-            optionStyle: option.optionStyle || null,
-
-          }
-        }))
+      return possibleValues.map((option: any) => ({
+        label: option.label,
+        value: option.value || option.label, // Use `value` if available, fallback to `label`
+        isSelected:
+          option.label === selectedValue || option.value === selectedValue,
+        additionalAttributes: {
+          optionWeightage: option.optionWeightage || null,
+          enableStyle: attribute.attributeOptions?.enableStyle || false,
+          optionStyle: option.optionStyle || null,
+        },
+      }));
     }
   }
 
@@ -1141,12 +1190,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return attributesArray;
   }
 
-
   closeWrapper() {
     console.log('wrapper closed');
     this.additionalPanel = false;
     this.resizeWidget('icon-view');
-    sessionStorage.setItem('wrapper-hide', 'true');
+    this.storageService.setItem('wrapper-hide', 'true', this.storageType);
   }
 
   changeScreen(screen: any) {
@@ -1154,7 +1202,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     switch (screen) {
       case 'widget':
         if (
-          sessionStorage.getItem('wrapper-hide') === 'true' ||
+          this.storageService.getItem('wrapper-hide', this.storageType) ===
+            'true' ||
           this.__appConfig.appConfig.ADDITIONAL_PANEL !== true
         ) {
           this.additionalPanel = false;
@@ -1162,7 +1211,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         } else {
           this.additionalPanel = true;
           this.resizeWidget('wraper-view');
-
         }
         if (this.standaloneWebRtc) {
           this.authenticateSecureLinkKey(false);
@@ -1178,7 +1226,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isChatMax = false;
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
-        this.fileName = ''
+        this.fileName = '';
         if (this.source === 'UApp') {
           this.additionalPanel = false;
           this.isIconWidget = false;
@@ -1287,7 +1335,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isWebRtcMax = false;
         break;
     }
-    this.cdRef.detectChanges()
+    this.cdRef.detectChanges();
   }
 
   async changeView(view: any) {
@@ -1425,7 +1473,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.initiateWebRtcCall(view);
           }
         } else {
-          console.warn("WebRTC Call Is GOING ON")
+          console.warn('WebRTC Call Is GOING ON');
         }
         break;
       case 'standaloneVideo':
@@ -1437,7 +1485,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.initiateWebRtcCall('video');
           }
         } else {
-          console.warn("Error : Some Issues in initiating Stand alone Call")
+          console.warn('Error : Some Issues in initiating Stand alone Call');
         }
         break;
       case 'secureWebVideoCall':
@@ -1461,7 +1509,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         break;
     }
-    this.cdRef.detectChanges()
+    this.cdRef.detectChanges();
   }
 
   // assignStreams() {
@@ -1574,14 +1622,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         switch (event.type) {
           case 'CHANNEL_SESSION_ENDED':
           case 'CHANNEL_SESSION_EXPIRED':
-          case 'SOCKET_DISCONNECTED':
-            if (event.data == 'io server disconnect') {
-              localStorage.removeItem('user');
-              if (messageType !== 'survey') {
-                this.clearSession();
-              }
-              this.composerDisable()
+            if (messageType !== 'survey') {
+              this.clearSession();
+            } else {
+              this.storageService.removeItem('user', this.storageType);
+              this.isChatActive = false;
             }
+            this.composerDisable();
             break;
           case 'SOCKET_RECONNECTED':
             console.log(
@@ -1592,7 +1639,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               event.data.serviceIdentifier,
               event.data.channelCustomerIdentifier,
             );
-            let error = localStorage.removeItem('widget-error');
+            let error = this.storageService.removeItem(
+              'widget-error',
+              'localStorage',
+            );
             this.changeScreen('chat');
             console.log(
               '[SOCKET_RECONNECTED] ==> Chat Resume event response:',
@@ -1625,21 +1675,41 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             }
             this.changeScreen('chat');
             break;
+          case 'CONVERSATION_RESUMED':
+            console.log(
+              '[CONVERSATION_RESUMED] ==> Chat Resumed Response:',
+              event.data,
+            );
+            this.isChatActive = true;
+            this.isComposerDisable = false;
+            this.preChatFormLoader = false;
+            this.changeScreen('chat');
+            this.conversationId = event.data.history[0].header.conversationId;
+            this.storageService.setItem(
+              'conversationId',
+              event.data.history[0].header.conversationId,
+              this.storageType,
+            );
+            event.data.history &&
+              this.handleResumedMessages(event.data.history);
+            this.scrollToBottom();
+            break;
           case 'CHANNEL_SESSION_STARTED':
             this.isChatActive = true;
             this.isComposerDisable = false;
             this.preChatFormLoader = false;
             this.conversationId = event.data.header.conversationId;
             this.customerId = event.data.header.customer._id;
-            localStorage.setItem(
+            this.storageService.setItem(
               'conversationId',
               event.data.header.conversationId,
+              this.storageType,
             );
             this.sdk.setConversationDataAgainstCustomerIdentifier(
               this.customerData.channelCustomerIdentifier,
               this.getFormDataAsConversationData(this.preChatFormData),
             );
-            this.pushPrechatDataAsActivity()
+            this.pushPrechatDataAsActivity();
 
             // this.composerDisable()
             break;
@@ -1648,13 +1718,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.handleCimMessage(event.data);
             console.log('Cim Message Array: ', this.cimMessage);
             break;
-          // case 'SOCKET_DISCONNECTED':
-          //   console.log('event response:', event.data);
-          //   localStorage.removeItem('user');
-          //   if (messageType !== 'survey') {
-          //     this.clearSession();
-          //   }
-          //   break;
+          case 'SOCKET_DISCONNECTED':
+            console.log('event response:', event.data);
+            if (messageType !== 'survey') {
+              this.cimMessage = [];
+              this.clearMessageData();
+              this.isChatActive = false;
+              this.composerDisable();
+              this.changeScreen('end');
+            }
+            break;
+          case 'SOCKET_REPLACED':
+            console.log('event response:', event.data);
+            this.cimMessage = [];
+            this.clearMessageData();
+            this.isChatActive = false;
+            this.composerDisable();
+            this.changeScreen('end');
+            break;
           case 'CONNECT_ERROR':
             this.changeScreen('error');
             console.log('event response:', event.data);
@@ -1682,7 +1763,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleCimMessage(cimMessage: any) {
-
     if (
       cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
       cimMessage.header.sender &&
@@ -1721,13 +1801,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
         cimMessage.header.sender.type.toLowerCase() == 'bot')
     ) {
-
-
-      const urlRegex = /(?:https?:\/\/)?(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:\/[^\s]*)?/g;
+      const urlRegex =
+        /(?:https?:\/\/)?(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:\/[^\s]*)?/g;
       const urls = cimMessage.body.markdownText.match(urlRegex);
       if (urls) {
         for (let url of urls) {
-          if (url.includes('&type=survey')) {
+          if (url.includes('type=survey')) {
             cimMessage.body.subType = 'SURVEY';
             cimMessage.body.surveyLink = url;
             const normalText = cimMessage.body.markdownText
@@ -1738,7 +1817,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           }
         }
       }
-      if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
+      if (
+        cimMessage.header.intent &&
+        cimMessage.header.intent.toLowerCase() === 'update'
+      ) {
         this.editMessage(cimMessage);
         this.handleMessageReport(cimMessage);
       } else {
@@ -1760,34 +1842,52 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (
           cimMessage.body.notificationData.data.agentParticipant &&
           cimMessage.body.notificationData.data.agentParticipant.participant &&
-          cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser
+          cimMessage.body.notificationData.data.agentParticipant.participant
+            .keycloakUser
         ) {
-          let fullName = this.getAgentDisplayName(cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser);
+          let fullName = this.getAgentDisplayName(
+            cimMessage.body.notificationData.data.agentParticipant.participant
+              .keycloakUser,
+          );
           if (!this.isUsernameEnabled) {
-            cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser.username = fullName;
+            cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser.username =
+              fullName;
           }
         }
 
         if (
           cimMessage.body.notificationData.data.conversationParticipant &&
-          cimMessage.body.notificationData.data.conversationParticipant.participant &&
-          cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser
+          cimMessage.body.notificationData.data.conversationParticipant
+            .participant &&
+          cimMessage.body.notificationData.data.conversationParticipant
+            .participant.keycloakUser
         ) {
-          let fullName = this.getAgentDisplayName(cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser);
+          let fullName = this.getAgentDisplayName(
+            cimMessage.body.notificationData.data.conversationParticipant
+              .participant.keycloakUser,
+          );
           if (!this.isUsernameEnabled) {
-            cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser.username = fullName;
+            cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser.username =
+              fullName;
           }
         }
       }
 
-      if (cimMessage.header.sender.type.toLowerCase() == "agent") {
-        let fullName = this.getAgentDisplayName(cimMessage.header.sender.additionalDetail);
+      if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
+        let fullName = this.getAgentDisplayName(
+          cimMessage.header.sender.additionalDetail,
+        );
         if (!this.isUsernameEnabled) {
           cimMessage.header.sender.senderName = fullName;
         }
       }
 
-      if (cimMessage && cimMessage.header && cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
+      if (
+        cimMessage &&
+        cimMessage.header &&
+        cimMessage.header.intent &&
+        cimMessage.header.intent.toLowerCase() === 'update'
+      ) {
         this.editMessage(cimMessage);
         this.handleMessageReport(cimMessage);
       } else {
@@ -1803,23 +1903,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const messageId = cimMessage.header.originalMessageId;
 
     // Find the message by messageId
-    const existingMessageIndex = this.cimMessage.findIndex(msg => msg.id === messageId);
+    const existingMessageIndex = this.cimMessage.findIndex(
+      (msg) => msg.id === messageId,
+    );
 
     if (existingMessageIndex !== -1) {
-      const newContent = cimMessage.body.markdownText
+      const newContent = cimMessage.body.markdownText;
       this.cimMessage[existingMessageIndex].body.markdownText = newContent;
       this.cimMessage[existingMessageIndex].isEdited = true;
-
     }
   }
 
-
   composerDisable() {
-    console.log("message element is ", this.messageElement)
+    console.log('message element is ', this.messageElement);
     const messageRef: any = this.messageElement?.nativeElement;
     if (messageRef) {
-      this.renderer.setAttribute(messageRef, 'disabled', 'true')
-      this.renderer.setAttribute(messageRef, 'placeholder', 'Unable to send message')
+      this.renderer.setAttribute(messageRef, 'disabled', 'true');
+      this.renderer.setAttribute(
+        messageRef,
+        'placeholder',
+        'Unable to send message',
+      );
       this.renderer.setProperty(messageRef, 'value', '');
       this.isComposerDisable = true;
     }
@@ -1835,13 +1939,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
           cimMessage.header.sender.type.toLowerCase() == 'bot')
       ) {
-        const urlRegex = /((https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?)/g;
+        const urlRegex =
+          /((https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?)/g;
 
         const urls = cimMessage.body.markdownText.match(urlRegex);
         // Check if any URLs are found
         if (urls) {
           urls.forEach((url: string | string[]) => {
-            if (url.includes('&type=survey')) {
+            if (url.includes('type=survey')) {
               cimMessage.body.subType = 'SURVEY';
               cimMessage.body.surveyLink = url;
               cimMessage.body.markdownText = cimMessage.body.markdownText
@@ -1850,7 +1955,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             }
           });
         }
-        if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
+        if (
+          cimMessage.header.intent &&
+          cimMessage.header.intent.toLowerCase() === 'update'
+        ) {
           this.editMessage(cimMessage);
         } else {
           this.cimMessage.push(cimMessage);
@@ -1866,7 +1974,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           clearTimeout(this.typingIndicatorTimer);
           this.typingIndicatorTimer = null;
         }
-        if (cimMessage.header.intent && cimMessage.header.intent.toLowerCase() === 'update') {
+        if (
+          cimMessage.header.intent &&
+          cimMessage.header.intent.toLowerCase() === 'update'
+        ) {
           this.editMessage(cimMessage);
         } else {
           this.cimMessage.push(cimMessage);
@@ -2085,22 +2196,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       try {
         this.scrollContainer.nativeElement.scrollTop =
           this.scrollContainer.nativeElement.scrollHeight;
-      } catch (err) { }
+      } catch (err) {}
     }, 350);
   }
 
-
-
   clearMessageData() {
-
     if (this.elementView?.nativeElement) {
-      this.elementView.nativeElement.value = ''
+      this.elementView.nativeElement.value = '';
     }
     this.composer_input_disabled = false;
     this.text = '';
     this.scrollToBottom();
     this.scrollCon = 45;
-    this.fileName = ''
+    this.fileName = '';
   }
 
   constructCimMessage(
@@ -2135,7 +2243,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       markdownText: '',
       type: '',
     };
-    const messageTypesFormediaURLs = ["application", "text", "image", "video", "audio"]
+    const messageTypesFormediaURLs = [
+      'application',
+      'text',
+      'image',
+      'video',
+      'audio',
+    ];
     const messageType = msgType.toLowerCase();
 
     if (messageType == 'plain') {
@@ -2161,10 +2275,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.imageUrls = [];
       this.selectedFile = null as any;
     } else if (messageTypesFormediaURLs.includes(messageType)) {
-      const imageUrl = this.__appConfig.appConfig.FILE_SERVER_URL + "/api/downloadFileStream?filename=" + fileName;
+      const imageUrl =
+        this.__appConfig.appConfig.FILE_SERVER_URL +
+        '/api/downloadFileStream?filename=' +
+        fileName;
       // this.sdk.getFileURLfromServer(imageUrl, (res: any ) => {
-      body['attachment'] = this.buildMediaAttachment(imageUrl, fileSize || 0, fileMimeType || '', fileType || '')
-      if (messageType == "application" || messageType == "text") {
+      body['attachment'] = this.buildMediaAttachment(
+        imageUrl,
+        fileSize || 0,
+        fileMimeType || '',
+        fileType || '',
+      );
+      if (messageType == 'application' || messageType == 'text') {
         body.type = 'FILE';
         body.markdownText = additionalText || '';
         body['caption'] = ''; // Here is the 'caption' property
@@ -2194,14 +2316,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-
-  buildMediaAttachment(mediaUrl: SafeUrl, fileSize?: any, fileMimeType?: string, fileType?: any): any {
+  buildMediaAttachment(
+    mediaUrl: SafeUrl,
+    fileSize?: any,
+    fileMimeType?: string,
+    fileType?: any,
+  ): any {
     return {
       mediaUrl: mediaUrl,
       type: fileMimeType,
       size: fileSize,
       extType: fileType,
-      mimeType: fileMimeType
+      mimeType: fileMimeType,
     };
   }
 
@@ -2213,7 +2339,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     if (filesAmount) {
-      this.fileLoading = true
+      this.fileLoading = true;
       this.selectedFile = filesAmount;
       let filesLoaded = 0;
       for (let i = 0; i < filesAmount.length; i++) {
@@ -2245,16 +2371,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   resetFileValidation(event: Event, additionalText: string) {
     const fileElem = event.target as HTMLInputElement;
-    const fileControl = this.preChatFormGroup.get(additionalText) as FormControl;
+    const fileControl = this.preChatFormGroup.get(
+      additionalText,
+    ) as FormControl;
     this.removeUploadFile();
-    this.fileName = ''
+    this.fileName = '';
     fileControl?.setValue('');
     if (fileElem?.required) {
       fileControl?.setValidators([Validators.required]);
     } else {
       fileControl?.clearValidators();
     }
-    fileControl.updateValueAndValidity()
+    fileControl.updateValueAndValidity();
   }
   uploadFile(files: any, additionalText: string) {
     let availableExtensions = [
@@ -2290,42 +2418,43 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           );
           console.log('ready to Upload File', fileSize, fileMimeType);
 
-          this.sdk.moveToFileServer(
-            fd,
-            (res: any) => {
-              if (res?.isFileInvalid) {
-                if (res?.statusCode === 413) {
-                  this.snackBar.open(`Error while uploading file(s) on Server. Requested Entity Too Large`, 'X', {
+          this.sdk.moveToFileServer(fd, (res: any) => {
+            if (res?.isFileInvalid) {
+              if (res?.statusCode === 413) {
+                this.snackBar.open(
+                  `Error while uploading file(s) on Server. Requested Entity Too Large`,
+                  'X',
+                  {
                     duration: 3000,
                     panelClass: ['error-snackbar'],
                     horizontalPosition: 'right',
-                  });
-                  this.removeUploadFile();
-                  return;
-                } else {
-                  this.snackBar.open(res?.errorMessage, 'X', {
-                    duration: 3000,
-                    panelClass: ['error-snackbar'],
-                    horizontalPosition: 'right',
-                  });
-                  this.removeUploadFile();
-                  return;
-                }
+                  },
+                );
+                this.removeUploadFile();
+                return;
+              } else {
+                this.snackBar.open(res?.errorMessage, 'X', {
+                  duration: 3000,
+                  panelClass: ['error-snackbar'],
+                  horizontalPosition: 'right',
+                });
+                this.removeUploadFile();
+                return;
               }
+            }
 
-              this.constructCimMessage(
-                res.type.split('/')[0],
-                '',
-                null,
-                null,
-                res.type,
-                res.name,
-                res.size,
-                additionalText,
-                res.name.split('.').pop(),
-              );
-            },
-          );
+            this.constructCimMessage(
+              res.type.split('/')[0],
+              '',
+              null,
+              null,
+              res.type,
+              res.name,
+              res.size,
+              additionalText,
+              res.name.split('.').pop(),
+            );
+          });
         } else {
           this.snackBar.open(files[i].name + ' unsupported type', 'X', {
             panelClass: 'custom-snackbar',
@@ -2384,7 +2513,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   customerChatResumed() {
-    let userData: string | null = localStorage.getItem('user');
+    let userData: string | null = this.storageService.getItem(
+      'user',
+      this.storageType,
+      false,
+    );
 
     if (userData !== null) {
       let parsedUserData = JSON.parse(userData);
@@ -2399,7 +2532,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.channelCustomerIdentifier,
       );
     } else {
-      localStorage.removeItem('widget-error');
+      this.storageService.removeItem('widget-error', 'localStorage');
       this.changeScreen('widget');
     }
   }
@@ -2484,23 +2617,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   //   localStorage.removeItem('conversationId');
   // }
 
-
-
   chatTranscript(): void {
-    const conversationId     = localStorage.getItem('conversationId');
-    const browserLang        = this.browserLang;
+    const conversationId = this.storageService.getItem(
+      'conversationId',
+      this.storageType,
+    );
+    const browserLang = this.browserLang;
 
     // Build the query string
     //state=download&browserLang=en&conversationId=
     const params = new URLSearchParams({
-      state:              'download',
-      browserLang:        browserLang || '',
-      conversationId:     conversationId || '',
+      state: 'download',
+      browserLang: browserLang || '',
+      conversationId: conversationId || '',
     });
 
-  const absoluteUrl = `${window.location.origin}/customer-widget/#/chat-transcript?${params.toString()}`;
-  window.open(absoluteUrl, '_blank', 'noopener');
-}
+    const absoluteUrl = `${window.location.origin}/customer-widget/#/chat-transcript?${params.toString()}`;
+    window.open(absoluteUrl, '_blank', 'noopener');
+  }
 
   loadBrowserLanguage() {
     this.browserLang = navigator.language;
@@ -2510,18 +2644,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (this.selectedLanguage == 'ar') {
       this.textDirection = 'right-direction';
       this.translate.use(this.selectedLanguage);
-      console.log(this.selectedLanguage, 'this.selectedLanguage')
+      console.log(this.selectedLanguage, 'this.selectedLanguage');
     }
   }
 
-
   logInToFreeSwitch() {
-
     if (!this.IsRegisteredInFreeSwitch && this.webRTCConfig.sipExtension) {
-      let selectedSipExtension = this.webRTCConfig.sipExtension
+      let selectedSipExtension = this.webRTCConfig.sipExtension;
       this.webRTCConfig.sipExtension = selectedSipExtension.toString();
     }
-    if (!this.IsRegisteredInFreeSwitch && this.enableWebRtc) this.sdk.loginSipWebRtc(this.webRTCConfig);
+    if (!this.IsRegisteredInFreeSwitch && this.enableWebRtc)
+      this.sdk.loginSipWebRtc(this.webRTCConfig);
   }
   // Audio Functions
   async toggleCallMic(tooltip: any) {
@@ -2530,7 +2663,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.sdk.handleCallMic(action, this.dialogId);
     // Short delay to ensure proper state transition
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Update the control state that affects the tooltip text
     this.isCallMute = !this.isCallMute;
@@ -2555,12 +2688,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async toggleCallVideo(tooltip: any) {
-    if (tooltip)
-      this.updateTooltip(tooltip);
+    if (tooltip) this.updateTooltip(tooltip);
     const cameraStatus = !this.isVideoHide ? 'off' : 'on';
     this.sdk.convertCall(cameraStatus, 'video', this.dialogId);
     // Short delay to ensure proper state transition
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Update the control state that affects the tooltip text
     this.isVideoHide = !this.isVideoHide;
@@ -2571,9 +2703,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       // Hide the tooltip first
       tooltip.hide();
 
-
       // Small delay before showing the new tooltip
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       tooltip.show();
     }
@@ -2587,13 +2718,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const action = !this.isCallOnHold ? 'holdCall' : 'retrieveCall';
     this.sdk.handleCallHoldState(action, this.dialogId);
     // Short delay to ensure proper state transition
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     // Update the control state that affects the tooltip text
     this.isCallOnHold = !this.isCallOnHold;
   }
 
   initiateWebRtcCall(callType: any) {
-    if (callType === "video" || callType === "audio") {
+    if (callType === 'video' || callType === 'audio') {
       this.isVideoHide = false;
       this.isCallMute = false;
     }
@@ -2614,7 +2745,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     // standAlone Web RTC Call when the link is given in active chat / web session as a message..
     if (this.isSecureWebCall && !this.errorDuringWebRTCCall) {
-
       this.sdk.handleCallStart({
         type: callType,
         authConfigs: this.setAuthorizedResponse,
@@ -2627,21 +2757,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     // In case of simple webRTC call
-
     else {
-
       if (this.preChatFormData && typeof this.preChatFormData === 'object') {
         if (this.preChatFormData?.sections?.length > 0) {
-          this.webRTCConfig.customerName = "";
-          this.webRTCConfig.customerNumber = "";
+          this.webRTCConfig.customerName = '';
+          this.webRTCConfig.customerNumber = '';
           let sections: Array<any> = this.preChatFormData?.sections;
           sections.forEach((item) => {
             if (item?.name) this.webRTCConfig.customerName = item.name;
             if (item?.phone) this.webRTCConfig.customerNumber = item.phone;
           });
         }
-      }
-      else this.handleRefreshCaseForWebRTC();
+      } else this.handleRefreshCaseForWebRTC();
 
       this.sdk.handleCallStart({
         type: callType,
@@ -2657,7 +2784,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
   }
-
 
   handleScreenShareClick() {
     // Do not proceed if secure web call or audio call is active
@@ -2686,7 +2812,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-
   startCountdown(): void {
     const countDownDate = new Date().getTime();
     if (!this.counterVar) {
@@ -2696,9 +2821,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         const minutes = (
           '0' + Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
         ).slice(-2);
-        const seconds = ('0' + Math.floor((distance % (1000 * 60)) / 1000)).slice(
-          -2,
-        );
+        const seconds = (
+          '0' + Math.floor((distance % (1000 * 60)) / 1000)
+        ).slice(-2);
         this.callTime = `${minutes}:${seconds}`;
       }, 1000);
     }
@@ -2714,12 +2839,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.IsRegisteredInFreeSwitch = false;
     console.log('[handleDialogStates] received dialog: ===> ', data);
 
-    if (data.reasonCode === "NO_ANSWER") {
-      this.snackBar.open("Call is not picked up", 'X', {
-        duration: 2000,  // 5 seconds
+    if (data.reasonCode === 'NO_ANSWER') {
+      this.snackBar.open('Call is not picked up', 'X', {
+        duration: 2000, // 5 seconds
         panelClass: ['error-snackbar'],
         horizontalPosition: 'right',
-        verticalPosition: 'top'
+        verticalPosition: 'top',
       });
     }
 
@@ -2757,7 +2882,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         '[handleDialogStates] Inside Outbound Dialing Event: ===> ',
         data.response,
       );
-      if (this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO) { this.remoteStreamStatus = false; }
+      if (
+        this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED &&
+        this.__appConfig.appConfig.VIDEO
+      ) {
+        this.remoteStreamStatus = false;
+      }
 
       if (data.response.dialog === null) {
         this.maintainDialog = null;
@@ -2836,9 +2966,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             } else if (this.isScreenShareActive) {
               this.changeView('screenshare');
             } else if (this.isChatActive) {
-              this.changeView('chat')
+              this.changeView('chat');
             } else if (this.isSecureWebCall) {
-
               this.changeView('secureWebVideoCall');
             }
             break;
@@ -2863,7 +2992,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               '[dialogState] DROPPED CALL DIALOG: ===> ',
               data.response.dialog,
             );
-            if (this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO) { this.remoteStreamStatus = false; }
+            if (
+              this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED &&
+              this.__appConfig.appConfig.VIDEO
+            ) {
+              this.remoteStreamStatus = false;
+            }
 
             if (this.standaloneWebRtc) {
               this.callPopUpView = false;
@@ -2885,7 +3019,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               if (this.IsRegisteredInFreeSwitch) {
                 this.callEnd();
               }
-              if (this.isChatActive && data.response.dialog.callEndReason !== "NO_ANSWER") {
+              if (
+                this.isChatActive &&
+                data.response.dialog.callEndReason !== 'NO_ANSWER'
+              ) {
                 this.clearSession();
               } else {
                 this.changeView('chat');
@@ -2923,7 +3060,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         ) {
           // this.remoteVideoActive = false;
           console.log('Remote Camera Off');
-          setTimeout(() => { this.remoteStreamStatus = true; }, 2000)
+          setTimeout(() => {
+            this.remoteStreamStatus = true;
+          }, 2000);
         } else if (
           data.dialog.eventRequest === 'remote' &&
           data.dialog.streamStatus === 'on'
@@ -2935,7 +3074,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     if (data.event === 'mediaPermissionStatus') {
-
       console.log(
         '[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ',
         data.dialog,
@@ -2987,25 +3125,31 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.callPopUpView = false;
           this.activeVideoView = false;
           this.isWebRtcVideoCallActive = false;
-          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-            duration: 3000,
-            panelClass: ['error-snackbar'],
-            horizontalPosition: 'right',
-          });
-
+          this.snackBar.open(
+            this.showAuthenticationResponseMessage,
+            'Dismiss',
+            {
+              duration: 3000,
+              panelClass: ['error-snackbar'],
+              horizontalPosition: 'right',
+            },
+          );
         } else {
-
-          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-            duration: 3000,
-            panelClass: ['error-snackbar'],
-            horizontalPosition: 'right',
-          });
+          this.snackBar.open(
+            this.showAuthenticationResponseMessage,
+            'Dismiss',
+            {
+              duration: 3000,
+              panelClass: ['error-snackbar'],
+              horizontalPosition: 'right',
+            },
+          );
           this.isAudioCallActive = false;
           this.isSecureWebCall = false;
           this.isVideoCallActive = false;
           this.activeVideoView = false;
           this.errorDuringWebRTCCall = true;
-          this.changeView('chat')
+          this.changeView('chat');
         }
       }
     }
@@ -3013,7 +3157,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   callEnd() {
     if (!this.dialogId) {
-      console.warn("Call cannot be ended because dialogId is missing.");
+      console.warn('Call cannot be ended because dialogId is missing.');
       return;
     }
 
@@ -3022,7 +3166,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.endCountdown();
     this.sdk.handleCallEnd(this.dialogId);
     this.sdk.handleLogOutAgent(this.dialogId);
-    this.changeView("chat");
+    this.changeView('chat');
   }
 
   changeFont() {
@@ -3033,18 +3177,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   setFontSize(e: any) {
     console.log('Set fontsize', e);
     try {
-      localStorage.setItem('fontSize', e);
+      this.storageService.setItem('fontSize', e, this.storageType);
       this.changeFont();
       this.setFontFromLocalStorage();
-    } catch (error) { }
+    } catch (error) {}
   }
 
   private setFontFromLocalStorage() {
     try {
-      if (localStorage.getItem('fontSize') !== null) {
-        this.fontSize.setValue(localStorage.getItem('fontSize'));
+      if (this.storageService.getItem('fontSize', this.storageType) !== null) {
+        this.fontSize.setValue(
+          this.storageService.getItem('fontSize', this.storageType),
+        );
       }
-    } catch (error) { }
+    } catch (error) {}
   }
 
   clearSession() {
@@ -3060,6 +3206,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.isChatActive = false;
     this.changeScreen('end');
     this.sdk.handleChatEnd(this.customerData);
+    this.storageService.removeItem('user', this.storageType);
     this.clearMessageData();
     this.fileLoading = false;
     this.fileUrl = '';
@@ -3084,7 +3231,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async authenticateSecureLinkKey(isAuthenticated: boolean): Promise<void> {
-
     this.dialogId = undefined;
     const roomId = this.webRtcSecureLink;
     this.setAuthorizedResponse = undefined;
@@ -3093,7 +3239,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (res.error) {
         this.isSecureLinkExpired = true;
         this.showAuthenticationResponseMessage = res.data.message
-          ? "The link has expired"
+          ? 'The link has expired'
           : res.message;
         this.showInvalidCodeError = true;
         return;
@@ -3110,7 +3256,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           await this.logInToFreeSwitch();
         }
       } catch (error) {
-        console.error("Error logging into FreeSwitch:", error);
+        console.error('Error logging into FreeSwitch:', error);
         return;
       }
       if (isAuthenticated) {
@@ -3126,15 +3272,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     });
   }
 
-
   processSecureLinkMessage(message: any) {
-
     this.isSecureWebCall = false;
-    const mediaUrl = message.body.mediaUrl
+    const mediaUrl = message.body.mediaUrl;
     const queryString = mediaUrl.split('?')[1];
     const urlParams = new URLSearchParams(queryString);
     const encryptedKey = urlParams.get('encryptedKey');
-    const preservedKey = decodeURIComponent(encryptedKey ?? "");
+    const preservedKey = decodeURIComponent(encryptedKey ?? '');
     this.webRtcSecureLink = preservedKey;
 
     // Just for Debugging to open url in new window.
@@ -3146,11 +3290,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // console.log("fullUrl", fullUrl);
     // window.open(fullUrl, '_blank');
 
-    const widgetIdentifier = urlParams.get('widgetIdentifier')
+    const widgetIdentifier = urlParams.get('widgetIdentifier');
     if (widgetIdentifier === this.widgetIdentifier) {
       this.authenticateSecureLinkKey(true);
     } else {
-      console.warn('[Warning] Widget Identifiers do not match or there was an error during WebRTC call.');
+      console.warn(
+        '[Warning] Widget Identifiers do not match or there was an error during WebRTC call.',
+      );
 
       this.snackBar.open(
         this.showAuthenticationResponseMessage || 'Authentication failed!',
@@ -3159,7 +3305,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           duration: 3000,
           panelClass: ['error-snackbar'],
           horizontalPosition: 'right',
-        }
+        },
       );
     }
     return;
@@ -3176,10 +3322,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return label.charAt(0).toUpperCase() + label.slice(1);
   }
 
-
-
-
-  isMaxLengthError(sectionIndex: number, controlName: string, valueType: string): boolean {
+  isMaxLengthError(
+    sectionIndex: number,
+    controlName: string,
+    valueType: string,
+  ): boolean {
     // Get the sections array from preChatFormGroup
     const sections = this.preChatFormGroup.get('sections') as FormArray;
 
@@ -3191,7 +3338,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     // Get the control from the specified section in preChatFormGroup
     const controlPreChat = sections.at(sectionIndex).get(controlName);
-
 
     // Prioritize the preChatFormGroup control
     const control = controlPreChat;
@@ -3221,14 +3367,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return false;
   }
 
-
   selected5starOption(
     controlName: string,
     sectionIndex: number,
     attributeIndex: number,
     itemIndex: number,
     type: string,
-    value: string
+    value: string,
   ) {
     console.log('controlName:', controlName);
 
@@ -3243,32 +3388,34 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // Get the form control from the specific section
     const control = sections.at(sectionIndex).get(controlName);
     if (!control) {
-      console.error(`Control "${controlName}" not found in section ${sectionIndex}.`);
+      console.error(
+        `Control "${controlName}" not found in section ${sectionIndex}.`,
+      );
       return;
     }
 
     // Update the star rating UI
     const svgElements = document.querySelectorAll(
-      `.option-${sectionIndex}-${attributeIndex}-${type}`
+      `.option-${sectionIndex}-${attributeIndex}-${type}`,
     );
 
-    if (type === "star") {
+    if (type === 'star') {
       svgElements.forEach((svg, index) => {
-        const paths = svg.getElementsByTagName("path");
-        const fillColor = index <= itemIndex ? "#FFB100" : "#E6E6E6";
+        const paths = svg.getElementsByTagName('path');
+        const fillColor = index <= itemIndex ? '#FFB100' : '#E6E6E6';
         for (let i = 0; i < paths.length; i++) {
-          paths[i].setAttribute("fill", fillColor);
+          paths[i].setAttribute('fill', fillColor);
         }
       });
     } else {
       svgElements.forEach((svg: any, index: number) => {
-        const paths = svg.getElementsByTagName("path");
+        const paths = svg.getElementsByTagName('path');
 
         if (!svg?.dataset.originalColors) {
           // Store original colors if not already stored
           const originalColors = [];
           for (let i = 0; i < paths.length; i++) {
-            originalColors.push(paths[i].getAttribute("fill"));
+            originalColors.push(paths[i].getAttribute('fill'));
           }
           svg.dataset.originalColors = JSON.stringify(originalColors);
         }
@@ -3277,24 +3424,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           // Restore the original colors for the clicked SVG
           const originalColors = JSON.parse(svg.dataset.originalColors);
           for (let i = 0; i < paths.length; i++) {
-            paths[i].setAttribute("fill", originalColors[i]);
+            paths[i].setAttribute('fill', originalColors[i]);
           }
         } else {
-          const fillColor = "gray"; // Change to gray for SVGs that are not clicked
+          const fillColor = 'gray'; // Change to gray for SVGs that are not clicked
           for (let i = 0; i < paths.length; i++) {
-            paths[i].setAttribute("fill", fillColor);
+            paths[i].setAttribute('fill', fillColor);
           }
         }
       });
     }
 
     control.setValue(value);
-    console.log(`Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`);
+    console.log(
+      `Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`,
+    );
   }
 
   selectedIndices: { [key: number]: number } = {};
 
-  changeNpsColor(controlName: any, sectionIndex: number, attributeIndex: number, currentIndex: number, value: string): void {
+  changeNpsColor(
+    controlName: any,
+    sectionIndex: number,
+    attributeIndex: number,
+    currentIndex: number,
+    value: string,
+  ): void {
     const sections = this.preChatFormGroup.get('sections') as FormArray;
 
     if (!sections || !sections.at(sectionIndex)) {
@@ -3305,17 +3460,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const control = sections.at(sectionIndex).get(controlName);
 
     if (!control) {
-      console.error(`Control "${controlName}" not found in section ${sectionIndex}.`);
+      console.error(
+        `Control "${controlName}" not found in section ${sectionIndex}.`,
+      );
       return;
     }
 
     // Create a new object reference to trigger change detection
-    this.selectedIndices = { ...this.selectedIndices, [attributeIndex]: currentIndex };
+    this.selectedIndices = {
+      ...this.selectedIndices,
+      [attributeIndex]: currentIndex,
+    };
 
     control.setValue(value);
-    console.log(`Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`);
+    console.log(
+      `Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`,
+    );
   }
-
 
   changeScaleStyle(
     controlName: string,
@@ -3323,7 +3484,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     attributeIndex: number,
     itemIndex: number,
     type: string,
-    value: string
+    value: string,
   ) {
     // Get the sections array from preChatFormGroup
     const sections = this.preChatFormGroup.get('sections') as FormArray;
@@ -3338,28 +3499,38 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const control = sections.at(sectionIndex).get(controlName);
 
     if (!control) {
-      console.error(`Control "${controlName}" not found in section ${sectionIndex}.`);
+      console.error(
+        `Control "${controlName}" not found in section ${sectionIndex}.`,
+      );
       return;
     }
 
     // Update the scale UI (NPS style)
     const svgElements = document.querySelectorAll(
-      `.npsOption-${sectionIndex}-${attributeIndex}-${type}`
+      `.npsOption-${sectionIndex}-${attributeIndex}-${type}`,
     );
 
     svgElements.forEach((svg, index) => {
-      const paths = svg.getElementsByTagName("path");
-      const fillColor = index === itemIndex ? "#E57032" : "gray";
+      const paths = svg.getElementsByTagName('path');
+      const fillColor = index === itemIndex ? '#E57032' : 'gray';
       for (let i = 0; i < paths.length; i++) {
-        paths[i].setAttribute("fill", fillColor);
+        paths[i].setAttribute('fill', fillColor);
       }
     });
     control.setValue(value);
-    console.log(`Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`);
+    console.log(
+      `Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`,
+    );
   }
 
-  ChangeBarColor(controlName: any, sectionIndex: number, attributeIndex: number, buttonIndex: number, attributeKey: string, value: string) {
-
+  ChangeBarColor(
+    controlName: any,
+    sectionIndex: number,
+    attributeIndex: number,
+    buttonIndex: number,
+    attributeKey: string,
+    value: string,
+  ) {
     const sections = this.preChatFormGroup.get('sections') as FormArray;
 
     // Validate section existence
@@ -3372,7 +3543,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const control = sections.at(sectionIndex).get(controlName);
 
     if (!control) {
-      console.error(`Control "${controlName}" not found in section ${sectionIndex}.`);
+      console.error(
+        `Control "${controlName}" not found in section ${sectionIndex}.`,
+      );
       return;
     }
 
@@ -3380,20 +3553,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     // Selecting all radio input elements for the given attributeKey
     const radioInputs = document.querySelectorAll(
-      `input[name="${attributeKey}"]`
+      `input[name="${attributeKey}"]`,
     );
 
     // Loop through all icon elements
     iconElements.forEach((iconElement: any) => {
       // Check if the data-bar-index matches the buttonIndex
-      if (parseInt(iconElement.getAttribute("data-bar-index")) === buttonIndex) {
+      if (
+        parseInt(iconElement.getAttribute('data-bar-index')) === buttonIndex
+      ) {
         // Show the matching icon element
-        iconElement.classList.remove("bar-icon-hide");
-        iconElement.classList.add("bar-icon-show");
+        iconElement.classList.remove('bar-icon-hide');
+        iconElement.classList.add('bar-icon-show');
       } else {
         // Hide all other icon elements
-        iconElement.classList.remove("bar-icon-show");
-        iconElement.classList.add("bar-icon-hide");
+        iconElement.classList.remove('bar-icon-show');
+        iconElement.classList.add('bar-icon-hide');
       }
     });
 
@@ -3407,7 +3582,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     });
 
     control.setValue(value);
-    console.log(`Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`);
+    console.log(
+      `Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`,
+    );
   }
 
   onCheckboxChange(
@@ -3416,7 +3593,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     sectionIndex: number,
     optionValue: string | null,
     categoryLabel: string,
-    hasCategory: boolean
+    hasCategory: boolean,
   ): void {
     if (!optionValue) return;
 
@@ -3446,7 +3623,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     } else {
       // Remove value
-      const updated = selectedValues[categoryLabel]?.filter(v => v !== optionValue) || [];
+      const updated =
+        selectedValues[categoryLabel]?.filter((v) => v !== optionValue) || [];
       if (updated.length > 0) {
         selectedValues[categoryLabel] = updated;
       } else {
@@ -3455,7 +3633,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     //  Update form control with stringified object
-    const newValue = Object.keys(selectedValues).length > 0 ? JSON.stringify(selectedValues) : '';
+    const newValue =
+      Object.keys(selectedValues).length > 0
+        ? JSON.stringify(selectedValues)
+        : '';
     control.setValue(newValue, { emitEvent: true });
   }
   parseCheckboxValue(val: string): { [key: string]: string[] } {
@@ -3466,13 +3647,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-
-
   isChecked(
     controlName: string,
     sectionIndex: number,
     optionValue: string,
-    categoryLabel: string
+    categoryLabel: string,
   ): boolean {
     const controlPath = `sections.${sectionIndex}.${controlName}`;
     const control = this.preChatFormGroup.get(controlPath);
@@ -3497,26 +3676,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return false;
   }
 
-
-
-
-  booleanEmojiSet(sectionIndex: number, attributeIndex: number, itemIndex: number) {
-    console.log("boooean emoji set", itemIndex);
+  booleanEmojiSet(
+    sectionIndex: number,
+    attributeIndex: number,
+    itemIndex: number,
+  ) {
+    console.log('boooean emoji set', itemIndex);
     // Select all SVG elements within the booleanOption container
     const svgElements = document.querySelectorAll(
-      `#booleanOption-${sectionIndex}-${attributeIndex} svg`
+      `#booleanOption-${sectionIndex}-${attributeIndex} svg`,
     );
 
-    console.log('svgElements', svgElements)
+    console.log('svgElements', svgElements);
     // Iterate through all SVG elements
     svgElements.forEach((svg: any, index) => {
-      const paths = svg.getElementsByTagName("path");
+      const paths = svg.getElementsByTagName('path');
 
       if (!svg.dataset.originalColors) {
         // Store original colors in data attribute if not already stored
         const originalColors = [];
         for (let i = 0; i < paths.length; i++) {
-          originalColors.push(paths[i].getAttribute("fill"));
+          originalColors.push(paths[i].getAttribute('fill'));
         }
         svg.dataset.originalColors = JSON.stringify(originalColors);
       }
@@ -3525,19 +3705,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         // Restore the original colors for the clicked SVG
         const originalColors = JSON.parse(svg.dataset.originalColors);
         for (let i = 0; i < paths.length; i++) {
-          paths[i].setAttribute("fill", originalColors[i]);
+          paths[i].setAttribute('fill', originalColors[i]);
         }
       } else {
         // Change to gray for SVGs that are not clicked
-        const fillColor = "gray";
+        const fillColor = 'gray';
         for (let i = 0; i < paths.length; i++) {
-          paths[i].setAttribute("fill", fillColor);
+          paths[i].setAttribute('fill', fillColor);
         }
       }
     });
   }
 
-  handleFileChange(input: any, sectionIndex: number, attributeIndex: number, fileSize: any, id: any, allowed: any, attribute: any
+  handleFileChange(
+    input: any,
+    sectionIndex: number,
+    attributeIndex: number,
+    fileSize: any,
+    id: any,
+    allowed: any,
+    attribute: any,
   ) {
     const file = input.files[0];
 
@@ -3545,24 +3732,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    console.log('file', file)
+    console.log('file', file);
     const errorDiv: any = document.getElementById(`${id}-error`);
     const uploadBtn: any = document.getElementById(`upload-btn-${id}`);
     uploadBtn.disabled = true;
 
-
     if (file) {
-      console.log('file', file)
+      console.log('file', file);
       const allowedTypesString: any[] = allowed;
-      const allowedTypes = allowedTypesString.map(ext => ext.trim().toLowerCase());
+      const allowedTypes = allowedTypesString.map((ext) =>
+        ext.trim().toLowerCase(),
+      );
 
-      const fileExtension = file.name.slice(file.name.lastIndexOf(".") + 1).toLowerCase(); // Improved extension extraction
-      console.log('allowedTypes', allowedTypes)
-      console.log('fileExtension', fileExtension)
+      const fileExtension = file.name
+        .slice(file.name.lastIndexOf('.') + 1)
+        .toLowerCase(); // Improved extension extraction
+      console.log('allowedTypes', allowedTypes);
+      console.log('fileExtension', fileExtension);
 
       if (allowedTypes.length > 0 && !allowedTypes.includes(fileExtension)) {
-
-        console.log('fileExtension not allowed', fileExtension)
+        console.log('fileExtension not allowed', fileExtension);
         this.snackBar.open("File extension not allowed'", 'X', {
           panelClass: 'custom-snackbar',
         });
@@ -3571,13 +3760,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     }
     const fileName = file.name;
-    console.log('fileName', fileName)
-    const truncatedName = fileName.length > 10
-      ? fileName.substring(0, 7) + '...' + fileName.split('.').pop()
-      : fileName;
+    console.log('fileName', fileName);
+    const truncatedName =
+      fileName.length > 10
+        ? fileName.substring(0, 7) + '...' + fileName.split('.').pop()
+        : fileName;
 
-    this.setFileControl(sectionIndex, fileName, attribute.key)
-    this.previewFileForm(file, sectionIndex, attributeIndex)
+    this.setFileControl(sectionIndex, fileName, attribute.key);
+    this.previewFileForm(file, sectionIndex, attributeIndex);
     uploadBtn.disabled = false;
   }
 
@@ -3593,23 +3783,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     control.setValue(fileName);
     control.markAsTouched();
     control.markAsDirty();
-
-
   }
   getFileName(sectionIndex: number, controlName: any) {
     const sections = this.preChatFormGroup.get('sections') as FormArray;
     const currentSection = sections.at(sectionIndex);
-    return currentSection.get(controlName)?.value || ''
-
+    return currentSection.get(controlName)?.value || '';
   }
 
   disableUploadBtn(buttonId: any) {
     const uploadedBtn = document.querySelector(`#upload-btn-${buttonId}`);
     // uploadedBtn.textContent = 'Uploaded'
-    console.log('uploadedBtn', uploadedBtn)
+    console.log('uploadedBtn', uploadedBtn);
     this.renderer.setAttribute(uploadedBtn, 'disabled', 'true'); // Correct way
-
-
   }
 
   previewFileForm(file: File, sectionIndex: number, attributeIndex: number) {
@@ -3618,8 +3803,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const reader = new FileReader();
     const key = `${sectionIndex}-${attributeIndex}`;
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    const isTextOrJson = !fileExtension || ['txt', 'json'].includes(fileExtension);
-
+    const isTextOrJson =
+      !fileExtension || ['txt', 'json'].includes(fileExtension);
 
     if (isTextOrJson) {
       reader.onload = (e: ProgressEvent<FileReader>) => {
@@ -3652,7 +3837,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.fileHistory[key] = { isImage };
 
         if (isImage) {
-          this.filePreviewUrl[key] = this.sanitizer.bypassSecurityTrustUrl(fileResult);
+          this.filePreviewUrl[key] =
+            this.sanitizer.bypassSecurityTrustUrl(fileResult);
         } else {
           this.filePreviewUrl[key] = this.sanitizeFileContent(file, fileResult);
         }
@@ -3668,36 +3854,47 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return this.sanitizer.bypassSecurityTrustUrl(fileResult);
   }
 
-
-  clearFile(sectionIndex: number, attributeIndex: number, controlName: string, id: any) {
+  clearFile(
+    sectionIndex: number,
+    attributeIndex: number,
+    controlName: string,
+    id: any,
+  ) {
     const key = `${sectionIndex}-${attributeIndex}`;
     const uploadBtn: any = document.getElementById(`upload-btn-${id}`);
     const input: any = document.getElementById(`${id}`);
     uploadBtn.disabled = true;
-    uploadBtn.textContent = 'Upload'
+    uploadBtn.textContent = 'Upload';
     input.value = '';
 
     delete this.filePreviewUrl[key];
     delete this.fileHistory[key];
-    this.setFileControl(sectionIndex, '', controlName)
+    this.setFileControl(sectionIndex, '', controlName);
   }
 
   getFileType(fileName: string): string {
     const extension = fileName.split('.').pop()?.toLowerCase() || '';
     switch (extension) {
-      case 'txt': return 'text';
-      case 'json': return 'json';
+      case 'txt':
+        return 'text';
+      case 'json':
+        return 'json';
       case 'pdf':
       case 'doc':
-      case 'docx': return 'document';
+      case 'docx':
+        return 'document';
       case 'mp3':
-      case 'wav': return 'audio';
+      case 'wav':
+        return 'audio';
       case 'mp4':
-      case 'webm': return 'video';
+      case 'webm':
+        return 'video';
       case 'png':
       case 'jpg':
-      case 'jpeg': return 'image';
-      default: return 'unknown';
+      case 'jpeg':
+        return 'image';
+      default:
+        return 'unknown';
     }
   }
 
@@ -3754,11 +3951,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // If no match, just return as a normal URL (fallback)
     return this.sanitizer.bypassSecurityTrustUrl(fileUrl);
   }
-  isErrorExist(sectionIndex: number, attributeIndex: number, controlName: string) {
+  isErrorExist(
+    sectionIndex: number,
+    attributeIndex: number,
+    controlName: string,
+  ) {
     const sections: any = this.preChatFormGroup.get('sections');
     const control = sections.at(sectionIndex).get(controlName);
-    console.log('error control ', control)
-
+    console.log('error control ', control);
   }
   disableTooltip(titleElement: any): boolean {
     if (!titleElement) return true; // Ensure the element exists to avoid errors
@@ -3771,8 +3971,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   hasRequiredError(controlName: string, sectionIndex: number): boolean {
-    const control = this.preChatFormGroup.get(['sections', sectionIndex])?.get(controlName);
-    console.log('control===>', control)
+    const control = this.preChatFormGroup
+      .get(['sections', sectionIndex])
+      ?.get(controlName);
+    console.log('control===>', control);
     return !!(
       control &&
       control.hasError('required') &&
@@ -3780,17 +3982,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
   }
 
-
   getTextAlignment(alignment: string | undefined) {
     // by default, the text alignment is center from scss
     alignment = alignment?.toLowerCase();
     switch (alignment) {
-      case 'left': return 'left';
-      case 'right': return 'right';
-      default: return null;
+      case 'left':
+        return 'left';
+      case 'right':
+        return 'right';
+      default:
+        return null;
     }
   }
-
 
   // Common helper function for uploading a file to server
   private uploadToFileServer(
@@ -3802,7 +4005,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       isFileInvalid: boolean;
       statusCode?: number;
       errorDetails?: any;
-    }) => void
+    }) => void,
   ): void {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
 
@@ -3816,7 +4019,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('conversationId', `${Math.floor(Math.random() * 90000) + 10000}`);
+    formData.append(
+      'conversationId',
+      `${Math.floor(Math.random() * 90000) + 10000}`,
+    );
 
     this.sdk.moveToFileServer(formData, (res: any) => {
       if (res?.isFileInvalid) {
@@ -3848,10 +4054,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      const availableExtensions = restriction ? fileTypes.map(ext => ext.toLowerCase()) : this.fileExtensons;
-      console.log('file uploading')
+      const availableExtensions = restriction
+        ? fileTypes.map((ext) => ext.toLowerCase())
+        : this.fileExtensons;
+      console.log('file uploading');
 
-      const fileControl = this.preChatFormGroup.get(additionalText) as FormControl;
+      const fileControl = this.preChatFormGroup.get(
+        additionalText,
+      ) as FormControl;
 
       this.uploadToFileServer(
         file,
@@ -3862,9 +4072,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           fileControl?.setValue(this.fileUrl);
         },
         (error: any) => {
-          this.snackBar.open(error.errorMessage, 'X', { panelClass: 'custom-snackbar' });
+          this.snackBar.open(error.errorMessage, 'X', {
+            panelClass: 'custom-snackbar',
+          });
           this.resetFileValidation(event, additionalText);
-        }
+        },
       );
 
       input.value = '';
@@ -3874,7 +4086,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     sectionIndex: number,
     controlName: string,
     fileInput: HTMLInputElement,
-    id: any
+    id: any,
   ): void {
     if (fileInput.files && fileInput.files.length > 0) {
       const file = fileInput.files[0];
@@ -3887,30 +4099,40 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           const fileName = `${this.__appConfig.appConfig.FILE_SERVER_URL}/api/downloadFileStream?filename=${res.name}`;
           this.setFileControl(sectionIndex, fileName, controlName);
 
-          this.snackBar.open('File uploaded successfully', 'X', { panelClass: 'custom-snackbar' });
+          this.snackBar.open('File uploaded successfully', 'X', {
+            panelClass: 'custom-snackbar',
+          });
 
           this.isFileUploading[controlName] = false;
           this.disableUploadBtn(id);
         },
         (error: any) => {
-          console.log(error)
-          this.snackBar.open(error.errorMessage, 'X', { panelClass: 'custom-snackbar' });
+          console.log(error);
+          this.snackBar.open(error.errorMessage, 'X', {
+            panelClass: 'custom-snackbar',
+          });
           this.isFileUploading[controlName] = false;
-        }
+        },
       );
     }
   }
 
   handleRefreshCaseForWebRTC() {
     try {
-      const storageUserData = localStorage.getItem('user');
+      const storageUserData = this.storageService.getItem(
+        'user',
+        this.storageType,
+        false,
+      );
       let parsedStorageUserData;
       if (storageUserData) parsedStorageUserData = JSON.parse(storageUserData);
       if (parsedStorageUserData) {
-        let attributes: Array<any> = parsedStorageUserData.data.formData.attributes;
+        let attributes: Array<any> =
+          parsedStorageUserData.data.formData.attributes;
         attributes.forEach((item) => {
           if (item.key === 'name') this.webRTCConfig.customerName = item.value;
-          if (item.key === 'phone') this.webRTCConfig.customerNumber = item.value;
+          if (item.key === 'phone')
+            this.webRTCConfig.customerNumber = item.value;
         });
       }
     } catch (error) {
