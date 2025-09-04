@@ -40,7 +40,7 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from "ng-pick-datetime";
 import { TranscriptComponent } from './chat-transcript/chat-transcript.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
-import { NgxUiLoaderModule, NgxUiLoaderConfig } from 'ngx-ui-loader';
+import { NgxUiLoaderModule } from 'ngx-ui-loader';
 import { SanitizeHtmlPipe } from './sanitizeHtml.pipe';
 import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
 import { SanitizeHtmlForEmail } from './pipes/sanitize-html-for-email.pipe';

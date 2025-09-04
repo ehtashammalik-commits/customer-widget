@@ -1799,7 +1799,7 @@
                           <span [owlDateTimeTrigger]="timePicker">
                             <mat-icon>access_time</mat-icon>
                           </span>
-                        <owl-date-time pickerType="timer" #timePicker></owl-date-time>
+                        <owl-date-time pickerType="timer" [hour12Timer]="true" #timePicker></owl-date-time>
                       </div>
 
 
@@ -1817,7 +1817,7 @@
                           <span [owlDateTimeTrigger]="dateTimePicker">
                             <mat-icon>calendar_month</mat-icon>
                           </span>
-                        <owl-date-time #dateTimePicker></owl-date-time>
+                        <owl-date-time [hour12Timer]="true" #dateTimePicker></owl-date-time>
                       </div>
 
                       <!-- color picker -->
@@ -1869,7 +1869,7 @@
                   mat-button
                   (click)="handleActionButtonClick(button, message)"
                 >
-                  {{ button.text }}
+                  {{ button.text | titlecase }}
                 </button>
               </div>
             </form>
