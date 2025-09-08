@@ -2012,7 +2012,7 @@
                         <mat-chip *ngFor="let btn of message.body.buttons; let i = index"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
                           (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
-                          [disabled]="message.body.additionalDetails?.disableButtonType"  [ngClass]="{ 'selected': selectedButtonIndex === i }">
+                          [disabled]="message.body.additionalDetails?.disableButtonType">
                           {{ btn.title }}
                         </mat-chip>
                       </mat-chip-list>

@@ -324,7 +324,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isSecureLinkExpired: boolean = false;
   IsRegisteredInFreeSwitch: boolean = false;
   currentTypeIndex = 1;
-  selectedButtonIndex = null;
 
 
   // file properties
@@ -2641,7 +2640,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       );
     }
   }
-  
 
   sendCarousalMessage(data: any, originalMessageId : string, carousalCardId? : null | string) {
     if (data.title.trim() !== '') {
