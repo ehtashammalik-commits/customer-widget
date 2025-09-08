@@ -324,6 +324,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isSecureLinkExpired: boolean = false;
   IsRegisteredInFreeSwitch: boolean = false;
   currentTypeIndex = 1;
+  selectedChipIndex: { [messageId: string]: number | null } = {};
 
 
   // file properties
@@ -2629,8 +2630,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   sendButtonMessage(
     data: { title: string; payload: any },
-    originalMessageId: any,
+    originalMessageId: any, index?: number
   ) {
+    if (index !== undefined) {
+      this.selectedChipIndex[originalMessageId] = index;
+    }
     if (data.title.trim() !== '') {
       this.constructCimMessage(
         'PLAIN',

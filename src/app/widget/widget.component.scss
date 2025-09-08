@@ -1198,6 +1198,11 @@ button.close-widget-wrapper {
 
       mat-chip.mat-chip{
         margin: 2px !important;
+
+        &.selected-chip{
+          background: var(--main-color);
+          color: #fff !important;
+          }
         }
       }
     }
@@ -3660,11 +3665,13 @@ input[type='radio'] {
   .form-inner-action {
     display: flex;
     justify-content: space-between;
+    gap: 2px;
 
     button{
       background: var(--main-color);
       color: #fff;
       font-size: 13px;
+      flex: 1;
       }
     }
 
@@ -3796,7 +3803,7 @@ input[type='radio'] {
 
     .form-inner-header {
       p {
-        font-weight: 500;
+        font-weight: 400;
         font-size: 14px;
         color: #555;
         }
@@ -3809,6 +3816,11 @@ input[type='radio'] {
       box-shadow: none;
       border: 0 !important;
       }
+    }
+  }
+.main-range-slider{
+  mat-slider{
+    width: 100%;
     }
   }
 

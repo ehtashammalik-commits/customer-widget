@@ -1832,7 +1832,7 @@
 
 
                       <!-- Interactive range slider -->
-                    <div *ngSwitchCase="'range'" class="form-group">
+                    <div *ngSwitchCase="'range'" class="form-group main-range-slider">
                       <label>
                         {{ attribute.label }}
                         <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -1846,7 +1846,7 @@
                         [max]="attribute.max || 100"
                         [step]="attribute.step || 1"
                         aria-label="units"
-                        tickInterval="auto">
+                        tickInterval="auto" color="primary">
                       </mat-slider>
                     </div>
 
@@ -2011,8 +2011,10 @@
                       <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
                         <mat-chip *ngFor="let btn of message.body.buttons; let i = index"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
-                          (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
-                          [disabled]="message.body.additionalDetails?.disableButtonType">
+                          (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id, i)"
+                          [disabled]="message.body.additionalDetails?.disableButtonType"
+                                  [ngClass]="[ message.body?.additionalDetails?.interactive?.type,
+              selectedChipIndex[message.id] === i ? 'selected-chip' : '']">
                           {{ btn.title }}
                         </mat-chip>
                       </mat-chip-list>

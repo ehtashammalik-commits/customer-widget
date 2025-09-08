@@ -116,3 +116,7 @@ body {
     margin-bottom: 0;
 }
 }
+
+.mat-slider.mat-primary .mat-slider-track-fill, .mat-slider.mat-primary .mat-slider-thumb, .mat-slider.mat-primary .mat-slider-thumb-label {
+  background-color: var(--main-color);
+  }
