@@ -323,6 +323,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   fileContent: { [key: string]: string } = {};
   isSecureLinkExpired: boolean = false;
   IsRegisteredInFreeSwitch: boolean = false;
+  currentTypeIndex = 1;
+  selectedButtonIndex = null;
 
 
   // file properties
@@ -2639,6 +2641,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       );
     }
   }
+  
 
   sendCarousalMessage(data: any, originalMessageId : string, carousalCardId? : null | string) {
     if (data.title.trim() !== '') {
@@ -4372,6 +4375,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (this.currentIndex > 0) {
       this.currentIndex--;
     }
+  }
+
+  selectSlide(index: number) {
+    this.currentIndex = index;
   }
 
 

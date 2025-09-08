@@ -1571,7 +1571,7 @@
                     </span>
                   </div>
                 </div>
-                <div class="widget-chat-message-agent" *ngIf="
+                <div class="widget-chat-message-agent {{message.body.type.toLowerCase()}}" *ngIf="
                     message.header.sender.type == 'AGENT' ||
                     message.header.sender.type == 'BOT'
                   ">
@@ -1622,8 +1622,10 @@
 <!--                    form type-->
         <div *ngIf="message.body.type.toLowerCase() === 'form_data'" class="message-type-form rich-message-content pt-3 pb-3">
           <!-- Form Title and Description -->
-          <p class="rich-inner-text">{{ message.body.formTitle }}</p>
-          <p class="rich-inner-text">{{ message.body.formDescription }}</p>
+          <div class="rich-form-header">
+          <h4>{{ message.body.formTitle }}</h4>
+          <span>{{ message.body.formDescription }}</span>
+          </div>
 
           <!-- Global error for this specific message form -->
           <div class="fields-validation-error mr-2" *ngIf="formGroupsMap[message.id]?.invalid && formGroupsMap[message.id]?.touched">
@@ -1640,15 +1642,17 @@
               *ngIf="formGroupsMap[message.id]?.get('sections')"
             >
               <div class="main-form" formArrayName="sections">
-                <ng-container
+                <div class="form-main-section"
                   *ngFor="let sectionGroup of getSectionsControls(message.id); let i = index"
                   [formGroup]="sectionGroup"
                 >
+                  <div class="form-inner-header">
                   <!-- Section Header -->
-                  <h4>{{ message.body.sections[i].sectionName }}</h4>
-                  <p *ngIf="message.body.sections[i].sectionDescription">
+                  <p>{{ message.body.sections[i].sectionName }}</p>
+                  <span *ngIf="message.body.sections[i].sectionDescription">
                     {{ message.body.sections[i].sectionDescription }}
-                  </p>
+                  </span>
+                  </div>
 
                   <!-- Fields Rendering -->
                   <ng-container *ngFor="let attribute of message.body.sections[i].attributes">
@@ -1821,7 +1825,7 @@
                       </div>
 
                       <!-- color picker -->
-                      <div *ngSwitchCase="'color'">
+                      <div *ngSwitchCase="'color'" class="color-selection">
                         <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span></label>
                         <input matInput type="color" [formControlName]="attribute.key" />
                       </div>
@@ -1852,7 +1856,7 @@
                       </div> -->
                     </div>
                   </ng-container>
-                </ng-container>
+                </div>
               </div>
 
               <!-- Action Buttons -->
@@ -1882,7 +1886,9 @@
 
 
 <!--                    carousel message-->
-                    <div *ngIf="message.body.type === 'Carousel'" class="carousel-container">
+
+                    <div *ngIf="message.body.type === 'Carousel'" class="carousel-container-main">
+                    <div class="carousel-container">
                       <div class="carousel-wrapper">
                         <div class="carousel-track" [style.transform]="'translateX(-' + currentIndex * 100 + '%)'">
                           <mat-card class="carousel-card pt-0" *ngFor="let item of message.body.elements">
@@ -1890,9 +1896,9 @@
                                <!--                            <img mat-card-image [src]="item.image" />-->
                             </div>
                             <mat-card-content>
-                              <h2>{{ item.additionalCarouselElementDetails.title }}</h2>
+                              <h3>{{ item.additionalCarouselElementDetails.title }}</h3>
                               <p>{{ item.text }}</p>
-                              <div class="carousel-actions">
+                              <div class="carousel-actions" [ngClass]="item.buttons?.[currentTypeIndex]?.type">
                                 <ng-container *ngFor="let button of item.buttons">
                                   <!-- If link type -->
                                   <a *ngIf="button.type === 'linkButton'"
@@ -1904,7 +1910,7 @@
 
                                   <!-- If normal button -->
                                   <!-- [disabled]="isSubmitted" -->
-                                  <button mat-stroked-button
+                                  <button mat-stroked-button class="{{button.type}}"
                                     *ngIf="button.type === 'button' || button.type === 'clickableList'"
                                     (click)="sendCarousalMessage(button, message.id, item.additionalCarouselElementDetails.id)"
                                     [disabled]="message.body.disableAllButtons || message.body.additionalDetails?.disableButtonType"
@@ -1923,14 +1929,21 @@
                       </div>
 
                       <div class="carousel-trigger-area">
-                        <button class="carousel-trigger" mat-icon-button (click)="prev()" [disabled]="currentIndex === 0">
+                        <button class="carousel-trigger" mat-icon-button (click)="prev()" [style.visibility]="currentIndex === 0 ? 'hidden' : 'visible'">
                           <mat-icon>chevron_left</mat-icon>
                         </button>
-                        <button class="carousel-trigger"mat-icon-button (click)="next(message)" [disabled]="currentIndex === message.body.elements.length - 1">
+                        <button class="carousel-trigger"mat-icon-button (click)="next(message)" [style.visibility]="currentIndex === message.body.elements.length - 1 ? 'hidden' : 'visible'">
                           <mat-icon>chevron_right</mat-icon>
                         </button>
                       </div>
-
+                    </div>
+                      <div class="carousel-dots-area">
+                        <span *ngFor="let el of message.body.elements; let i = index"
+                              class="dot"
+                              [class.active]="i === currentIndex"
+                              (click)="selectSlide(i)">
+                        </span>
+                      </div>
                     </div>
  <!--                    ./carousel message-->
                     </div>
@@ -1996,10 +2009,10 @@
                         }">
                       </span>
                       <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
-                        <mat-chip *ngFor="let btn of message.body.buttons"
+                        <mat-chip *ngFor="let btn of message.body.buttons; let i = index"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
                           (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
-                          [disabled]="message.body.additionalDetails?.disableButtonType">
+                          [disabled]="message.body.additionalDetails?.disableButtonType"  [ngClass]="{ 'selected': selectedButtonIndex === i }">
                           {{ btn.title }}
                         </mat-chip>
                       </mat-chip-list>
