@@ -120,3 +120,20 @@ body {
 .mat-slider.mat-primary .mat-slider-track-fill, .mat-slider.mat-primary .mat-slider-thumb, .mat-slider.mat-primary .mat-slider-thumb-label {
   background-color: var(--main-color);
   }
+
+.owl-dt-timer-hour12 .owl-dt-timer-hour12-box {
+  border: 1px solid rgb(134 134 134);
+  transition: background .2s ease;
+  color: #000;
+  width: 38px;
+  height: 30px;
+  border-radius: 3px;
+  }
+.owl-dt-container-buttons button.owl-dt-control.owl-dt-control-button {
+  color: #555;
+  }
+.form-main-section{
+  .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+    color: #888888;
+    }
+  }

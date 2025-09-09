@@ -1200,7 +1200,7 @@ button.close-widget-wrapper {
         margin: 2px !important;
 
         &.selected-chip{
-          background: var(--main-color);
+          filter: grayscale(.7);
           color: #fff !important;
           }
         }
@@ -1587,8 +1587,8 @@ mat-spinner {
 
 // Button Messages
 .structured-message-area.custom-theme mat-chip.mat-chip {
-  color: #000000;
-  background: #bfcadb;
+  color: #fff;
+  background: var(--main-color);
   border: 1px solid #bfcadb;
   border-radius: 3px;
   width: 100%;
@@ -1596,6 +1596,7 @@ mat-spinner {
   justify-content: center;
   margin: 4px 4px 0px 4px !important;
   line-height: 13px;
+  text-shadow: 0 0 2px black;
 
   &:hover {
     background: var(--main-color);
@@ -3631,6 +3632,8 @@ input[type='radio'] {
         right: 5px;
         top: 28px;
         color: #666;
+        font-size: 20px;
+        line-height: 24px;
         }
       input{
         width: 100%;
@@ -3672,6 +3675,9 @@ input[type='radio'] {
       color: #fff;
       font-size: 13px;
       flex: 1;
+      &:focus {
+        outline: none;
+        }
       }
     }
 
