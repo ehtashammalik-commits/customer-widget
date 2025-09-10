@@ -12,11 +12,11 @@ export class tagFormatPipe implements PipeTransform {
     return ibsFormat(
       value,
       [
-        ["em", "`"],
-        ["b", "*"],
-        ["i", "_"],
-        ["strike", "~"],
-        ["mark", "!"]
+        ['em', '`'],
+        ['b', '*'],
+        ['i', '_'],
+        ['strike', '~'],
+        ['mark', '!'],
       ],
       { detectLinks: enableDynamicLink, target: "_blank" },
       { allowXssEscaping: true }

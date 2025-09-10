@@ -19,7 +19,7 @@ declare var widgetConfigs: any,
   authenticateRequest: any,
   getBrowserInfo: any,
   getCalendarId: any,
-  getCalendarEvents:any,
+  getCalendarEvents: any,
   getFileURL: any;
 
 type formAttributeMappings = {
@@ -108,7 +108,6 @@ export class SdkService implements OnInit {
     });
   }
 
-
   loadWidget(ccm_url: any, widget_identifier: any) {
     widgetConfigs(ccm_url, widget_identifier, (res: any) => {
       this.widgetConfigsSubject.next(res);
@@ -155,7 +154,7 @@ export class SdkService implements OnInit {
           } else {
             reject('Failed to fetch calendar events.');
           }
-        }
+        },
       );
     });
   }
@@ -218,7 +217,6 @@ export class SdkService implements OnInit {
     );
   }
 
-
   // testingData(dialogueId: string) {
   //   console.log("dialogueId is coming", dialogueId)
   //   testing(dialogueId, (res: any) => {
@@ -247,15 +245,10 @@ export class SdkService implements OnInit {
     );
   }
   postFormDataAsActivity(data: any) {
-    pushFormDataAsActivity(
-      this.ConfigData.CX_ACTIVITY,
-      data,
-      (res: any) => {
-        console.log('Set an activity Request', res);
-      },
-    );
+    pushFormDataAsActivity(this.ConfigData.CX_ACTIVITY, data, (res: any) => {
+      console.log('Set an activity Request', res);
+    });
   }
-
 
   onChatResumed(serviceIdentifier: any, channelCustomerIdentifier: any) {
     console.log('onChatResumed in service');
@@ -344,10 +337,7 @@ export class SdkService implements OnInit {
     );
   }
 
-  authenticateKey(
-    authPayload: { roomId: string | null },
-    callback: any,
-  ) {
+  authenticateKey(authPayload: { roomId: string | null }, callback: any) {
     authenticateRequest(
       this.ConfigData.AUTHENTICATOR_URL,
       authPayload,
@@ -362,17 +352,16 @@ export class SdkService implements OnInit {
   }
 
   /**************************
-  *  BUSINESS CALENDARS
-  * @param calendarId
-  *************************/
-
+   *  BUSINESS CALENDARS
+   * @param calendarId
+   *************************/
 
   /**************************
    *  WEB RTC CALL FUNCTIONS
    * @param webRtc
    *************************/
 
-  // Once the video call is clicked then this function will trigger and register the user in freeswitch. 
+  // Once the video call is clicked then this function will trigger and register the user in freeswitch.
   loginSipWebRtc(webRtc: any) {
     const login = {
       action: 'login',
@@ -492,8 +481,7 @@ export class SdkService implements OnInit {
   getFileURLfromServer(fileURL: string, callback: any) {
     getFileURL(fileURL, (res: any) => {
       callback(res);
-    }
-  );
+    });
   }
 }
 

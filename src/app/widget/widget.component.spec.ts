@@ -10,42 +10,41 @@ const mockAppConfigService = {
   appConfig: {
     ENABLE_LOGO: false,
     ADDITIONAL_PANEL: false,
-    USERNAME_ENABLED: true
-  }
+    USERNAME_ENABLED: true,
+  },
 };
-
 
 const mockTranslateService = {
   setDefaultLang: jest.fn(),
-  use: jest.fn()
+  use: jest.fn(),
 };
 
 const mockElementRef = {
   nativeElement: {
     style: {
-      setProperty: jest.fn()
-    }
-  }
+      setProperty: jest.fn(),
+    },
+  },
 };
 
 const mockRenderer2 = {
-  setStyle: jest.fn()
+  setStyle: jest.fn(),
 };
 
 const mockChangeDetectorRef = {
-  detectChanges: jest.fn()
+  detectChanges: jest.fn(),
 };
 
 const mockDomSanitizer = {
-  bypassSecurityTrustUrl: jest.fn()
+  bypassSecurityTrustUrl: jest.fn(),
 };
 
 const mockMatSnackBar = {
-  open: jest.fn()
+  open: jest.fn(),
 };
 
 const mockMatDialog = {
-  open: jest.fn()
+  open: jest.fn(),
 };
 
 const mockRoute = {};
@@ -79,7 +78,8 @@ describe('WidgetComponent', () => {
       mockTranslateService as any,
       undefined, // router
       undefined, // doc
-      undefined  // window
+      undefined,  // window
+      undefined
     );
   });
 
@@ -102,7 +102,7 @@ describe('WidgetComponent', () => {
       // Initialize webRTCConfig with default values
       component.webRTCConfig = {
         customerName: '',
-        customerNumber: ''
+        customerNumber: '',
       };
     });
 
@@ -112,7 +112,7 @@ describe('WidgetComponent', () => {
       // Restore any overridden localStorage methods
       Object.defineProperty(window, 'localStorage', {
         value: originalLocalStorage,
-        writable: true
+        writable: true,
       });
     });
 
@@ -123,10 +123,10 @@ describe('WidgetComponent', () => {
           formData: {
             attributes: [
               { key: 'name', value: 'Test User' },
-              { key: 'phone', value: '1234567890' }
-            ]
-          }
-        }
+              { key: 'phone', value: '1234567890' },
+            ],
+          },
+        },
       };
 
       // Set the test data in real localStorage
@@ -144,8 +144,8 @@ describe('WidgetComponent', () => {
       // Arrange
       const mockUserData = {
         data: {
-          formData: {}
-        }
+          formData: {},
+        },
       };
 
       // Set test data with missing attributes array
@@ -154,7 +154,7 @@ describe('WidgetComponent', () => {
       // Set some initial values
       component.webRTCConfig = {
         customerName: 'Initial Name',
-        customerNumber: 'Initial Number'
+        customerNumber: 'Initial Number',
       };
 
       // Act

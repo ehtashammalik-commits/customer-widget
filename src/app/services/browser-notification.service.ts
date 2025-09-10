@@ -8,9 +8,7 @@ export class BrowserNotificationService {
   @ViewChild('myFileInput')
   myInputVariable!: ElementRef;
 
-  constructor(
-    private appConfig: ConfigService,
-  ) {}
+  constructor(private appConfig: ConfigService) {}
 
   notify(cimMessage: any) {
     if (
@@ -32,8 +30,11 @@ export class BrowserNotificationService {
           this.openBrowserNotification(messageType, messageText);
         }
         if (
-          (textType === 'PLAIN' || textType === 'BUTTON' || textType === 'URL') &&
-          !this.appConfig.appConfig.MUTE_NOTIFICATIONS) {
+          (textType === 'PLAIN' ||
+            textType === 'BUTTON' ||
+            textType === 'URL') &&
+          !this.appConfig.appConfig.MUTE_NOTIFICATIONS
+        ) {
           this.playSound();
         }
       }

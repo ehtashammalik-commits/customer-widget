@@ -17,8 +17,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 
-import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
-import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
 import { tagFormatPipe } from './tagFormat.pipe';
@@ -27,6 +27,7 @@ import { AppComponent } from './app.component';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { AppRoutingModule, routingComponents } from './app-routing.module';
 import { ConfigService } from './services/config.service';
+import { StorageService } from './services/storage.service';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { getMediaFromTask } from './getMediaFromTask.pipe';
 import { NpsColorPipe } from './npsColor.pipe';
@@ -45,7 +46,6 @@ import { SanitizeHtmlPipe } from './sanitizeHtml.pipe';
 import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
 import { SanitizeHtmlForEmail } from './pipes/sanitize-html-for-email.pipe';
 import {MatSliderModule} from "@angular/material/slider";
-
 
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
@@ -74,7 +74,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     FormatTimePipe,
     SanitizeHtmlPipe,
     SafeAttachmentUrlPipe,
-    SanitizeHtmlForEmail
+    SanitizeHtmlForEmail,
   ],
   imports: [
     NgxLinkifyjsModule.forRoot({
@@ -93,8 +93,8 @@ export function initializeApp1(appConfigService: ConfigService) {
       loader: {
         provide: TranslateLoader,
         useFactory: HttpLoaderFactory,
-        deps: [HttpClient]
-      }
+        deps: [HttpClient],
+      },
     }),
     AppRoutingModule,
     BrowserAnimationsModule,
@@ -121,12 +121,14 @@ export function initializeApp1(appConfigService: ConfigService) {
     OwlNativeDateTimeModule,
     MatSliderModule
   ],
-  exports: [getMediaFromTask,TranscriptComponent],
-  providers: [{
+  exports: [getMediaFromTask, TranscriptComponent],
+  providers: [
+    {
       provide: LocationStrategy,
       useClass: HashLocationStrategy,
     },
     ConfigService,
+    StorageService,
     {
       provide: APP_INITIALIZER,
       useFactory: (_appConfigService: ConfigService) => () =>
