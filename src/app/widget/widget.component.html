@@ -2013,8 +2013,7 @@
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
                           (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id, i)"
                           [disabled]="message.body.additionalDetails?.disableButtonType"
-                                  [ngClass]="[ message.body?.additionalDetails?.interactive?.type,
-              selectedChipIndex[message.id] === i ? 'selected-chip' : '']">
+                          [ngClass]="[ message.body?.additionalDetails?.interactive?.type,selectedChipIndex[message.id] === i ? 'selected-chip' : '']">
                           {{ btn.title }}
                         </mat-chip>
                       </mat-chip-list>

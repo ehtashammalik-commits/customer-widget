@@ -1990,6 +1990,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             disableButtonType: true,
           }
         }
+
+        const userReply = cimMessages.find(
+          (m: any) =>
+            m.header?.originalMessageId === message.id
+        );
+
+        if (userReply) {
+          const selectedIndex = message.body.buttons.findIndex(
+            (btn: any) =>
+              btn.title === userReply.body.markdownText ||
+              btn.payload === userReply.body.markdownText
+          );
+
+          if (selectedIndex !== -1) {
+            this.selectedChipIndex[message.id] = selectedIndex;
+          }
+        }
       }
 
       if (type === 'carousel') {
@@ -2055,6 +2072,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
           cimMessage.header.sender.type.toLowerCase() == 'bot')
       ) {
+
+      const selectedIndex = cimMessage.body?.additionalDetails?.selectedIndex;
+      if (selectedIndex !== undefined) {
+        this.selectedChipIndex[cimMessage.id] = selectedIndex;
+      }
         const urlRegex = /((https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?)/g;
 
         const urls = cimMessage.body.markdownText.match(urlRegex);
