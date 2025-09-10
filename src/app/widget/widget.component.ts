@@ -1990,23 +1990,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             disableButtonType: true,
           }
         }
-
-        const userReply = cimMessages.find(
-          (m: any) =>
-            m.header?.originalMessageId === message.id
-        );
-
-        if (userReply) {
-          const selectedIndex = message.body.buttons.findIndex(
-            (btn: any) =>
-              btn.title === userReply.body.markdownText ||
-              btn.payload === userReply.body.markdownText
-          );
-
-          if (selectedIndex !== -1) {
-            this.selectedChipIndex[message.id] = selectedIndex;
-          }
-        }
       }
 
       if (type === 'carousel') {

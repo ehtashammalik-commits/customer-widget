@@ -79,6 +79,7 @@ describe('WidgetComponent', () => {
       mockTranslateService as any,
       undefined, // router
       undefined, // doc
+      undefined  // window
     );
   });
 
