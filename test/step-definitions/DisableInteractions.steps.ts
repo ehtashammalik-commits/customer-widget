@@ -15,6 +15,9 @@ defineFeature(feature, (test) => {
       detectChanges: jest.fn(),
     } as unknown as ChangeDetectorRef;
 
+    const mockStorageService = {} as any;
+    const mockRouter = {} as any;
+    const mockDocument = {} as Document;
     const mockTranslateService = {
       setDefaultLang: jest.fn(),
       use: jest.fn(),
@@ -48,22 +51,23 @@ defineFeature(feature, (test) => {
     const mockDeliveryNotificationService = {} as any;
     const mockPostMessageHandlerService = {} as any;
     component = new WidgetComponent(
-      mockActivatedRoute,
-      mockFormBuilder,
-      mockSdkService,
-      mockAppConfig,
-      mockElementRef,
-      mockRenderer2,
-      mockChangeDetectorRef,
-      mockSanitizer,
-      mockSnackBar,
-      mockDialog,
-      mockBrowserNotificationService,
-      mockDeliveryNotificationService,
-      mockPostMessageHandlerService,
-      mockTranslateService,
-      undefined,
-      undefined,
+      mockActivatedRoute, // ActivatedRoute
+      mockFormBuilder, // FormBuilder
+      mockSdkService, // SdkService
+      mockAppConfig, // ConfigService
+      mockStorageService, // StorageService
+      mockElementRef, // ElementRef
+      mockRenderer2, // Renderer2
+      mockChangeDetectorRef, // ChangeDetectorRef
+      mockSanitizer, // DomSanitizer
+      mockSnackBar, // MatSnackBar
+      mockDialog, // MatDialog
+      mockBrowserNotificationService, // BrowserNotificationService
+      mockDeliveryNotificationService, // DeliveryNotificationService
+      mockPostMessageHandlerService, // PostMessageHandlerService
+      mockTranslateService, // TranslateService
+      mockRouter, // Router
+      mockDocument, // Document,
       undefined
     );
 

@@ -9,6 +9,7 @@ import { FormBuilder } from '@angular/forms';
 defineFeature(feature, (test) => {
   const fb = new FormBuilder();
   let component: WidgetComponent;
+  let mockStorageService: any;
   let spy: jest.SpyInstance;
   beforeEach(() => {
     const mockChangeDetectorRef = {
@@ -22,6 +23,12 @@ defineFeature(feature, (test) => {
     const mockActivatedRoute = { snapshot: { params: {} } } as any;
     const mockFormBuilder = { group: jest.fn() } as any;
 
+     mockStorageService = {
+          setItem: jest.fn(),
+          getItem: jest.fn().mockReturnValue('conv-123'),
+          removeItem: jest.fn(),
+          clear: jest.fn()
+        } as any;
     const mockSdkService = {
       sendChatMessage: jest.fn(),
       setConversationDataAgainstCustomerIdentifier: jest.fn(),
@@ -52,6 +59,7 @@ defineFeature(feature, (test) => {
       mockFormBuilder,
       mockSdkService,
       mockAppConfig,
+      mockStorageService,
       mockElementRef,
       mockRenderer2,
       mockChangeDetectorRef,
@@ -108,7 +116,11 @@ defineFeature(feature, (test) => {
       };
       component.eventListener(mockEvent);
       expect(component.isChatActive).toBe(true);
-      expect(localStorage.getItem('conversationId')).toBe('conv-123');
+      expect(mockStorageService.setItem).toHaveBeenCalledWith(
+              'conversationId',
+              'conv-123',
+              component.storageType
+            );
     });
 
     when('the customer receives a form message', () => {

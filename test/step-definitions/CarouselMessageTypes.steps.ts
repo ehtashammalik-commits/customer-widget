@@ -1,19 +1,21 @@
 import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture } from '@angular/core/testing';
 import { defineFeature, loadFeature } from 'jest-cucumber';
-
+import { StorageService } from 'src/app/services/storage.service';
 import {WidgetComponent} from 'src/app/widget/widget.component'
 const feature = loadFeature('./test/features/CarouselMessageTypes.feature');
 
 defineFeature(feature, (test) => {
     
     let component: WidgetComponent;
+    let mockStorageService: any;
     let spy: jest.SpyInstance;
     beforeEach(() => {
         const mockChangeDetectorRef = {
           detectChanges: jest.fn()
         } as unknown as ChangeDetectorRef;
     
+        
         const mockTranslateService = {
             setDefaultLang: jest.fn(),
             use: jest.fn()
@@ -21,6 +23,13 @@ defineFeature(feature, (test) => {
         const mockActivatedRoute = { snapshot: { params: {} } } as any;
         const mockFormBuilder = { group: jest.fn() } as any;
 
+
+         mockStorageService = {
+          setItem: jest.fn(),
+          getItem: jest.fn().mockReturnValue('conv-123'),
+          removeItem: jest.fn(),
+          clear: jest.fn()
+        } as any;
 
         const mockSdkService = {
           sendChatMessage: jest.fn(),
@@ -53,6 +62,7 @@ defineFeature(feature, (test) => {
             mockFormBuilder,
             mockSdkService,
             mockAppConfig,
+            mockStorageService,
             mockElementRef,
             mockRenderer2,
             mockChangeDetectorRef,
@@ -65,7 +75,7 @@ defineFeature(feature, (test) => {
             mockTranslateService,
             undefined,
             undefined,
-            undefined
+            undefined,
           );
 
           component.customerData = {
@@ -113,7 +123,11 @@ defineFeature(feature, (test) => {
               };
               component.eventListener(mockEvent);
               expect(component.isChatActive).toBe(true);
-              expect(localStorage.getItem('conversationId')).toBe('conv-123');
+              expect(mockStorageService.setItem).toHaveBeenCalledWith(
+              'conversationId',
+              'conv-123',
+              component.storageType
+          );
         });
         
         when('the customer receives a carousel message', () => {
@@ -290,7 +304,11 @@ defineFeature(feature, (test) => {
         given('the customer is in an active conversation with the bot', () => {
           component.eventListener(mockEvent);
           expect(component.isChatActive).toBe(true);
-          expect(localStorage.getItem('conversationId')).toBe('conv-123');
+          expect(mockStorageService.setItem).toHaveBeenCalledWith(
+              'conversationId',
+              'conv-123',
+              component.storageType
+          );
 
         });
 
