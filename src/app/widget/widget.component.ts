@@ -2195,11 +2195,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     // 🔹 Form
     if (type === 'form_data') {
-      const fg = this.formGroupsMap[originalMessage.id];
-      if (fg) {
-        fg.disable({ emitEvent: false });
-      }
-      originalMessage.body.disableFormMessageInteraction = true;
 
       const status = userReply.body.additionalDetails?.status?.toLowerCase();
       // mapping between status and button actions
