@@ -842,9 +842,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   async onFormMessageTypeSubmit(message: any): Promise<void> {
     const messageId = message.id;
     const form = this.formGroupsMap[messageId];
-    console.log('Form for messageId:', messageId, 'is', form);
       if (form.invalid) {
         form.markAllAsTouched(); // Mark all fields touched so errors show
+        this.snackBar.open('Please fill all the required fields', 'X', {
+        duration: 2000, // 5 seconds
+        panelClass: ['error-snackbar'],
+        horizontalPosition: 'right',
+        verticalPosition: 'bottom',
+      });
         return; // Stop submission
       }
 
@@ -4648,7 +4653,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (status === 'filled') {
         await this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
       }
-      
+
       this.handleFormMessageType(cimMessage);
     } else {
       this.createFormMapGroup(cimMessage);
