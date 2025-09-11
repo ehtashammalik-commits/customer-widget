@@ -1200,8 +1200,8 @@ button.close-widget-wrapper {
         margin: 2px !important;
 
         &.selected-chip{
-          filter: grayscale(.7);
           color: #fff !important;
+          opacity: 1;
           }
         }
       }
@@ -3831,7 +3831,7 @@ input[type='radio'] {
   }
 
 .selected-button {
-  filter: grayscale(.7);
   color: #fff !important;
+  opacity: 1;
 }
 
