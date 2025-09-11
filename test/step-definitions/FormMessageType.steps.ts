@@ -21,7 +21,11 @@ defineFeature(feature, (test) => {
       use: jest.fn(),
     } as any;
     const mockActivatedRoute = { snapshot: { params: {} } } as any;
-    const mockFormBuilder = { group: jest.fn() } as any;
+    const mockFormBuilder = {
+      group: jest.fn().mockReturnValue({}),
+      array: jest.fn().mockReturnValue([]),
+    } as any;
+
 
      mockStorageService = {
           setItem: jest.fn(),
@@ -128,6 +132,7 @@ defineFeature(feature, (test) => {
         type: 'MESSAGE_RECEIVED',
           data: {
           body: {
+            type: 'form_data',
             additionalDetails: {
               actionButtons: [
                 {
@@ -184,6 +189,7 @@ defineFeature(feature, (test) => {
       }
       };
 
+
       // Spy on constructCimMessage
       jest.spyOn(component, 'constructCimMessage');
       jest.spyOn(component.sdk, 'sendChatMessage');
@@ -199,6 +205,7 @@ defineFeature(feature, (test) => {
       formMessage = {
         id: '123',
           body: {
+            type: 'form_data',
             additionalDetails: {
               actionButtons: [
                 {

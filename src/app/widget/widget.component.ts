@@ -329,7 +329,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isSecureLinkExpired: boolean = false;
   IsRegisteredInFreeSwitch: boolean = false;
   currentTypeIndex = 1;
-  selectedChipIndex: { [messageId: string]: number | null } = {};
+  private messageMap: Map<string, any> = new Map();
 
   // file properties
   fileExtensons: any[] = [
@@ -1985,7 +1985,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // For Teneo Bot
 
     else if (cimMessage.header.sender.type.toLowerCase() === 'customer') {
-      console.log('Received message from customer:', cimMessage);
+
       this.disableOldInteractiveMessages(this.cimMessage);
       if (
         cimMessage.header.originalMessageId &&
@@ -1995,7 +1995,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       ) {
         this.handleCarousalQuotedMessage(cimMessage);
       }
-
 
 
       else if(cimMessage.header.originalMessageId &&
@@ -2012,6 +2011,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
        this.browserNotificationService.notify(cimMessage);
        this.scrollToBottom();
        this.handleMessageReport(cimMessage);
+      }
+
+      // ✅ Apply interaction state only once
+      if (cimMessage.header.originalMessageId) {
+        this.applyInteractionState(cimMessage);
       }
     }
 
@@ -2083,6 +2087,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.handleMessageReport(cimMessage);
       }
     }
+
+    // ✅ At the end of handleCimMessage:
+    if (cimMessage?.id) {
+      this.messageMap.set(cimMessage.id, cimMessage);
+    }
   }
 
   disableOldInteractiveMessages(cimMessages: any[]) {
@@ -2092,6 +2101,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       if (!isFromBot || !this.INTERACTIVE_TYPES.includes(type)) return;
 
+      const userReply = cimMessages.find(
+        (m: any) => m.header?.originalMessageId === message.id
+      );
+
+      // If a reply exists, apply interaction state
+      if (userReply) {
+        this.applyInteractionState(userReply);
+      }
       if (type === 'button') {
         const disableInteraction = message.body?.additionalDetails?.interactive?.disableInteraction;
 
@@ -2123,6 +2140,78 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     });
   }
+
+  applyInteractionState(userReply: any) {
+    const originalMessageId = userReply.header?.originalMessageId;
+    if (!originalMessageId) return;
+
+    // ✅ First try O(1) lookup in the map
+    let originalMessage = this.messageMap.get(originalMessageId);
+
+    // Fallback if not found (refresh case or missed sync)
+    if (!originalMessage) {
+      originalMessage = this.cimMessage.find(
+        (m: any) => m.id === originalMessageId
+      );
+      if (originalMessage) {
+        this.messageMap.set(originalMessageId, originalMessage);
+      }
+    }
+
+    if (!originalMessage) return;
+    const type = originalMessage.body?.type?.toLowerCase();
+    if (!type) return;
+
+    // 🔹 Buttons
+    if (type === 'button') {
+      originalMessage.body.buttons?.forEach((btn: any) => {
+        btn.isSelected =
+          (btn.payload === userReply.body.markdownText ||
+          btn.title === userReply.body.markdownText);
+      });
+    }
+
+    // 🔹 Carousel
+    if (type === 'carousel') {
+      originalMessage.body.elements?.forEach((el: any) => {
+        el.buttons?.forEach((btn: any) => {
+          btn.isSelected =
+            (btn.payload === userReply.body.markdownText ||
+            btn.title === userReply.body.markdownText) &&
+            btn.type === userReply.body.quotedButtons?.find(
+              (qb: any) =>
+                qb.payload === userReply.body.markdownText ||
+                qb.title === userReply.body.markdownText
+            )?.type &&
+            el.additionalCarouselElementDetails?.title === userReply.body.quotedCardTitle;
+        });
+      });
+    }
+
+    // 🔹 Form
+    if (type === 'form_data') {
+      const fg = this.formGroupsMap[originalMessage.id];
+      if (fg) {
+        fg.disable({ emitEvent: false });
+      }
+      originalMessage.body.disableFormMessageInteraction = true;
+
+      const status = userReply.body.additionalDetails?.status?.toLowerCase();
+      // mapping between status and button actions
+      const statusToActionMap: Record<string, string> = {
+        cancelled: 'cancel',
+        filled: 'submit'
+      };
+
+      originalMessage.body.additionalDetails?.actionButtons?.forEach((button: any) => {
+        const expectedAction = statusToActionMap[status];
+        button.isSelected = button.action?.toLowerCase() === expectedAction;
+      });
+    }
+
+  }
+
+
 
 
   editMessage(cimMessage: any) {
@@ -2772,11 +2861,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   sendButtonMessage(
     data: { title: string; payload: any },
-    originalMessageId: any, index?: number
+    originalMessageId: any,
   ) {
-    if (index !== undefined) {
-      this.selectedChipIndex[originalMessageId] = index;
-    }
     if (data.title.trim() !== '') {
       this.constructCimMessage(
         'PLAIN',
@@ -4557,14 +4643,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   async handleRefreshCasesofFormMessageType(cimMessage: any) {
     if (cimMessage.header.originalMessageId) {
       const formGroup = await this.buildFormMessage(cimMessage);
-      console.log("here is formGroup", formGroup)
 
       const status = cimMessage.body.additionalDetails?.status?.toLowerCase();
       if (status === 'filled') {
         await this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
       }
-
-      // ✅ Always runs regardless of status
+      
       this.handleFormMessageType(cimMessage);
     } else {
       this.createFormMapGroup(cimMessage);

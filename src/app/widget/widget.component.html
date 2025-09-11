@@ -1868,7 +1868,8 @@
                   [ngClass]="{
                     'mat-flat-button': button.action === 'submit',
                     'mat-stroked-button': button.action !== 'submit',
-                    'disabled': message.body?.disableFormMessageInteraction
+                    'disabled': message.body?.disableFormMessageInteraction,
+                    'selected-button': button.isSelected
                   }"
                   mat-button
                   (click)="handleActionButtonClick(button, message)"
@@ -1909,13 +1910,13 @@
                                   </a>
 
                                   <!-- If normal button -->
-                                  <!-- [disabled]="isSubmitted" -->
                                   <button mat-stroked-button class="{{button.type}}"
                                     *ngIf="button.type === 'button' || button.type === 'clickableList'"
                                     (click)="sendCarousalMessage(button, message.id, item.additionalCarouselElementDetails.id)"
                                     [disabled]="message.body.disableAllButtons || message.body.additionalDetails?.disableButtonType"
                                     [ngClass]="{
-                                      'disabled': message.body.disableAllButtons || message.body.additionalDetails?.disableButtonType
+                                      'disabled': message.body.disableAllButtons || message.body.additionalDetails?.disableButtonType,
+                                      'selected-button': button.isSelected
                                     }"
                                     >
 
@@ -2011,9 +2012,12 @@
                       <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
                         <mat-chip *ngFor="let btn of message.body.buttons; let i = index"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
-                          (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id, i)"
+                          (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
                           [disabled]="message.body.additionalDetails?.disableButtonType"
-                          [ngClass]="[ message.body?.additionalDetails?.interactive?.type,selectedChipIndex[message.id] === i ? 'selected-chip' : '']">
+                          [ngClass]="[
+                            message.body?.additionalDetails?.interactive?.type,
+                            btn.isSelected ? 'selected-chip' : ''
+                          ]">
                           {{ btn.title }}
                         </mat-chip>
                       </mat-chip-list>
