@@ -1206,7 +1206,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         sectionName: section.sectionName,
         sectionWeightage: section.sectionWeightage || null,
         sectionScore: null,
-        attributes: [],
+        attributes: []
       };
 
 
@@ -1215,13 +1215,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const sectionAttributes = formValues['sections'];
 
       const currentSectionAttributes = sectionAttributes[sectionIndex]
-
       if (currentSectionAttributes) {
         section.attributes.forEach((attribute: any) => {
 
           const attributeData = attribute.attributeOptions?.attributeData || [];
-          const possibleValues =
-            attributeData.length > 0 ? attributeData[0].values : [];
+          const possibleValues = attributeData.length > 0 ? attributeData[0].values : [];
           const selectedValue = currentSectionAttributes[attribute.key] || null;
 
           let newAttribute: any = {
@@ -1230,7 +1228,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             valueType: attribute.valueType,
             attributeWeightage: attribute.attributeWeightage || null,
             attributeScore: null,
-            attributeType: attribute.attributeType || 'OPTIONS',
+            attributeType: attribute.attributeType || "OPTIONS",
             skipType: attribute.skipType || null,
             key: attribute.key || null,
             attributeAttachment: attribute.attributeAttachment || "",
@@ -4125,12 +4123,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       control.setValue(selectedValues.length === 0 ? '' : selectedValues, { emitEvent: true });
     }
 
-    //  Update form control with stringified object
-    const newValue =
-      Object.keys(selectedValues).length > 0
-        ? JSON.stringify(selectedValues)
-        : '';
-    control.setValue(newValue, { emitEvent: true });
   }
 
 
@@ -4497,7 +4489,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     categoryLabel?: string,
     hasCategory?: boolean,
     messageId?: string
-  ): boolean {
+   ): boolean {
     const formGroup = this.formGroupsMap?.[messageId] || this.preChatFormGroup;
     const control = formGroup.get(`sections.${sectionIndex}.${controlName}`);
 
