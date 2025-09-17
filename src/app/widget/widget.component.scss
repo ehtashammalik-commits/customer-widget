@@ -3667,7 +3667,7 @@ input[type='radio'] {
 
   .form-inner-action {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     gap: 2px;
 
     button{
@@ -3675,6 +3675,10 @@ input[type='radio'] {
       color: #fff;
       font-size: 13px;
       flex: 1;
+      max-width: fit-content;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: pre;
       &:focus {
         outline: none;
         }

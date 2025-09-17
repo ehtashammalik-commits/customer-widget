@@ -1911,6 +1911,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
      if (cimMessage.body.type?.toLowerCase() === 'form_data' &&
        cimMessage.header.sender?.type?.toLowerCase() === 'bot') {
+        this.showTypingIndicator();
         this.createFormMapGroup(cimMessage);
       }
 
@@ -1928,23 +1929,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       cimMessage.body.type.toLowerCase() == 'notification' &&
       cimMessage.body.notificationType.toLowerCase() == 'typing_started'
     ) {
-      if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
+      if (cimMessage.header.sender.type.toLowerCase() == 'agent' || cimMessage.header.sender.type.toLowerCase() == 'bot') {
         console.log('Event  received with data  ', cimMessage.body);
 
-        // If timer exists, restart the timer
-        if (!this.typingIndicatorTimer) {
-          console.log('Timer started for indicator to show ', cimMessage.body);
-
-          this.typingIndicatorTimer = setTimeout(() => {
-            console.log('Timer ended for indicator to show ', cimMessage.body);
-            this.typingIndicatorTimer = null;
-          }, 5000);
-        } else {
-          clearTimeout(this.typingIndicatorTimer);
-          this.typingIndicatorTimer = setTimeout(() => {
-            this.typingIndicatorTimer = null;
-          }, 5000);
-        }
+        this.showTypingIndicator();
       }
     } else if (
       cimMessage.body.type.toLowerCase() == 'plain' &&
@@ -1952,6 +1940,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
         cimMessage.header.sender.type.toLowerCase() == 'bot')
     ) {
+
+      this.stopTypingIndicator();
       const urlRegex =
         /(?:https?:\/\/)?(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:\/[^\s]*)?/g;
       const urls = cimMessage.body.markdownText.match(urlRegex);
@@ -2094,6 +2084,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // ✅ At the end of handleCimMessage:
     if (cimMessage?.id) {
       this.messageMap.set(cimMessage.id, cimMessage);
+    }
+  }
+
+  // 🔹 Separate functions
+  private showTypingIndicator() {
+    this.isTyping = true;
+
+    if (this.typingIndicatorTimer) {
+      clearTimeout(this.typingIndicatorTimer);
+    }
+
+    this.typingIndicatorTimer = setTimeout(() => {
+      this.stopTypingIndicator();
+    }, 5000);
+  }
+
+  private stopTypingIndicator() {
+    this.isTyping = false;
+    if (this.typingIndicatorTimer) {
+      clearTimeout(this.typingIndicatorTimer);
+      this.typingIndicatorTimer = null;
     }
   }
 
