@@ -2352,11 +2352,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     ];
     let ln = files.length;
     if (ln > 0) {
-      for (var i = 0; i < ln; i++) {
+      for (let i = 0; i < ln; i++) {
         const fileSize = files[i].size;
         const fileMimeType = files[i].name.split('.').pop();
-
-        // if (fileSize <= 5000000) {
         if (availableExtensions.includes(fileMimeType.toLowerCase())) {
           let fd = new FormData();
           fd.append('file', files[i]);
@@ -2548,22 +2546,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // chatTranscript(): void {
-  //   const requestData = {
-  //     ccmUrl:             this.__appConfig.appConfig.CCM_URL,
-  //     customerIdentifier: this.customerIdentifier,
-  //     serviceIdentifier:  this.serviceIdentifier,
-  //     conversationId:     localStorage.getItem('conversationId'),
-  //     browserLang:        this.browserLang,
-  //   };
-
-  //   localStorage.setItem('ef_transcript_req', JSON.stringify(requestData));
-
-  //   const absoluteUrl = `${window.location.origin}/#/chat-transcript`;
-  //   console.log('Opening transcript URL:', absoluteUrl);
-  //   window.open(absoluteUrl, '_blank', 'noopener');
-  //   localStorage.removeItem('conversationId');
-  // }
 
   chatTranscript(): void {
     const conversationId = this.storageService.getItem(
@@ -2622,12 +2604,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('convertCallRequest ==>', view);
     if (view === 'video') {
       this.isVideoCallActive = true;
-      // this.activeVideoView = true;
-      // this.callPopUpView = false;
       this.sdk.convertCall('on', view, this.dialogId);
     } else if (view === 'screenshare') {
       this.isScreenShareActive = true;
-      // this.callPopUpView = false;
       this.sdk.convertCall('on', view, this.dialogId);
     } else {
       this.isAudioCallActive = true;
@@ -2687,7 +2666,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       if (!this.showInvalidCodeError) {
         this.isWebRtcVideoCallActive = true;
-        //this.startCountdown();
       }
     }
 
@@ -2700,7 +2678,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (!this.errorDuringWebRTCCall) {
         this.isSecureWebCall = true;
         this.isVideoCallActive = true;
-        //this.startCountdown();
       }
     }
 
@@ -2804,9 +2781,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     //   //   horizontalPosition: 'right',
     //   // });
 
-    //   console.log("this.IsRegisteredInFreeSwitch",this.IsRegisteredInFreeSwitch)
-    //   this.clearSession();
-    // }
     if (data.event === 'agentInfo') {
       console.log(
         '[handleDialogStates] Inside Agent Info Event: ===> ',
@@ -2847,7 +2821,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               '[outboundDialing] INITIATING CALL DIALOG Event: ===> ',
               data.response.dialog,
             );
-            // this.callPopUpView = true;
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
@@ -2874,7 +2847,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               '[dialogState] INITIATING CALL DIALOG: ===> ',
               data.response.dialog,
             );
-            // this.callPopUpView = true;
+            
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
             break;
@@ -2900,7 +2873,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               data.response.dialog,
             );
             this.startCountdown();
-            // this.callPopUpView = false;
+            
             this.maintainDialog = data.response.dialog;
             this.dialogId = data.response.dialog.id;
 
@@ -2950,12 +2923,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             if (this.standaloneWebRtc) {
               this.callPopUpView = false;
               this.isWebRtcVideoCallActive = false;
-              // if(this.IsRegisteredInFreeSwitch) {
-              //   this.callEnd();
-              // }
-              // if(this.isChatActive) {
-              //   this.clearSession();
-              // }
+              
               this.endCountdown();
               this.changeScreen('end');
             } else {
@@ -2988,11 +2956,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           data.dialog.stream,
         );
 
-        // if (data.dialog.stream === 'audio') {
-        //   this.isVideoCallActive = false;
-        //   this.isScreenShareActive = false;
-        // } else
-        // this.changeView(data.dialog.stream);
+        
         if (data.dialog.stream === 'video') {
           this.isAudioCallActive = false;
           this.isScreenShareActive = false;
@@ -3006,7 +2970,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           data.dialog.eventRequest === 'remote' &&
           data.dialog.streamStatus === 'off'
         ) {
-          // this.remoteVideoActive = false;
+          
           console.log('Remote Camera Off');
           setTimeout(() => {
             this.remoteStreamStatus = true;
@@ -3128,7 +3092,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.storageService.setItem('fontSize', e, this.storageType);
       this.changeFont();
       this.setFontFromLocalStorage();
-    } catch (error) {}
+    } catch (error) {
+      console.error('Error setting font from local storage:', error);
+    }
   }
 
   private setFontFromLocalStorage() {
@@ -3138,7 +3104,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.storageService.getItem('fontSize', this.storageType),
         );
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error('Error setting font from local storage:', error);
+    }
   }
 
   clearSession() {
@@ -3201,7 +3169,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       try {
         if (this.webRTCConfig && !this.IsRegisteredInFreeSwitch) {
-          await this.logInToFreeSwitch();
+           this.logInToFreeSwitch();
         }
       } catch (error) {
         console.error('Error logging into FreeSwitch:', error);
@@ -3235,8 +3203,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // const baseUrl = "http://localhost:4000";
     // const fullUrl = `${baseUrl}${hashPart}`;
 
-    // console.log("fullUrl", fullUrl);
-    // window.open(fullUrl, '_blank');
+    
 
     const widgetIdentifier = urlParams.get('widgetIdentifier');
     if (widgetIdentifier === this.widgetIdentifier) {
@@ -3256,7 +3223,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         },
       );
     }
-    return;
   }
 
   // pickSipExtension(sipExtensions: any) {
@@ -3329,7 +3295,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const sections = this.preChatFormGroup.get('sections') as FormArray;
 
     // Validate section existence
-    if (!sections || !sections.at(sectionIndex)) {
+    if (!sections?.at(sectionIndex)) {
       console.error(`Section at index ${sectionIndex} does not exist.`);
       return;
     }
