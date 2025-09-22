@@ -6,7 +6,7 @@ import {
   Renderer2,
   ViewChild,
   Input,
-  ChangeDetectorRef,
+  ChangeDetectorRef,Inject
 } from '@angular/core';
 import {
   FormGroup,
@@ -22,7 +22,7 @@ import { StorageType } from './../services/storage.service';
 import { BrowserNotificationService } from '../services/browser-notification.service';
 import { DeliveryNotificationService } from '../services/delivery-notification.service';
 import { PostMessageHandlerService } from '../post-message-handler.service';
-import { lastValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -32,7 +32,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import { DOCUMENT } from '@angular/common';
-import { Inject } from '@angular/core';
 
 interface Shift {
   id: string;
@@ -65,7 +64,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private onChatResumedSubject: Subscription = new Subscription();
   private onWebRtcCallSubject: Subscription = new Subscription();
   private onCallbackRequestSubject: Subscription = new Subscription();
-  private onDataRequest: Subscription = new Subscription();
   @ViewChild('autosize')
   autosize!: CdkTextareaAutosize;
   @ViewChild('myFileInput')
@@ -156,9 +154,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   //(paragraph)
   paragraph_maxLength: number = 0;
   paragraph_minLength: number = 0;
-
-  // remoteVideoActive = true;
-  // localVideoActive = true;
 
   alphaNumeric_maxLength: number = 0;
   alphaNumeric_minLength: number = 0;
@@ -334,23 +329,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isFileSelected: any;
   isFileUploading: any = {};
   constructor(
-    private route: ActivatedRoute,
-    private fb: FormBuilder,
+    private readonly route: ActivatedRoute,
+    private readonly fb: FormBuilder,
     public sdk: SdkService,
     public __appConfig: ConfigService,
-    private storageService: StorageService,
-    private el: ElementRef,
-    private renderer: Renderer2,
-    private cdRef: ChangeDetectorRef,
-    private sanitizer: DomSanitizer,
-    private snackBar: MatSnackBar,
+    private readonly storageService: StorageService,
+    private readonly el: ElementRef,
+    private readonly renderer: Renderer2,
+    private readonly cdRef: ChangeDetectorRef,
+    private readonly sanitizer: DomSanitizer,
+    private readonly snackBar: MatSnackBar,
     public dialog: MatDialog,
-    private browserNotificationService: BrowserNotificationService,
-    private deliveryNotificationService: DeliveryNotificationService,
-    private __postMessageHandlerService: PostMessageHandlerService,
-    private translate: TranslateService,
-    private router: Router,
-    @Inject(DOCUMENT) private doc: Document,
+    private readonly browserNotificationService: BrowserNotificationService,
+    private readonly deliveryNotificationService: DeliveryNotificationService,
+    private readonly __postMessageHandlerService: PostMessageHandlerService,
+    private readonly translate: TranslateService,
+    private readonly router: Router,
+    @Inject(DOCUMENT) private readonly doc: Document,
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
@@ -363,7 +358,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     translate.use('en');
   }
 
-  async ngAfterViewInit(): Promise<void> {
+  ngAfterViewInit(): void {
     if (!this.standaloneWebRtc) {
       this.customerChatResumed();
       console.log('Not Secure Chat View');
@@ -498,7 +493,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     this.onChatResumedSubject = this.sdk.onChatResumedResponse$.subscribe(
       (data: { isChatAvailable: boolean; data: any[] }) => {
-        if (data.isChatAvailable == true) {
+        if (data.isChatAvailable) {
           this.changeScreen('chat');
           console.log('on Chat Resumed Response:', data.data);
           if (data.data && data.data.length > 0) {
@@ -506,7 +501,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           } else {
             this.clearSession();
           }
-        } else if (data.isChatAvailable == false) {
+        } else if (!data.isChatAvailable) {
           this.storageService.removeItem('widget-error', 'localStorage');
           this.clearSession();
         }
@@ -525,7 +520,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         (data: { status: { name: string } }) => {
           console.log('callback request response events => ', data);
 
-          if (data && data.status && data.status.name) {
+          if (data?.status?.name) {
             this.callbackResponseStatus = data.status.name.toLowerCase();
           } else {
             this.callbackResponseStatus = 'error';
@@ -650,7 +645,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
         resolve(this.orderedEvents);
       } catch (error) {
-        reject('Error processing Business Hours events: ' + error);
+        reject(new Error('Error processing Business Hours events: ' + error));
       }
     });
   }
@@ -665,7 +660,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   async passUrlParamsToServices() {
-    await this.sdk.receiveUrlParamsValue(
+    this.sdk.receiveUrlParamsValue(
       this.widgetIdentifier,
       this.serviceIdentifier,
     );
@@ -748,8 +743,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           }
         }
 
-        // console.log('Adding control:', attribute.key, 'with validators:', validators);
-
         // Add the control to the section group
         sectionGroup.addControl(attribute.key, this.fb.control('', validators));
       });
@@ -810,8 +803,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     maxLength: number | null;
   } {
     // Extract min/max length from regex
-    const minMatch = regex.match(/(?<=.{)\d+/);
-    const maxMatch = regex.match(/(?<=,)\d+(?=})/);
+    const minRegex = /(?<=.{)\d+/;
+    const maxRegex = /(?<=,)\d+(?=})/;
+    const minMatch = minRegex.exec(regex);
+    const maxMatch = maxRegex.exec(regex);
 
     return {
       minLength: minMatch ? parseInt(minMatch[0], 10) : null,
@@ -846,6 +841,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.markFormGroupTouched(this.preChatFormGroup);
       }
     } catch (error) {
+      console.error('Error while submitting the form:', error);
       alert('Error while submitting the form');
     }
   }
@@ -984,13 +980,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   calculateAttributeScore(formData: any) {
     formData.body.sections.forEach((section: any) => {
-      // console.log(section);
+      
       section.attributes.forEach((attribute: any) => {
-        //  console.log(attribute);
         let selectedOption = attribute?.answer.find(
           (option: any) => option?.isSelected === true,
         );
-        // console.log(selectedOption.additionalAttributes.optionWeightage, "SELECTED OPTIONS");
         if (selectedOption) {
           let selectedOptionWeightage =
             selectedOption?.additionalAttributes?.optionWeightage;
@@ -1004,7 +998,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           attribute.attributeScore = 0;
         }
 
-        // console.log(attribute.attributeScore, "ATTRIBUTE SCORE");
       });
     });
   }
@@ -1015,7 +1008,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       section.attributes.forEach((attribute: any) => {
         totalAttributeWeightage += attribute.attributeScore;
       });
-      // console.log('totalAttributeWeightage', totalAttributeWeightage)
       section.sectionScore = parseFloat(
         ((totalAttributeWeightage / 100) * section.sectionWeightage).toFixed(1),
       );
@@ -1023,7 +1015,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   calculateFormScore(formData: any): any {
-    // console.log(sections);
+    
     if (!formData) return;
 
     let totalSectionWeightages = 0;
@@ -1108,13 +1100,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         attributes: [],
       };
 
-      const sectionIndexNumber = `section_${sectionIndex}`;
       const sectionAttributes = formValues['sections'];
       const currentSectionAttributes = sectionAttributes[sectionIndex];
 
       if (currentSectionAttributes) {
         section.attributes.forEach((attribute: any) => {
-          // console.log("ATTRIBUte", attribute);
 
           const attributeData = attribute.attributeOptions?.attributeData || [];
           const possibleValues =
@@ -1435,7 +1425,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           if (!this.isSecureWebCall) {
             this.isSecureWebCall = false;
           }
-          //this.convertCallView('video');
         } else {
           this.callPopUpView = true;
           this.activeVideoView = true;
@@ -1446,7 +1435,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.activeCallbackResponseView = false;
           this.isSecureWebCall = false;
           if (!this.IsRegisteredInFreeSwitch) {
-            await this.logInToFreeSwitch();
+             this.logInToFreeSwitch();
           }
           this.initiateWebRtcCall(view);
         }
@@ -1535,16 +1524,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   convertCallView(view: any) {
     switch (view) {
       case 'audio':
-        // if (this.isAudioCallActive) {
-        //   this.activeChatView = false;
-        //   this.activeAudioView = true;
-        //   this.activeVideoView = false;
-        //   this.activeScreenShareView = false;
-        //   this.callPopUpView = false;
-        //   this.activeCallbackView = false;
-        //   this.activeCallbackResponseView = false;
-        // } else {
-        //this.callPopUpView = true;
         this.activeChatView = false;
         this.activeAudioView = true;
         this.activeVideoView = false;
@@ -1556,15 +1535,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         // }
         break;
       case 'video':
-        // if (this.isVideoCallActive) {
-        //   this.activeChatView = false;
-        //   this.activeAudioView = false;
-        //   this.activeVideoView = true;
-        //   this.activeScreenShareView = false;
-        //   this.callPopUpView = false;
-        //   this.activeCallbackView = false;
-        //   this.activeCallbackResponseView = false;
-        // } else {
         if (!this.isSecureWebCall) {
           this.callPopUpView = true;
           this.activeVideoView = true;
@@ -1578,15 +1548,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         // }
         break;
       case 'screenshare':
-        // if (this.isScreenShareActive) {
-        //   this.activeChatView = false;
-        //   this.activeAudioView = false;
-        //   this.activeVideoView = false;
-        //   this.activeScreenShareView = true;
-        //   this.callPopUpView = false;
-        //   this.activeCallbackView = false;
-        //   this.activeCallbackResponseView = false;
-        // } else {
         this.callPopUpView = true;
         this.activeChatView = false;
         this.activeAudioView = false;
@@ -1638,10 +1599,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.sdk.onChatResumed(
               event.data.serviceIdentifier,
               event.data.channelCustomerIdentifier,
-            );
-            let error = this.storageService.removeItem(
-              'widget-error',
-              'localStorage',
             );
             this.changeScreen('chat');
             console.log(
@@ -1840,10 +1797,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       if (cimMessage.body.type.toLowerCase() == 'notification') {
         if (
-          cimMessage.body.notificationData.data.agentParticipant &&
-          cimMessage.body.notificationData.data.agentParticipant.participant &&
-          cimMessage.body.notificationData.data.agentParticipant.participant
-            .keycloakUser
+          cimMessage.body.notificationData.data.agentParticipant?.participant?.keycloakUser
         ) {
           let fullName = this.getAgentDisplayName(
             cimMessage.body.notificationData.data.agentParticipant.participant
@@ -1856,11 +1810,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
 
         if (
-          cimMessage.body.notificationData.data.conversationParticipant &&
-          cimMessage.body.notificationData.data.conversationParticipant
-            .participant &&
-          cimMessage.body.notificationData.data.conversationParticipant
-            .participant.keycloakUser
+          cimMessage.body?.notificationData?.data?.conversationParticipant?.participant?.keycloakUser
         ) {
           let fullName = this.getAgentDisplayName(
             cimMessage.body.notificationData.data.conversationParticipant
@@ -1883,9 +1833,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
 
       if (
-        cimMessage &&
-        cimMessage.header &&
-        cimMessage.header.intent &&
+        cimMessage?.header?.intent &&
         cimMessage.header.intent.toLowerCase() === 'update'
       ) {
         this.editMessage(cimMessage);
