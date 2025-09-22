@@ -2129,13 +2129,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.clearMessageData();
       }
       this.uploadFile(this.selectedFile, additionalText);
-    } else {
-      if (replyInputValue.trim() !== '') {
+    } else if (replyInputValue.trim() !== '') {
         console.log('Customer message: ', replyInputValue.trim());
 
         this.constructCimMessage('PLAIN', replyInputValue.trim(), null, null);
         this.clearMessageData();
-      }
     }
   }
 
@@ -2144,7 +2142,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       try {
         this.scrollContainer.nativeElement.scrollTop =
           this.scrollContainer.nativeElement.scrollHeight;
-      } catch (err) {}
+      } catch (err) {
+        console.error('Error while scrolling to bottom:', err);
+      }
     }, 350);
   }
 
@@ -2202,7 +2202,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     if (messageType == 'plain') {
       let transformedIntent = this.transformPayload(intent);
-      header.originalMessageId = originalMessageId ? originalMessageId : null;
+      header.originalMessageId = originalMessageId ?? null;
       header.intent = transformedIntent.intent
         ? transformedIntent.intent
         : null;
@@ -2210,7 +2210,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         header.entities = transformedIntent.entities;
       }
       body.type = 'PLAIN';
-      body.markdownText = text!.trim();
+      body.markdownText = text.trim();
       const msgPayload = {
         type: msgType,
         header: header,
@@ -2280,8 +2280,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   previewFile(event: any) {
-    if (event.target.files && event.target.files[0]) {
-      var filesAmount = event.target.files;
+    let filesAmount : any
+    if (event.target?.files?.[0]) {
+       filesAmount = event.target.files;
     } else if (event.dataTransfer.files.length > 0) {
       filesAmount = event.dataTransfer.files;
     }
@@ -2290,8 +2291,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.fileLoading = true;
       this.selectedFile = filesAmount;
       let filesLoaded = 0;
-      for (let i = 0; i < filesAmount.length; i++) {
-        const file = filesAmount[i];
+      for (const file of filesAmount) {
         const reader = new FileReader();
         reader.onload = (event: any) => {
           console.log(this.imageUrls, 'urlssssssss');
@@ -2312,7 +2312,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (filesLoaded === filesAmount.length) {
           this.fileLoading = false;
         }
-        reader.readAsDataURL(filesAmount[i]);
+        reader.readAsDataURL(file);
       }
     }
   }
