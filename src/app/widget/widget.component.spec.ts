@@ -1,7 +1,13 @@
 import { WidgetComponent } from './widget.component';
+import { SdkService } from '../services/sdk.service';
 
 // ---------- Common mocks ----------
-const mockSdkService = { makeConnection: jest.fn() };
+
+
+const mockSdkService: Partial<SdkService> = {
+  handleCallStart: jest.fn(),
+  makeConnection: jest.fn()
+};
 
 const mockAppConfigService = {
   appConfig: { ENABLE_LOGO: false, ADDITIONAL_PANEL: false, USERNAME_ENABLED: true },
@@ -694,4 +700,115 @@ describe('WidgetComponent', () => {
     });
   });
 
+  describe('initiateWebRtcCall', () => {
+    let spyHandleCallStart: jest.SpyInstance;
+    let spyHandleRefresh: jest.SpyInstance;
+
+    beforeEach(() => {
+      component.sdk = { handleCallStart: jest.fn() } as unknown as SdkService; // just mocking partial of the sdk service
+      spyHandleCallStart = jest.spyOn(component.sdk, 'handleCallStart');
+      spyHandleRefresh = jest.spyOn(component, 'handleRefreshCaseForWebRTC').mockImplementation(() => {});
+      component.webRTCConfig = { customerName: '', customerNumber: '' };
+      component.setAuthorizedResponse = { token: 'auth-token' };
+    });
+
+    it('should reset isVideoHide and isCallMute when callType is video', () => {
+      component.isVideoHide = true;
+      component.isCallMute = true;
+
+      component.initiateWebRtcCall('video');
+
+      expect(component.isVideoHide).toBe(false);
+      expect(component.isCallMute).toBe(false);
+    });
+
+    it('should handle standaloneWebRtc call', () => {
+      component.standaloneWebRtc = true;
+      component.showInvalidCodeError = false;
+
+      component.initiateWebRtcCall('video');
+
+      expect(spyHandleCallStart).toHaveBeenCalledWith({
+        type: 'video',
+        authConfigs: component.setAuthorizedResponse,
+      });
+      expect(component.isWebRtcVideoCallActive).toBe(true);
+    });
+
+    it('should not activate standalone call when showInvalidCodeError is true', () => {
+      component.standaloneWebRtc = true;
+      component.showInvalidCodeError = true;
+
+      component.initiateWebRtcCall('video');
+
+      expect(component.isWebRtcVideoCallActive).toBeFalsy();
+    });
+
+    it('should handle secure web call when no error', () => {
+      component.isSecureWebCall = true;
+      component.errorDuringWebRTCCall = false;
+
+      component.initiateWebRtcCall('video');
+
+      expect(spyHandleCallStart).toHaveBeenCalledWith({
+        type: 'video',
+        authConfigs: component.setAuthorizedResponse,
+      });
+      expect(component.isSecureWebCall).toBe(true);
+      expect(component.isVideoCallActive).toBe(true);
+    });
+
+    it('should skip secure web call when errorDuringWebRTCCall is true', () => {
+      component.isSecureWebCall = true;
+      component.errorDuringWebRTCCall = true;
+
+      component.initiateWebRtcCall('video');
+
+      expect(component.isVideoCallActive).toBeFalsy();
+    });
+
+    it('should handle simple webRTC call with preChatFormData', () => {
+      component.isSecureWebCall = false;
+      component.preChatFormData = {
+        sections: [{ name: 'John Doe', phone: '9876543210' }],
+      };
+
+      component.initiateWebRtcCall('audio');
+
+      expect(component.webRTCConfig.customerName).toBe('John Doe');
+      expect(component.webRTCConfig.customerNumber).toBe('9876543210');
+      expect(spyHandleCallStart).toHaveBeenCalledWith({
+        type: 'audio',
+        authConfigs: component.webRTCConfig,
+      });
+      expect(component.isAudioCallActive).toBe(true);
+    });
+
+    it('should call handleRefreshCaseForWebRTC when preChatFormData is missing', () => {
+      component.preChatFormData = null;
+
+      component.initiateWebRtcCall('audio');
+
+      expect(spyHandleRefresh).toHaveBeenCalled();
+    });
+
+    it('should set isVideoCallActive when callType is video and not secure', () => {
+      component.isSecureWebCall = false;
+
+      component.initiateWebRtcCall('video');
+
+      expect(component.isVideoCallActive).toBe(true);
+    });
+
+    it('should set isScreenShareActive when callType is screenshare', () => {
+      component.initiateWebRtcCall('screenshare');
+      expect(component.isScreenShareActive).toBe(true);
+    });
+
+    it('should set isAudioCallActive for non-video, non-screenshare calls', () => {
+      component.initiateWebRtcCall('audio');
+      expect(component.isAudioCallActive).toBe(true);
+    });
+  });
+  
 });
