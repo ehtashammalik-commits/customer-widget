@@ -9,6 +9,8 @@ const mockSdkService: Partial<SdkService> = {
   handleCallStart: jest.fn(),
   makeConnection: jest.fn(),
   authenticateKey: jest.fn(),
+  fetchBusinessCalendarId: jest.fn(),
+  getCalendarEvents: jest.fn(),
 };
 
 const mockAppConfigService = {
@@ -814,6 +816,7 @@ describe('WidgetComponent', () => {
     });
   });
 
+  // ---------- Secure Link Handling ----------
   describe('WidgetComponent - Secure Link Handling', () => {
 
     beforeEach(() => {
@@ -917,4 +920,370 @@ describe('WidgetComponent', () => {
       expect(component.standaloneWebRtc).toBe(true);
     });
   })
+
+  // ---------- updateStatusOfCustomerMessage ----------
+  describe('WidgetComponent - updateStatusOfCustomerMessage', () => {
+    beforeEach(() => {
+      jest.spyOn(component, 'markMessageStatusToSeenOrSucceed').mockImplementation(() => {});
+      jest.spyOn(component, 'changeMessageStatusToFailed').mockImplementation(() => {});
+    });
+
+    it('should call markMessageStatusToSeenOrSucceed when status is read', () => {
+      component.updateStatusOfCustomerMessage('m1', 'read');
+      expect(component.markMessageStatusToSeenOrSucceed).toHaveBeenCalledWith('m1', 'seen');
+    });
+
+    it('should call changeMessageStatusToFailed when status is failed', () => {
+      component.updateStatusOfCustomerMessage('m2', 'failed');
+      expect(component.changeMessageStatusToFailed).toHaveBeenCalledWith('m2', 'failed');
+    });
+
+    it('should not call any function when status is unknown', () => {
+      component.updateStatusOfCustomerMessage('m3', 'delivered');
+      expect(component.markMessageStatusToSeenOrSucceed).not.toHaveBeenCalled();
+      expect(component.changeMessageStatusToFailed).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- editMessage ----------
+  describe('WidgetComponent - editMessage', () => {
+    beforeEach(() => {
+      component.cimMessage = [
+        { id: 'm1', body: { markdownText: 'Old Text' }, isEdited: false }
+      ];
+    });
+
+    it('should update the message content and mark it as edited if found', () => {
+      const newMessage = {
+        header: { originalMessageId: 'm1' },
+        body: { markdownText: 'New Text' }
+      };
+      component.editMessage(newMessage);
+      expect(component.cimMessage[0].body.markdownText).toBe('New Text');
+      expect(component.cimMessage[0].isEdited).toBe(true);
+    });
+
+    it('should do nothing if messageId is not found', () => {
+      const newMessage = {
+        header: { originalMessageId: 'm2' },
+        body: { markdownText: 'Does not exist' }
+      };
+      component.editMessage(newMessage);
+      expect(component.cimMessage.length).toBe(1);
+      expect(component.cimMessage[0].body.markdownText).toBe('Old Text');
+    });
+  });
+  // ---------- handleMessageReport ----------
+  describe('WidgetComponent - handleMessageReport', () => {
+    beforeEach(() => {
+      jest.spyOn(component, 'constructAndPublishMessageSeenNotification').mockImplementation(() => {});
+      jest.spyOn(document, 'hasFocus').mockReturnValue(true);
+    });
+
+    it('should call constructAndPublishMessageSeenNotification for agent messages', () => {
+      const cimMessage = {
+        header: { sender: { type: 'agent' } },
+        body: { type: 'text' },
+        id: 'm1'
+      };
+      component.handleMessageReport(cimMessage);
+      expect(component.constructAndPublishMessageSeenNotification).toHaveBeenCalledWith('m1');
+    });
+
+    it('should call constructAndPublishMessageSeenNotification for bot messages', () => {
+      const cimMessage = {
+        header: { sender: { type: 'bot' } },
+        body: { type: 'text' },
+        id: 'm2'
+      };
+      component.handleMessageReport(cimMessage);
+      expect(component.constructAndPublishMessageSeenNotification).toHaveBeenCalledWith('m2');
+    });
+
+    it('should not call constructAndPublishMessageSeenNotification for notification messages', () => {
+      const cimMessage = {
+        header: { sender: { type: 'agent' } },
+        body: { type: 'notification' },
+        id: 'm3'
+      };
+      component.handleMessageReport(cimMessage);
+      expect(component.constructAndPublishMessageSeenNotification).not.toHaveBeenCalled();
+    });
+
+    it('should not call constructAndPublishMessageSeenNotification if document is not focused', () => {
+      (document.hasFocus as jest.Mock).mockReturnValue(false);
+      const cimMessage = {
+        header: { sender: { type: 'agent' } },
+        body: { type: 'text' },
+        id: 'm4'
+      };
+      component.handleMessageReport(cimMessage);
+      expect(component.constructAndPublishMessageSeenNotification).not.toHaveBeenCalled();
+    });
+
+    it('should not call constructAndPublishMessageSeenNotification for customer messages', () => {
+      const cimMessage = {
+        header: { sender: { type: 'customer' } },
+        body: { type: 'text' },
+        id: 'm5'
+      };
+      component.handleMessageReport(cimMessage);
+      expect(component.constructAndPublishMessageSeenNotification).not.toHaveBeenCalled();
+    });
+  });
+  // ---------- getAgentDisplayName ----------
+  describe('WidgetComponent - getAgentDisplayName', () => {
+
+    it('should return full name when firstName and lastName exist', () => {
+      const name = component.getAgentDisplayName({ firstName: 'John', lastName: 'Doe' });
+      expect(name).toBe('John Doe');
+    });
+
+    it('should return firstName when only firstName exists', () => {
+      const name = component.getAgentDisplayName({ firstName: 'John' });
+      expect(name).toBe('John');
+    });
+
+    it('should return lastName when only lastName exists', () => {
+      const name = component.getAgentDisplayName({ lastName: 'Doe' });
+      expect(name).toBe('Doe');
+    });
+
+    it('should return "Agent" when no name is provided', () => {
+      const name = component.getAgentDisplayName({});
+      expect(name).toBe('Agent');
+    });
+
+    it('should return "Agent" when user is null or undefined', () => {
+      expect(component.getAgentDisplayName(null)).toBe('Agent');
+      expect(component.getAgentDisplayName(undefined)).toBe('Agent');
+    });
+  });
+
+  // ---------- clearSession ----------
+
+  describe('WidgetComponent - clearSession', () => {
+      beforeEach(() => {
+
+        jest.spyOn(component, 'callEnd').mockImplementation(() => {});
+        jest.spyOn(component, 'changeScreen').mockImplementation(() => {});
+        component.sdk = { handleChatEnd: jest.fn() } as any;
+        jest.spyOn(component, 'clearMessageData').mockImplementation(() => {});
+      });
+
+      it('should call callEnd if any call is active', () => {
+        component.isAudioCallActive = true;
+        component.clearSession();
+        expect(component.callEnd).toHaveBeenCalled();
+      });
+
+      it('should reset cimMessage and set chat inactive', () => {
+        component.cimMessage = [{ id: '1' }] as any;
+        component.isChatActive = true;
+        component.clearSession();
+        expect(component.cimMessage).toEqual([]);
+        expect(component.isChatActive).toBe(false);
+      });
+
+      it('should call changeScreen with "end"', () => {
+        component.clearSession();
+        expect(component.changeScreen).toHaveBeenCalledWith('end');
+      });
+
+      it('should call sdk.handleChatEnd with customerData', () => {
+        component.customerData = { id: 'cust1' } as any;
+        component.clearSession();
+        expect(component.sdk.handleChatEnd).toHaveBeenCalledWith(component.customerData);
+      });
+
+      it('should remove user item from storage', () => {
+        component.clearSession();
+        expect(mockStorageService.removeItem).toHaveBeenCalledWith('user', component.storageType);
+      });
+
+
+      it('should call clearMessageData', () => {
+        component.clearSession();
+        expect(component.clearMessageData).toHaveBeenCalled();
+      });
+
+      it('should reset file related properties', () => {
+        component.fileLoading = true;
+        component.fileUrl = 'test-url';
+        component.selectedFile = {} as any;
+        component.clearSession();
+        expect(component.fileLoading).toBe(false);
+        expect(component.fileUrl).toBe('');
+        expect(component.imageUrls).toEqual([]);
+        expect(component.selectedFile).toBeNull();
+      });
+    });
+
+    // ---------- clearMessageData ----------
+    describe('WidgetComponent - clearMessageData', () => {
+      beforeEach(() => {
+        jest.spyOn(component, 'scrollToBottom').mockImplementation(() => {});
+      });
+
+      it('should clear input value if elementView exists', () => {
+        const mockInput = { value: 'Some text' };
+        component.elementView = { nativeElement: mockInput } as any;
+        component.clearMessageData();
+        expect(mockInput.value).toBe('');
+      });
+
+      it('should reset composer_input_disabled and text', () => {
+        component.composer_input_disabled = true;
+        component.text = 'Some message';
+        component.clearMessageData();
+        expect(component.composer_input_disabled).toBe(false);
+        expect(component.text).toBe('');
+      });
+
+      it('should call scrollToBottom', () => {
+        component.clearMessageData();
+        expect(component.scrollToBottom).toHaveBeenCalled();
+      });
+
+      it('should reset scrollCon and fileName', () => {
+        component.scrollCon = 100;
+        component.fileName = 'file.txt';
+        component.clearMessageData();
+        expect(component.scrollCon).toBe(45);
+        expect(component.fileName).toBe('');
+      });
+
+      it('should not throw error if elementView is null', () => {
+        component.elementView = null as any;
+        expect(() => component.clearMessageData()).not.toThrow();
+      });
+    });
+
+    // ---------- getCalendarEvents & getTodayEvent ----------
+    describe('WidgetComponent - getCalendarEvents', () => {
+
+      it('should fetch calendarId and events successfully and call getTodayEvent if events exist', async () => {
+        const mockCalendarId = 'cal-123';
+        const mockEvents = { events: [{ id: 1, type: 'BUSINESS_HOURS', shifts: [] }] };
+
+        (component.sdk.fetchBusinessCalendarId as jest.Mock).mockResolvedValue(mockCalendarId);
+        (component.sdk.getCalendarEvents as jest.Mock).mockResolvedValue(mockEvents);
+        jest.spyOn(component, 'getTodayEvent').mockImplementation(jest.fn());
+
+        await component.getCalendarEvents();
+
+        expect(component.sdk.fetchBusinessCalendarId).toHaveBeenCalled();
+        expect(component.sdk.getCalendarEvents).toHaveBeenCalledWith(mockCalendarId);
+        expect(component.events).toEqual(mockEvents.events);
+        expect(component.getTodayEvent).toHaveBeenCalled();
+      });
+
+      it('should set events and not call getTodayEvent if no events exist', async () => {
+        const mockCalendarId = 'cal-456';
+        const mockEvents = { events: [] };
+
+        (component.sdk.fetchBusinessCalendarId as jest.Mock).mockResolvedValue(mockCalendarId);
+        (component.sdk.getCalendarEvents as jest.Mock).mockResolvedValue(mockEvents);
+        jest.spyOn(component, 'getTodayEvent').mockImplementation(jest.fn());
+
+        await component.getCalendarEvents();
+
+        expect(component.events).toEqual([]);
+        expect(component.getTodayEvent).not.toHaveBeenCalled();
+      });
+
+      it('should handle errors gracefully', async () => {
+        const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+        (component.sdk.fetchBusinessCalendarId as jest.Mock).mockRejectedValue('API error');
+
+        await component.getCalendarEvents();
+
+        expect(consoleSpy).toHaveBeenCalledWith('Business Calendar Api Response:', 'API error');
+        consoleSpy.mockRestore();
+      });
+    });
+
+    describe('WidgetComponent - getTodayEvent', () => {
+      it('should resolve with empty array and set daySummary null if no BUSINESS_HOURS shifts today', async () => {
+        component.events = [
+          {
+            id: '1',
+            name: 'Event 1',
+            type: 'BUSINESS_HOURS',
+            startTime: new Date().toISOString(),
+            endTime: new Date().toISOString(),
+            shifts: [],
+            validityPeriod: '2025-01-01T00:00:00Z',
+            calendar: [],
+            eventColor: '#FFFFFF',
+          },
+          {
+            id: '2',
+            name: 'Event 2',
+            type: 'OTHER',
+            startTime: new Date().toISOString(),
+            endTime: new Date().toISOString(),
+            shifts: [],
+            validityPeriod: '2025-01-01T00:00:00Z',
+            calendar: [],
+            eventColor: '#FFFFFF',
+          },
+        ];
+
+        const result = await component.getTodayEvent();
+
+        expect(result).toEqual([]);
+        expect(component.daySummary).toBeNull();
+      });
+
+      it('should resolve with orderedEvents and set correct daySummary when shifts exist today', async () => {
+        const today = new Date();
+        const startTime = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          9
+        ).toISOString();
+        const endTime = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          17
+        ).toISOString();
+
+        component.events = [
+          {
+            id: '3',
+            name: 'Business Event',
+            type: 'BUSINESS_HOURS',
+            startTime,
+            endTime,
+            shifts: [{ id: 'shift-1',name: 'Morning Shift', startTime, endTime }],
+            validityPeriod: '2025-01-01T00:00:00Z',
+            calendar: [],
+            eventColor: '#FFFFFF',
+          },
+        ];
+
+        component.orderedEvents = [
+          { type: 'BUSINESS_HOURS', shiftName: 'Morning Shift', startTime, endTime },
+        ];
+
+        const result = await component.getTodayEvent();
+
+        expect(component.daySummary?.startOfDay).toEqual(new Date(startTime));
+        expect(component.daySummary?.endOfDay).toEqual(new Date(endTime));
+        expect(result).toEqual(component.orderedEvents);
+      });
+
+      it('should reject with error if processing fails', async () => {
+        component.events = null as any; // force error
+
+        await expect(component.getTodayEvent()).rejects.toThrow(
+          'Error processing Business Hours events:'
+        );
+      });
+    });    
+
+
 });
