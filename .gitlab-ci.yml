@@ -154,11 +154,11 @@ sonarqube-test:
         -Dsonar.exclusions=**/node_modules/**,src/widget-assets/**,**/.spec.ts,test/*.spec.js
         -Dsonar.javascript.lcov.reportPaths="coverage/lcov.info"
         -Dsonar.tests="src/"
-        -Dsonar.test.inclusions="**/*.spec.js,**/*.test.js"
+        -Dsonar.test.inclusions=**/*.spec.ts,**/*.spec.js,**/*.test.ts,**/*.test.js
         -Dsonar.qualitygate.wait=true
         -Dsonar.language=js
         -Dsonar.sourceEncoding=UTF-8
-        -Dsonar.coverage.exclusions=test/*.spec.js,test/*.mock.js,node_modules/*,coverage/lcov-report/*
+        -Dsonar.coverage.exclusions=**/*.spec.ts,**/*.spec.js,**/*.test.ts,**/*.test.js,test/*.mock.js,node_modules/**,coverage/lcov-report/**
 
 
 
