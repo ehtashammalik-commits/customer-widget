@@ -1,12 +1,14 @@
-import { WidgetComponent } from './widget.component';
+
 import { SdkService } from '../services/sdk.service';
+import { WidgetComponent } from './widget.component';
 
 // ---------- Common mocks ----------
 
 
 const mockSdkService: Partial<SdkService> = {
   handleCallStart: jest.fn(),
-  makeConnection: jest.fn()
+  makeConnection: jest.fn(),
+  authenticateKey: jest.fn(),
 };
 
 const mockAppConfigService = {
@@ -700,6 +702,7 @@ describe('WidgetComponent', () => {
     });
   });
 
+  // ---------- initiateWebRtcCall ----------
   describe('initiateWebRtcCall', () => {
     let spyHandleCallStart: jest.SpyInstance;
     let spyHandleRefresh: jest.SpyInstance;
@@ -810,5 +813,108 @@ describe('WidgetComponent', () => {
       expect(component.isAudioCallActive).toBe(true);
     });
   });
-  
+
+  describe('WidgetComponent - Secure Link Handling', () => {
+
+    beforeEach(() => {
+      jest.spyOn(component, 'logInToFreeSwitch').mockImplementation(() => {});
+
+      // mock the webRTCConfig before tests run
+        component.webRTCConfig = {
+        diallingUri: 'wss://mock.dial.uri',
+        stunServers: ['stun:stun.l.google.com:19302'], // add whatever else is expected in your code
+        turnServers: [],
+        turnUsername: 'testUser',
+        turnCredential: 'testPass'
+      };
+    });
+
+    it('should extract encryptedKey and call authenticateSecureLinkKey when widgetIdentifier matches', () => {
+      component.widgetIdentifier = 'widget123'; // ensure match
+
+      const fakeMessage = {
+        body: {
+          mediaUrl: 'https://test.com?encryptedKey=abc123&widgetIdentifier=widget123'
+        }
+      };
+
+      const spyAuth = jest.spyOn(component, 'authenticateSecureLinkKey').mockImplementation();
+
+      component.processSecureLinkMessage(fakeMessage);
+
+      expect(component.webRtcSecureLink).toBe('abc123');
+      expect(spyAuth).toHaveBeenCalledWith(true);
+    });
+
+    it('should show snackbar when widgetIdentifier mismatches', () => {
+      component.widgetIdentifier = 'widget123';
+
+      const fakeMessage = {
+        body: {
+          mediaUrl: 'https://test.com?encryptedKey=abc123&widgetIdentifier=wrongWidget'
+        }
+      };
+
+      component.processSecureLinkMessage(fakeMessage);
+
+      expect(mockMatSnackBar.open).toHaveBeenCalledWith(
+        'Authentication failed!',
+        'Dismiss',
+        expect.objectContaining({
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'right',
+        }),
+      );
+    });
+
+    it('should handle missing encryptedKey gracefully', () => {
+      component.widgetIdentifier = 'widget123';
+
+      const fakeMessage = {
+        body: { mediaUrl: 'https://test.com?widgetIdentifier=widget123' }
+      };
+
+      const spyAuth = jest.spyOn(component, 'authenticateSecureLinkKey').mockImplementation();
+
+      component.processSecureLinkMessage(fakeMessage);
+
+      expect(component.webRtcSecureLink).toBe('');
+      expect(spyAuth).toHaveBeenCalledWith(true);
+    });
+
+    it('should handle error response and set expired link flags', async () => {
+      (mockSdkService.authenticateKey as jest.Mock).mockImplementation((payload, cb) => {
+        cb({ error: true, data: { message: 'Expired' }, message: 'Link expired' });
+      });
+
+      await component.authenticateSecureLinkKey(true);
+
+      expect(component.isSecureLinkExpired).toBe(true);
+      expect(component.showInvalidCodeError).toBe(true);
+      expect(component.showAuthenticationResponseMessage).toBe('The link has expired');
+    });
+
+    it('should handle successful response and login to FreeSwitch', async () => {
+      component.webRTCConfig = { diallingUri: 'test-uri' } as any;
+      const res = { error: false, data: { agentName: 'Agent007' }, message: 'Authenticated' };
+      (mockSdkService.authenticateKey as jest.Mock).mockImplementation((payload, cb) => cb(res));
+
+      await component.authenticateSecureLinkKey(true);
+
+      expect(component.agentName).toBe('Agent007');
+      expect(component.setAuthorizedResponse).toMatchObject(res.data);
+      expect(component.showAuthenticationResponseMessage).toBe('Authenticated');
+      expect(component.logInToFreeSwitch).toHaveBeenCalled();
+    });
+
+    it('should set standaloneWebRtc when not authenticated and authorized response exists', async () => {
+      const res = { error: false, data: { agentName: 'Agent007' }, message: 'Authenticated' };
+      (mockSdkService.authenticateKey as jest.Mock).mockImplementation((payload, cb) => cb(res));
+
+      await component.authenticateSecureLinkKey(false);
+
+      expect(component.standaloneWebRtc).toBe(true);
+    });
+  })
 });
