@@ -38,35 +38,35 @@ export class SdkService implements OnInit {
   widgetIdentifier: any;
   serviceIdentifier: any;
 
-  private widgetConfigsSubject: Subject<any> = new Subject<any>();
+  private readonly widgetConfigsSubject: Subject<any> = new Subject<any>();
   public widgetConfigs$: Observable<any> =
     this.widgetConfigsSubject.asObservable();
 
-  private preChatFormSubject: Subject<any> = new Subject<any>();
+  private readonly preChatFormSubject: Subject<any> = new Subject<any>();
   public renderPreChatForm$: Observable<any> =
     this.preChatFormSubject.asObservable();
 
-  private preChatFormValidationSubject: Subject<any> = new Subject<any>();
+  private readonly preChatFormValidationSubject: Subject<any> = new Subject<any>();
   public validationsSubcription: Observable<any> =
     this.preChatFormValidationSubject.asObservable();
 
-  private callbackFormSubject: Subject<any> = new Subject<any>();
+  private readonly callbackFormSubject: Subject<any> = new Subject<any>();
   public renderCallbackForm$: Observable<any> =
     this.callbackFormSubject.asObservable();
 
-  private establishConnectionSubject: Subject<any> = new Subject<any>();
+  private readonly establishConnectionSubject: Subject<any> = new Subject<any>();
   public connectionResponse$: Observable<any> =
     this.establishConnectionSubject.asObservable();
 
-  private onChatResumedSubject: Subject<any> = new Subject<any>();
+  private readonly onChatResumedSubject: Subject<any> = new Subject<any>();
   public onChatResumedResponse$: Observable<any> =
     this.onChatResumedSubject.asObservable();
 
-  private onWebRtcCallSubject: Subject<any> = new Subject<any>();
+  private readonly onWebRtcCallSubject: Subject<any> = new Subject<any>();
   public onWebRtcCallResponse$: Observable<any> =
     this.onWebRtcCallSubject.asObservable();
 
-  private onCallbackRequestSubject: Subject<any> = new Subject<any>();
+  private readonly onCallbackRequestSubject: Subject<any> = new Subject<any>();
   public onCallbackRequestResponse$: Observable<any> =
     this.onCallbackRequestSubject.asObservable();
 
@@ -78,12 +78,14 @@ export class SdkService implements OnInit {
   // public setupRemoteMediaResponse$: Observable<any> =
   // this.setupRemoteMediaRequest.asObservable();
 
-  constructor(private _ConfigService: ConfigService) {
+  constructor(private readonly _ConfigService: ConfigService) {
     this.ConfigData = this._ConfigService.appConfig;
     this.loadSdk();
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    console.log('SdkService initialized');
+  }
 
   receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
     this.widgetIdentifier = widgetIdentifier;
