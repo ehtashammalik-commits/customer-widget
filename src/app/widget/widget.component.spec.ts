@@ -11,6 +11,7 @@ const mockSdkService: Partial<SdkService> = {
   authenticateKey: jest.fn(),
   fetchBusinessCalendarId: jest.fn(),
   getCalendarEvents: jest.fn(),
+  sendChatMessage: jest.fn(),
 };
 
 const mockAppConfigService = {
@@ -1284,6 +1285,122 @@ describe('WidgetComponent', () => {
         );
       });
     });    
+
+    describe('WidgetComponent - onSendMessage & constructCimMessage', () => {
+
+  beforeEach(() => {
+
+    // mock methods on component
+    jest.spyOn(component, 'clearMessageData').mockImplementation(() => {});
+    jest.spyOn(component, 'uploadFile').mockImplementation(() => {});
+    jest.spyOn(component, 'scrollToBottom').mockImplementation(() => {});
+    jest.spyOn(component['cdRef'], 'detectChanges').mockImplementation(() => {});
+  });
+
+  it('should return early if composer is disabled', () => {
+    component.isComposerDisable = true;
+    jest.spyOn(component, 'constructCimMessage');
+    jest.spyOn(component, 'uploadFile');
+
+    component.onSendMessage('hello');
+
+    expect(component.constructCimMessage).not.toHaveBeenCalled();
+    expect(component.uploadFile).not.toHaveBeenCalled();
+  });
+
+  it('should call uploadFile when imageUrls exist', () => {
+    component.isComposerDisable = false;
+    component.selectedFile = { name: 'file.png' } as any;
+
+    component.onSendMessage('extra text');
+
+    expect(component.uploadFile).toBeTruthy()
+    ;});
+
+  it('should call constructCimMessage for plain text', () => {
+    component.isComposerDisable = false;
+    component.imageUrls = [];
+
+    jest.spyOn(component, 'constructCimMessage');
+
+    component.onSendMessage('hello world');
+
+    expect(component.constructCimMessage).toHaveBeenCalledWith(
+      'PLAIN',
+      'hello world',
+      null,
+      null
+    );
+    expect(component.clearMessageData).toHaveBeenCalled();
+  });
+
+  it('should send plain text message via sdk', () => {
+    const payloadText = 'test message';
+    component.customerData = { id: 'cust1' } as any;
+
+    component.constructCimMessage('PLAIN', payloadText, null, null);
+
+    expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
+    const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
+    expect(payload.body.type).toBe('PLAIN');
+    expect(payload.body.markdownText).toBe(payloadText);
+  });
+
+  it('should send application/file message', () => {
+    const fileName = 'doc.pdf';
+    component.customerData = { id: 'cust1' } as any;
+
+    component.constructCimMessage(
+      'application',
+      '',
+      null,
+      null,
+      'application/pdf',
+      fileName,
+      1234,
+      'extra text',
+      'file'
+    );
+
+    expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
+    const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
+    expect(payload.body.type).toBe('FILE');
+    expect(payload.body.additionalDetails).toEqual({ fileName });
+  });
+
+  it('should send image message', () => {
+    const fileName = 'img.png';
+    component.customerData = { id: 'cust1' } as any;
+
+    component.constructCimMessage(
+      'image',
+      '',
+      null,
+      null,
+      'image/png',
+      fileName,
+      456,
+      'caption text',
+      'image'
+    );
+
+    expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
+    const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
+    expect(payload.body.type).toBe('IMAGE');
+    expect(payload.body.caption).toBe(fileName);
+  });
+
+  it('should handle unknown message type', () => {
+    component.constructCimMessage('unknown');
+
+    expect(mockMatSnackBar.open).toHaveBeenCalledWith(
+      'unable to process the file',
+      'X'
+    );
+    expect(mockSdkService.sendChatMessage).not.toHaveBeenCalled();
+  });
+});
+
 
 
 });

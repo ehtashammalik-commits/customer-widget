@@ -8,7 +8,7 @@ export class BrowserNotificationService {
   @ViewChild('myFileInput')
   myInputVariable!: ElementRef;
 
-  constructor(private appConfig: ConfigService) {}
+  constructor(private readonly appConfig: ConfigService) {}
 
   notify(cimMessage: any) {
     if (
