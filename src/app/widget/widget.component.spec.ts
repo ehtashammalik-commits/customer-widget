@@ -1,4 +1,3 @@
-import { Router } from '@angular/router';
 import { WidgetComponent } from './widget.component';
 
 // ---------- Common mocks ----------
@@ -27,13 +26,17 @@ const mockStorageService = {
 };
 
 const mockRoute = {};
-const mockFormBuilder = {};
+const mockFormBuilder = {
+  group: jest.fn(() => ({})), // returns an empty object or a mock FormGroup
+};
 
 const mockBrowserNotificationService: any = {
   notify: jest.fn(),
   playSound: jest.fn(),
   openBrowserNotification: jest.fn(),
 };
+
+const PostMessageHandlerService = {};
 
 const mockDeliveryNotificationService = {};
 const mockPostMessageHandlerService = {};
@@ -59,7 +62,7 @@ describe('WidgetComponent', () => {
       mockDeliveryNotificationService as any,
       mockPostMessageHandlerService as any,
       mockTranslateService,
-      {} as any, // Router
+      mockRoute as any, // Router
       {} as any  // Document
     );
   });
@@ -71,6 +74,172 @@ describe('WidgetComponent', () => {
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
+  });
+
+
+  // ---------- ngOnInit ---------- 
+
+  describe('Initialization of the Componenet in the ngOnInit LifeCycle Hook', () => {
+    let mockQueryParams$: any;
+    let mockWidgetConfigs$: any;
+    let mockValidations$: any;
+    let mockRenderPreChatForm$: any;
+    let mockRenderCallbackForm$: any;
+    let mockOnChatResumedResponse$: any;
+    let mockOnWebRtcCallResponse$: any;
+    let mockOnCallbackRequestResponse$: any;
+    let mockConnectionResponse$: any;
+    let mockBrowserInfoData$: any;
+
+    beforeEach(() => {
+      // Mock observables
+      mockQueryParams$ = {
+        subscribe: jest.fn((fn) => {
+          fn({
+            channelCustomerIdentifier: 'cid',
+            serviceIdentifier: 'sid',
+            widgetIdentifier: 'wid',
+            Source: 'Widget',
+            encryptedKey: encodeURIComponent('myKey'),
+          });
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+      mockWidgetConfigs$ = { subscribe: jest.fn() };
+      mockValidations$ = { subscribe: jest.fn() };
+      mockRenderPreChatForm$ = { subscribe: jest.fn() };
+      mockRenderCallbackForm$ = { subscribe: jest.fn() };
+      mockOnChatResumedResponse$ = { subscribe: jest.fn() };
+      mockOnWebRtcCallResponse$ = { subscribe: jest.fn() };
+      mockOnCallbackRequestResponse$ = { subscribe: jest.fn() };
+      mockConnectionResponse$ = { subscribe: jest.fn() };
+      mockBrowserInfoData$ = { subscribe: jest.fn() };
+
+      // Patch private/readonly properties
+        (component as any).route = { queryParams: mockQueryParams$ };
+        (component as any).__postMessageHandlerService = { browserInfoData$: mockBrowserInfoData$ };
+        jest.spyOn(component as any, 'setFontFromLocalStorage').mockImplementation(() => {});
+        jest.spyOn(component as any, 'createFormValidationControls').mockImplementation(() => {});
+
+      // Patch route and SDK observables
+      component.sdk = {
+        widgetConfigs$: mockWidgetConfigs$,
+        validationsSubcription: mockValidations$,
+        renderPreChatForm$: mockRenderPreChatForm$,
+        renderCallbackForm$: mockRenderCallbackForm$,
+        onChatResumedResponse$: mockOnChatResumedResponse$,
+        onWebRtcCallResponse$: mockOnWebRtcCallResponse$,
+        onCallbackRequestResponse$: mockOnCallbackRequestResponse$,
+        connectionResponse$: mockConnectionResponse$,
+        getFormValidation: jest.fn((cb) => cb()),
+        renderPreChatForm: jest.fn(),
+        renderCallbackForm: jest.fn(),
+      } as any;
+
+      // Patch methods to spy
+      component.initPrechatform = jest.fn();
+      component.passUrlParamsToServices = jest.fn();
+      component.getCalendarEvents = jest.fn();
+      component.setWidgetConfigs = jest.fn();
+      component.loadBrowserLanguage = jest.fn();
+      component.setFontFromLocalStorage = jest.fn();
+      component.createFormValidationControls = jest.fn();
+      component.changeScreen = jest.fn();
+      component.handleResumedMessages = jest.fn();
+      component.clearSession = jest.fn();
+      component.scrollToBottom = jest.fn();
+      component.changeView = jest.fn();
+    });
+
+    it('should call initPrechatform, loadBrowserLanguage, setFontFromLocalStorage, getCalendarEvents', () => {
+      component.ngOnInit();
+      expect(component.initPrechatform).toHaveBeenCalled();
+      expect(component.loadBrowserLanguage).toHaveBeenCalled();
+      expect(component.setFontFromLocalStorage).toHaveBeenCalled();
+      expect(component.getCalendarEvents).toHaveBeenCalled();
+    });
+
+    it('should extract and set route params correctly', () => {
+      component.ngOnInit();
+      expect(component.customerIdentifier).toBe('cid');
+      expect(component.serviceIdentifier).toBe('sid');
+      expect(component.widgetIdentifier).toBe('wid');
+      expect(component.source).toBe('Widget');
+      expect(component.webRtcSecureLink).toBe('myKey');
+    });
+
+    it('should set standaloneWebRtc true if webRtcSecureLink is present', () => {
+      component.ngOnInit();
+      expect(component.standaloneWebRtc).toBe(true);
+    });
+
+    it('should call alert if widgetIdentifier is missing in standaloneWebRtc mode', () => {
+      global.alert = jest.fn();
+      mockQueryParams$.subscribe = jest.fn((fn) => {
+        fn({
+          channelCustomerIdentifier: 'cid',
+          serviceIdentifier: 'sid',
+          Source: 'Widget',
+          encryptedKey: encodeURIComponent('myKey'),
+        });
+        return { unsubscribe: jest.fn() };
+      });
+      component.ngOnInit();
+      expect(global.alert).toHaveBeenCalledWith(
+        'Error: Please check with Administrator. Widget identifier is missing!!!'
+      );
+    });
+
+    it('should call alert if serviceIdentifier is missing in non-standalone mode', () => {
+      global.alert = jest.fn();
+      mockQueryParams$.subscribe = jest.fn((fn) => {
+        fn({
+          channelCustomerIdentifier: 'cid',
+          widgetIdentifier: 'wid',
+          Source: 'Widget',
+        });
+        return { unsubscribe: jest.fn() };
+      });
+      component.ngOnInit();
+      expect(global.alert).toHaveBeenCalledWith(
+        'Error: Please check with Administrator. Service identifier is missing!!!'
+      );
+    });
+
+    it('should call alert if widgetIdentifier is missing in non-standalone mode', () => {
+      global.alert = jest.fn();
+      mockQueryParams$.subscribe = jest.fn((fn) => {
+        fn({
+          channelCustomerIdentifier: 'cid',
+          serviceIdentifier: 'sid',
+          Source: 'Widget',
+        });
+        return { unsubscribe: jest.fn() };
+      });
+      component.ngOnInit();
+      expect(global.alert).toHaveBeenCalledWith(
+        'Error: Please check with Administrator. Widget identifier is missing!!!'
+      );
+    });
+
+    it('should call alert if channelCustomerIdentifier is missing and CHANNEL_IDENTIFIER is set', () => {
+      global.alert = jest.fn();
+      component.__appConfig = { appConfig: { CHANNEL_IDENTIFIER: 'channel_customer_identifier' } } as any;
+      mockQueryParams$.subscribe = jest.fn((fn) => {
+        fn({
+          serviceIdentifier: 'sid',
+          widgetIdentifier: 'wid',
+          Source: 'Widget',
+        });
+        return { unsubscribe: jest.fn() };
+      });
+      component.ngOnInit();
+      expect(global.alert).toHaveBeenCalledWith(
+        "Warning: 'channelCustomerIdentifier' parameter is missing in the url, Required for Customer Identification!!!"
+      );
+    });
+
+    // You can add more tests for subscriptions and side effects as needed
   });
 
   // ---------- handleRefreshCaseForWebRTC ----------
@@ -389,4 +558,140 @@ describe('WidgetComponent', () => {
       expect(component.handleMessageReport).toHaveBeenCalledWith(cimMessage);
     });
   });
+
+  // ---------- handleDialogStates ----------
+  describe('handleDialogStates', () => {
+    it('should open snackbar when reasonCode is NO_ANSWER', () => {
+      const snackSpy = jest.spyOn(component['snackBar'], 'open');
+      component.handleDialogStates({ reasonCode: 'NO_ANSWER' });
+      expect(snackSpy).toHaveBeenCalledWith('Call is not picked up', 'X', expect.any(Object));
+    });
+
+    it('should set IsRegisteredInFreeSwitch true when agentInfo state is LOGIN', () => {
+      component.handleDialogStates({
+        event: 'agentInfo',
+        response: { state: 'LOGIN', extension: '101' },
+      });
+      expect(component.IsRegisteredInFreeSwitch).toBe(true);
+    });
+
+    it('should set maintainDialog and dialogId on outboundDialing INITIATING', () => {
+      const dialog = { id: 'd1', state: 'INITIATING' };
+      component.handleDialogStates({
+        event: 'outboundDialing',
+        response: { dialog },
+      });
+      expect(component.maintainDialog).toEqual(dialog);
+      expect(component.dialogId).toBe('d1');
+    });
+
+    it('should call changeView and startCountdown on ACTIVE dialogState', () => {
+    const spyStart = jest.spyOn(component as any, 'startCountdown').mockImplementation(() => {});
+
+    const dialog = { id: 'd2', state: 'ACTIVE' };
+    component.handleDialogStates({
+      event: 'dialogState',
+      response: { dialog },
+    });
+
+    expect(spyStart).toHaveBeenCalled();
+    expect(component.dialogId).toBe('d2');
+  });
+
+
+    it('should set remoteStreamStatus=false when mediaStreamUpdate success with video', () => {
+      component.handleDialogStates({
+        event: 'mediaStreamUpdate',
+        status: 'success',
+        dialog: { stream: 'video' },
+      });
+      expect(component.isAudioCallActive).toBe(false);
+      expect(component.callPopUpView).toBe(false);
+    });
+
+    it('should handle Error event with generalError Forbidden', () => {
+      const snackSpy = jest.spyOn(component['snackBar'], 'open');
+      component.standaloneWebRtc = true;
+      component.handleDialogStates({
+        event: 'Error',
+        response: { type: 'generalError', description: 'Forbidden' },
+      });
+      expect(component.showAuthenticationResponseMessage).toContain('Authentication failed');
+      expect(snackSpy).toHaveBeenCalled();
+    });
+ });
+
+ // ---------- changeScreen ----------
+  describe('changeScreen', () => {
+    it('should set widget screen correctly when screen=widget', () => {
+      jest.spyOn(component['storageService'], 'getItem').mockReturnValue('true');
+      const spyResize = jest.spyOn(component, 'resizeWidget').mockImplementation();
+      component.changeScreen('widget');
+      expect(component.isIconWidget).toBe(true);
+      expect(spyResize).toHaveBeenCalledWith('icon-view');
+    });
+
+    it('should set chat screen correctly when screen=chat', () => {
+      const spyResize = jest.spyOn(component, 'resizeWidget').mockImplementation();
+      const spyChange = jest.spyOn(component, 'changeView').mockImplementation();
+      component.changeScreen('chat');
+      expect(component.widgetChatScreen).toBe(true);
+      expect(spyChange).toHaveBeenCalledWith('chat');
+      expect(spyResize).toHaveBeenCalledWith('form-view');
+    });
+
+    it('should set error screen correctly when screen=error', () => {
+      component.changeScreen('error');
+      expect(component.chatError).toBe(true);
+      expect(component.chatEndScreen).toBe(false);
+    });
+  });
+
+  // ---------- changeView ----------
+  describe('changeView', () => {
+    it('should set activeChatView true when view=chat', () => {
+      component.changeView('chat');
+      expect(component.activeChatView).toBe(true);
+      expect(component.activeVideoView).toBe(false);
+    });
+
+    it('should call initiateWebRtcCall when view=audio and not active', () => {
+      const spyInit = jest.spyOn(component, 'initiateWebRtcCall').mockImplementation();
+      const spyLogin = jest.spyOn(component, 'logInToFreeSwitch').mockImplementation();
+      component.isAudioCallActive = false;
+      component.changeView('audio');
+      expect(spyLogin).toHaveBeenCalled();
+      expect(spyInit).toHaveBeenCalledWith('audio');
+    });
+
+    it('should set activeVideoView true when view=video and active', () => {
+      component.isVideoCallActive = true;
+      component.changeView('video');
+      expect(component.activeVideoView).toBe(true);
+      expect(component.callPopUpView).toBe(false);
+    });
+
+    it('should log warning when screenshare and isSecureWebCall is true', () => {
+      component.isSecureWebCall = true;
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      component.changeView('screenshare');
+      expect(warnSpy).toHaveBeenCalledWith('WebRTC Call Is GOING ON');
+    });
+
+    it('should initiate call when standaloneVideo and not active', () => {
+      const spyInit = jest.spyOn(component, 'initiateWebRtcCall').mockImplementation();
+      component.isWebRtcVideoCallActive = false;
+      component.showInvalidCodeError = false;
+      component.changeView('standaloneVideo');
+      expect(spyInit).toHaveBeenCalledWith('video');
+    });
+
+    it('should initiate secureWebVideoCall when not already secure', () => {
+      const spyInit = jest.spyOn(component, 'initiateWebRtcCall').mockImplementation();
+      component.isSecureWebCall = false;
+      component.changeView('secureWebVideoCall');
+      expect(spyInit).toHaveBeenCalledWith('video');
+    });
+  });
+
 });

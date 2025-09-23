@@ -666,7 +666,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
   }
 
-  private createFormValidationControls(
+   createFormValidationControls(
     formSchema: any[],
     formValidation: any[],
     formType: string,
@@ -1349,29 +1349,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.callPopUpView = false;
         this.activeCallbackView = false;
         this.activeCallbackResponseView = false;
-        // if(this.isAudioCallActive || this.isVideoCallActive) {
-        //   console.log("AUDIO / VIDEO CALL IS ACTIVE NOW")
-        // }
-        // this.sendDataToService(this.dialogId);
-        // if (this.enableEmoji) {
-        //   setTimeout(() => {
-        //     new EmojiPicker();
-        //   }, 500)
-        // }
-
-        // this.onDataRequest = this.sdk.onDataResponses$.subscribe(
-        //   (response: any) => {
-        //     if (response) {
-        //       console.log("here is the response now", response)
-        //       this.sendRemoteData(response)
-        //     }
-        //   },
-        // );
-
-        // this.onDataRequest = this.sdk.setupRemoteMediaResponse$.subscribe((res) => {
-        //   console.log("here are the response from the setupRemoteMediaResponses now", res)
-        // })
-        // this.assignStreams();
         break;
       case 'callback':
         this.activeChatView = false;
@@ -1500,26 +1477,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
     this.cdRef.detectChanges();
   }
-
-  // assignStreams() {
-  //   if (document.getElementById('localVideo')) {
-  //   this.localStream = document.getElementById('localVideo')
-  //   console.log("here is the localStream")
-  //   }
-
-  //   if(document.getElementById('remoteVide')) {
-  //   this.remoteStream = document.getElementById('localVideo')
-  //   console.log("here is the remoteStream")
-  //   }
-  // }
-  // sendDataToService(dialogueId: string) {
-  //   console.log("sending dialogueId from .ts to service",dialogueId)
-  //   this.sdk.testingData(dialogueId);
-  // }
-
-  // sendRemoteData(session:any) {
-  //   this.sdk.remoteMediaStream(session)
-  // }
 
   convertCallView(view: any) {
     switch (view) {
@@ -3097,7 +3054,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  private setFontFromLocalStorage() {
+   setFontFromLocalStorage() {
     try {
       if (this.storageService.getItem('fontSize', this.storageType) !== null) {
         this.fontSize.setValue(
@@ -3295,7 +3252,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const sections = this.preChatFormGroup.get('sections') as FormArray;
 
     // Validate section existence
-    if (!sections?.at(sectionIndex)) {
+    if (!sections || !sections.at(sectionIndex)) {
       console.error(`Section at index ${sectionIndex} does not exist.`);
       return;
     }
