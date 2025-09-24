@@ -166,12 +166,12 @@ defineFeature(feature, (test) => {
           component.callPopUpView = true;
           component.activeVideoView = true;
 
-          await component.sdk.handleCallStart({
+           component.sdk.handleCallStart({
             type,
             authConfigs: component.webRTCConfig,
           });
 
-          await component.sdk.sendChatMessage({
+           component.sdk.sendChatMessage({
             type: 'webrtc',
             action: 'initiate',
             hasVideo: true,
@@ -207,13 +207,9 @@ defineFeature(feature, (test) => {
     });
 
     when('the customer clicks on Start Video Call button', () => {
-      return new Promise((resolve, reject) => {
-        component
-          .changeView('video')
-          .then(() => resolve(undefined))
-          .catch(reject);
-      });
+      return component.changeView('video'); // Already a Promise
     });
+
 
     then('a new WebRTC session should be initiated', () => {
       expect(initiateWebRtcCallSpy).toHaveBeenCalledWith('video');
@@ -371,7 +367,7 @@ defineFeature(feature, (test) => {
             );
           }
 
-          await component.sdk.handleCallStart({
+           component.sdk.handleCallStart({
             type,
             authConfigs: component.webRTCConfig,
           });
@@ -462,19 +458,21 @@ defineFeature(feature, (test) => {
       component.activeVideoView = true;
 
       // Add toggleMute method to the component
-      (component as any).toggleMute = function () {
-        this.isMuted = !this.isMuted;
-        if (this.localStream) {
-          const tracks = this.localStream.getAudioTracks();
-          tracks.forEach((track: MediaStreamTrack) => {
-            track.enabled = !this.isMuted;
-          });
-        }
-      };
+      (component as any).toggleMute = () => toggleMuteHelper(component);
 
-      // Spy on the toggleMute method
-      toggleMuteSpy = jest.spyOn(component as any, 'toggleMute');
+       toggleMuteSpy = jest.spyOn(component as any, 'toggleMute');
     });
+
+    function toggleMuteHelper(component: any) {
+      component.isMuted = !component.isMuted;
+      if (component.localStream) {
+        const tracks = component.localStream.getAudioTracks();
+        tracks.forEach((track: MediaStreamTrack) => {
+          track.enabled = !component.isMuted;
+        });
+      }
+    }
+
 
     when('the customer clicks the Mute icon', () => {
       (component as any).toggleMute();
@@ -555,24 +553,29 @@ defineFeature(feature, (test) => {
 
       // Add toggleCallHold method if not exists
       if (!component['toggleCallHold']) {
-        component['toggleCallHold'] = function (tooltip: any): Promise<void> {
-          return new Promise((resolve) => {
-            this.isCallOnHold = !this.isCallOnHold;
-            if (this.localStream) {
-              const tracks = this.localStream.getTracks();
-              tracks.forEach((track: MediaStreamTrack) => {
-                track.enabled = !this.isCallOnHold;
-              });
-            }
-            this.sdk.handleCallHoldState(
-              this.isCallOnHold ? 'holdCall' : 'retrieveCall',
-              this.dialogId,
-            );
-            resolve();
-          });
-        };
+        component['toggleCallHold'] = (tooltip: any) => toggleCallHoldHelper(component);
       }
     });
+
+    function toggleCallHoldHelper(component: any): Promise<void> {
+      return new Promise((resolve) => {
+        component.isCallOnHold = !component.isCallOnHold;
+
+        if (component.localStream) {
+          for (const track of component.localStream.getTracks()) {
+            track.enabled = !component.isCallOnHold;
+          }
+        }
+
+        component.sdk.handleCallHoldState(
+          component.isCallOnHold ? 'holdCall' : 'retrieveCall',
+          component.dialogId,
+        );
+
+        resolve();
+      });
+    }
+
 
     when('the customer clicks the Hold button', async () => {
       const mockTooltip = {

@@ -95,12 +95,16 @@ describe('BrowserNotificationService (Jest)', () => {
   });
 
   describe('openBrowserNotification()', () => {
-    it('should log if Notification not supported', () => {
-      (global as any).Notification = undefined;
+    it('should log if user blocks notifications', async () => {
+      (global as any).Notification.permission = 'default';
+      (global as any).Notification.requestPermission = jest.fn().mockResolvedValue('denied');
       const logSpy = jest.spyOn(console, 'log').mockImplementation();
-      service.openBrowserNotification('BOT', 'msg');
-      expect(logSpy).toHaveBeenCalledWith('Browser does not support notifications.');
+
+      await service.openBrowserNotification('BOT', 'msg');
+
+      expect(logSpy).toHaveBeenCalledWith('User blocked notifications.');
     });
+
 
     it('should request permission and show notification if granted', async () => {
       (global as any).Notification.permission = 'default';
