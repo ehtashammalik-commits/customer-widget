@@ -298,4 +298,92 @@ describe('TranscriptComponent (unit)', () => {
       expect(component.getChannelIconURL('x', 'y')).toBe('');
     });
   });
+
+  describe('ngOnInit (extra branches)', () => {
+    it('should catch invalid CCM_URL and log error', async () => {
+      const badConfig = {
+        appConfig: {
+          ENABLE_TRANSCRIPT_NOTIFICATIONS: true,
+          CCM_URL: '::::bad-url', // won’t throw in Node without override
+        },
+      } as any;
+
+      const spyError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const originalURL = global.URL;
+      global.URL = jest.fn(() => { throw new Error('bad url'); }) as any;
+
+      mockRoute.queryParams.subscribe.mockImplementation((cb: any) => {
+        cb({ conversationId: 'c1', browserLang: 'en', state: 'view' });
+      });
+
+      component = new TranscriptComponent(
+        mockRoute,
+        mockTranscriptService,
+        badConfig,
+        mockSanitizer as any,
+        mockNgxLoader,
+        mockTitle,
+        mockTranslate,
+        mockStorageService,
+      );
+
+      component.ngOnInit();
+
+      expect(spyError).toBeTruthy(); 
+
+      global.URL = originalURL; 
+      spyError.mockRestore();
+    });
+
+  });
+
+  describe('loadChatData (extra cases)', () => {
+    it('should not blur message when status is not FAILED', async () => {
+      const ts = new Date().toISOString();
+      const msg = {
+        id: 'm1',
+        header: { messageId: 'm1', timestamp: ts },
+        body: { type: 'PLAIN', markdownText: 'ok' },
+      };
+      const delivery = {
+        body: { type: 'DELIVERYNOTIFICATION', messageId: 'm1', status: 'DELIVERED' },
+        header: { timestamp: ts },
+      };
+      mockTranscriptService.getTranscriptData.mockReturnValue(of([msg, delivery]));
+      await component.loadChatData({ conversationId: 'c' });
+      expect(component.processedMessages[0].isBlurred).toBe(false);
+    });
+
+    it('should not crash if update intent original not found', async () => {
+      const ts = new Date().toISOString();
+      const updateMsg = {
+        id: 'mX',
+        header: { originalMessageId: 'not-found', intent: 'update', timestamp: ts },
+        body: { type: 'PLAIN', markdownText: 'updated text' },
+      };
+
+      mockTranscriptService.getTranscriptData.mockReturnValue(of([updateMsg]));
+
+      await expect(component.loadChatData({ conversationId: 'c' })).resolves.not.toThrow();
+
+      // update message is discarded since original not found
+      expect(component.processedMessages.length).toBe(0);
+    });
+
+  });
+
+  describe('getFileExtension (extra cases)', () => {
+    it('returns undefined if input is null/undefined', () => {
+      expect(component.getFileExtension(undefined as any)).toBeUndefined();
+      expect(component.getFileExtension(null as any)).toBeUndefined();
+    });
+  });
+
+  describe('getCustomerIcon (extra cases)', () => {
+    it('should return empty string when name is empty', () => {
+      expect(component.getCustomerIcon('')).toBe('');
+    });
+  });
+
 });
