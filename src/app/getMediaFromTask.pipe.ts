@@ -9,10 +9,16 @@ export class getMediaFromTask implements PipeTransform {
       return media.state.toLowerCase() == 'queued';
     });
 
+    if (!queuedMedia) {
+      return undefined; // <--- guard clause
+    }
+
     if (n == 'direction') {
       return queuedMedia.type.direction;
     } else if (n == 'queueName') {
       return queuedMedia.queue.name;
     }
+
+    return undefined;
   }
 }
