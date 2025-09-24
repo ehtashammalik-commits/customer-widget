@@ -2,7 +2,7 @@ import { Injectable, OnInit } from '@angular/core';
 import { ConfigService } from '../services/config.service';
 import { Observable, Subject } from 'rxjs';
 
-declare var widgetConfigs: any,
+declare let widgetConfigs: any,
   getPreChatForm: any,
   formValidation: any,
   establishConnection: any,
@@ -32,7 +32,7 @@ type formAttributeMappings = {
 @Injectable({
   providedIn: 'root',
 })
-export class SdkService implements OnInit {
+export class SdkService {
   private sdkLoaded: boolean = false;
   ConfigData: any;
   widgetIdentifier: any;
@@ -83,9 +83,6 @@ export class SdkService implements OnInit {
     this.loadSdk();
   }
 
-  ngOnInit(): void {
-    console.log('SdkService initialized');
-  }
 
   receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
     this.widgetIdentifier = widgetIdentifier;
@@ -289,14 +286,14 @@ export class SdkService implements OnInit {
   }
 
   getCurrentDate() {
-    var currentDate = new Date();
+    let currentDate = new Date();
     // Get the current year, month, and day
-    var year = currentDate.getFullYear();
-    var month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    var day = String(currentDate.getDate()).padStart(2, '0');
+    let year = currentDate.getFullYear();
+    let month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    let day = String(currentDate.getDate()).padStart(2, '0');
 
     // Combine the year, month, and day with hyphens using template literals
-    var formattedDate = `${year}-${month}-${day}`;
+    let formattedDate = `${year}-${month}-${day}`;
     return formattedDate;
   }
 
