@@ -11,7 +11,7 @@ export class FormatTimePipe implements PipeTransform {
     const ampm = hours >= 12 ? 'PM' : 'AM';
 
     hours = hours % 12;
-    hours = hours ? hours : 12; // convert '0' to '12'
+    hours = hours || 12; // convert '0' to '12'
     const hoursStr = hours.toString().padStart(2, '0');
 
     return `${hoursStr}:${minutes} ${ampm}`;

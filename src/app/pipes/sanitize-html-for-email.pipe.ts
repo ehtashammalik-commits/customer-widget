@@ -5,7 +5,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   name: 'sanitizeHtmlForEmail',
 })
 export class SanitizeHtmlForEmail implements PipeTransform {
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(private readonly sanitizer: DomSanitizer) {}
 
   transform(html: string): SafeHtml {
     if (!html) return '';

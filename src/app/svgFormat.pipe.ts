@@ -9,8 +9,8 @@ import { catchError, map } from 'rxjs/operators';
 })
 export class SvgNpsFormatPipe implements PipeTransform {
   constructor(
-    private sanitizer: DomSanitizer,
-    private http: HttpClient,
+    private readonly sanitizer: DomSanitizer,
+    private readonly http: HttpClient,
   ) {}
 
   transform(

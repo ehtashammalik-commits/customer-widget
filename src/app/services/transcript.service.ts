@@ -10,9 +10,9 @@ import { StorageService } from './storage.service';
 export class TranscriptService {
   nativeElement: any;
   constructor(
-    private http: HttpClient,
+    private readonly http: HttpClient,
     public __appConfig: ConfigService,
-    private storageService: StorageService,
+    private readonly storageService: StorageService,
   ) {}
 
   getTranscriptData(data): Observable<any> {

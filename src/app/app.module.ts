@@ -1,10 +1,8 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms'; // Import the FormsModule
+import { FormsModule,ReactiveFormsModule } from '@angular/forms'; // Import the FormsModule
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-
-import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -36,7 +34,7 @@ import { SvgNpsFormatPipe } from './svgFormat.pipe';
 import { IsEllipsisActiveDirective } from './isEllipsisActive.directive';
 import { TranscriptComponent } from './chat-transcript/chat-transcript.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
-import { NgxUiLoaderModule, NgxUiLoaderConfig } from 'ngx-ui-loader';
+import { NgxUiLoaderModule } from 'ngx-ui-loader';
 import { SanitizeHtmlPipe } from './sanitizeHtml.pipe';
 import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
 import { SanitizeHtmlForEmail } from './pipes/sanitize-html-for-email.pipe';
