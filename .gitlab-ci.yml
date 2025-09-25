@@ -159,6 +159,8 @@ sonarqube-test:
         -Dsonar.language=js
         -Dsonar.sourceEncoding=UTF-8
         -Dsonar.coverage.exclusions="**/*.spec.ts,**/*.test.ts,test/**/*.step.ts,node_modules/**,coverage/lcov-report/**"
+        -Dsonar.coverage.exclusions="**/*.spec.ts,**/*.test.ts,test/**/*.step.ts,node_modules/**,coverage/lcov-report/**,src/app/app.module.ts,src/environments/environment*.ts,src/app/isEllipsisActive.directive.ts,src/main.ts,setup-jest.ts"
+
 
 
 

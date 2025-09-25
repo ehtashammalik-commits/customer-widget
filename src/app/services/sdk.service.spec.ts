@@ -176,7 +176,8 @@ describe('SdkService', () => {
 
     it('rejects when getCalendarId returns invalid response', async () => {
       getCalendarIdMock.mockImplementation((_url, _sid, cb) => cb({}));
-      await expect(service.fetchBusinessCalendarId()).rejects.toBe('Failed to fetch calendar ID.');
+      await expect(service.fetchBusinessCalendarId())
+        .rejects.toThrow('Failed to fetch calendar ID.');
     });
   });
 
@@ -190,7 +191,8 @@ describe('SdkService', () => {
 
     it('rejects when getCalendarEvents returns falsy', async () => {
       getCalendarEventsMock.mockImplementation((_cid, _url, _s, _e, cb) => cb(null));
-      await expect(service.getCalendarEvents('cid-1')).rejects.toBe('Failed to fetch calendar events.');
+      await expect(service.getCalendarEvents('cid-1'))
+        .rejects.toThrow('Failed to fetch calendar events.');
     });
   });
 
