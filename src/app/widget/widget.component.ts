@@ -375,6 +375,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.initPrechatform();
+    this.handleRouteParams();
+    this.setupForms();
+    this.subscribeToWidgetConfigs();
+    this.subscribeToValidations();
+    this.subscribeToCallbackForm();
+    this.subscribeToChatResume();
+    this.subscribeToWebRtc();
+    this.subscribeToCallbackRequest();
+    this.subscribeToConnectionResponse();
+    this.subscribeToBrowserInfo();
+
+    this.loadBrowserLanguage();
+    this.setFontFromLocalStorage();
+    this.getCalendarEvents();
+  }
+
+  /* ----------------------------
+  * Route handling
+  * ---------------------------- */
+  private handleRouteParams(): void {
     this.route.queryParams.subscribe((params: { [x: string]: any }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
@@ -434,27 +454,68 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.passUrlParamsToServices();
       this.getCalendarEvents();
     });
+  }
 
+  private validateIdentifiers(): void {
+    if (this.webRtcSecureLink) {
+      this.standaloneWebRtc = true;
+      if (!this.widgetIdentifier) {
+        alert('Error: Please check with Administrator. Widget identifier is missing!!!');
+      }
+    } else {
+      this.standaloneWebRtc = false;
+      if (!this.serviceIdentifier) {
+        alert('Error: Please check with Administrator. Service identifier is missing!!!');
+      }
+      if (!this.widgetIdentifier) {
+        alert('Error: Please check with Administrator. Widget identifier is missing!!!');
+      }
+      if (
+        this.__appConfig.appConfig.CHANNEL_IDENTIFIER ===
+          'channel_customer_identifier' &&
+        !this.customerIdentifier
+      ) {
+        alert(
+          "Warning: 'channelCustomerIdentifier' parameter is missing in the url, Required for Customer Identification!!!"
+        );
+      }
+    }
+  }
+
+  /* ----------------------------
+  * Forms
+  * ---------------------------- */
+  private setupForms(): void {
     this.preChatFormGroup = this.fb.group({});
     this.callbackFormGroup = this.fb.group({});
+  }
 
+  /* ----------------------------
+  * Subscriptions
+  * ---------------------------- */
+  private subscribeToWidgetConfigs(): void {
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe(
       (configs: { form: string }) => {
         this.setWidgetConfigs(configs);
-
         this.loadBrowserLanguage();
+
         console.log('Widget configurations:', configs);
+
         if (this.enabledCallback) {
           this.sdk.renderCallbackForm(this.callbackConfig.callBackForm);
         }
+
         this.sdk.getFormValidation(() => {
-          if (configs.form !== '')
+          if (configs.form !== '') {
             this.sdk.renderPreChatForm(this.preChatFormId);
+          }
         });
       },
     );
+  }
 
-    this.sdk.validationsSubcription.subscribe((res) => {
+  private subscribeToValidations(): void {
+     this.sdk.validationsSubcription.subscribe((res) => {
       this.formValidations = res;
       this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
         (formData: {
@@ -475,14 +536,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         },
       );
     });
+  }
 
+  private subscribeToCallbackForm(): void {
     this.callbackFormSubscription = this.sdk.renderCallbackForm$.subscribe(
       (formData: { sections: { attributes: any[] }[] }) => {
         this.callbackFormData = formData.sections[0].attributes.filter(
-          (item: any) => {
-            return item.valueType != 'checkbox';
-          },
+          (item: any) => item.valueType != 'checkbox',
         );
+
         this.createFormValidationControls(
           this.callbackFormData,
           this.formValidations,
@@ -490,31 +552,38 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         );
       },
     );
+  }
 
+  private subscribeToChatResume(): void {
     this.onChatResumedSubject = this.sdk.onChatResumedResponse$.subscribe(
       (data: { isChatAvailable: boolean; data: any[] }) => {
         if (data.isChatAvailable) {
           this.changeScreen('chat');
           console.log('on Chat Resumed Response:', data.data);
+
           if (data.data && data.data.length > 0) {
             this.handleResumedMessages(data.data);
           } else {
             this.clearSession();
           }
-        } else if (!data.isChatAvailable) {
+        } else {
           this.storageService.removeItem('widget-error', 'localStorage');
           this.clearSession();
         }
         this.scrollToBottom();
       },
     );
+  }
 
+  private subscribeToWebRtc(): void {
     this.onWebRtcCallSubject = this.sdk.onWebRtcCallResponse$.subscribe(
       (data: any) => {
         this.handleDialogStates(data);
       },
     );
+  }
 
+  private subscribeToCallbackRequest(): void {
     this.onCallbackRequestSubject =
       this.sdk.onCallbackRequestResponse$.subscribe(
         (data: { status: { name: string } }) => {
@@ -526,13 +595,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.callbackResponseStatus = 'error';
             console.error('Something Went Wrong Please check logs');
           }
+
           this.callbackLoader = false;
           this.isChatActive
             ? this.changeView('callbackResponse')
             : this.changeScreen('callbackResponse');
         },
       );
+  }
 
+  private subscribeToConnectionResponse(): void {
     this.establishConnectionSubject = this.sdk.connectionResponse$.subscribe(
       (response: any) => {
         console.log('Connection Response:', response);
@@ -542,16 +614,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
       },
     );
+  }
 
+  private subscribeToBrowserInfo(): void {
     this.__postMessageHandlerService.browserInfoData$.subscribe((data) => {
       this.browserInfoData = data;
       console.log('Browser Info Data in Component: ', this.browserInfoData);
     });
-
-    this.loadBrowserLanguage();
-    this.setFontFromLocalStorage();
-    this.getCalendarEvents();
   }
+
 
   initPrechatform() {
     this.preChatFormGroup = this.fb.group({
