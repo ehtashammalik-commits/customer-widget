@@ -151,10 +151,10 @@ sonarqube-test:
         -Dsonar.projectKey=${CI_PROJECT_NAME}
         -Dsonar.projectName=${CI_PROJECT_NAME}
         -Dsonar.sources="."
-        -Dsonar.exclusions=**/node_modules/**,src/widget-assets/**,**/.spec.ts,test/*.step.ts,*.js
+        -Dsonar.exclusions=**/node_modules/**,src/widget-assets/**,**/.spec.ts,test/**,*.js
         -Dsonar.javascript.lcov.reportPaths="coverage/lcov.info"
         -Dsonar.tests="src/"
-        -Dsonar.test.inclusions=**/*.spec.ts,**/*.test.ts,src/test/step-definitions/**/*.step.ts
+        -Dsonar.test.inclusions=**/*.spec.ts,**/*.test.ts,test/step-definitions/**/*.step.ts
         -Dsonar.qualitygate.wait=true
         -Dsonar.language=js
         -Dsonar.sourceEncoding=UTF-8
