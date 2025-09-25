@@ -1,4 +1,4 @@
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { ConfigService } from '../services/config.service';
 import { Observable, Subject } from 'rxjs';
 
@@ -117,12 +117,12 @@ export class SdkService {
     const url = this.ConfigData.CCM_URL;
     const serviceIdentifier = this.serviceIdentifier;
 
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       getCalendarId(url, serviceIdentifier, (response: any) => {
-        if (response && response.calendarId) {
+        if (response?.calendarId) {
           resolve(response.calendarId);
         } else {
-          reject('Failed to fetch calendar ID.');
+          reject(new Error('Failed to fetch calendar ID.'));
         }
       });
     });
@@ -151,7 +151,7 @@ export class SdkService {
           if (response) {
             resolve(response);
           } else {
-            reject('Failed to fetch calendar events.');
+            reject(new Error('Failed to fetch calendar events.'));
           }
         },
       );
