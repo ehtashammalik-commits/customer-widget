@@ -1626,5 +1626,4 @@ describe('WidgetComponent', () => {
         expect(mockMatSnackBar.open).toHaveBeenCalled();
       });
     });
-
 });

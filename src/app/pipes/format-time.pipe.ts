@@ -1,19 +1,18 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({
-  name: 'formatTime',
-})
+@Pipe({ name: 'formatTime' })
 export class FormatTimePipe implements PipeTransform {
-  transform(timestamp: string): string {
-    const dateTime = new Date(timestamp);
-    let hours = dateTime.getHours();
-    const minutes = dateTime.getMinutes().toString().padStart(2, '0');
+  transform(value: string): string {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return 'NaN:NaN AM';
+    let hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
     const ampm = hours >= 12 ? 'PM' : 'AM';
-
     hours = hours % 12;
-    hours = hours || 12; // convert '0' to '12'
-    const hoursStr = hours.toString().padStart(2, '0');
-
-    return `${hoursStr}:${minutes} ${ampm}`;
+    hours = hours || 12; // 0 should be 12
+    const strTime = `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')} ${ampm}`;
+    return strTime;
   }
 }
