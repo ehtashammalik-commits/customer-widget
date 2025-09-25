@@ -12,6 +12,8 @@ const mockSdkService: Partial<SdkService> = {
   fetchBusinessCalendarId: jest.fn(),
   getCalendarEvents: jest.fn(),
   sendChatMessage: jest.fn(),
+  handleChatEnd: jest.fn(), 
+  moveToFileServer: jest.fn((fd, cb) => cb({})),
 };
 
 const mockAppConfigService = {
@@ -1288,119 +1290,341 @@ describe('WidgetComponent', () => {
 
     describe('WidgetComponent - onSendMessage & constructCimMessage', () => {
 
-  beforeEach(() => {
+      beforeEach(() => {
 
-    // mock methods on component
-    jest.spyOn(component, 'clearMessageData').mockImplementation(() => {});
-    jest.spyOn(component, 'uploadFile').mockImplementation(() => {});
-    jest.spyOn(component, 'scrollToBottom').mockImplementation(() => {});
-    jest.spyOn(component['cdRef'], 'detectChanges').mockImplementation(() => {});
-  });
+        // mock methods on component
+        jest.spyOn(component, 'clearMessageData').mockImplementation(() => {});
+        jest.spyOn(component, 'uploadFile').mockImplementation(() => {});
+        jest.spyOn(component, 'scrollToBottom').mockImplementation(() => {});
+        jest.spyOn(component['cdRef'], 'detectChanges').mockImplementation(() => {});
+      });
 
-  it('should return early if composer is disabled', () => {
-    component.isComposerDisable = true;
-    jest.spyOn(component, 'constructCimMessage');
-    jest.spyOn(component, 'uploadFile');
+      it('should return early if composer is disabled', () => {
+        component.isComposerDisable = true;
+        jest.spyOn(component, 'constructCimMessage');
+        jest.spyOn(component, 'uploadFile');
 
-    component.onSendMessage('hello');
+        component.onSendMessage('hello');
 
-    expect(component.constructCimMessage).not.toHaveBeenCalled();
-    expect(component.uploadFile).not.toHaveBeenCalled();
-  });
+        expect(component.constructCimMessage).not.toHaveBeenCalled();
+        expect(component.uploadFile).not.toHaveBeenCalled();
+      });
 
-  it('should call uploadFile when imageUrls exist', () => {
-    component.isComposerDisable = false;
-    component.selectedFile = { name: 'file.png' } as any;
+      it('should call uploadFile when imageUrls exist', () => {
+        component.isComposerDisable = false;
+        component.selectedFile = { name: 'file.png' } as any;
 
-    component.onSendMessage('extra text');
+        component.onSendMessage('extra text');
 
-    expect(component.uploadFile).toBeTruthy()
-    ;});
+        expect(component.uploadFile).toBeTruthy()
+        ;});
 
-  it('should call constructCimMessage for plain text', () => {
-    component.isComposerDisable = false;
-    component.imageUrls = [];
+      it('should call constructCimMessage for plain text', () => {
+        component.isComposerDisable = false;
+        component.imageUrls = [];
 
-    jest.spyOn(component, 'constructCimMessage');
+        jest.spyOn(component, 'constructCimMessage');
 
-    component.onSendMessage('hello world');
+        component.onSendMessage('hello world');
 
-    expect(component.constructCimMessage).toHaveBeenCalledWith(
-      'PLAIN',
-      'hello world',
-      null,
-      null
-    );
-    expect(component.clearMessageData).toHaveBeenCalled();
-  });
+        expect(component.constructCimMessage).toHaveBeenCalledWith(
+          'PLAIN',
+          'hello world',
+          null,
+          null
+        );
+        expect(component.clearMessageData).toHaveBeenCalled();
+      });
 
-  it('should send plain text message via sdk', () => {
-    const payloadText = 'test message';
-    component.customerData = { id: 'cust1' } as any;
+      it('should send plain text message via sdk', () => {
+        const payloadText = 'test message';
+        component.customerData = { id: 'cust1' } as any;
 
-    component.constructCimMessage('PLAIN', payloadText, null, null);
+        component.constructCimMessage('PLAIN', payloadText, null, null);
 
-    expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
-    const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
-    expect(payload.body.type).toBe('PLAIN');
-    expect(payload.body.markdownText).toBe(payloadText);
-  });
+        expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
+        const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
+        expect(payload.body.type).toBe('PLAIN');
+        expect(payload.body.markdownText).toBe(payloadText);
+      });
 
-  it('should send application/file message', () => {
-    const fileName = 'doc.pdf';
-    component.customerData = { id: 'cust1' } as any;
+      it('should send application/file message', () => {
+        const fileName = 'doc.pdf';
+        component.customerData = { id: 'cust1' } as any;
 
-    component.constructCimMessage(
-      'application',
-      '',
-      null,
-      null,
-      'application/pdf',
-      fileName,
-      1234,
-      'extra text',
-      'file'
-    );
+        component.constructCimMessage(
+          'application',
+          '',
+          null,
+          null,
+          'application/pdf',
+          fileName,
+          1234,
+          'extra text',
+          'file'
+        );
 
-    expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
-    const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
-    expect(payload.body.type).toBe('FILE');
-    expect(payload.body.additionalDetails).toEqual({ fileName });
-  });
+        expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
+        const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
+        expect(payload.body.type).toBe('FILE');
+        expect(payload.body.additionalDetails).toEqual({ fileName });
+      });
 
-  it('should send image message', () => {
-    const fileName = 'img.png';
-    component.customerData = { id: 'cust1' } as any;
+      it('should send image message', () => {
+        const fileName = 'img.png';
+        component.customerData = { id: 'cust1' } as any;
 
-    component.constructCimMessage(
-      'image',
-      '',
-      null,
-      null,
-      'image/png',
-      fileName,
-      456,
-      'caption text',
-      'image'
-    );
+        component.constructCimMessage(
+          'image',
+          '',
+          null,
+          null,
+          'image/png',
+          fileName,
+          456,
+          'caption text',
+          'image'
+        );
 
-    expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
-    const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
-    expect(payload.body.type).toBe('IMAGE');
-    expect(payload.body.caption).toBe(fileName);
-  });
+        expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
+        const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
+        expect(payload.body.type).toBe('IMAGE');
+        expect(payload.body.caption).toBe(fileName);
+      });
 
-  it('should handle unknown message type', () => {
-    component.constructCimMessage('unknown');
+      it('should handle unknown message type', () => {
+        component.constructCimMessage('unknown');
 
-    expect(mockMatSnackBar.open).toHaveBeenCalledWith(
-      'unable to process the file',
-      'X'
-    );
-    expect(mockSdkService.sendChatMessage).not.toHaveBeenCalled();
-  });
-});
+        expect(mockMatSnackBar.open).toHaveBeenCalledWith(
+          'unable to process the file',
+          'X'
+        );
+        expect(mockSdkService.sendChatMessage).not.toHaveBeenCalled();
+      });
+    });
 
 
+    // ---------- selected5starOption ----------
+    describe('selected5starOption', () => {
+      let sectionsArray: any;
+
+      beforeEach(() => {
+        // Setup a FormArray with one section and one control
+        sectionsArray = {
+          at: jest.fn().mockReturnValue({
+            get: jest.fn().mockReturnValue({
+              setValue: jest.fn(),
+            }),
+          }),
+        };
+        component.preChatFormGroup = {
+          get: jest.fn().mockImplementation((name: string) => {
+            if (name === 'sections') return sectionsArray;
+            return null;
+          }),
+        } as any;
+        jest.spyOn(console, 'log').mockImplementation(() => {});
+        jest.spyOn(document, 'querySelectorAll').mockReturnValue([] as any);
+      });
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should set value for star type and update SVG fill', () => {
+        // Arrange
+        const mockSetValue = jest.fn();
+        sectionsArray.at = jest.fn().mockReturnValue({
+          get: jest.fn().mockReturnValue({ setValue: mockSetValue }),
+        });
+        // Mock SVGs
+        const mockSvg = {
+          getElementsByTagName: jest.fn().mockReturnValue([
+            { setAttribute: jest.fn() },
+            { setAttribute: jest.fn() },
+          ]),
+        };
+        (document.querySelectorAll as jest.Mock).mockReturnValue([mockSvg, mockSvg]);
+        // Act
+        component.selected5starOption('rating', 0, 0, 1, 'star', '4');
+        // Assert
+        expect(sectionsArray.at).toHaveBeenCalledWith(0);
+        expect(sectionsArray.at(0).get).toHaveBeenCalledWith('rating');
+        expect(mockSetValue).toHaveBeenCalledWith('4');
+        // Check SVG fill
+        expect(mockSvg.getElementsByTagName).toHaveBeenCalledWith('path');
+        expect(mockSvg.getElementsByTagName()[0].setAttribute).toHaveBeenCalledWith('fill', '#FFB100');
+        expect(mockSvg.getElementsByTagName()[1].setAttribute).toHaveBeenCalledWith('fill', '#FFB100');
+      });
+
+      it('should set value for non-star type and update SVG fill', () => {
+        // Arrange
+        const mockSetValue = jest.fn();
+        const mockSvg = {
+          getElementsByTagName: jest.fn().mockReturnValue([
+            { setAttribute: jest.fn(), getAttribute: jest.fn().mockReturnValue('#000') },
+          ]),
+          dataset: {},
+        };
+        (document.querySelectorAll as jest.Mock).mockReturnValue([mockSvg, mockSvg]);
+        sectionsArray.at = jest.fn().mockReturnValue({
+          get: jest.fn().mockReturnValue({ setValue: mockSetValue }),
+        });
+        // Act
+        component.selected5starOption('rating', 0, 0, 1, 'emoji', 'happy');
+        // Assert
+        expect(sectionsArray.at).toHaveBeenCalledWith(0);
+        expect(sectionsArray.at(0).get).toHaveBeenCalledWith('rating');
+        expect(mockSetValue).toHaveBeenCalledWith('happy');
+        // Should store original colors and set fill to gray for non-selected
+        expect(mockSvg.getElementsByTagName).toHaveBeenCalledWith('path');
+        
+        expect(mockSvg.getElementsByTagName()[0].setAttribute).toHaveBeenCalledWith('fill', expect.any(String));
+      });
+
+      it('should log error if section does not exist', () => {
+        // Arrange
+        sectionsArray.at = jest.fn().mockReturnValue(undefined);
+        const logSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        // Act
+        component.selected5starOption('rating', 99, 0, 0, 'star', '5');
+        // Assert
+        expect(logSpy).toHaveBeenCalledWith('Section at index 99 does not exist.');
+      });
+
+      it('should log error if control does not exist', () => {
+        // Arrange
+        sectionsArray.at = jest.fn().mockReturnValue({
+          get: jest.fn().mockReturnValue(undefined),
+        });
+        const logSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        // Act
+        component.selected5starOption('rating', 0, 0, 0, 'star', '5');
+        // Assert
+        expect(logSpy).toHaveBeenCalledWith('Control "rating" not found in section 0.');
+      });
+    });
+
+
+    // ---------- handleDialogStates ----------
+    describe('WidgetComponent', () => {
+
+      beforeEach(() => {
+          component.preChatFormGroup = {
+          get: jest.fn(() => ({ setValue: jest.fn() })),
+        } as any;
+      });
+      it('should call snackBar.open on handleDialogStates with NO_ANSWER', () => {
+        component.handleDialogStates({ reasonCode: 'NO_ANSWER' });
+        expect(mockMatSnackBar.open).toHaveBeenCalledWith('Call is not picked up', 'X', expect.any(Object));
+      });
+
+      it('should set IsRegisteredInFreeSwitch true on agentInfo LOGIN', () => {
+        component.handleDialogStates({ event: 'agentInfo', response: { state: 'LOGIN', extension: '123' } });
+        expect(component.IsRegisteredInFreeSwitch).toBe(true);
+      });
+
+      it('should set maintainDialog and dialogId on outboundDialing INITIATING', () => {
+        const dialog = { id: 'd1', state: 'INITIATING' };
+        component.handleDialogStates({ event: 'outboundDialing', response: { dialog } });
+        expect(component.maintainDialog).toBe(dialog);
+        expect(component.dialogId).toBe('d1');
+      });
+
+      it('should set maintainDialog and dialogId on dialogState ACTIVE and call startCountdown', () => {
+        const dialog = { id: 'd2', state: 'ACTIVE' };
+        component.standaloneWebRtc = false;
+        component.isAudioCallActive = true;
+        component.handleDialogStates({ event: 'dialogState', response: { dialog } });
+        expect(component.maintainDialog).toBe(dialog);
+        expect(component.dialogId).toBe('d2');
+      });
+
+
+      it('should set remoteStreamStatus on mediaStreamUpdate with video', () => {
+        component.handleDialogStates({ event: 'mediaStreamUpdate', status: 'success', dialog: { stream: 'video', eventRequest: 'remote', streamStatus: 'off' } });
+        expect(component.isAudioCallActive).toBe(false);
+        expect(component.isScreenShareActive).toBe(false);
+        expect(component.callPopUpView).toBe(false);
+      });
+
+      it('should set showAuthenticationResponseMessage and call snackBar.open on Error event', () => {
+        component.standaloneWebRtc = true;
+        component.handleDialogStates({ event: 'Error', response: { type: 'generalError', description: 'Service Unavailable' } });
+        expect(component.showAuthenticationResponseMessage).toContain('service is currently unavailable');
+        expect(mockMatSnackBar.open).toHaveBeenCalled();
+      });
+
+      it('should call changeScreen in closeWrapper', () => {
+        component.closeWrapper();
+        expect(component.additionalPanel).toBe(false);
+        
+        expect(mockStorageService.setItem).toHaveBeenCalledWith('wrapper-hide', 'true', 'sessionStorage');
+      });
+
+      it('should call setFontFromLocalStorage in setFontSize', () => {
+        component.setFontFromLocalStorage = jest.fn();
+        component.setFontSize('14');
+        expect(mockStorageService.setItem).toHaveBeenCalledWith('fontSize', '14', 'sessionStorage');
+        expect(component.setFontFromLocalStorage).toHaveBeenCalled();
+      });
+
+      it('should set fontSize from storage in setFontFromLocalStorage', () => {
+        
+        component.fontSize = { setValue: jest.fn() } as any;
+        component.setFontFromLocalStorage();
+        expect(component.fontSize.setValue).toBeTruthy();
+      });
+
+      it('should call changeScreen and sdk.handleChatEnd in clearSession', () => {
+        component.isAudioCallActive = false;
+        component.isVideoCallActive = false;
+        component.isScreenShareActive = false;
+        component.clearSession();
+        expect(component.sdk.handleChatEnd).toHaveBeenCalled();
+        expect(mockStorageService.removeItem).toHaveBeenCalledWith('user', 'sessionStorage');
+      });
+
+      it('should call callEnd if isAudioCallActive in clearSession', () => {
+        component.isAudioCallActive = true;
+        component.clearSession();
+        expect(component.callEnd).toBeTruthy();
+      });
+
+      it('should call snackBar.open on uploadFile with unsupported type', () => {
+        const files = [{ name: 'file.exe', size: 100 }];
+        mockMatSnackBar.open = jest.fn();
+        component.uploadFile(files, '');
+        expect(mockMatSnackBar.open).toHaveBeenCalledWith('file.exe unsupported type', 'X', expect.any(Object));
+      });
+
+      it('should call snackBar.open and resetFileValidation on uploadFileFromForm error', () => {
+        mockMatSnackBar.open = jest.fn();
+        const event = { target: { files: [{ name: 'file.exe' }], value: '' } };
+        component.resetFileValidation = jest.fn();
+        component.uploadFileFromForm(event as any, 'file', true, ['txt']);
+        expect(mockMatSnackBar.open).toHaveBeenCalled();
+        expect(component.resetFileValidation).toHaveBeenCalled();
+      });
+
+      it('should call setFileControl and snackBar.open on uploadPrechatFile success', () => {
+        const fileInput = { files: [{ name: 'file.txt' }] };
+        component.setFileControl = jest.fn();
+        mockMatSnackBar.open = jest.fn();
+        component.disableUploadBtn = jest.fn();
+        component.uploadPrechatFile(0, 'file', fileInput as any, 'id');
+        expect(component.setFileControl).toHaveBeenCalled();
+        expect(mockMatSnackBar.open).toHaveBeenCalledWith('File uploaded successfully', 'X', expect.any(Object));
+        expect(component.disableUploadBtn).toHaveBeenCalled();
+      });
+
+      it('should call snackBar.open on uploadPrechatFile error', () => {
+        component.sdk.moveToFileServer = jest.fn((fd, cb) => cb({ isFileInvalid: true, errorMessage: 'fail' }));
+        const fileInput = { files: [{ name: 'file.exe' }] };
+        mockMatSnackBar.open = jest.fn();
+        component.uploadPrechatFile(0, 'file', fileInput as any, 'id');
+        expect(mockMatSnackBar.open).toHaveBeenCalled();
+      });
+    });
 
 });
