@@ -1785,133 +1785,149 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-
+    
   handleCimMessage(cimMessage: any) {
-    if (
-      cimMessage.body.type.toLowerCase() == 'deliverynotification' &&
-      cimMessage.header.sender &&
-      (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
-        cimMessage.header.sender.type.toLowerCase() == 'bot')
-    ) {
-      this.updateStatusOfCustomerMessage(
-        cimMessage.body.messageId,
-        cimMessage.body.status.toLowerCase(),
-      );
-    } else if (
-      cimMessage.body.type.toLowerCase() == 'notification' &&
-      cimMessage.body.notificationType.toLowerCase() == 'typing_started'
-    ) {
-      if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
-        console.log('Event  received with data  ', cimMessage.body);
+    const type = cimMessage.body.type?.toLowerCase();
+    const senderType = cimMessage.header.sender?.type?.toLowerCase();
+    const intent = cimMessage.header.intent?.toLowerCase();
 
-        // If timer exists, restart the timer
-        if (!this.typingIndicatorTimer) {
-          console.log('Timer started for indicator to show ', cimMessage.body);
+    if (this.isDeliveryNotification(type, senderType)) {
+      this.handleDeliveryNotification(cimMessage);
+      return;
+    }
 
-          this.typingIndicatorTimer = setTimeout(() => {
-            console.log('Timer ended for indicator to show ', cimMessage.body);
-            this.typingIndicatorTimer = null;
-          }, 5000);
-        } else {
-          clearTimeout(this.typingIndicatorTimer);
-          this.typingIndicatorTimer = setTimeout(() => {
-            this.typingIndicatorTimer = null;
-          }, 5000);
-        }
-      }
-    } else if (
-      cimMessage.body.type.toLowerCase() == 'plain' &&
-      cimMessage.header.sender &&
-      (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
-        cimMessage.header.sender.type.toLowerCase() == 'bot')
-    ) {
-      const urlRegex =
-        /(?:https?:\/\/)?(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:\/[^\s]*)?/g;
-      const urls = cimMessage.body.markdownText.match(urlRegex);
-      if (urls) {
-        for (let url of urls) {
-          if (url.includes('type=survey')) {
-            cimMessage.body.subType = 'SURVEY';
-            cimMessage.body.surveyLink = url;
-            const normalText = cimMessage.body.markdownText
-              .replace(urlRegex, '')
-              .trim();
-            cimMessage.body.markdownText = normalText;
-            break; // Exit the loop if found
-          }
-        }
-      }
-      if (
-        cimMessage.header.intent &&
-        cimMessage.header.intent.toLowerCase() === 'update'
-      ) {
-        this.editMessage(cimMessage);
-        this.handleMessageReport(cimMessage);
-      } else {
-        this.cimMessage.push(cimMessage);
-        this.browserNotificationService.notify(cimMessage);
-        this.scrollToBottom();
-        this.handleMessageReport(cimMessage);
-      }
+    if (this.isTypingNotification(type, cimMessage, senderType)) {
+      this.handleTypingNotification(cimMessage);
+      return;
+    }
+
+    if (this.isPlainMessage(type, senderType)) {
+      this.handlePlainMessage(cimMessage, intent);
+      return;
+    }
+
+    this.handleOtherMessages(cimMessage, type, senderType, intent);
+  }
+
+
+    private isDeliveryNotification(type: string, senderType: string): boolean {
+    return (
+      type === 'deliverynotification' &&
+      (senderType === 'agent' || senderType === 'bot')
+    );
+  }
+
+  private handleDeliveryNotification(cimMessage: any) {
+    this.updateStatusOfCustomerMessage(
+      cimMessage.body.messageId,
+      cimMessage.body.status.toLowerCase(),
+    );
+  }
+
+  private isTypingNotification(type: string, cimMessage: any, senderType: string): boolean {
+    return type === 'notification' &&
+          cimMessage.body.notificationType?.toLowerCase() === 'typing_started' &&
+          senderType === 'agent';
+  }
+
+  private handleTypingNotification(cimMessage: any) {
+    if (this.typingIndicatorTimer) {
+      clearTimeout(this.typingIndicatorTimer);
     } else {
-      if (
-        cimMessage.body.type.toLowerCase() != 'notification' &&
-        cimMessage.header.sender.type.toLowerCase() == 'agent'
-      ) {
-        clearTimeout(this.typingIndicatorTimer);
-        this.typingIndicatorTimer = null;
-      }
+      console.log('Timer started for typing indicator', cimMessage.body);
+    }
 
-      if (cimMessage.body.type.toLowerCase() == 'notification') {
-        if (
-          cimMessage.body.notificationData.data.agentParticipant?.participant?.keycloakUser
-        ) {
-          let fullName = this.getAgentDisplayName(
-            cimMessage.body.notificationData.data.agentParticipant.participant
-              .keycloakUser,
-          );
-          if (!this.isUsernameEnabled) {
-            cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser.username =
-              fullName;
-          }
+    this.typingIndicatorTimer = setTimeout(() => {
+      console.log('Timer ended for typing indicator', cimMessage.body);
+      this.typingIndicatorTimer = null;
+    }, 5000);
+  }
+
+
+  private isPlainMessage(type: string, senderType: string): boolean {
+    return type === 'plain' && (senderType === 'agent' || senderType === 'bot');
+  }
+
+  private handlePlainMessage(cimMessage: any, intent: string) {
+    this.extractSurveyFromPlainMessage(cimMessage);
+
+    if (intent === 'update') {
+      this.editMessage(cimMessage);
+      this.handleMessageReport(cimMessage);
+    } else {
+      this.pushAndNotify(cimMessage);
+    }
+  }
+
+  private extractSurveyFromPlainMessage(cimMessage: any) {
+    const urlRegex = /(?:https?:\/\/)?(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:\/[^\s]*)?/g;
+    const urls = cimMessage.body.markdownText.match(urlRegex);
+
+    if (urls) {
+      for (const url of urls) {
+        if (url.includes('type=survey')) {
+          cimMessage.body.subType = 'SURVEY';
+          cimMessage.body.surveyLink = url;
+          cimMessage.body.markdownText = cimMessage.body.markdownText.replace(urlRegex, '').trim();
+          break;
         }
-
-        if (
-          cimMessage.body?.notificationData?.data?.conversationParticipant?.participant?.keycloakUser
-        ) {
-          let fullName = this.getAgentDisplayName(
-            cimMessage.body.notificationData.data.conversationParticipant
-              .participant.keycloakUser,
-          );
-          if (!this.isUsernameEnabled) {
-            cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser.username =
-              fullName;
-          }
-        }
-      }
-
-      if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
-        let fullName = this.getAgentDisplayName(
-          cimMessage.header.sender.additionalDetail,
-        );
-        if (!this.isUsernameEnabled) {
-          cimMessage.header.sender.senderName = fullName;
-        }
-      }
-
-      if (
-        cimMessage?.header?.intent &&
-        cimMessage.header.intent.toLowerCase() === 'update'
-      ) {
-        this.editMessage(cimMessage);
-        this.handleMessageReport(cimMessage);
-      } else {
-        this.cimMessage.push(cimMessage);
-        this.browserNotificationService.notify(cimMessage);
-        this.scrollToBottom();
-        this.handleMessageReport(cimMessage);
       }
     }
+  }
+
+  private handleOtherMessages(cimMessage: any, type: string, senderType: string, intent: string) {
+    this.clearTypingIndicatorIfNeeded(type, senderType);
+    this.enrichNotificationWithNames(cimMessage);
+
+    if (senderType === 'agent') {
+      this.setAgentName(cimMessage);
+    }
+
+    if (intent === 'update') {
+      this.editMessage(cimMessage);
+      this.handleMessageReport(cimMessage);
+    } else {
+      this.pushAndNotify(cimMessage);
+    }
+  }
+
+  private clearTypingIndicatorIfNeeded(type: string, senderType: string) {
+    if (type !== 'notification' && senderType === 'agent') {
+      clearTimeout(this.typingIndicatorTimer);
+      this.typingIndicatorTimer = null;
+    }
+  }
+
+  private enrichNotificationWithNames(cimMessage: any) {
+    const agentParticipant = cimMessage.body?.notificationData?.data?.agentParticipant?.participant?.keycloakUser;
+    if (agentParticipant) {
+      const fullName = this.getAgentDisplayName(agentParticipant);
+      if (!this.isUsernameEnabled) {
+        agentParticipant.username = fullName;
+      }
+    }
+
+    const conversationParticipant = cimMessage.body?.notificationData?.data?.conversationParticipant?.participant?.keycloakUser;
+    if (conversationParticipant) {
+      const fullName = this.getAgentDisplayName(conversationParticipant);
+      if (!this.isUsernameEnabled) {
+        conversationParticipant.username = fullName;
+      }
+    }
+  }
+
+  private setAgentName(cimMessage: any) {
+    const fullName = this.getAgentDisplayName(cimMessage.header.sender.additionalDetail);
+    if (!this.isUsernameEnabled) {
+      cimMessage.header.sender.senderName = fullName;
+    }
+  }
+
+  private pushAndNotify(cimMessage: any) {
+    this.cimMessage.push(cimMessage);
+    this.browserNotificationService.notify(cimMessage);
+    this.scrollToBottom();
+    this.handleMessageReport(cimMessage);
   }
 
   editMessage(cimMessage: any) {
