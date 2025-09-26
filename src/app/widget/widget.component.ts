@@ -1611,132 +1611,47 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         switch (event.type) {
           case 'CHANNEL_SESSION_ENDED':
           case 'CHANNEL_SESSION_EXPIRED':
-            if (messageType !== 'survey') {
-              this.clearSession();
-            } else {
-              this.storageService.removeItem('user', this.storageType);
-              this.isChatActive = false;
-            }
-            this.composerDisable();
+            this.handleChannelSessionEnd(messageType);
             break;
-          case 'SOCKET_RECONNECTED':
-            console.log(
-              '[SOCKET_RECONNECTED] ==> Chat Resume Request Sent: ',
-              event.data,
-            );
-            this.sdk.onChatResumed(
-              event.data.serviceIdentifier,
-              event.data.channelCustomerIdentifier,
-            );
-            this.changeScreen('chat');
-            console.log(
-              '[SOCKET_RECONNECTED] ==> Chat Resume event response:',
-              this.customerData,
-            );
-            break;
-          case 'SOCKET_CONNECTED':
-            console.log(
-              '[SOCKET_CONNECTED] ==> New Connection Request Response:',
-              event.data,
-            );
-            if (this.eventTriggerType === 'startChat') {
-              this.chatPayLoad = {
-                type: 'CHAT_REQUESTED',
-                data: this.customerData,
-              };
-              this.sdk.sendChatRequest(this.chatPayLoad);
-              if (this.enabledWebhook)
-                this.sdk.sendWebhookNotification(
-                  this.webhookUrl,
-                  this.chatPayLoad,
-                );
-              console.log('New Chat Start Request Sent');
-            } else if (this.eventTriggerType === '') {
-              console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
-              this.sdk.onChatResumed(
-                this.customerData.serviceIdentifier,
-                this.customerData.channelCustomerIdentifier,
-              );
-            }
-            this.changeScreen('chat');
-            break;
-          case 'CONVERSATION_RESUMED':
-            console.log(
-              '[CONVERSATION_RESUMED] ==> Chat Resumed Response:',
-              event.data,
-            );
-            this.isChatActive = true;
-            this.isComposerDisable = false;
-            this.preChatFormLoader = false;
-            this.changeScreen('chat');
-            this.conversationId = event.data.history[0].header.conversationId;
-            this.storageService.setItem(
-              'conversationId',
-              event.data.history[0].header.conversationId,
-              this.storageType,
-            );
-            event.data.history &&
-              this.handleResumedMessages(event.data.history);
-            this.scrollToBottom();
-            break;
-          case 'CHANNEL_SESSION_STARTED':
-            this.isChatActive = true;
-            this.isComposerDisable = false;
-            this.preChatFormLoader = false;
-            this.conversationId = event.data.header.conversationId;
-            this.customerId = event.data.header.customer._id;
-            this.storageService.setItem(
-              'conversationId',
-              event.data.header.conversationId,
-              this.storageType,
-            );
-            this.sdk.setConversationDataAgainstCustomerIdentifier(
-              this.customerData.channelCustomerIdentifier,
-              this.getFormDataAsConversationData(this.preChatFormData),
-            );
-            this.pushPrechatDataAsActivity();
 
-            // this.composerDisable()
+          case 'SOCKET_RECONNECTED':
+            this.handleSocketReconnected(event);
             break;
+
+          case 'SOCKET_CONNECTED':
+            this.handleSocketConnected();
+            break;
+
+          case 'CONVERSATION_RESUMED':
+            this.handleConversationResumed(event);
+            break;
+
+          case 'CHANNEL_SESSION_STARTED':
+            this.handleChannelSessionStarted(event);
+            break;
+
           case 'MESSAGE_RECEIVED':
             console.log('event response:', event.data);
             this.handleCimMessage(event.data);
             console.log('Cim Message Array: ', this.cimMessage);
             break;
+
           case 'SOCKET_DISCONNECTED':
-            console.log('event response:', event.data);
-            if (messageType !== 'survey') {
-              this.cimMessage = [];
-              this.clearMessageData();
-              this.isChatActive = false;
-              this.composerDisable();
-              this.changeScreen('end');
-            }
+            this.handleSocketDisconnected(event, messageType);
             break;
+
           case 'SOCKET_REPLACED':
-            console.log('event response:', event.data);
-            this.cimMessage = [];
-            this.clearMessageData();
-            this.isChatActive = false;
-            this.composerDisable();
-            this.changeScreen('end');
+            this.handleSocketReplaced(event);
             break;
+
           case 'CONNECT_ERROR':
             this.changeScreen('error');
             console.log('event response:', event.data);
             break;
+
+
           case 'ERRORS':
-            if (event.data.task.toUpperCase() == 'CHAT_REQUESTED') {
-              if (event.data.code == 408) {
-                alert('Unable to connect with end server');
-              } else if (event.data.code == 400) {
-                alert('data is invalid');
-              } else if (event.data.code == 500) {
-                alert('Internal error with end server');
-              } else {
-                alert('Unable to send request');
-              }
-            }
+            this.handleErrors(event);
             break;
           default:
             break;
@@ -1746,6 +1661,130 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       console.error('Error on establishing connection: ', error);
     }
   }
+
+  private handleChannelSessionEnd(messageType: string) {
+    if (messageType !== 'survey') {
+      this.clearSession();
+    } else {
+      this.storageService.removeItem('user', this.storageType);
+      this.isChatActive = false;
+    }
+    this.composerDisable();
+  }
+
+  private handleSocketReconnected(event: any) {
+    console.log('[SOCKET_RECONNECTED] ==> Chat Resume Request Sent:', event.data);
+    this.sdk.onChatResumed(
+      event.data.serviceIdentifier,
+      event.data.channelCustomerIdentifier,
+    );
+    this.changeScreen('chat');
+    console.log('[SOCKET_RECONNECTED] ==> Chat Resume event response:', this.customerData);
+  }
+
+  private handleSocketConnected() {
+    console.log('[SOCKET_CONNECTED] ==> New Connection Request Response:', this.customerData);
+    if (this.eventTriggerType === 'startChat') {
+      this.chatPayLoad = {
+        type: 'CHAT_REQUESTED',
+        data: this.customerData,
+      };
+      this.sdk.sendChatRequest(this.chatPayLoad);
+
+      if (this.enabledWebhook) {
+        this.sdk.sendWebhookNotification(this.webhookUrl, this.chatPayLoad);
+      }
+
+      console.log('New Chat Start Request Sent');
+    } else if (!this.eventTriggerType) {
+      console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
+      this.sdk.onChatResumed(
+        this.customerData.serviceIdentifier,
+        this.customerData.channelCustomerIdentifier,
+      );
+    }
+    this.changeScreen('chat');
+  }
+
+  private handleConversationResumed(event: any) {
+    console.log('[CONVERSATION_RESUMED] ==> Chat Resumed Response:', event.data);
+    this.isChatActive = true;
+    this.isComposerDisable = false;
+    this.preChatFormLoader = false;
+    this.changeScreen('chat');
+
+    this.conversationId = event.data.history[0].header.conversationId;
+    this.storageService.setItem(
+      'conversationId',
+      event.data.history[0].header.conversationId,
+      this.storageType,
+    );
+
+    if (event.data.history) {
+      this.handleResumedMessages(event.data.history);
+    }
+    this.scrollToBottom();
+  }
+
+  private handleChannelSessionStarted(event: any) {
+    this.isChatActive = true;
+    this.isComposerDisable = false;
+    this.preChatFormLoader = false;
+    this.conversationId = event.data.header.conversationId;
+    this.customerId = event.data.header.customer._id;
+
+    this.storageService.setItem(
+      'conversationId',
+      event.data.header.conversationId,
+      this.storageType,
+    );
+
+    this.sdk.setConversationDataAgainstCustomerIdentifier(
+      this.customerData.channelCustomerIdentifier,
+      this.getFormDataAsConversationData(this.preChatFormData),
+    );
+    this.pushPrechatDataAsActivity();
+  }
+
+  private handleSocketDisconnected(event: any, messageType: string) {
+    console.log('event response:', event.data);
+    if (messageType !== 'survey') {
+      this.cimMessage = [];
+      this.clearMessageData();
+      this.isChatActive = false;
+      this.composerDisable();
+      this.changeScreen('end');
+    }
+  }
+
+  private handleSocketReplaced(event: any) {
+    console.log('event response:', event.data);
+    this.cimMessage = [];
+    this.clearMessageData();
+    this.isChatActive = false;
+    this.composerDisable();
+    this.changeScreen('end');
+  }
+
+  private handleErrors(event: any) {
+    if (event.data.task.toUpperCase() === 'CHAT_REQUESTED') {
+      switch (event.data.code) {
+        case 408:
+          alert('Unable to connect with end server');
+          break;
+        case 400:
+          alert('data is invalid');
+          break;
+        case 500:
+          alert('Internal error with end server');
+          break;
+        default:
+          alert('Unable to send request');
+          break;
+      }
+    }
+  }
+
 
   handleCimMessage(cimMessage: any) {
     if (
