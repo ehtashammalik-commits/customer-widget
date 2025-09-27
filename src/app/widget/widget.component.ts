@@ -395,66 +395,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   * Route handling
   * ---------------------------- */
   private handleRouteParams(): void {
-    this.route.queryParams.subscribe((params: { [x: string]: any }) => {
+    this.route.queryParams.subscribe((params: { [key: string]: any }) => {
       this.customerIdentifier = params['channelCustomerIdentifier'];
       this.serviceIdentifier = params['serviceIdentifier'];
       this.widgetIdentifier = params['widgetIdentifier'];
-      this.source = params['Source'] ? params['Source'] : 'Web';
+      this.source = params['Source'] || 'Web';
 
-      // Assuming all spaces in the decoded encryptedKey should actually be '+' signs
+      const rawEncryptedKey = params['encryptedKey'] || null;
+      this.webRtcSecureLink = rawEncryptedKey ? decodeURIComponent(rawEncryptedKey) : null;
 
-      const rawEncryptedKey = params['encryptedKey']
-        ? params['encryptedKey']
-        : null;
+      this.validateIdentifiers();
 
-      if (rawEncryptedKey !== null) {
-        const preservedKey = decodeURIComponent(rawEncryptedKey);
-        this.webRtcSecureLink = preservedKey;
-      } else {
-        this.webRtcSecureLink = null;
-      }
-      if (this.webRtcSecureLink != undefined && this.webRtcSecureLink != '') {
-        this.standaloneWebRtc = true;
-        if (this.widgetIdentifier == undefined || this.widgetIdentifier == '') {
-          alert(
-            'Error: Please check with Administrator. Widget identifier is missing!!!',
-          );
-        }
-      } else {
-        this.standaloneWebRtc = false;
-        if (
-          this.serviceIdentifier == undefined ||
-          this.serviceIdentifier == ''
-        ) {
-          alert(
-            'Error: Please check with Administrator. Service identifier is missing!!!',
-          );
-        }
-        if (this.widgetIdentifier == undefined || this.widgetIdentifier == '') {
-          alert(
-            'Error: Please check with Administrator. Widget identifier is missing!!!',
-          );
-        }
-        if (
-          this.__appConfig.appConfig.CHANNEL_IDENTIFIER ===
-          'channel_customer_identifier'
-        ) {
-          if (
-            this.customerIdentifier == undefined ||
-            this.customerIdentifier == '' ||
-            this.customerIdentifier == null
-          ) {
-            alert(
-              "Warning: 'channelCustomerIdentifier' parameter is missing in the url, Required for Customer Identification!!!",
-            );
-          }
-        }
-      }
       // Pass parameters to service after you have received them.
       this.passUrlParamsToServices();
       this.getCalendarEvents();
     });
   }
+
 
   private validateIdentifiers(): void {
     if (this.webRtcSecureLink) {
@@ -1964,61 +1921,33 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   handleResumedMessages(cimMessages: any[]) {
     cimMessages.forEach((cimMessage) => {
-      if (
-        cimMessage.body.type.toLowerCase() == 'plain' &&
-        cimMessage.header.sender &&
-        (cimMessage.header.sender.type.toLowerCase() == 'agent' ||
-          cimMessage.header.sender.type.toLowerCase() == 'bot')
-      ) {
-        const urlRegex =
-          /((https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?)/g;
+      const type = cimMessage.body.type?.toLowerCase();
+      const senderType = cimMessage.header.sender?.type?.toLowerCase();
+      const intent = cimMessage.header.intent?.toLowerCase();
 
-        const urls = cimMessage.body.markdownText.match(urlRegex);
-        // Check if any URLs are found
-        if (urls) {
-          urls.forEach((url: string | string[]) => {
-            if (url.includes('type=survey')) {
-              cimMessage.body.subType = 'SURVEY';
-              cimMessage.body.surveyLink = url;
-              cimMessage.body.markdownText = cimMessage.body.markdownText
-                .replace(urlRegex, '')
-                .trim();
-            }
-          });
-        }
-        if (
-          cimMessage.header.intent &&
-          cimMessage.header.intent.toLowerCase() === 'update'
-        ) {
+      if (this.isPlainMessage(type, senderType)) {
+        this.extractSurveyFromPlainMessage(cimMessage);
+        if (intent === 'update') {
           this.editMessage(cimMessage);
         } else {
           this.cimMessage.push(cimMessage);
         }
-        this.isChatActive = true;
-        this.processSeenMessages();
-        this.scrollToBottom();
       } else {
-        if (
-          cimMessage.body.type.toLowerCase() != 'notification' &&
-          cimMessage.header.sender.type.toLowerCase() == 'agent'
-        ) {
-          clearTimeout(this.typingIndicatorTimer);
-          this.typingIndicatorTimer = null;
-        }
-        if (
-          cimMessage.header.intent &&
-          cimMessage.header.intent.toLowerCase() === 'update'
-        ) {
+        this.clearTypingIndicatorIfNeeded(type, senderType);
+        if (intent === 'update') {
           this.editMessage(cimMessage);
         } else {
           this.cimMessage.push(cimMessage);
         }
-        this.isChatActive = true;
-        this.processSeenMessages();
-        this.scrollToBottom();
       }
+
+      // Common actions across all cases
+      this.isChatActive = true;
+      this.processSeenMessages();
+      this.scrollToBottom();
     });
   }
+
   getAgentDisplayName(user: any): string {
     if (user) {
       const { firstName, lastName } = user;
@@ -2085,10 +2014,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       ) {
         this.cimMessage[index]['sendStatus'] = msgStatus;
       }
-    } else {
-      if (msgStatus.toLowerCase() == 'failed') {
-        alert('unable to start chat');
-      }
+    }
+    if (index == -1 && msgStatus.toLowerCase() == 'failed') {
+      alert('unable to start chat');
     }
   }
 
@@ -3378,7 +3306,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const sections = this.preChatFormGroup.get('sections') as FormArray;
 
     // Validate section existence
-    if (!sections || !sections.at(sectionIndex)) {
+    if (!sections?.at(sectionIndex)) {
       console.error(`Section at index ${sectionIndex} does not exist.`);
       return;
     }
