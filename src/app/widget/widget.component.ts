@@ -3256,7 +3256,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const sections = this.preChatFormGroup.get('sections') as FormArray;
 
     // Validate section existence
-    if (!sections || !sections.at(sectionIndex)) {
+    if (!sections?.at(sectionIndex)) {
       console.error(`Section at index ${sectionIndex} does not exist.`);
       return false;
     }
@@ -3267,7 +3267,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // Prioritize the preChatFormGroup control
     const control = controlPreChat;
 
-    if (control && control.value) {
+    if (control?.value) {
       // Define max length for each value type
       const maxLengthMap: { [key: string]: number } = {
         shortAnswer: 101,
@@ -3435,18 +3435,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       `.npsOption-${sectionIndex}-${attributeIndex}-${type}`,
     );
 
-    svgElements.forEach((svg, index) => {
+    svgElements.forEach((svg) => {
+      if (!(svg instanceof SVGElement)) return;
       const paths = svg.getElementsByTagName('path');
-      const fillColor = index === itemIndex ? '#E57032' : 'gray';
-      for (let i = 0; i < paths.length; i++) {
-        paths[i].setAttribute('fill', fillColor);
-      }
+      const fillColor = Number(svg.dataset.index) === itemIndex ? '#E57032' : 'gray';
+
+      Array.from(paths).forEach((path) => {
+        path.setAttribute('fill', fillColor);
+      });
     });
+
     control.setValue(value);
     console.log(
       `Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`,
     );
   }
+
 
   ChangeBarColor(
     controlName: any,
@@ -3620,9 +3624,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (!svg.dataset.originalColors) {
         // Store original colors in data attribute if not already stored
         const originalColors = [];
-        for (let i = 0; i < paths.length; i++) {
-          originalColors.push(paths[i].getAttribute('fill'));
-        }
+          for (const path of paths) {
+            originalColors.push(path.getAttribute('fill'));
+          }
         svg.dataset.originalColors = JSON.stringify(originalColors);
       }
 
@@ -3635,8 +3639,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       } else {
         // Change to gray for SVGs that are not clicked
         const fillColor = 'gray';
-        for (let i = 0; i < paths.length; i++) {
-          paths[i].setAttribute('fill', fillColor);
+        for (const path of paths) {
+          path.setAttribute('fill', fillColor);
         }
       }
     });
