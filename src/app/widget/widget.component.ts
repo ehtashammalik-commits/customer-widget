@@ -3310,6 +3310,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       console.error(`Section at index ${sectionIndex} does not exist.`);
       return;
     }
+
     // Get the form control from the specific section
     const control = sections.at(sectionIndex).get(controlName);
     if (!control) {
@@ -3318,6 +3319,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       );
       return;
     }
+
+    // Helper: apply fill colors to paths
+    const applyFill = (paths: HTMLCollectionOf<SVGPathElement>, colors: string | string[]) => {
+      const pathArray = Array.from(paths);
+      if (Array.isArray(colors)) {
+        pathArray.forEach((path, i) => path.setAttribute('fill', colors[i] || ''));
+      } else {
+        pathArray.forEach((path) => path.setAttribute('fill', colors));
+      }
+    };
 
     // Update the star rating UI
     const svgElements = document.querySelectorAll(
@@ -3328,34 +3339,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       svgElements.forEach((svg, index) => {
         const paths = svg.getElementsByTagName('path');
         const fillColor = index <= itemIndex ? '#FFB100' : '#E6E6E6';
-        for (let i = 0; i < paths.length; i++) {
-          paths[i].setAttribute('fill', fillColor);
-        }
+        applyFill(paths, fillColor);
       });
     } else {
       svgElements.forEach((svg: any, index: number) => {
-        const paths = svg.getElementsByTagName('path');
+        const paths = svg.getElementsByTagName('path') as HTMLCollectionOf<SVGPathElement>;
 
         if (!svg?.dataset.originalColors) {
-          // Store original colors if not already stored
-          const originalColors = [];
-          for (let i = 0; i < paths.length; i++) {
-            originalColors.push(paths[i].getAttribute('fill'));
-          }
+          const originalColors: string[] = Array.from(paths).map((p) => p.getAttribute('fill') || '');
           svg.dataset.originalColors = JSON.stringify(originalColors);
         }
 
         if (index === itemIndex) {
-          // Restore the original colors for the clicked SVG
-          const originalColors = JSON.parse(svg.dataset.originalColors);
-          for (let i = 0; i < paths.length; i++) {
-            paths[i].setAttribute('fill', originalColors[i]);
-          }
+          const originalColors: string[] = JSON.parse(svg.dataset.originalColors);
+          applyFill(paths, originalColors);
         } else {
-          const fillColor = 'gray'; // Change to gray for SVGs that are not clicked
-          for (let i = 0; i < paths.length; i++) {
-            paths[i].setAttribute('fill', fillColor);
-          }
+          applyFill(paths, 'gray');
         }
       });
     }
@@ -3365,6 +3364,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       `Updated control "${controlName}" in section ${sectionIndex} with value: ${value}`,
     );
   }
+
 
   selectedIndices: { [key: number]: number } = {};
 
@@ -3658,7 +3658,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     console.log('file', file);
-    const errorDiv: any = document.getElementById(`${id}-error`);
+    
     const uploadBtn: any = document.getElementById(`upload-btn-${id}`);
     uploadBtn.disabled = true;
 
@@ -3686,10 +3686,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
     const fileName = file.name;
     console.log('fileName', fileName);
-    const truncatedName =
-      fileName.length > 10
-        ? fileName.substring(0, 7) + '...' + fileName.split('.').pop()
-        : fileName;
 
     this.setFileControl(sectionIndex, fileName, attribute.key);
     this.previewFileForm(file, sectionIndex, attributeIndex);
@@ -3698,7 +3694,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   setFileControl(sectionIndex: number, fileName: string, controlName: string) {
     const sections = this.preChatFormGroup.get('sections') as FormArray;
-    if (!sections || !sections.at(sectionIndex)) {
+    if (!sections?.at(sectionIndex)) {
       console.error(`Section at index ${sectionIndex} does not exist.`);
       return;
     }
