@@ -3377,7 +3377,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   ): void {
     const sections = this.preChatFormGroup.get('sections') as FormArray;
 
-    if (!sections || !sections.at(sectionIndex)) {
+    if (!sections?.at(sectionIndex)) {
       console.error(`Section at index ${sectionIndex} does not exist.`);
       return;
     }
@@ -3415,7 +3415,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const sections = this.preChatFormGroup.get('sections') as FormArray;
 
     // Validate section existence
-    if (!sections || !sections.at(sectionIndex)) {
+    if (!sections?.at(sectionIndex)) {
       console.error(`Section at index ${sectionIndex} does not exist.`);
       return;
     }
@@ -3459,7 +3459,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const sections = this.preChatFormGroup.get('sections') as FormArray;
 
     // Validate section existence
-    if (!sections || !sections.at(sectionIndex)) {
+    if (!sections?.at(sectionIndex)) {
       console.error(`Section at index ${sectionIndex} does not exist.`);
       return;
     }
@@ -3581,7 +3581,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const controlPath = `sections.${sectionIndex}.${controlName}`;
     const control = this.preChatFormGroup.get(controlPath);
 
-    if (!control || !control.value) return false;
+    if (!control?.value) return false;
 
     const parts: string[] = control.value
       .split(',')
@@ -3773,8 +3773,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   sanitizeFileContent(file: File, fileResult: string): SafeUrl {
-    const fileExtension = file.name.split('.').pop()?.toLowerCase();
-
     // All data URLs use bypassSecurityTrustUrl
     return this.sanitizer.bypassSecurityTrustUrl(fileResult);
   }
