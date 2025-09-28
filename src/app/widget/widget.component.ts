@@ -2815,312 +2815,314 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.counterVar = null;
   }
 
+  /* -----------------
+  MAIN (dispatcher) for dialogState events
+   ----------------- */
   handleDialogStates(data: any): void {
+    // Reset registration flag and log
     this.IsRegisteredInFreeSwitch = false;
     console.log('[handleDialogStates] received dialog: ===> ', data);
 
+    // Handle NO_ANSWER reason code early
     if (data.reasonCode === 'NO_ANSWER') {
-      this.snackBar.open('Call is not picked up', 'X', {
-        duration: 2000, // 5 seconds
-        panelClass: ['error-snackbar'],
-        horizontalPosition: 'right',
-        verticalPosition: 'top',
-      });
+      this.showSnackbar('Call is not picked up', 2000, ['error-snackbar']);
     }
 
-    // if (data.event === "MEDIA_SERVER_CALL_END" && data.reasonCode === "NORMAL_CLEARING") {
-    //   const reasonCode = data.reasonCode ? data.reasonCode : "Unknown Error"
-    //   // this.snackBar.open(reasonCode, 'Dismiss', {
-    //   //   duration: 3000,
-    //   //   panelClass: ['error-snackbar'],
-    //   //   horizontalPosition: 'right',
-    //   // });
-
-    if (data.event === 'agentInfo') {
-      console.log(
-        '[handleDialogStates] Inside Agent Info Event: ===> ',
-        data.response,
-      );
-      if (data.response.state === 'LOGIN') {
-        this.IsRegisteredInFreeSwitch = true;
-        console.log(
-          '[handleDialogStates] SIP Connection Established with: ===> ',
-          data.response.extension,
-        );
-      } else {
-        console.log(
-          '[handleDialogStates] SIP Connection Failed with: ===> ',
-          data.response.extension,
-        );
-      }
-    }
-    if (data.event === 'outboundDialing') {
-      console.log(
-        '[handleDialogStates] Inside Outbound Dialing Event: ===> ',
-        data.response,
-      );
-      if (
-        this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED &&
-        this.__appConfig.appConfig.VIDEO
-      ) {
-        this.remoteStreamStatus = false;
-      }
-
-      if (data.response.dialog === null) {
-        this.maintainDialog = null;
-        this.dialogId = null;
-      } else {
-        switch (data.response.dialog.state) {
-          case 'INITIATING':
-            console.log(
-              '[outboundDialing] INITIATING CALL DIALOG Event: ===> ',
-              data.response.dialog,
-            );
-            this.maintainDialog = data.response.dialog;
-            this.dialogId = data.response.dialog.id;
-            break;
-          case 'INITIATED':
-            console.log(
-              '[outboundDialing] INITIATED CALL DIALOG Event: ===> ',
-              data.response.dialog,
-            );
-            this.maintainDialog = data.response.dialog;
-            this.dialogId = data.response.dialog.id;
-            break;
-        }
-      }
-    }
-    // outboundDialing
-    if (data.event === 'dialogState') {
-      if (data.response.dialog === null) {
-        this.maintainDialog = null;
-        this.dialogId = null;
-      } else {
-        switch (data.response.dialog.state) {
-          case 'INITIATING':
-            console.log(
-              '[dialogState] INITIATING CALL DIALOG: ===> ',
-              data.response.dialog,
-            );
-            
-            this.maintainDialog = data.response.dialog;
-            this.dialogId = data.response.dialog.id;
-            break;
-          case 'INITIATED':
-            console.log(
-              '[dialogState] INITIATED CALL DIALOG: ===> ',
-              data.response.dialog,
-            );
-            this.maintainDialog = data.response.dialog;
-            this.dialogId = data.response.dialog.id;
-            break;
-          case 'ALERTING':
-            console.log(
-              '[dialogState] ALERTING CALL DIALOG: ===> ',
-              data.response.dialog,
-            );
-            this.maintainDialog = data.response.dialog;
-            this.dialogId = data.response.dialog.id;
-            break;
-          case 'ACTIVE':
-            console.log(
-              '[dialogState] ACTIVE CALL DIALOG: ===> ',
-              data.response.dialog,
-            );
-            this.startCountdown();
-            
-            this.maintainDialog = data.response.dialog;
-            this.dialogId = data.response.dialog.id;
-
-            if (this.standaloneWebRtc) {
-              this.changeView('standaloneVideo');
-            }
-            if (this.isAudioCallActive) {
-              this.changeView('audio');
-            } else if (this.isVideoCallActive) {
-              this.changeView('video');
-            } else if (this.isScreenShareActive) {
-              this.changeView('screenshare');
-            } else if (this.isChatActive) {
-              this.changeView('chat');
-            } else if (this.isSecureWebCall) {
-              this.changeView('secureWebVideoCall');
-            }
-            break;
-          case 'FAILED':
-            console.log(
-              '[dialogState] FAILED CALL DIALOG: ===> ',
-              data.response.dialog,
-            );
-            if (this.standaloneWebRtc) {
-              this.endCountdown();
-              this.changeScreen('error');
-            } else {
-              this.isAudioCallActive = false;
-              this.isVideoCallActive = false;
-              this.isScreenShareActive = false;
-              this.endCountdown();
-              this.changeView('chat');
-            }
-            break;
-          case 'DROPPED':
-            console.log(
-              '[dialogState] DROPPED CALL DIALOG: ===> ',
-              data.response.dialog,
-            );
-            if (
-              this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED &&
-              this.__appConfig.appConfig.VIDEO
-            ) {
-              this.remoteStreamStatus = false;
-            }
-
-            if (this.standaloneWebRtc) {
-              this.callPopUpView = false;
-              this.isWebRtcVideoCallActive = false;
-              
-              this.endCountdown();
-              this.changeScreen('end');
-            } else {
-              this.callPopUpView = false;
-              this.isAudioCallActive = false;
-              this.isVideoCallActive = false;
-              this.isScreenShareActive = false;
-              this.endCountdown();
-              if (this.IsRegisteredInFreeSwitch) {
-                this.callEnd();
-              }
-              if (
-                this.isChatActive &&
-                data.response.dialog.callEndReason !== 'NO_ANSWER'
-              ) {
-                this.clearSession();
-              } else {
-                this.changeView('chat');
-              }
-            }
-            break;
-        }
-      }
-    }
-
-    if (data.event === 'mediaStreamUpdate') {
-      if (data.status === 'success') {
-        console.log(
-          '[mediaConversion] ACTIVE CALL mediaConversion: ===> ',
-          data.dialog.stream,
-        );
-
-        
-        if (data.dialog.stream === 'video') {
-          this.isAudioCallActive = false;
-          this.isScreenShareActive = false;
-          this.callPopUpView = false;
-        } else if (data.dialog.stream === 'screenshare') {
-          this.isAudioCallActive = false;
-          this.isVideoCallActive = false;
-          this.callPopUpView = false;
-        }
-        if (
-          data.dialog.eventRequest === 'remote' &&
-          data.dialog.streamStatus === 'off'
-        ) {
-          
-          console.log('Remote Camera Off');
-          setTimeout(() => {
-            this.remoteStreamStatus = true;
-          }, 2000);
-        } else if (
-          data.dialog.eventRequest === 'remote' &&
-          data.dialog.streamStatus === 'on'
-        ) {
-          console.log('Remote Camera On');
-          this.remoteStreamStatus = false;
-        }
-      }
-    }
-
-    if (data.event === 'mediaPermissionStatus') {
-      console.log(
-        '[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ',
-        data.dialog,
-      );
-    }
-    if (data.event === 'Error') {
-      // this.errorDuringWebRTCCall = true;
-      // This dialoguId we got in reponse once the call starts ringing on agent side
-      // If share end / mute / hold / unhold events on the basis of this Id.
-      // If we do not have this id, we might face unexpected errors / behavour.
-      // That is why it is necessary that if an error occurs while initiating a call we make this Id undefined
-      // so that while initiating a new call it is overridden easily.
-      this.dialogId = undefined;
-      let errorMessage = '';
-      switch (data.response.type) {
-        case 'generalError':
-          switch (data.response.description) {
-            case 'Service Unavailable':
-              errorMessage = `The service is currently unavailable. Please check your network connection and try again.`;
-              break;
-            case 'Forbidden':
-              errorMessage = `Authentication failed. Please verify your SIP credentials and try again.`;
-              break;
-            case 'Session.getOffer unknown error.':
-              errorMessage = `Please check Audio / Video permissions in your browser.`;
-              break;
-          }
-          console.log('[Error] Call terminated:', errorMessage);
-          break;
-        case 'subscriptionFailed':
-          errorMessage = `Certificate Issues: Please contact with your administrator`;
-          console.log('[Error] Call terminated:', errorMessage);
-          break;
-        case 'invalidState':
-          errorMessage = `Invalid State: Session not found`;
-          console.log('[Error] Call terminated:', errorMessage);
-          break;
-        default:
-          console.log(`[Error] Unknown:', ${data.response.description}`);
-          errorMessage = 'An unknown error occurred.';
-      }
-
-      if (errorMessage) {
-        this.showAuthenticationResponseMessage = errorMessage;
-        this.activeVideoView = false;
-
-        if (this.standaloneWebRtc) {
-          this.showInvalidCodeError = true;
-          this.callPopUpView = false;
-          this.activeVideoView = false;
-          this.isWebRtcVideoCallActive = false;
-          this.snackBar.open(
-            this.showAuthenticationResponseMessage,
-            'Dismiss',
-            {
-              duration: 3000,
-              panelClass: ['error-snackbar'],
-              horizontalPosition: 'right',
-            },
-          );
-        } else {
-          this.snackBar.open(
-            this.showAuthenticationResponseMessage,
-            'Dismiss',
-            {
-              duration: 3000,
-              panelClass: ['error-snackbar'],
-              horizontalPosition: 'right',
-            },
-          );
-          this.isAudioCallActive = false;
-          this.isSecureWebCall = false;
-          this.isVideoCallActive = false;
-          this.activeVideoView = false;
-          this.errorDuringWebRTCCall = true;
-          this.changeView('chat');
-        }
-      }
+    // Dispatch based on event type
+    const event = data?.event;
+    switch (event) {
+      case 'agentInfo':
+        this.handleAgentInfoEvent(data);
+        break;
+      case 'outboundDialing':
+        this.handleOutboundDialingEvent(data);
+        break;
+      case 'dialogState':
+        this.handleDialogStateEvent(data);
+        break;
+      case 'mediaStreamUpdate':
+        this.handleMediaStreamUpdateEvent(data);
+        break;
+      case 'mediaPermissionStatus':
+        this.handleMediaPermissionStatusEvent(data);
+        break;
+      case 'Error':
+        this.handleErrorEvent(data);
+        break;
+      default:
+        // Unknown events: log and ignore
+        // you may want to add more event handlers later
+        break;
     }
   }
+
+
+  /* -----------------
+   HANDLERS for specific dialogState events
+   ----------------- */
+
+  /** agentInfo: SIP register/login status */
+  private handleAgentInfoEvent(data: any): void {
+    console.log('[handleDialogStates] Inside Agent Info Event: ===> ', data.response);
+    if (data.response?.state === 'LOGIN') {
+      this.IsRegisteredInFreeSwitch = true;
+      console.log('[handleDialogStates] SIP Connection Established with: ===> ', data.response.extension);
+    } else {
+      console.log('[handleDialogStates] SIP Connection Failed with: ===> ', data.response.extension);
+    }
+  }
+
+  /** outboundDialing: handle outbound dialing states and dialog lifecycle */
+  private handleOutboundDialingEvent(data: any): void {
+    console.log('[handleDialogStates] Inside Outbound Dialing Event: ===> ', data.response);
+
+    if (this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO) {
+      this.remoteStreamStatus = false;
+    }
+
+    if (!data.response?.dialog) {
+      this.maintainDialog = null;
+      this.dialogId = null;
+      return;
+    }
+
+    // reuse dialog state processor for consistency
+    this.processDialogByState(data.response.dialog, data);
+  }
+
+  /** dialogState: handle dialog updates (INITIATING, INITIATED, ALERTING, ACTIVE, FAILED, DROPPED) */
+  private handleDialogStateEvent(data: any): void {
+    if (!data.response?.dialog) {
+      this.maintainDialog = null;
+      this.dialogId = null;
+      return;
+    }
+    this.processDialogByState(data.response.dialog, data);
+  }
+
+  /** mediaStreamUpdate: handle remote/local stream on/off changes */
+  private handleMediaStreamUpdateEvent(data: any): void {
+    if (data.status !== 'success') return;
+
+    console.log('[mediaConversion] ACTIVE CALL mediaConversion: ===> ', data.dialog.stream);
+
+    if (data.dialog?.stream === 'video') {
+      this.isAudioCallActive = false;
+      this.isScreenShareActive = false;
+      this.callPopUpView = false;
+    } else if (data.dialog?.stream === 'screenshare') {
+      this.isAudioCallActive = false;
+      this.isVideoCallActive = false;
+      this.callPopUpView = false;
+    }
+
+    if (data.dialog?.eventRequest === 'remote' && data.dialog?.streamStatus === 'off') {
+      console.log('Remote Camera Off');
+      setTimeout(() => {
+        this.remoteStreamStatus = true;
+      }, 2000);
+    } else if (data.dialog?.eventRequest === 'remote' && data.dialog?.streamStatus === 'on') {
+      console.log('Remote Camera On');
+      this.remoteStreamStatus = false;
+    }
+  }
+
+  /** mediaPermissionStatus: just log for now (keeps previous behaviour) */
+  private handleMediaPermissionStatusEvent(data: any): void {
+    console.log('[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ', data.dialog);
+  }
+
+  /** Error: big handler — map response.type + description to user-friendly message and take appropriate actions */
+  private handleErrorEvent(data: any): void {
+    // Clear dialogId on error (same as original)
+    this.dialogId = undefined;
+
+    let errorMessage = '';
+
+    switch (data.response?.type) {
+      case 'generalError':
+        switch (data.response?.description) {
+          case 'Service Unavailable':
+            errorMessage = 'The service is currently unavailable. Please check your network connection and try again.';
+            break;
+          case 'Forbidden':
+            errorMessage = 'Authentication failed. Please verify your SIP credentials and try again.';
+            break;
+          case 'Session.getOffer unknown error.':
+            errorMessage = 'Please check Audio / Video permissions in your browser.';
+            break;
+          default:
+            errorMessage = 'An unknown general error occurred.';
+        }
+        console.log('[Error] Call terminated:', errorMessage);
+        break;
+
+      case 'subscriptionFailed':
+        errorMessage = 'Certificate Issues: Please contact with your administrator';
+        console.log('[Error] Call terminated:', errorMessage);
+        break;
+
+      case 'invalidState':
+        errorMessage = 'Invalid State: Session not found';
+        console.log('[Error] Call terminated:', errorMessage);
+        break;
+
+      default:
+        console.log(`[Error] Unknown: ${data.response?.description}`);
+        errorMessage = 'An unknown error occurred.';
+        break;
+    }
+
+    if (!errorMessage) return;
+
+    this.showAuthenticationResponseMessage = errorMessage;
+    this.activeVideoView = false;
+
+    if (this.standaloneWebRtc) {
+      this.showInvalidCodeError = true;
+      this.callPopUpView = false;
+      this.activeVideoView = false;
+      this.isWebRtcVideoCallActive = false;
+      this.showSnackbar(this.showAuthenticationResponseMessage, 3000, ['error-snackbar']);
+    } else {
+      this.showSnackbar(this.showAuthenticationResponseMessage, 3000, ['error-snackbar']);
+      this.isAudioCallActive = false;
+      this.isSecureWebCall = false;
+      this.isVideoCallActive = false;
+      this.activeVideoView = false;
+      this.errorDuringWebRTCCall = true;
+      this.changeView('chat');
+    }
+  }
+
+
+  /** Process a dialog object (shared between dialogState & outboundDialing) */
+  private processDialogByState(dialog: any, originalEventData?: any): void {
+    const state = dialog?.state;
+    if (!state) return;
+
+    switch (state) {
+      case 'INITIATING':
+      case 'INITIATED':
+      case 'ALERTING':
+        this.handleEarlyDialogStates(state, dialog);
+        break;
+
+      case 'ACTIVE':
+        this.handleActiveDialogState(dialog);
+        break;
+
+      case 'FAILED':
+        this.handleFailedDialogState(dialog);
+        break;
+
+      case 'DROPPED':
+        this.handleDroppedDialogState(dialog);
+        break;
+
+      default:
+        // unknown state: do nothing
+        break;
+    }
+  }
+
+  private handleEarlyDialogStates(state: string, dialog: any): void {
+    console.log(`[${state}] CALL DIALOG: ===> `, dialog);
+    this.maintainDialog = dialog;
+    this.dialogId = dialog.id;
+  }
+
+  private handleActiveDialogState(dialog: any): void {
+    console.log('[dialogState] ACTIVE CALL DIALOG: ===> ', dialog);
+    this.startCountdown();
+    this.maintainDialog = dialog;
+    this.dialogId = dialog.id;
+    this.routeViewForActiveCall();
+  }
+
+  private handleFailedDialogState(dialog: any): void {
+    console.log('[dialogState] FAILED CALL DIALOG: ===> ', dialog);
+    if (this.standaloneWebRtc) {
+      this.endCountdown();
+      this.changeScreen('error');
+      return;
+    }
+    this.isAudioCallActive = false;
+    this.isVideoCallActive = false;
+    this.isScreenShareActive = false;
+    this.endCountdown();
+    this.changeView('chat');
+  }
+
+  private handleDroppedDialogState(dialog: any): void {
+    console.log('[dialogState] DROPPED CALL DIALOG: ===> ', dialog);
+
+    if (this.__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED && this.__appConfig.appConfig.VIDEO) {
+      this.remoteStreamStatus = false;
+    }
+
+    if (this.standaloneWebRtc) {
+      this.callPopUpView = false;
+      this.isWebRtcVideoCallActive = false;
+      this.endCountdown();
+      this.changeScreen('end');
+      return;
+    }
+
+    this.callPopUpView = false;
+    this.isAudioCallActive = false;
+    this.isVideoCallActive = false;
+    this.isScreenShareActive = false;
+    this.endCountdown();
+
+    if (this.IsRegisteredInFreeSwitch) {
+      this.callEnd();
+    }
+
+    if (this.isChatActive && dialog.callEndReason !== 'NO_ANSWER') {
+      this.clearSession();
+    } else {
+      this.changeView('chat');
+    }
+  }
+
+
+  /** Decide which view to show when dialog reaches ACTIVE state (keeps your original precedence) */
+  private routeViewForActiveCall(): void {
+    if (this.standaloneWebRtc) {
+      this.changeView('standaloneVideo');
+      return;
+    }
+    if (this.isAudioCallActive) {
+      this.changeView('audio');
+      return;
+    }
+    if (this.isVideoCallActive) {
+      this.changeView('video');
+      return;
+    }
+    if (this.isScreenShareActive) {
+      this.changeView('screenshare');
+      return;
+    }
+    if (this.isChatActive) {
+      this.changeView('chat');
+      return;
+    }
+    if (this.isSecureWebCall) {
+      this.changeView('secureWebVideoCall');
+    }
+  }
+
+  /** Generic snack bar helper used across this component */
+  private showSnackbar(message: string, duration = 3000, panelClass: string[] = []): void {
+    this.snackBar.open(message, 'Dismiss', {
+      duration,
+      panelClass,
+      horizontalPosition: 'right',
+    });
+  }
+
 
   callEnd() {
     if (!this.dialogId) {

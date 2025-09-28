@@ -577,7 +577,7 @@ describe('WidgetComponent', () => {
     it('should open snackbar when reasonCode is NO_ANSWER', () => {
       const snackSpy = jest.spyOn(component['snackBar'], 'open');
       component.handleDialogStates({ reasonCode: 'NO_ANSWER' });
-      expect(snackSpy).toHaveBeenCalledWith('Call is not picked up', 'X', expect.any(Object));
+      expect(snackSpy).toHaveBeenCalledWith('Call is not picked up', 'Dismiss', expect.any(Object));
     });
 
     it('should set IsRegisteredInFreeSwitch true when agentInfo state is LOGIN', () => {
@@ -1518,7 +1518,7 @@ describe('WidgetComponent', () => {
       });
       it('should call snackBar.open on handleDialogStates with NO_ANSWER', () => {
         component.handleDialogStates({ reasonCode: 'NO_ANSWER' });
-        expect(mockMatSnackBar.open).toHaveBeenCalledWith('Call is not picked up', 'X', expect.any(Object));
+        expect(mockMatSnackBar.open).toHaveBeenCalledWith('Call is not picked up', 'Dismiss', expect.any(Object));
       });
 
       it('should set IsRegisteredInFreeSwitch true on agentInfo LOGIN', () => {
