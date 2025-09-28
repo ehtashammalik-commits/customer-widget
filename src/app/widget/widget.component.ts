@@ -1356,7 +1356,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.cdRef.detectChanges();
   }
 
-  async changeView(view: any) {
+  async changeView(view: string) {
     if (this.showInvalidCodeError && this.standaloneWebRtc) {
       if (!this.isSecureLinkExpired) {
         this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
@@ -1368,143 +1368,150 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    switch (view) {
-      case 'chat':
-        this.activeChatView = true;
-        this.activeAudioView = false;
-        this.activeVideoView = false;
-        this.activeScreenShareView = false;
-        this.callPopUpView = false;
-        this.activeCallbackView = false;
-        this.activeCallbackResponseView = false;
-        break;
-      case 'callback':
-        this.activeChatView = false;
-        this.activeAudioView = false;
-        this.activeVideoView = false;
-        this.activeScreenShareView = false;
-        this.callPopUpView = false;
-        this.activeCallbackView = true;
-        this.activeCallbackResponseView = false;
-        break;
-      case 'callbackResponse':
-        this.activeChatView = false;
-        this.activeAudioView = false;
-        this.activeVideoView = false;
-        this.activeScreenShareView = false;
-        this.callPopUpView = false;
-        this.activeCallbackView = false;
-        this.activeCallbackResponseView = true;
-        break;
-      case 'audio':
-        if (this.isAudioCallActive) {
-          //this.assignStreams()
-          this.activeChatView = false;
-          this.activeAudioView = true;
-          this.activeVideoView = false;
-          this.activeScreenShareView = false;
-          this.callPopUpView = false;
-          this.activeCallbackView = false;
-          this.activeCallbackResponseView = false;
-        } else {
-          this.callPopUpView = true;
-          this.activeChatView = true;
-          this.activeAudioView = false;
-          this.activeVideoView = false;
-          this.activeScreenShareView = false;
-          this.activeCallbackView = false;
-          this.activeCallbackResponseView = false;
-          this.logInToFreeSwitch();
-          this.initiateWebRtcCall(view);
-        }
-        break;
-      case 'video':
-        if (this.isVideoCallActive) {
-          this.activeChatView = false;
-          this.activeAudioView = false;
-          this.activeVideoView = true;
-          this.activeScreenShareView = false;
-          this.callPopUpView = false;
-          this.activeCallbackView = false;
-          this.activeCallbackResponseView = false;
-          if (!this.isSecureWebCall) {
-            this.isSecureWebCall = false;
-          }
-        } else {
-          this.callPopUpView = true;
-          this.activeVideoView = true;
-          this.activeChatView = false;
-          this.activeAudioView = false;
-          this.activeScreenShareView = false;
-          this.activeCallbackView = false;
-          this.activeCallbackResponseView = false;
-          this.isSecureWebCall = false;
-          if (!this.IsRegisteredInFreeSwitch) {
-             this.logInToFreeSwitch();
-          }
-          this.initiateWebRtcCall(view);
-        }
-        break;
-      case 'screenshare':
-        if (!this.isSecureWebCall) {
-          if (this.isScreenShareActive) {
-            this.activeChatView = false;
-            this.activeAudioView = false;
-            this.activeVideoView = true;
-            this.activeScreenShareView = true;
-            this.callPopUpView = false;
-            this.activeCallbackView = false;
-            this.activeCallbackResponseView = false;
-          } else {
-            this.callPopUpView = true;
-            this.activeChatView = false;
-            this.activeAudioView = false;
-            this.activeVideoView = false;
-            this.activeScreenShareView = true;
-            this.activeCallbackView = false;
-            this.activeCallbackResponseView = false;
-            this.logInToFreeSwitch();
-            this.initiateWebRtcCall(view);
-          }
-        } else {
-          console.warn('WebRTC Call Is GOING ON');
-        }
-        break;
-      case 'standaloneVideo':
-        if (!this.showInvalidCodeError) {
-          if (this.isWebRtcVideoCallActive) {
-            this.callPopUpView = false;
-          } else {
-            this.callPopUpView = true;
-            this.initiateWebRtcCall('video');
-          }
-        } else {
-          console.warn('Error : Some Issues in initiating Stand alone Call');
-        }
-        break;
-      case 'secureWebVideoCall':
-        if (this.isSecureWebCall) {
-          this.activeChatView = false;
-          this.activeAudioView = false;
-          this.activeVideoView = true;
-          this.activeScreenShareView = false;
-          this.callPopUpView = false;
-          this.activeCallbackView = false;
-          this.activeCallbackResponseView = false;
-        } else {
-          this.callPopUpView = true;
-          this.activeChatView = false;
-          this.activeAudioView = false;
-          this.activeVideoView = true;
-          this.isSecureWebCall = true;
-          this.activeCallbackView = false;
-          this.activeCallbackResponseView = false;
-          this.initiateWebRtcCall('video');
-        }
-        break;
+    /**
+     * A lookup table (dictionary) of all possible view change handlers.
+     *
+     * Instead of using a long switch-case statement inside `changeView`,
+     * we define a `handlers` object where:
+     *
+     * - The key (e.g. "chat", "audio", "video") is the view name.
+     * - The value is a function that calls the appropriate handler
+     *   (e.g. this.handleChatView, this.handleAudioView, etc.).
+     *
+     * Example:
+     *   handlers["chat"]() will run `this.handleChatView()`.
+     *
+     * Benefits:
+     * - Removes switch/case repetition.
+     * - Makes it easier to add new views (just add a new key-value pair here).
+     * - Keeps the `changeView` method simpler and less complex.
+     */
+
+    
+    const handlers: Record<string, () => void> = {
+      chat: () => this.handleChatView(),
+      callback: () => this.handleCallbackView(),
+      callbackResponse: () => this.handleCallbackResponseView(),
+      audio: () => this.handleAudioView(),
+      video: () => this.handleVideoView(),
+      screenshare: () => this.handleScreenShareView(),
+      standaloneVideo: () => this.handleStandaloneVideoView(),
+      secureWebVideoCall: () => this.handleSecureWebVideoCallView(),
+    };
+
+    if (handlers[view]) {
+      handlers[view]();
     }
+
     this.cdRef.detectChanges();
   }
+
+  // ----------------- Handlers -----------------
+  private handleChatView() {
+    this.setView({ chat: true });
+  }
+
+  private handleCallbackView() {
+    this.setView({ callback: true });
+  }
+
+  private handleCallbackResponseView() {
+    this.setView({ callbackResponse: true });
+  }
+
+  private handleAudioView() {
+    if (this.isAudioCallActive) {
+      this.setView({ audio: true });
+    } else {
+      this.setView({ chat: true, popup: true });
+      this.startWebRtcCall('audio');
+    }
+  }
+
+  private handleVideoView() {
+    if (this.isVideoCallActive) {
+      this.setView({ video: true });
+      this.isSecureWebCall = false;
+    } else {
+      this.setView({ video: true, popup: true });
+      this.isSecureWebCall = false;
+      this.startWebRtcCall('video');
+    }
+  }
+
+  private handleScreenShareView() {
+    if (this.isSecureWebCall) {
+      console.warn('WebRTC Call Is GOING ON');
+      return;
+    }
+    if (this.isScreenShareActive) {
+      this.setView({ video: true, screenShare: true });
+    } else {
+      this.setView({ screenShare: true, popup: true });
+      this.startWebRtcCall('screenshare');
+    }
+  }
+
+  private handleStandaloneVideoView() {
+    if (this.showInvalidCodeError) {
+      console.warn('Error : Some Issues in initiating Stand alone Call');
+      return;
+    }
+    this.callPopUpView = !this.isWebRtcVideoCallActive;
+    if (!this.isWebRtcVideoCallActive) {
+      this.initiateWebRtcCall('video');
+    }
+  }
+
+  private handleSecureWebVideoCallView() {
+    if (this.isSecureWebCall) {
+      this.setView({ video: true });
+    } else {
+      this.setView({ video: true, popup: true });
+      this.isSecureWebCall = true;
+      this.initiateWebRtcCall('video');
+    }
+  }
+
+  // ----------------- Helpers -----------------
+  private resetViews() {
+    this.activeChatView = false;
+    this.activeAudioView = false;
+    this.activeVideoView = false;
+    this.activeScreenShareView = false;
+    this.callPopUpView = false;
+    this.activeCallbackView = false;
+    this.activeCallbackResponseView = false;
+  }
+
+  private setView(options: {
+    chat?: boolean;
+    audio?: boolean;
+    video?: boolean;
+    screenShare?: boolean;
+    callback?: boolean;
+    callbackResponse?: boolean;
+    popup?: boolean;
+  }) {
+    this.resetViews();
+
+    // Use of double-bang operator
+    this.activeChatView = !!options.chat;
+    this.activeAudioView = !!options.audio;
+    this.activeVideoView = !!options.video;
+    this.activeScreenShareView = !!options.screenShare;
+    this.activeCallbackView = !!options.callback;
+    this.activeCallbackResponseView = !!options.callbackResponse;
+    this.callPopUpView = !!options.popup;
+  }
+
+  private startWebRtcCall(view: string) {
+    if (!this.IsRegisteredInFreeSwitch) {
+      this.logInToFreeSwitch();
+    }
+    this.initiateWebRtcCall(view);
+  }
+
 
   convertCallView(view: any) {
     switch (view) {
