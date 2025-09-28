@@ -2472,7 +2472,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     originalMessageId: any,
   ) {
     if (data.title.trim() !== '') {
-      
+
         this.constructCimMessage('PLAIN', {
         text: data.title.trim(),
         intent: data.payload,
@@ -2697,58 +2697,73 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     this.callText = callType;
-    // standAlone Web RTC Call when the link is clicked other than web.
+
     if (this.standaloneWebRtc) {
-      this.sdk.handleCallStart({
-        type: callType,
-        authConfigs: this.setAuthorizedResponse,
-      });
-
-      if (!this.showInvalidCodeError) {
-        this.isWebRtcVideoCallActive = true;
-      }
-    }
-
-    // standAlone Web RTC Call when the link is given in active chat / web session as a message..
-    if (this.isSecureWebCall && !this.errorDuringWebRTCCall) {
-      this.sdk.handleCallStart({
-        type: callType,
-        authConfigs: this.setAuthorizedResponse,
-      });
-      if (!this.errorDuringWebRTCCall) {
-        this.isSecureWebCall = true;
-        this.isVideoCallActive = true;
-      }
-    }
-
-    // In case of simple webRTC call
-    else {
-      if (this.preChatFormData && typeof this.preChatFormData === 'object') {
-        if (this.preChatFormData?.sections?.length > 0) {
-          this.webRTCConfig.customerName = '';
-          this.webRTCConfig.customerNumber = '';
-          let sections: Array<any> = this.preChatFormData?.sections;
-          sections.forEach((item) => {
-            if (item?.name) this.webRTCConfig.customerName = item.name;
-            if (item?.phone) this.webRTCConfig.customerNumber = item.phone;
-          });
-        }
-      } else this.handleRefreshCaseForWebRTC();
-
-      this.sdk.handleCallStart({
-        type: callType,
-        authConfigs: this.webRTCConfig,
-      });
-
-      if (callType === 'video' && !this.isSecureWebCall) {
-        this.isVideoCallActive = true;
-      } else if (callType === 'screenshare') {
-        this.isScreenShareActive = true;
-      } else {
-        this.isAudioCallActive = true;
-      }
+      this.handleStandaloneWebRtcCall(callType);
+    } else if (this.isSecureWebCall && !this.errorDuringWebRTCCall) {
+      this.handleSecureWebRtcCall(callType);
+    } else {
+      this.handleStandardWebRtcCall(callType);
     }
   }
+
+  private handleStandaloneWebRtcCall(callType: string) {
+    this.sdk.handleCallStart({
+      type: callType,
+      authConfigs: this.setAuthorizedResponse,
+    });
+
+    if (!this.showInvalidCodeError) {
+      this.isWebRtcVideoCallActive = true;
+    }
+  }
+
+  private handleSecureWebRtcCall(callType: string) {
+    this.sdk.handleCallStart({
+      type: callType,
+      authConfigs: this.setAuthorizedResponse,
+    });
+
+    if (!this.errorDuringWebRTCCall) {
+      this.isSecureWebCall = true;
+      this.isVideoCallActive = true;
+    }
+  }
+
+  private handleStandardWebRtcCall(callType: string) {
+    if (this.preChatFormData && typeof this.preChatFormData === 'object') {
+      if (this.preChatFormData?.sections?.length > 0) {
+        this.webRTCConfig.customerName = '';
+        this.webRTCConfig.customerNumber = '';
+        let sections: Array<any> = this.preChatFormData?.sections;
+        sections.forEach((item) => {
+          if (item?.name) this.webRTCConfig.customerName = item.name;
+          if (item?.phone) this.webRTCConfig.customerNumber = item.phone;
+        });
+      }
+    } else {
+      this.handleRefreshCaseForWebRTC();
+    }
+
+    this.sdk.handleCallStart({
+      type: callType,
+      authConfigs: this.webRTCConfig,
+    });
+
+    this.setCallState(callType);
+  }
+
+  private setCallState(callType: string) {
+    if (callType === 'video' && !this.isSecureWebCall) {
+      this.isVideoCallActive = true;
+    } else if (callType === 'screenshare') {
+      this.isScreenShareActive = true;
+    } else {
+      this.isAudioCallActive = true;
+    }
+  }
+
+
 
   handleScreenShareClick() {
     // Do not proceed if secure web call or audio call is active
