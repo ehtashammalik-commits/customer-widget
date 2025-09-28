@@ -51,6 +51,17 @@ interface EventData {
   calendar: string[];
   eventColor: string;
 }
+
+interface CimMessageOptions {
+  text?: string;
+  intent?: string | null;
+  originalMessageId?: string | null;
+  fileMimeType?: string;
+  fileName?: string;
+  fileSize?: number;
+  additionalText?: string;
+  fileType?: string;
+}
 @Component({
   selector: 'app-widget',
   templateUrl: './widget.component.html',
@@ -1387,7 +1398,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
      * - Keeps the `changeView` method simpler and less complex.
      */
 
-    
+
     const handlers: Record<string, () => void> = {
       chat: () => this.handleChatView(),
       callback: () => this.handleCallbackView(),
@@ -2150,7 +2161,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     } else if (replyInputValue.trim() !== '') {
         console.log('Customer message: ', replyInputValue.trim());
 
-        this.constructCimMessage('PLAIN', replyInputValue.trim(), null, null);
+        this.constructCimMessage('PLAIN', {
+          text: replyInputValue.trim(),
+          intent: null,
+          originalMessageId: null,
+        });
+
         this.clearMessageData();
     }
   }
@@ -2177,17 +2193,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.fileName = '';
   }
 
-  constructCimMessage(
-    msgType: string,
-    text?: string,
-    intent?: null | string,
-    originalMessageId?: null | string,
-    fileMimeType?: string,
-    fileName?: string,
-    fileSize?: number,
-    additionalText?: string,
-    fileType?: string,
-  ) {
+  constructCimMessage(msgType: string, options: CimMessageOptions = {}) {
+    const {
+      text,
+      intent,
+      originalMessageId,
+      fileMimeType,
+      fileName,
+      fileSize,
+      additionalText,
+      fileType,
+    } = options;
+
     let header = {
       originalMessageId: null as null | string,
       intent: null as null | string,
@@ -2199,6 +2216,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         additionalDetail: null,
       },
     };
+
     let body: {
       markdownText: string;
       type: string;
@@ -2209,6 +2227,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       markdownText: '',
       type: '',
     };
+
     const messageTypesFormediaURLs = [
       'application',
       'text',
@@ -2216,26 +2235,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       'video',
       'audio',
     ];
+
     const messageType = msgType.toLowerCase();
 
-    if (messageType == 'plain') {
+    if (messageType === 'plain') {
       let transformedIntent = this.transformPayload(intent);
       header.originalMessageId = originalMessageId ?? null;
-      header.intent = transformedIntent.intent
-        ? transformedIntent.intent
-        : null;
+      header.intent = transformedIntent.intent || null;
       if (transformedIntent.entities) {
         header.entities = transformedIntent.entities;
       }
       body.type = 'PLAIN';
-      body.markdownText = text.trim();
-      const msgPayload = {
+      body.markdownText = text?.trim() || '';
+
+      this.sdk.sendChatMessage({
         type: msgType,
-        header: header,
-        body: body,
+        header,
+        body,
         customer: this.customerData,
-      };
-      this.sdk.sendChatMessage(msgPayload);
+      });
+
       this.clearMessageData();
       this.fileLoading = false;
       this.imageUrls = [];
@@ -2245,32 +2264,33 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.__appConfig.appConfig.FILE_SERVER_URL +
         '/api/downloadFileStream?filename=' +
         fileName;
-      // this.sdk.getFileURLfromServer(imageUrl, (res: any ) => {
-      body['attachment'] = this.buildMediaAttachment(
+
+      body.attachment = this.buildMediaAttachment(
         imageUrl,
         fileSize || 0,
         fileMimeType || '',
         fileType || '',
       );
-      if (messageType == 'application' || messageType == 'text') {
+
+      if (messageType === 'application' || messageType === 'text') {
         body.type = 'FILE';
         body.markdownText = additionalText || '';
-        body['caption'] = ''; // Here is the 'caption' property
-        body['additionalDetails'] = { fileName: fileName };
+        body.caption = '';
+        body.additionalDetails = { fileName };
       } else {
         body.type = messageType.toUpperCase();
         body.markdownText = additionalText || '';
-        body['caption'] = fileName;
-        body['additionalDetails'] = {};
+        body.caption = fileName;
+        body.additionalDetails = {};
       }
-      // });
-      const msgPayload = {
+
+      this.sdk.sendChatMessage({
         type: msgType,
-        header: header,
-        body: body,
+        header,
+        body,
         customer: this.customerData,
-      };
-      this.sdk.sendChatMessage(msgPayload);
+      });
+
       this.clearMessageData();
       this.fileLoading = false;
       this.imageUrls = [];
@@ -2281,6 +2301,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       return;
     }
   }
+
 
   buildMediaAttachment(
     mediaUrl: SafeUrl,
@@ -2407,17 +2428,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               }
             }
 
-            this.constructCimMessage(
-              res.type.split('/')[0],
-              '',
-              null,
-              null,
-              res.type,
-              res.name,
-              res.size,
-              additionalText,
-              res.name.split('.').pop(),
-            );
+            this.constructCimMessage(res.type.split('/')[0], {
+              text: '',
+              intent: null,
+              originalMessageId: null,
+              fileMimeType: res.type,
+              fileName: res.name,
+              fileSize: res.size,
+              additionalText: additionalText,
+              fileType: res.name.split('.').pop(),
+            });
+
           });
         } else {
           this.snackBar.open(files[i].name + ' unsupported type', 'X', {
@@ -2451,12 +2472,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     originalMessageId: any,
   ) {
     if (data.title.trim() !== '') {
-      this.constructCimMessage(
-        'PLAIN',
-        data.title.trim(),
-        data.payload,
-        originalMessageId,
-      );
+      
+        this.constructCimMessage('PLAIN', {
+        text: data.title.trim(),
+        intent: data.payload,
+        originalMessageId: originalMessageId,
+      });
+
     }
   }
 
