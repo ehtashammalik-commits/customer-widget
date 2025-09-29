@@ -1835,7 +1835,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private extractSurveyFromPlainMessage(cimMessage: any) {
-    const urlRegex = /(?:https?:\/\/)?(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:\/[^\s]*)?/g;
+    const urlRegex = /https?:\/\/[^\s]+/g;
     const urls = cimMessage.body.markdownText.match(urlRegex);
 
     if (urls) {
