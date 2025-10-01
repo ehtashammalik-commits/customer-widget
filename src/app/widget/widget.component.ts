@@ -1649,12 +1649,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private handleSocketReconnected(event: any) {
     console.log('[SOCKET_RECONNECTED] ==> Chat Resume Request Sent:', event.data);
+
     this.sdk.onChatResumed(
-      event.data.serviceIdentifier,
-      event.data.channelCustomerIdentifier,
+      event.data.auth.serviceIdentifier,
+      event.data.auth.channelCustomerIdentifier,
     );
     this.changeScreen('chat');
     console.log('[SOCKET_RECONNECTED] ==> Chat Resume event response:', this.customerData);
+    this.enableComposer();
   }
 
   private handleSocketConnected() {
@@ -1684,9 +1686,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private handleConversationResumed(event: any) {
     console.log('[CONVERSATION_RESUMED] ==> Chat Resumed Response:', event.data);
     this.isChatActive = true;
-    this.isComposerDisable = false;
     this.preChatFormLoader = false;
     this.changeScreen('chat');
+    this.enableComposer();
 
     this.conversationId = event.data.history[0].header.conversationId;
     this.storageService.setItem(
@@ -1932,6 +1934,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       );
       this.renderer.setProperty(messageRef, 'value', '');
       this.isComposerDisable = true;
+    }
+
+    // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
+  }
+
+
+  enableComposer() {  
+    console.log('message element is ', this.messageElement);
+    const messageRef: any = this.messageElement?.nativeElement;
+    if (messageRef) {
+      this.renderer.removeAttribute(messageRef, 'disabled');
+      this.renderer.setAttribute(
+        messageRef,
+        'placeholder',
+        'Type message here ...',
+      );
+      this.renderer.setProperty(messageRef, 'value', '');
+      this.isComposerDisable = false;
     }
 
     // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
