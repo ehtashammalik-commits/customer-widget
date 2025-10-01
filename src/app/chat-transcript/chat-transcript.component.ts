@@ -28,14 +28,14 @@ export class TranscriptComponent implements OnInit {
   enableTranscriptNotifications: boolean = false;
 
   constructor(
-    private route: ActivatedRoute,
-    private transcript: TranscriptService,
+    private readonly route: ActivatedRoute,
+    private readonly transcript: TranscriptService,
     public __appConfig: ConfigService,
-    private sanitizer: DomSanitizer,
-    private ngxLoader: NgxUiLoaderService,
-    private title: Title,
-    private translate: TranslateService,
-    private storageService: StorageService,
+    private readonly sanitizer: DomSanitizer,
+    private readonly ngxLoader: NgxUiLoaderService,
+    private readonly title: Title,
+    private readonly translate: TranslateService,
+    private readonly storageService: StorageService,
   ) {
     translate.setDefaultLang('en');
     translate.use('en');

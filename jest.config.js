@@ -1,7 +1,7 @@
 module.exports = {
     preset: 'jest-preset-angular',
     setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
-    testMatch: ['**/*.steps.ts'],
+    testMatch: ["<rootDir>/src/**/*.spec.ts"],
     testEnvironment: 'jsdom',
     transform: {
       '^.+\\.(ts|js|html)$': [
@@ -15,7 +15,7 @@ module.exports = {
       ]
     },
     transformIgnorePatterns: [
-      'node_modules/(?!@angular|@ngx-translate|rxjs)'
+       'node_modules/(?!@angular|@ngx-translate|rxjs|ngx-ui-loader)'
     ],
     moduleNameMapper: {
        '^src/(.*)$': '<rootDir>/src/$1'

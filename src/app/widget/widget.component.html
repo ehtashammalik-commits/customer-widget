@@ -44,10 +44,7 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon"  *ngIf="!isWebRtcVideoCallActive">
-<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">-->
-<!--              minimize-->
-<!--            </span>-->
+            
               <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                 <mat-icon>remove</mat-icon>
               </button>
@@ -80,30 +77,7 @@
                 }}" [ngClass]="{ 'error-text': showInvalidCodeError === true }"></span>
             </div>
             <div class="widget-authentication-body">
-              <!-- <div class="widget-auth-text">
-                <p
-                  innerHTML="{{
-                    showInvalidCodeError
-                      ? 'You Entered an Invalid session code.'
-                      : 'Video request initiated by Adam Reeds.'
-                  }}"></p>
-                <p innerHTML="{{
-                    showInvalidCodeError
-                      ? 'Please enter code again.'
-                      : 'To join video call, please enter session code below.'
-                  }}"
-                ></p>
-              </div> -->
               <div class="widget-auth-button">
-                <!-- <p>Session Code</p>
-                <input
-                  id="auth-token"
-                  type="text"
-                  [ngClass]="{ 'error-field': showInvalidCodeError === true }"
-                  class="widget-auth-input call-btn"
-                  placeholder="Enter Code Here ..."
-                  [(ngModel)]="sessionCode"
-                /> -->
                 <input id="auth-btn" type="button" class="widget-auth-trigger call-btn" value="Join"
                   (click)="changeView('standaloneVideo')" [ngClass]="{ 'disabled': isSecureLinkExpired }"
                   [disabled]="isSecureLinkExpired" />
@@ -117,15 +91,7 @@
             <video #remoteVideo id="remoteVideo" autoplay="autoplay" class="remoteVideo">
               {{ 'error.html5-not-supported' | translate }}
             </video>
-            <!-- <div class="localVideoView">
-              <span
-                class="material-symbols-outlined localVideoIcon"
-                [ngClass]="{ iconHide: isVideoHide === true }"
-                innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}"
-                (click)="toggleCallVideo()"
-              >
-              </span>
-            </div> -->
+            
             <video autoplay="autoplay" class="localVideo" id="localVideo"
               innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}">
               {{ 'error.html5-not-supported' | translate }}
@@ -179,29 +145,6 @@
     </div>
   </ng-container>
 
-  <!--------------------------------------------->
-  <!------ /Call Popup for Audio/Video Call ----->
-  <!--------------------------------------------->
-  <!-- <ng-container *ngIf="callPopUpView">
-    <div class="widget-call-area">
-      <div class="call-popup">
-        <p><span innerHTML="Initiating {{ callText }} call"></span></p>
-        <div class="audio-agent">
-          <div class="loader"></div>
-          <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon" />
-        </div>
-        <div class="agent-detail">
-          <p class="name">{{ agentName }}</p>
-        </div>
-        <div class="end-call-btn" (click)="callEnd()">
-          <div class="end-call-btn-sm">
-            <span class="material-symbols-outlined"> call_end </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </ng-container> -->
-
   <!------------------------->
   <!-- /Callback Form HTML /->
   <!- ----------------------->
@@ -210,10 +153,6 @@
       <div class="widget-form">
         <div class="widget-form-header widget-chat-header widget-color">
           <h5 id="headerHeading">{{ title }}</h5>
-<!--          <span class="widget-header-icon">-->
-<!--            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">minimize</span>-->
-<!--          </span>-->
           <div class="widget-header-icon">
             <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
               <mat-icon>remove</mat-icon>
@@ -452,10 +391,8 @@
             <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
               | date: 'shortTime' }}</p>
           </h5>
-<!--          <span class="widget-header-icon" (click)="changeScreen('widget')">-->
-<!--            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">minimize</span>-->
-<!--          </span>-->
+
+
 
           <div class="widget-header-icon">
             <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
@@ -506,7 +443,7 @@
                         <ng-container *ngSwitchCase="'INPUT'">
                           <label class="questionLabel">
                             <ng-container *ngIf="attribute.valueType === 'file'">
-                              <!-- <span class="dot-icon"></span> -->
+                              
                               <span class="attributeName filetypeAttribute" id="{{ attribute.key }}">
                                 <span>
                                   {{ attribute.label }}
@@ -517,7 +454,7 @@
 
                             </ng-container>
                             <ng-container *ngIf="attribute?.valueType !== 'file'">
-                              <!-- <span class="dot-icon"></span> -->
+    
                               <span class="attributeName" id="{{ attribute.key }}">{{
                                 attribute.label
                                 }}</span>
@@ -672,8 +609,7 @@
 
                           <!-- Date Input -->
                           <ng-container *ngIf="attribute.valueType === 'date'">
-                            <!-- <mat-form-field style="width: 100%;"
-                                  appearance="outline"> -->
+                            
                             <div class="dateTime">
                               <span class="dateTime-icon" (click)="dateInput.showPicker()">
                                 <mat-icon>date_range</mat-icon>
@@ -683,12 +619,11 @@
                             </div>
 
 
-                            <!-- </mat-form-field> -->
+                           
                           </ng-container>
                           <!-- DateTime Input -->
                           <ng-container *ngIf="attribute.valueType === 'dateTime'">
-                            <!-- <mat-form-field style="width: 100%;"
-                                  appearance="outline"> -->
+                            
                             <div class="dateTime">
                               <span class="dateTime-icon" (click)="dateTimeInput.showPicker()">
                                 <img src="widget-assets/images/date_time_icon.svg" alt="dateTime-icon">
@@ -700,8 +635,7 @@
 
                           </ng-container>
                           <ng-container *ngIf="attribute.valueType === 'time'">
-                            <!-- <mat-form-field style="width: 100%;"
-                                  appearance="outline"> -->
+                            
                             <div class="dateTime">
                               <span class="dateTime-icon" (click)="timeInput.showPicker()">
                                 <mat-icon>access_time</mat-icon>
@@ -715,7 +649,7 @@
                         <!-- TEXTAREA Fields -->
                         <ng-container *ngSwitchCase="'TEXTAREA'">
                           <label class="questionLabel">
-                            <!-- <span class="dot-icon"></span> -->
+                           
                             <span class="attributeName" id="{{ attribute.key }}">{{
                               attribute.label
                               }}</span>
@@ -737,7 +671,7 @@
                           <ng-container [ngSwitch]="attribute.valueType">
                             <ng-container *ngSwitchCase="'mcq'">
                               <label class="questionLabel">
-                                <!-- <span class="dot-icon"></span> -->
+                               
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -760,28 +694,28 @@
                             <!-- DROPDOWN Question ValueType -->
                             <ng-container *ngSwitchCase="'dropdown'">
                               <label class="questionLabel">
-                                <!-- <span class="dot-icon"></span> -->
+                               
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                               </label>
 
-                              <!-- <br /> -->
+                              
 
                               <mat-select [formControlName]="attribute.key" name="questionnaire">
-                                <!-- <mat-option [value]="null">None</mat-option> -->
+                                
                                 <mat-option #optionLabel style="width:100%"
                                   *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
                                   [value]="option.label"><span>{{option.label}}</span></mat-option>
                               </mat-select>
-                              <!-- <mat-error> *Required field</mat-error> -->
+                              
 
                             </ng-container>
 
                             <ng-container *ngSwitchCase="'checkbox'">
                               <label class="questionLabel">
-                                <!-- <span class="dot-icon"></span> -->
+                                
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -798,7 +732,7 @@
                                       {{ category.label }}
                                     </h3>
 
-                                    <!-- <span *ngIf="attribute?.isRequired" class="widget-required">*</span> -->
+                                   
                                     <div class="option_field" [attr.data-required]="attribute.isRequired">
                                       <label *ngFor="let option of category.values; let optionIndex = index"
                                         class="checkbox-label">
@@ -818,7 +752,7 @@
 
                             <ng-container *ngSwitchCase="'boolean'">
                               <label class=" questionLabel">
-                                <!-- <span class="dot-icon"></span> -->
+                               
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -858,7 +792,7 @@
                               <ng-container
                                 *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type=='star' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'filled' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'outlined'">
                                 <label class="questionLabel">
-                                  <!-- <span class="dot-icon"></span> -->
+                                 
                                   <span class="attributeName" id="{{ attribute.key }}">{{
                                     attribute.label
                                     }}</span>
@@ -1120,26 +1054,13 @@
               <mat-icon>close</mat-icon>
             </button>
 
-<!--            <span (click)="changeScreen('widget')" class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">-->
-<!--              minimize-->
-<!--            </span>-->
-<!--            <span (click)="endChat()" class="material-symbols-outlined close-icon" matTooltip="{{ 'button.end-conversation' | translate }}"-->
-<!--                  [matTooltipPosition]="matToolTipPosition!">-->
-<!--              close-->
-<!--            </span>-->
           </div>
-<!--          <div class="widget-header-icon iconOne" mat-raised-button (click)="endChat()">-->
-<!--            <span class="material-symbols-outlined close-icon" matTooltip="{{ 'button.end-conversation' | translate }}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">-->
-<!--              close-->
-<!--            </span>-->
-<!--          </div>-->
+
         </div>
         <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
 
-          <!-- <span class="widget-navbar-divider">|</span> -->
+          
           <span class="widget-navbar-icon material-symbols-outlined"
             matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
               btnTwo: enableFontResize === true,
@@ -1151,27 +1072,7 @@
             }" (click)="changeView('callback')" *ngIf="enabledCallback" [matTooltipPosition]="matToolTipPosition!">
             perm_phone_msg
           </span>
-          <!--           <span
-            class="widget-navbar-icon material-symbols-outlined btnFive"
-            (click)="
-              activeScreenShareView || activeAudioView || activeVideoView
-                ? convertCallView('screenshare')
-                : changeView('screenshare')
-            "
-            *ngIf="enableWebRtc && __appConfig.appConfig.VIDEO"
-            [ngClass]="{
-              'focus-icon': isScreenShareActive && activeVideoView,
-              'away-call-icon': isScreenShareActive && !activeVideoView,
-              'disabled': isSecureWebCall
-            }"
-            matTooltip="Screen Share"
-            [matTooltipPosition]="matToolTipPosition!"
-            [ngStyle]="{
-              right: __appConfig.appConfig.VIDEO ? '70px' : ''
-            }"
-           >
-            present_to_all
-          </span> -->
+          
           <span class="widget-navbar-icon material-symbols-outlined" (click)="
               activeScreenShareView || activeAudioView || activeVideoView
                 ? convertCallView('video')
@@ -1274,9 +1175,7 @@
             <div class="call-session-expired-inner">
               <span class="icon-error"><mat-icon>priority_high</mat-icon></span>
               <h3>The link has expired</h3>
-              <!-- <span class="expire-reason">
-                {{ showInvalidCodeError ? showAuthenticationResponseMessage : '' }}
-              </span> -->
+              
             </div>
           </div>
 
@@ -1609,12 +1508,7 @@
                     </div>
                     <!--              Securelink -->
 
-                    <!-- <div class="s-link quoted-message-url" (click)="isSecureLinkExpired = true">
-                      <span class="video-call-detail"><mat-icon>videocam</mat-icon> Video Call</span>
-                      <span class="video-call-link">join video call
-                      <span class="call-link">https://webrtc.link.com/88901a</span>
-                    </span>
-                    </div> -->
+                    
 
                     <!--              /Securelink -->
                     <!-- Message Type Button -->
@@ -1846,10 +1740,7 @@
             <span>Max Limit Reached</span>
           </div>
           <div class="widget-composer">
-            <!-- <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined emoji-btn"
-              *ngIf="enableEmoji">
-              add_reaction
-            </span> -->
+            
             <textarea class="widget-chat-composer" #messageComposer [attr.data-emoji-picker]="enableEmoji" matInput
               id="messageTextarea" cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
               cdkAutosizeMaxRows="4" placeholder="{{ 'composer-placeholder' | translate }}" #message
@@ -1886,15 +1777,14 @@
               'widget-audio-section': activeAudioView,
               'widget-video-section': activeVideoView || activeScreenShareView
             }">
-            <!-- <video *ngIf="remoteVideoActive" #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
-            <video *ngIf="localVideoActive" #localVideo id="localVideo" autoplay playsinline class="localVideo"></video> -->
+            
             <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
-            <!-- <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video> -->
+           
 
              <!-- test  div start -->
             <div class="video-container">
               <!-- Remote video when visible -->
-               <!-- *ngIf="!remoteStreamStatus"  -->
+              
               <video #remoteVideo id="remoteVideo" autoplay playsinline
                 class="remoteVideo"></video>
 
@@ -1904,9 +1794,7 @@
               </div>
 
               <!-- Optional fallback message -->
-              <!-- <div class="unsupported-msg">
-                {{ 'error.html5-not-supported' | translate }}
-              </div> -->
+             
             </div>
 
             <!-- test div end -->
@@ -1945,11 +1833,7 @@
                     present_to_all
                   </span>
                 </div>
-                <!-- <div class="control-btn">
-                  <span class="material-symbols-outlined">
-                    videocam
-                  </span>
-                </div> -->
+                
                 <div class="control-btn" [ngClass]="{
                     'end-call': isVideoHide,
                     'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
@@ -2263,10 +2147,7 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon">
-<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">-->
-<!--              minimize-->
-<!--            </span>-->
+
               <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                 <mat-icon>remove</mat-icon>
               </button>
@@ -2313,10 +2194,6 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon">
-<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">-->
-<!--              minimize-->
-<!--            </span>-->
               <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                 <mat-icon>remove</mat-icon>
               </button>
@@ -2377,10 +2254,7 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon">
-<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">-->
-<!--              minimize-->
-<!--            </span>-->
+
               <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                 <mat-icon>remove</mat-icon>
               </button>

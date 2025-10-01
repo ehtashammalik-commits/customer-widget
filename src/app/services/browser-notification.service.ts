@@ -8,7 +8,7 @@ export class BrowserNotificationService {
   @ViewChild('myFileInput')
   myInputVariable!: ElementRef;
 
-  constructor(private appConfig: ConfigService) {}
+  constructor(private readonly appConfig: ConfigService) {}
 
   notify(cimMessage: any) {
     if (
@@ -43,43 +43,45 @@ export class BrowserNotificationService {
 
   playSound() {
     try {
-      var audioElement: any = document.getElementById('soundNotif');
+      let audioElement: any = document.getElementById('soundNotif');
       audioElement.play();
     } catch (error) {
       console.error('[playSound] unable to play sound ', error);
     }
   }
 
-  openBrowserNotification(head: any, message: any) {
-    if (!Notification) {
-      console.log('Browser does not support notifications.');
-      return;
-    } else {
-      // check if permission is already granted
-      if (Notification.permission === 'granted') {
-        // show notification here
-        var notify = new Notification(head, {
-          icon: '/widget-assets/images/chat.svg', // Add the path to your icon
+  openBrowserNotification(head: string, message: string): Promise<void> {
+    return new Promise((resolve) => {
+      if (!('Notification' in window)) {
+        console.log('Browser does not support notifications.');
+        resolve();
+        return;
+      }
+
+      const showNotification = () => {
+        new Notification(head, {
+          icon: '/widget-assets/images/chat.svg',
           body: message,
         });
+      };
+
+      if (Notification.permission === 'granted') {
+        showNotification();
+        resolve();
       } else {
-        // request permission from user
         Notification.requestPermission()
-          .then(function (p) {
-            if (p === 'granted') {
-              // show notification here
-              var notify = new Notification(head, {
-                icon: '/widget-assets/images/chat.svg', // Add the path to your icon
-                body: message,
-              });
+          .then((permission) => {
+            if (permission === 'granted') {
+              showNotification();
             } else {
               console.log('User blocked notifications.');
             }
           })
-          .catch(function (err) {
+          .catch((err) => {
             console.error('Error requesting notification permission:', err);
-          });
+          })
+          .finally(() => resolve());
       }
-    }
+    });
   }
 }
