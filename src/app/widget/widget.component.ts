@@ -3886,60 +3886,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         return 'unknown';
     }
   }
-
-  sanitizeFileUrl(fileName: string, fileUrl: string): SafeUrl {
-    const fileExtension = fileName.split('.').pop()?.toLowerCase();
-
-    if (!fileExtension) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Default sanitization
-    }
-
-    const imageExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'svg'];
-    const documentExtensions = ['pdf', 'doc', 'docx', 'ppt', 'txt', 'json'];
-    const audioExtensions = ['mp3', 'wav', 'ogg'];
-    const videoExtensions = ['mp4', 'webm', 'avi'];
-    const textExtensions = ['txt', 'log', 'csv']; // For text file previews
-    const zipExtensions = ['zip', 'rar', 'tar', '7z']; // Zip or archive files
-    const executableExtensions = ['exe', 'bat', 'sh']; // Executable or script files
-
-    // Check for image file
-    if (imageExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for image URLs
-    }
-
-    // Check for document file
-    if (documentExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustResourceUrl(fileUrl); // Safe for document resource URLs
-    }
-
-    // Check for audio file
-    if (audioExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for audio URLs
-    }
-
-    // Check for video file
-    if (videoExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for video URLs
-    }
-
-    // Handle text files (e.g. .txt, .log)
-    if (textExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for text files, or display them
-    }
-
-    // Handle zip or archive files
-    if (zipExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Offer for download instead
-    }
-
-    // Handle executable files (don't show them)
-    if (executableExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Return safe URL, but don't open them in browser
-    }
-
-    // If no match, just return as a normal URL (fallback)
-    return this.sanitizer.bypassSecurityTrustUrl(fileUrl);
-  }
   isErrorExist(
     sectionIndex: number,
     attributeIndex: number,
