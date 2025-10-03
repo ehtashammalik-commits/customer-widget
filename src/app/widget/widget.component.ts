@@ -1764,14 +1764,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         switch (event.type) {
           case 'CHANNEL_SESSION_ENDED':
           case 'CHANNEL_SESSION_EXPIRED':
-          case 'SOCKET_DISCONNECTED':
-            if (event.data == 'io server disconnect') {
-              localStorage.removeItem('user');
-              localStorage.removeItem('formValidations');
-              if (messageType !== 'survey') {
-                this.clearSession();
-              }
-              this.composerDisable()
+            if (messageType !== 'survey') {
+              this.clearSession();
+            } else {
+              this.storageService.removeItem('user', this.storageType);
+              this.isChatActive = false;
             }
             this.composerDisable();
             break;
@@ -1789,6 +1786,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               'localStorage',
             );
             this.changeScreen('chat');
+            this.composerEnable();
             console.log(
               '[SOCKET_RECONNECTED] ==> Chat Resume event response:',
               this.customerData,
@@ -1826,7 +1824,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               event.data,
             );
             this.isChatActive = true;
-            this.isComposerDisable = false;
             this.preChatFormLoader = false;
             this.changeScreen('chat');
             this.conversationId = event.data.history[0].header.conversationId;
@@ -1837,7 +1834,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             );
             event.data.history &&
               this.handleResumedMessages(event.data.history);
-            this.scrollToBottom();
+            this.composerEnable();
             break;
           case 'CHANNEL_SESSION_STARTED':
             this.isChatActive = true;
@@ -2251,8 +2248,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.renderer.setProperty(messageRef, 'value', '');
       this.isComposerDisable = true;
     }
+  }
 
     // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
+
+  composerEnable() {
+    console.log('message element is ', this.messageElement);
+    const messageRef: any = this.messageElement?.nativeElement;
+    if (messageRef) {
+      this.renderer.removeAttribute(messageRef, 'disabled');
+      this.renderer.setAttribute(
+        messageRef,
+        'placeholder',
+        'Type message here ...'
+      );
+      this.isComposerDisable = false;
+    }
   }
 
   handleResumedMessages(cimMessages: any[]) {
