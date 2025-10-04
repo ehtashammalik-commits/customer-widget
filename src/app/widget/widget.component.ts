@@ -2463,6 +2463,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         } else {
           this.snackBar.open(files[i].name + ' unsupported type', 'X', {
             panelClass: 'custom-snackbar',
+            duration: 3000,
           });
           this.removeUploadFile();
         }
@@ -3749,6 +3750,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         console.log('fileExtension not allowed', fileExtension);
         this.snackBar.open("File extension not allowed'", 'X', {
           panelClass: 'custom-snackbar',
+          duration: 3000
         });
 
         return;
@@ -3819,7 +3821,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       reader.readAsText(file);
     } else {
       reader.onload = (e: ProgressEvent<FileReader>) => {
-        const fileResult = e.target?.result as string;
+        const blobUrl = URL.createObjectURL(file);
         const isImage = file.type.startsWith('image/');
 
         if (!this.fileHistory) this.fileHistory = {};
@@ -3827,20 +3829,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
         this.fileHistory[key] = { isImage };
 
-        if (isImage) {
-          this.filePreviewUrl[key] =
-            this.sanitizer.bypassSecurityTrustUrl(fileResult);
-        } else {
-          this.filePreviewUrl[key] = this.sanitizeFileContent(file, fileResult);
-        }
+        this.filePreviewUrl[key] = this.sanitizer.bypassSecurityTrustUrl(blobUrl);
       };
       reader.readAsDataURL(file);
     }
-  }
-
-  sanitizeFileContent(file: File, fileResult: string): SafeUrl {
-    // All data URLs use bypassSecurityTrustUrl
-    return this.sanitizer.bypassSecurityTrustUrl(fileResult);
   }
 
   clearFile(
@@ -4009,6 +4001,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         (error: any) => {
           this.snackBar.open(error.errorMessage, 'X', {
             panelClass: 'custom-snackbar',
+            duration: 3000
           });
           this.resetFileValidation(event, additionalText);
         },
@@ -4036,6 +4029,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
           this.snackBar.open('File uploaded successfully', 'X', {
             panelClass: 'custom-snackbar',
+            duration: 3000
           });
 
           this.isFileUploading[controlName] = false;
@@ -4045,6 +4039,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log(error);
           this.snackBar.open(error.errorMessage, 'X', {
             panelClass: 'custom-snackbar',
+            duration: 3000
           });
           this.isFileUploading[controlName] = false;
         },
