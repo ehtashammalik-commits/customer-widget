@@ -358,7 +358,11 @@ describe('WidgetComponent', () => {
     });
 
     it('should handle SOCKET_RECONNECTED', () => {
-      const event = { id: 1, type: 'SOCKET_RECONNECTED', data: { serviceIdentifier: 's', channelCustomerIdentifier: 'c' } };
+      const event = { 
+        id: 1, 
+        type: 'SOCKET_RECONNECTED', 
+        data: { auth: { serviceIdentifier: 's', channelCustomerIdentifier: 'c' } } 
+      };
       component.customerData = {};
       component.eventListener(event);
       expect(mockSdk.onChatResumed).toHaveBeenCalledWith('s', 'c');

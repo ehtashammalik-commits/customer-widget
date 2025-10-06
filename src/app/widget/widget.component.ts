@@ -1649,12 +1649,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private handleSocketReconnected(event: any) {
     console.log('[SOCKET_RECONNECTED] ==> Chat Resume Request Sent:', event.data);
+
     this.sdk.onChatResumed(
-      event.data.serviceIdentifier,
-      event.data.channelCustomerIdentifier,
+      event.data.auth.serviceIdentifier,
+      event.data.auth.channelCustomerIdentifier,
     );
     this.changeScreen('chat');
     console.log('[SOCKET_RECONNECTED] ==> Chat Resume event response:', this.customerData);
+    this.enableComposer();
   }
 
   private handleSocketConnected() {
@@ -1684,9 +1686,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private handleConversationResumed(event: any) {
     console.log('[CONVERSATION_RESUMED] ==> Chat Resumed Response:', event.data);
     this.isChatActive = true;
-    this.isComposerDisable = false;
     this.preChatFormLoader = false;
     this.changeScreen('chat');
+    this.enableComposer();
 
     this.conversationId = event.data.history[0].header.conversationId;
     this.storageService.setItem(
@@ -1932,6 +1934,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       );
       this.renderer.setProperty(messageRef, 'value', '');
       this.isComposerDisable = true;
+    }
+
+    // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
+  }
+
+
+  enableComposer() {  
+    console.log('message element is ', this.messageElement);
+    const messageRef: any = this.messageElement?.nativeElement;
+    if (messageRef) {
+      this.renderer.removeAttribute(messageRef, 'disabled');
+      this.renderer.setAttribute(
+        messageRef,
+        'placeholder',
+        'Type message here ...',
+      );
+      this.renderer.setProperty(messageRef, 'value', '');
+      this.isComposerDisable = false;
     }
 
     // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
@@ -2443,6 +2463,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         } else {
           this.snackBar.open(files[i].name + ' unsupported type', 'X', {
             panelClass: 'custom-snackbar',
+            duration: 3000,
           });
           this.removeUploadFile();
         }
@@ -3729,6 +3750,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         console.log('fileExtension not allowed', fileExtension);
         this.snackBar.open("File extension not allowed'", 'X', {
           panelClass: 'custom-snackbar',
+          duration: 3000
         });
 
         return;
@@ -3799,7 +3821,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       reader.readAsText(file);
     } else {
       reader.onload = (e: ProgressEvent<FileReader>) => {
-        const fileResult = e.target?.result as string;
+        const blobUrl = URL.createObjectURL(file);
         const isImage = file.type.startsWith('image/');
 
         if (!this.fileHistory) this.fileHistory = {};
@@ -3807,20 +3829,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
         this.fileHistory[key] = { isImage };
 
-        if (isImage) {
-          this.filePreviewUrl[key] =
-            this.sanitizer.bypassSecurityTrustUrl(fileResult);
-        } else {
-          this.filePreviewUrl[key] = this.sanitizeFileContent(file, fileResult);
-        }
+        this.filePreviewUrl[key] = this.sanitizer.bypassSecurityTrustUrl(blobUrl);
       };
       reader.readAsDataURL(file);
     }
-  }
-
-  sanitizeFileContent(file: File, fileResult: string): SafeUrl {
-    // All data URLs use bypassSecurityTrustUrl
-    return this.sanitizer.bypassSecurityTrustUrl(fileResult);
   }
 
   clearFile(
@@ -3865,60 +3877,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       default:
         return 'unknown';
     }
-  }
-
-  sanitizeFileUrl(fileName: string, fileUrl: string): SafeUrl {
-    const fileExtension = fileName.split('.').pop()?.toLowerCase();
-
-    if (!fileExtension) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Default sanitization
-    }
-
-    const imageExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'svg'];
-    const documentExtensions = ['pdf', 'doc', 'docx', 'ppt', 'txt', 'json'];
-    const audioExtensions = ['mp3', 'wav', 'ogg'];
-    const videoExtensions = ['mp4', 'webm', 'avi'];
-    const textExtensions = ['txt', 'log', 'csv']; // For text file previews
-    const zipExtensions = ['zip', 'rar', 'tar', '7z']; // Zip or archive files
-    const executableExtensions = ['exe', 'bat', 'sh']; // Executable or script files
-
-    // Check for image file
-    if (imageExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for image URLs
-    }
-
-    // Check for document file
-    if (documentExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustResourceUrl(fileUrl); // Safe for document resource URLs
-    }
-
-    // Check for audio file
-    if (audioExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for audio URLs
-    }
-
-    // Check for video file
-    if (videoExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for video URLs
-    }
-
-    // Handle text files (e.g. .txt, .log)
-    if (textExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Safe for text files, or display them
-    }
-
-    // Handle zip or archive files
-    if (zipExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Offer for download instead
-    }
-
-    // Handle executable files (don't show them)
-    if (executableExtensions.includes(fileExtension)) {
-      return this.sanitizer.bypassSecurityTrustUrl(fileUrl); // Return safe URL, but don't open them in browser
-    }
-
-    // If no match, just return as a normal URL (fallback)
-    return this.sanitizer.bypassSecurityTrustUrl(fileUrl);
   }
   isErrorExist(
     sectionIndex: number,
@@ -4043,6 +4001,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         (error: any) => {
           this.snackBar.open(error.errorMessage, 'X', {
             panelClass: 'custom-snackbar',
+            duration: 3000
           });
           this.resetFileValidation(event, additionalText);
         },
@@ -4070,6 +4029,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
           this.snackBar.open('File uploaded successfully', 'X', {
             panelClass: 'custom-snackbar',
+            duration: 3000
           });
 
           this.isFileUploading[controlName] = false;
@@ -4079,6 +4039,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log(error);
           this.snackBar.open(error.errorMessage, 'X', {
             panelClass: 'custom-snackbar',
+            duration: 3000
           });
           this.isFileUploading[controlName] = false;
         },
