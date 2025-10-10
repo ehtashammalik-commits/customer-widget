@@ -1834,6 +1834,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           }
         }
       }
+
+      if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
+        let fullName = this.getAgentDisplayName(
+          cimMessage.header.sender.additionalDetail,
+        );
+        if (!this.isUsernameEnabled) {
+          cimMessage.header.sender.senderName = fullName;
+        }
+      }
+
       if (
         cimMessage.header.intent &&
         cimMessage.header.intent.toLowerCase() === 'update'
@@ -1853,6 +1863,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       ) {
         clearTimeout(this.typingIndicatorTimer);
         this.typingIndicatorTimer = null;
+
+        let fullName = this.getAgentDisplayName(
+          cimMessage.header.sender.additionalDetail,
+        );
+        if (!this.isUsernameEnabled) {
+          cimMessage.header.sender.senderName = fullName;
+        }
       }
 
       if (cimMessage.body.type.toLowerCase() == 'notification') {
@@ -1887,15 +1904,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser.username =
               fullName;
           }
-        }
-      }
-
-      if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
-        let fullName = this.getAgentDisplayName(
-          cimMessage.header.sender.additionalDetail,
-        );
-        if (!this.isUsernameEnabled) {
-          cimMessage.header.sender.senderName = fullName;
         }
       }
 
@@ -1972,6 +1980,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             }
           });
         }
+
+        if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
+          let fullName = this.getAgentDisplayName(
+            cimMessage.header.sender.additionalDetail,
+          );
+          if (!this.isUsernameEnabled) {
+            cimMessage.header.sender.senderName = fullName;
+          }
+        }
         if (
           cimMessage.header.intent &&
           cimMessage.header.intent.toLowerCase() === 'update'
@@ -1984,13 +2001,56 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.processSeenMessages();
         this.scrollToBottom();
       } else {
+
+        if (cimMessage.body.type.toLowerCase() == 'notification') {
+          if (
+            cimMessage.body.notificationData.data.agentParticipant &&
+            cimMessage.body.notificationData.data.agentParticipant.participant &&
+            cimMessage.body.notificationData.data.agentParticipant.participant
+              .keycloakUser
+          ) {
+            let fullName = this.getAgentDisplayName(
+              cimMessage.body.notificationData.data.agentParticipant.participant
+                .keycloakUser,
+            );
+          if (!this.isUsernameEnabled) {
+            cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser.username =
+              fullName;
+          }
+        }
+
+        if (
+          cimMessage.body.notificationData.data.conversationParticipant &&
+          cimMessage.body.notificationData.data.conversationParticipant
+            .participant &&
+          cimMessage.body.notificationData.data.conversationParticipant
+            .participant.keycloakUser
+        ) {
+          let fullName = this.getAgentDisplayName(
+            cimMessage.body.notificationData.data.conversationParticipant
+              .participant.keycloakUser,
+          );
+          if (!this.isUsernameEnabled) {
+            cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser.username =
+              fullName;
+          }
+        }
+      }
+
         if (
           cimMessage.body.type.toLowerCase() != 'notification' &&
           cimMessage.header.sender.type.toLowerCase() == 'agent'
         ) {
           clearTimeout(this.typingIndicatorTimer);
           this.typingIndicatorTimer = null;
+          let fullName = this.getAgentDisplayName(
+            cimMessage.header.sender.additionalDetail,
+          );
+          if (!this.isUsernameEnabled) {
+            cimMessage.header.sender.senderName = fullName;
+         }
         }
+
         if (
           cimMessage.header.intent &&
           cimMessage.header.intent.toLowerCase() === 'update'
