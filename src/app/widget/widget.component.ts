@@ -1636,14 +1636,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               event.data,
             );
             this.sdk.onChatResumed(
-              event.data.serviceIdentifier,
-              event.data.channelCustomerIdentifier,
+              event.data.auth.serviceIdentifier,
+              event.data.auth.channelCustomerIdentifier,
+
             );
             let error = this.storageService.removeItem(
               'widget-error',
               'localStorage',
             );
             this.changeScreen('chat');
+            this.enableComposer();
             console.log(
               '[SOCKET_RECONNECTED] ==> Chat Resume event response:',
               this.customerData,
@@ -1681,9 +1683,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               event.data,
             );
             this.isChatActive = true;
-            this.isComposerDisable = false;
             this.preChatFormLoader = false;
             this.changeScreen('chat');
+            this.enableComposer();
             this.conversationId = event.data.history[0].header.conversationId;
             this.storageService.setItem(
               'conversationId',
@@ -1692,7 +1694,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             );
             event.data.history &&
               this.handleResumedMessages(event.data.history);
-            this.scrollToBottom();
             break;
           case 'CHANNEL_SESSION_STARTED':
             this.isChatActive = true;
@@ -1761,6 +1762,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       console.error('Error on establishing connection: ', error);
     }
   }
+
+  enableComposer() {  
+    console.log('message element is ', this.messageElement);
+    const messageRef: any = this.messageElement?.nativeElement;
+    if (messageRef) {
+      this.renderer.removeAttribute(messageRef, 'disabled');
+      this.renderer.setAttribute(
+        messageRef,
+        'placeholder',
+        'Type message here ...',
+      );
+      this.renderer.setProperty(messageRef, 'value', '');
+      this.isComposerDisable = false;
+    }
+
+    // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
+  }
+
 
   handleCimMessage(cimMessage: any) {
     if (
