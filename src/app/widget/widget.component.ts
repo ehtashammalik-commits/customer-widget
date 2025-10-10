@@ -507,7 +507,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.clearSession();
           }
         } else if (data.isChatAvailable == false) {
-          this.storageService.removeItem('widget-error', 'localStorage');
           this.clearSession();
         }
         this.scrollToBottom();
@@ -1630,32 +1629,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             }
             this.composerDisable();
             break;
-          case 'SOCKET_RECONNECTED':
-            console.log(
-              '[SOCKET_RECONNECTED] ==> Chat Resume Request Sent: ',
-              event.data,
-            );
-            this.sdk.onChatResumed(
-              event.data.auth.serviceIdentifier,
-              event.data.auth.channelCustomerIdentifier,
-
-            );
-            let error = this.storageService.removeItem(
-              'widget-error',
-              'localStorage',
-            );
-            this.changeScreen('chat');
-            this.enableComposer();
-            console.log(
-              '[SOCKET_RECONNECTED] ==> Chat Resume event response:',
-              this.customerData,
-            );
-            break;
           case 'SOCKET_CONNECTED':
             console.log(
-              '[SOCKET_CONNECTED] ==> New Connection Request Response:',
+              '[SOCKET_CONNECTED] ==> Connection Request Response:',
               event.data,
             );
+            
             if (this.eventTriggerType === 'startChat') {
               this.chatPayLoad = {
                 type: 'CHAT_REQUESTED',
@@ -1670,13 +1649,28 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               console.log('New Chat Start Request Sent');
             } else if (this.eventTriggerType === '') {
               console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
-              this.sdk.onChatResumed(
-                this.customerData.serviceIdentifier,
-                this.customerData.channelCustomerIdentifier,
-              );
+              if (this.customerData) {
+                this.sdk.onChatResumed(
+                  this.customerData.serviceIdentifier,
+                  this.customerData.channelCustomerIdentifier,
+                );
+              } else {
+                if (event.data && event.data.auth) {
+                  this.sdk.onChatResumed(
+                    event.data.auth.serviceIdentifier,
+                    event.data.auth.channelCustomerIdentifier,
+                  );
+                }
+                  console.log(
+                  '[SOCKET_CONNECTED] ==> Chat Resume event response:',
+                  this.customerData,
+                );
+              }
             }
             this.changeScreen('chat');
+            this.enableComposer();
             break;
+          
           case 'CONVERSATION_RESUMED':
             console.log(
               '[CONVERSATION_RESUMED] ==> Chat Resumed Response:',
@@ -2551,7 +2545,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.channelCustomerIdentifier,
       );
     } else {
-      this.storageService.removeItem('widget-error', 'localStorage');
       this.changeScreen('widget');
     }
   }
