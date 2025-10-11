@@ -535,7 +535,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.clearSession();
           }
         } else {
-          this.storageService.removeItem('widget-error', 'localStorage');
           this.clearSession();
         }
         this.scrollToBottom();
@@ -1589,12 +1588,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.handleChannelSessionEnd(messageType);
             break;
 
-          case 'SOCKET_RECONNECTED':
-            this.handleSocketReconnected(event);
-            break;
+          // case 'SOCKET_RECONNECTED':
+          //   this.handleSocketReconnected(event);
+          //   break;
 
           case 'SOCKET_CONNECTED':
-            this.handleSocketConnected();
+            this.handleSocketConnected(event);
             break;
 
           case 'CONVERSATION_RESUMED':
@@ -1647,25 +1646,27 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.composerDisable();
   }
 
-  private handleSocketReconnected(event: any) {
-    console.log('[SOCKET_RECONNECTED] ==> Chat Resume Request Sent:', event.data);
+  // private handleSocketReconnected(event: any) {
+  //   console.log('[SOCKET_RECONNECTED] ==> Chat Resume Request Sent:', event.data);
 
-    this.sdk.onChatResumed(
-      event.data.auth.serviceIdentifier,
-      event.data.auth.channelCustomerIdentifier,
-    );
-    this.changeScreen('chat');
-    console.log('[SOCKET_RECONNECTED] ==> Chat Resume event response:', this.customerData);
-    this.enableComposer();
-  }
+  //   this.sdk.onChatResumed(
+  //     event.data.auth.serviceIdentifier,
+  //     event.data.auth.channelCustomerIdentifier,
+  //   );
+  //   this.changeScreen('chat');
+  //   console.log('[SOCKET_RECONNECTED] ==> Chat Resume event response:', this.customerData);
+  //   this.enableComposer();
+  // }
 
-  private handleSocketConnected() {
-    console.log('[SOCKET_CONNECTED] ==> New Connection Request Response:', this.customerData);
+  private handleSocketConnected(event?: any) {
+    console.log('[SOCKET_CONNECTED] ==> Connection Request Response:', this.customerData);
+
     if (this.eventTriggerType === 'startChat') {
       this.chatPayLoad = {
         type: 'CHAT_REQUESTED',
         data: this.customerData,
       };
+
       this.sdk.sendChatRequest(this.chatPayLoad);
 
       if (this.enabledWebhook) {
@@ -1673,15 +1674,36 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
 
       console.log('New Chat Start Request Sent');
-    } else if (!this.eventTriggerType) {
+    } 
+    else if (this.eventTriggerType === '') {
       console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
-      this.sdk.onChatResumed(
-        this.customerData.serviceIdentifier,
-        this.customerData.channelCustomerIdentifier,
-      );
+
+      if (this.customerData) {
+        this.sdk.onChatResumed(
+          this.customerData.serviceIdentifier,
+          this.customerData.channelCustomerIdentifier,
+        );
+      } 
+      else {
+        if (event?.data?.auth) {
+          this.sdk.onChatResumed(
+            event.data.auth.serviceIdentifier,
+            event.data.auth.channelCustomerIdentifier,
+          );
+        }
+
+        console.log(
+          '[SOCKET_CONNECTED] ==> Chat Resume event response:',
+          this.customerData,
+        );
+      }
     }
+
     this.changeScreen('chat');
+    this.enableComposer();
   }
+
+  
 
   private handleConversationResumed(event: any) {
     console.log('[CONVERSATION_RESUMED] ==> Chat Resumed Response:', event.data);
@@ -1725,14 +1747,21 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private handleSocketDisconnected(event: any, messageType: string) {
     console.log('event response:', event.data);
-    if (messageType !== 'survey') {
-      this.cimMessage = [];
-      this.clearMessageData();
-      this.isChatActive = false;
-      this.composerDisable();
-      this.changeScreen('end');
+
+    if (event.data.includes('server')) {
+      if (messageType !== 'survey') {
+        this.cimMessage = [];
+        this.clearMessageData();
+        this.isChatActive = false;
+        this.composerDisable();
+        this.changeScreen('end');
+      }
+    } 
+    else {
+      this.changeScreen('error');
     }
   }
+
 
   private handleSocketReplaced(event: any) {
     console.log('event response:', event.data);
@@ -1779,7 +1808,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     if (this.isPlainMessage(type, senderType)) {
-      this.handlePlainMessage(cimMessage, intent);
+      this.handlePlainMessage(cimMessage, intent, senderType);
       return;
     }
 
@@ -1825,9 +1854,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return type === 'plain' && (senderType === 'agent' || senderType === 'bot');
   }
 
-  private handlePlainMessage(cimMessage: any, intent: string) {
+  private handlePlainMessage(cimMessage: any, intent: string, senderType:string) {
     this.extractSurveyFromPlainMessage(cimMessage);
-
+    if (senderType === 'agent') {
+      this.setAgentName(cimMessage);
+    }
     if (intent === 'update') {
       this.editMessage(cimMessage);
       this.handleMessageReport(cimMessage);
@@ -1853,7 +1884,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleOtherMessages(cimMessage: any, type: string, senderType: string, intent: string) {
-    this.clearTypingIndicatorIfNeeded(type, senderType);
+    this.clearTypingIndicatorIfNeeded(type, senderType, cimMessage);
     this.enrichNotificationWithNames(cimMessage);
 
     if (senderType === 'agent') {
@@ -1868,10 +1899,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  private clearTypingIndicatorIfNeeded(type: string, senderType: string) {
+  private clearTypingIndicatorIfNeeded(type: string, senderType: string, cimMessage: any) {
     if (type !== 'notification' && senderType === 'agent') {
       clearTimeout(this.typingIndicatorTimer);
       this.typingIndicatorTimer = null;
+      this.setAgentName(cimMessage);
     }
   }
 
@@ -1965,13 +1997,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       if (this.isPlainMessage(type, senderType)) {
         this.extractSurveyFromPlainMessage(cimMessage);
+        if (senderType === 'agent') {
+          this.setAgentName(cimMessage);
+        }
         if (intent === 'update') {
           this.editMessage(cimMessage);
         } else {
           this.cimMessage.push(cimMessage);
         }
       } else {
-        this.clearTypingIndicatorIfNeeded(type, senderType);
+        this.clearTypingIndicatorIfNeeded(type, senderType, cimMessage);
+
+        if(type === 'notification' && senderType === 'agent'){
+          this.enrichNotificationWithNames(cimMessage);
+        }
+        if(senderType === 'agent'){
+          this.enrichNotificationWithNames(cimMessage);
+        }
+
         if (intent === 'update') {
           this.editMessage(cimMessage);
         } else {
@@ -2539,7 +2582,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.channelCustomerIdentifier,
       );
     } else {
-      this.storageService.removeItem('widget-error', 'localStorage');
       this.changeScreen('widget');
     }
   }
