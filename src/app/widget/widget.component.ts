@@ -507,7 +507,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.clearSession();
           }
         } else if (data.isChatAvailable == false) {
-          this.storageService.removeItem('widget-error', 'localStorage');
           this.clearSession();
         }
         this.scrollToBottom();
@@ -1630,30 +1629,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             }
             this.composerDisable();
             break;
-          case 'SOCKET_RECONNECTED':
-            console.log(
-              '[SOCKET_RECONNECTED] ==> Chat Resume Request Sent: ',
-              event.data,
-            );
-            this.sdk.onChatResumed(
-              event.data.serviceIdentifier,
-              event.data.channelCustomerIdentifier,
-            );
-            let error = this.storageService.removeItem(
-              'widget-error',
-              'localStorage',
-            );
-            this.changeScreen('chat');
-            console.log(
-              '[SOCKET_RECONNECTED] ==> Chat Resume event response:',
-              this.customerData,
-            );
-            break;
           case 'SOCKET_CONNECTED':
             console.log(
-              '[SOCKET_CONNECTED] ==> New Connection Request Response:',
+              '[SOCKET_CONNECTED] ==> Connection Request Response:',
               event.data,
             );
+            
             if (this.eventTriggerType === 'startChat') {
               this.chatPayLoad = {
                 type: 'CHAT_REQUESTED',
@@ -1668,22 +1649,37 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               console.log('New Chat Start Request Sent');
             } else if (this.eventTriggerType === '') {
               console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
-              this.sdk.onChatResumed(
-                this.customerData.serviceIdentifier,
-                this.customerData.channelCustomerIdentifier,
-              );
+              if (this.customerData) {
+                this.sdk.onChatResumed(
+                  this.customerData.serviceIdentifier,
+                  this.customerData.channelCustomerIdentifier,
+                );
+              } else {
+                if (event.data && event.data.auth) {
+                  this.sdk.onChatResumed(
+                    event.data.auth.serviceIdentifier,
+                    event.data.auth.channelCustomerIdentifier,
+                  );
+                }
+                  console.log(
+                  '[SOCKET_CONNECTED] ==> Chat Resume event response:',
+                  this.customerData,
+                );
+              }
             }
             this.changeScreen('chat');
+            this.enableComposer();
             break;
+          
           case 'CONVERSATION_RESUMED':
             console.log(
               '[CONVERSATION_RESUMED] ==> Chat Resumed Response:',
               event.data,
             );
             this.isChatActive = true;
-            this.isComposerDisable = false;
             this.preChatFormLoader = false;
             this.changeScreen('chat');
+            this.enableComposer();
             this.conversationId = event.data.history[0].header.conversationId;
             this.storageService.setItem(
               'conversationId',
@@ -1692,7 +1688,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             );
             event.data.history &&
               this.handleResumedMessages(event.data.history);
-            this.scrollToBottom();
             break;
           case 'CHANNEL_SESSION_STARTED':
             this.isChatActive = true;
@@ -1720,12 +1715,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
           case 'SOCKET_DISCONNECTED':
             console.log('event response:', event.data);
-            if (messageType !== 'survey') {
-              this.cimMessage = [];
-              this.clearMessageData();
-              this.isChatActive = false;
-              this.composerDisable();
-              this.changeScreen('end');
+            if (event.data.includes('server')) {
+              if (messageType !== 'survey') {
+                this.cimMessage = [];
+                this.clearMessageData();
+                this.isChatActive = false;
+                this.composerDisable();
+                this.changeScreen('end');
+              }
+            } else {
+              this.changeScreen('error');
             }
             break;
           case 'SOCKET_REPLACED':
@@ -1761,6 +1760,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       console.error('Error on establishing connection: ', error);
     }
   }
+
+  enableComposer() {  
+    console.log('message element is ', this.messageElement);
+    const messageRef: any = this.messageElement?.nativeElement;
+    if (messageRef) {
+      this.renderer.removeAttribute(messageRef, 'disabled');
+      this.renderer.setAttribute(
+        messageRef,
+        'placeholder',
+        'Type message here ...',
+      );
+      this.renderer.setProperty(messageRef, 'value', '');
+      this.isComposerDisable = false;
+    }
+
+    // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
+  }
+
 
   handleCimMessage(cimMessage: any) {
     if (
@@ -1817,6 +1834,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           }
         }
       }
+
+      if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
+        let fullName = this.getAgentDisplayName(
+          cimMessage.header.sender.additionalDetail,
+        );
+        if (!this.isUsernameEnabled) {
+          cimMessage.header.sender.senderName = fullName;
+        }
+      }
+
       if (
         cimMessage.header.intent &&
         cimMessage.header.intent.toLowerCase() === 'update'
@@ -1836,6 +1863,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       ) {
         clearTimeout(this.typingIndicatorTimer);
         this.typingIndicatorTimer = null;
+
+        let fullName = this.getAgentDisplayName(
+          cimMessage.header.sender.additionalDetail,
+        );
+        if (!this.isUsernameEnabled) {
+          cimMessage.header.sender.senderName = fullName;
+        }
       }
 
       if (cimMessage.body.type.toLowerCase() == 'notification') {
@@ -1870,15 +1904,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser.username =
               fullName;
           }
-        }
-      }
-
-      if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
-        let fullName = this.getAgentDisplayName(
-          cimMessage.header.sender.additionalDetail,
-        );
-        if (!this.isUsernameEnabled) {
-          cimMessage.header.sender.senderName = fullName;
         }
       }
 
@@ -1955,6 +1980,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             }
           });
         }
+
+        if (cimMessage.header.sender.type.toLowerCase() == 'agent') {
+          let fullName = this.getAgentDisplayName(
+            cimMessage.header.sender.additionalDetail,
+          );
+          if (!this.isUsernameEnabled) {
+            cimMessage.header.sender.senderName = fullName;
+          }
+        }
         if (
           cimMessage.header.intent &&
           cimMessage.header.intent.toLowerCase() === 'update'
@@ -1967,13 +2001,56 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.processSeenMessages();
         this.scrollToBottom();
       } else {
+
+        if (cimMessage.body.type.toLowerCase() == 'notification') {
+          if (
+            cimMessage.body.notificationData.data.agentParticipant &&
+            cimMessage.body.notificationData.data.agentParticipant.participant &&
+            cimMessage.body.notificationData.data.agentParticipant.participant
+              .keycloakUser
+          ) {
+            let fullName = this.getAgentDisplayName(
+              cimMessage.body.notificationData.data.agentParticipant.participant
+                .keycloakUser,
+            );
+          if (!this.isUsernameEnabled) {
+            cimMessage.body.notificationData.data.agentParticipant.participant.keycloakUser.username =
+              fullName;
+          }
+        }
+
+        if (
+          cimMessage.body.notificationData.data.conversationParticipant &&
+          cimMessage.body.notificationData.data.conversationParticipant
+            .participant &&
+          cimMessage.body.notificationData.data.conversationParticipant
+            .participant.keycloakUser
+        ) {
+          let fullName = this.getAgentDisplayName(
+            cimMessage.body.notificationData.data.conversationParticipant
+              .participant.keycloakUser,
+          );
+          if (!this.isUsernameEnabled) {
+            cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser.username =
+              fullName;
+          }
+        }
+      }
+
         if (
           cimMessage.body.type.toLowerCase() != 'notification' &&
           cimMessage.header.sender.type.toLowerCase() == 'agent'
         ) {
           clearTimeout(this.typingIndicatorTimer);
           this.typingIndicatorTimer = null;
+          let fullName = this.getAgentDisplayName(
+            cimMessage.header.sender.additionalDetail,
+          );
+          if (!this.isUsernameEnabled) {
+            cimMessage.header.sender.senderName = fullName;
+         }
         }
+
         if (
           cimMessage.header.intent &&
           cimMessage.header.intent.toLowerCase() === 'update'
@@ -2532,7 +2609,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.channelCustomerIdentifier,
       );
     } else {
-      this.storageService.removeItem('widget-error', 'localStorage');
       this.changeScreen('widget');
     }
   }
