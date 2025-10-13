@@ -19,6 +19,7 @@ describe('TranscriptComponent (unit)', () => {
       ENABLE_TRANSCRIPT_NOTIFICATIONS: true,
       CCM_URL: 'https://example.com/some/path',
       FILE_SERVER_URL: 'https://example.com/file-engine',
+      USERNAME_ENABLED: true,
     },
   };
 
@@ -386,4 +387,79 @@ describe('TranscriptComponent (unit)', () => {
     });
   });
 
+    // -------------------------------
+  // getAgentDisplayName tests
+  // -------------------------------
+  describe('getAgentDisplayName', () => {
+    beforeEach(() => {
+      // reset mock config each time
+      mockConfigService.appConfig.USERNAME_ENABLED = false;
+    });
+
+    it('should return username when USERNAME_ENABLED and username exists', () => {
+      mockConfigService.appConfig.USERNAME_ENABLED = true;
+
+      const user = { username: 'agent123', senderName: 'fallback', firstName: 'John' };
+      const result = component.getAgentDisplayName(user);
+      expect(result).toBe('agent123');
+    });
+
+    it('should return senderName when USERNAME_ENABLED and username is missing', () => {
+      mockConfigService.appConfig.USERNAME_ENABLED = true;
+
+      const user = { senderName: 'senderX' };
+      const result = component.getAgentDisplayName(user);
+      expect(result).toBe('senderX');
+    });
+
+    it('should fallback to "Agent" when USERNAME_ENABLED and both username and senderName missing', () => {
+      mockConfigService.appConfig.USERNAME_ENABLED = true;
+
+      const user = {};
+      const result = component.getAgentDisplayName(user);
+      expect(result).toBe('Agent');
+    });
+
+    it('should return first + last name when USERNAME_ENABLED is false and both present', () => {
+      mockConfigService.appConfig.USERNAME_ENABLED = false;
+
+      const user = { firstName: 'John', lastName: 'Doe' };
+      expect(component.getAgentDisplayName(user)).toBe('John Doe');
+    });
+
+    it('should use additionalDetail names if main ones missing', () => {
+      mockConfigService.appConfig.USERNAME_ENABLED = false;
+
+      const user = { additionalDetail: { firstName: 'Jane', lastName: 'Smith' } };
+      expect(component.getAgentDisplayName(user)).toBe('Jane Smith');
+    });
+
+    it('should return only firstName when lastName missing', () => {
+      mockConfigService.appConfig.USERNAME_ENABLED = false;
+
+      const user = { firstName: 'Solo' };
+      expect(component.getAgentDisplayName(user)).toBe('Solo');
+    });
+
+    it('should return only lastName when firstName missing', () => {
+      mockConfigService.appConfig.USERNAME_ENABLED = false;
+
+      const user = { lastName: 'Lasty' };
+      expect(component.getAgentDisplayName(user)).toBe('Lasty');
+    });
+
+    it('should fallback to username when both names missing', () => {
+      mockConfigService.appConfig.USERNAME_ENABLED = false;
+
+      const user = { username: 'agent007' };
+      expect(component.getAgentDisplayName(user)).toBe('agent007');
+    });
+
+    it('should fallback to "Agent" when all name fields missing', () => {
+      mockConfigService.appConfig.USERNAME_ENABLED = false;
+
+      const user = {};
+      expect(component.getAgentDisplayName(user)).toBe('Agent');
+    });
+  });
 });

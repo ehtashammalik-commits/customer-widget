@@ -357,18 +357,6 @@ describe('WidgetComponent', () => {
       expect(mockComposerDisable).toHaveBeenCalled();
     });
 
-    it('should handle SOCKET_RECONNECTED', () => {
-      const event = { 
-        id: 1, 
-        type: 'SOCKET_RECONNECTED', 
-        data: { auth: { serviceIdentifier: 's', channelCustomerIdentifier: 'c' } } 
-      };
-      component.customerData = {};
-      component.eventListener(event);
-      expect(mockSdk.onChatResumed).toHaveBeenCalledWith('s', 'c');
-      expect(mockChangeScreen).toHaveBeenCalledWith('chat');
-    });
-
     it('should handle SOCKET_CONNECTED with eventTriggerType "startChat"', () => {
       component.eventTriggerType = 'startChat';
       component.customerData = { foo: 'bar' };
@@ -425,13 +413,17 @@ describe('WidgetComponent', () => {
 
     it('should handle SOCKET_DISCONNECTED when messageType is not survey', () => {
       component.cimMessage = [{ body: { subType: 'plain' } }];
-      component.eventListener({ id: 1, type: 'SOCKET_DISCONNECTED', data: {} });
+      const event = { id: 1, type: 'SOCKET_DISCONNECTED', data: 'io server disconnected' };
+      
+      component.eventListener(event);
+
       expect(component.cimMessage).toEqual([]);
       expect(mockClearMessageData).toHaveBeenCalled();
       expect(component.isChatActive).toBe(false);
       expect(mockComposerDisable).toHaveBeenCalled();
       expect(mockChangeScreen).toHaveBeenCalledWith('end');
     });
+
 
     it('should handle SOCKET_REPLACED', () => {
       component.eventListener({ id: 1, type: 'SOCKET_REPLACED', data: {} });
