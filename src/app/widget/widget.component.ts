@@ -1588,10 +1588,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.handleChannelSessionEnd(messageType);
             break;
 
-          // case 'SOCKET_RECONNECTED':
-          //   this.handleSocketReconnected(event);
-          //   break;
-
           case 'SOCKET_CONNECTED':
             this.handleSocketConnected(event);
             break;
@@ -1645,18 +1641,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
     this.composerDisable();
   }
-
-  // private handleSocketReconnected(event: any) {
-  //   console.log('[SOCKET_RECONNECTED] ==> Chat Resume Request Sent:', event.data);
-
-  //   this.sdk.onChatResumed(
-  //     event.data.auth.serviceIdentifier,
-  //     event.data.auth.channelCustomerIdentifier,
-  //   );
-  //   this.changeScreen('chat');
-  //   console.log('[SOCKET_RECONNECTED] ==> Chat Resume event response:', this.customerData);
-  //   this.enableComposer();
-  // }
 
   private handleSocketConnected(event?: any) {
     console.log('[SOCKET_CONNECTED] ==> Connection Request Response:', this.customerData);
