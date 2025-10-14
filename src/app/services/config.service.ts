@@ -24,7 +24,8 @@ export class ConfigService {
     this.appConfig = await lastValueFrom(appConfig$);
 
     //#####################################################################################################################
-    const currentFQDN = window.location.hostname;
+    // const currentFQDN = window.location.hostname;
+    const currentFQDN = "projectdev.expertflow.com"
     console.log("Current FQDN:", currentFQDN);
 
     for (let key of this.configsToOverride) {
