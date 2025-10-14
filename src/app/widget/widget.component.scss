@@ -1336,9 +1336,9 @@ button.close-widget-wrapper {
     border-radius: 10px;
     border: none;
     height: 40px;
-    padding: 0 30px;
+    padding: 10px 30px;
     outline: none;
-    width: calc(100% - 60px) !important;
+    width: 100%;
     font-size: 13px !important;
     background: #eff2f7;
     color: #3e3e3e;
@@ -1346,7 +1346,6 @@ button.close-widget-wrapper {
     position: absolute;
     bottom: 0;
     left: 0;
-    line-height: 40px;
   }
 
   .send-btn {

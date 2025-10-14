@@ -1778,8 +1778,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               event.data,
             );
             this.sdk.onChatResumed(
-              event.data.serviceIdentifier,
-              event.data.channelCustomerIdentifier,
+              event.data.auth.serviceIdentifier,
+              event.data.auth.channelCustomerIdentifier,
             );
             let error = this.storageService.removeItem(
               'widget-error',
@@ -2883,6 +2883,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     data: { title: string; payload: any },
     originalMessageId: any,
   ) {
+    console.log('Button data is ', data);
     if (data.title.trim() !== '') {
       this.constructCimMessage(
         'PLAIN',
