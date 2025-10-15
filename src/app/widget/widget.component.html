@@ -1660,7 +1660,7 @@
 
 
                       <!-- Number -->
-                      <div *ngSwitchCase="'number'">
+                      <!-- <div *ngSwitchCase="'number'">
                         <label>
                           {{ attribute.label }}
                           <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -1668,7 +1668,25 @@
                         <mat-form-field appearance="outline">
                           <input matInput type="number" [formControlName]="attribute.key" />
                         </mat-form-field>
+                      </div> -->
+
+                      <div *ngSwitchCase="'number'">
+                        <label>
+                          {{ attribute.label }}
+                          <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
+                        <mat-form-field appearance="outline">
+                          <!-- Use text type, but keep numeric restrictions manually -->
+                          <input
+                            matInput
+                            type="text"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            [formControlName]="attribute.key"
+                          />
+                        </mat-form-field>
                       </div>
+
 
                       <!-- Email -->
                       <div *ngSwitchCase="'email'">

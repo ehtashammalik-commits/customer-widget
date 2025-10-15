@@ -1185,7 +1185,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   creatingSectionsforSchema(messageTypeFormValues?, messageType?): any {
 
-
     let formData : any[] = [];
     let formValues: any[] = [];
 
@@ -2054,10 +2053,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       if (cimMessage.body.type.toLowerCase() == 'notification') {
         if (
-          cimMessage.body.notificationData.data.agentParticipant &&
-          cimMessage.body.notificationData.data.agentParticipant.participant &&
-          cimMessage.body.notificationData.data.agentParticipant.participant
-            .keycloakUser
+          cimMessage.body.notificationData.data?.agentParticipant?.participant?.keycloakUser
         ) {
           let fullName = this.getAgentDisplayName(
             cimMessage.body.notificationData.data.agentParticipant.participant
@@ -2070,15 +2066,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
 
         if (
-          cimMessage.body.notificationData.data.conversationParticipant &&
-          cimMessage.body.notificationData.data.conversationParticipant
-            .participant &&
-          cimMessage.body.notificationData.data.conversationParticipant
-            .participant.keycloakUser
+          cimMessage.body?.notificationData?.data?.conversationParticipant?.participant?.keycloakUser
         ) {
           let fullName = this.getAgentDisplayName(
-            cimMessage.body.notificationData.data.conversationParticipant
-              .participant.keycloakUser,
+            cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser,
           );
           if (!this.isUsernameEnabled) {
             cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser.username =
@@ -2293,7 +2284,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   handleResumedMessages(cimMessages: any[]) {
 
-
     cimMessages.forEach((cimMessage) => {
 
       if (cimMessage.body.type?.toLowerCase() === 'form_data') {
@@ -2349,10 +2339,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
         if (cimMessage.body.type.toLowerCase() == 'notification') {
           if (
-            cimMessage.body.notificationData.data.agentParticipant &&
-            cimMessage.body.notificationData.data.agentParticipant.participant &&
-            cimMessage.body.notificationData.data.agentParticipant.participant
-              .keycloakUser
+            cimMessage.body.notificationData?.data?.agentParticipant?.participant?.keycloakUser
           ) {
             let fullName = this.getAgentDisplayName(
               cimMessage.body.notificationData.data.agentParticipant.participant
@@ -2365,15 +2352,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
 
         if (
-          cimMessage.body.notificationData.data.conversationParticipant &&
-          cimMessage.body.notificationData.data.conversationParticipant
-            .participant &&
-          cimMessage.body.notificationData.data.conversationParticipant
-            .participant.keycloakUser
+          cimMessage.body?.notificationData?.data?.conversationParticipant?.participant?.keycloakUser
         ) {
           let fullName = this.getAgentDisplayName(
-            cimMessage.body.notificationData.data.conversationParticipant
-              .participant.keycloakUser,
+            cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser,
           );
           if (!this.isUsernameEnabled) {
             cimMessage.body.notificationData.data.conversationParticipant.participant.keycloakUser.username =
