@@ -633,6 +633,9 @@ button.close-widget-wrapper {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+  &:focus {
+    outline: none;
+  }
 }
 
 .widget-btn:focus .widget-btn:hover {
@@ -741,6 +744,12 @@ button.close-widget-wrapper {
     width: 22px;
     height: 22px;
     margin: 5px 2px;
+    &:focus {
+      outline: none;
+    }
+    &:hover {
+      background: #00000040;
+    }
 
 
     mat-icon {
@@ -1599,10 +1608,14 @@ mat-spinner {
   margin: 4px 4px 0px 4px !important;
   line-height: 13px;
   text-shadow: 0 0 2px black;
+  height: auto;
 
   &:hover {
     background: var(--main-color);
     color: $white-color;
+  }
+  &:disabled {
+    cursor: default;
   }
 }
 
@@ -3570,7 +3583,11 @@ input[type='radio'] {
     height: 32px;
     min-height: 32px;
     line-height: 31px;
-    }
+    &:focus {
+      outline: none;
+    } 
+    
+  }
 
   .carousel-actions a {
     color: var(--main-color);
@@ -3670,14 +3687,17 @@ input[type='radio'] {
     display: flex;
     justify-content: center;
     gap: 2px;
+    flex-direction: column;
 
     button{
       background: var(--main-color);
       color: #fff;
       font-size: 13px;
       max-width: 100%;
-      line-break: anywhere;
       height: auto;
+      line-height: 1.5;
+      min-height: 35px;
+      padding: 6px;
       white-space: pre-line;
       &:focus {
         outline: none;

@@ -137,3 +137,7 @@ body {
     color: #888888;
     }
   }
+
+  .mat-chip.mat-standard-chip.mat-chip-disabled {
+    cursor: default !important;
+}

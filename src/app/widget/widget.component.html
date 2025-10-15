@@ -2236,10 +2236,13 @@
                 accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp,.pptx,.ppt"
                 id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
             </div>
-            <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined send-btn"
-              *ngIf="isTyping" (click)="onSendMessage(messageComposer.value);">
-              send
-            </span>
+            <span
+            class="material-symbols-outlined send-btn"
+            [ngClass]="{'chat-disable': isComposerDisable}"
+            (click)="!isComposerDisable && onSendMessage(messageComposer.value)">
+            send
+          </span>
+
           </div>
         </ng-container>
 
