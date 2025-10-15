@@ -1322,6 +1322,11 @@ button.close-widget-wrapper {
   left: 5px;
   z-index: 999999;
 
+  &.main-composer-area {
+    position: fixed;
+    width: calc(100% - 20px);
+  }
+  
   .emoji-btn {
     position: absolute;
     bottom: 10px;
@@ -1336,16 +1341,14 @@ button.close-widget-wrapper {
     border-radius: 10px;
     border: none;
     height: 40px;
-    padding: 10px 30px;
+    padding: 0 30px;
     outline: none;
     width: 100%;
     font-size: 13px !important;
     background: #eff2f7;
     color: #3e3e3e;
     margin: 0;
-    position: absolute;
-    bottom: 0;
-    left: 0;
+    align-content: center;
   }
 
   .send-btn {
@@ -2208,9 +2211,8 @@ mat-spinner {
 }
 
 .maxLimitError {
-  position: relative;
-  bottom: 75px;
-  left: 225px;
+  position: absolute;
+  top: -17px;
   font-size: 10px;
   color: red;
 }
@@ -3673,11 +3675,10 @@ input[type='radio'] {
       background: var(--main-color);
       color: #fff;
       font-size: 13px;
-      flex: 1;
-      max-width: fit-content;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: pre;
+      max-width: 100%;
+      line-break: anywhere;
+      height: auto;
+      white-space: pre-line;
       &:focus {
         outline: none;
         }

@@ -2208,11 +2208,11 @@
             <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()">close</mat-icon>
           </div>
           <!-- Widget Message Composer -->
-          <div class="maxLimitError" *ngIf="text.length == messageLimit">
+          
+          <div class="widget-composer main-composer-area">
+            <div class="maxLimitError" *ngIf="text.length == messageLimit">
             <span>Max Limit Reached</span>
-          </div>
-          <div class="widget-composer">
-            
+            </div>
             <textarea class="widget-chat-composer" #messageComposer [attr.data-emoji-picker]="enableEmoji" matInput
               id="messageTextarea" cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
               cdkAutosizeMaxRows="4" placeholder="{{ 'composer-placeholder' | translate }}" #message

@@ -18,7 +18,7 @@ export class tagFormatPipe implements PipeTransform {
         ['strike', '~'],
         ['mark', '!'],
       ],
-      { detectLinks: enableDynamicLink, target: "_blank" },
+      { detectLinks: /\bhttps?:\/\/|www\./i.test(value), target: "_blank" },
       { allowXssEscaping: true }
     );
   }
