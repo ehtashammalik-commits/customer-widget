@@ -120,12 +120,7 @@ function eventListeners(callback) {
   this.socket.on('connect', () => {
     if (this.socket.id != undefined) {
       console.log(`you are connected with socket:`, this.socket);
-      let error = localStorage.getItem("widget-error");
-      if (error) {
-        callback({ type: "SOCKET_RECONNECTED", data: this.socket });
-      } else {
         callback({ type: "SOCKET_CONNECTED", data: this.socket });
-      }
     }
   });
   this.socket.on('TOKEN_GENERATED', (data) => {
@@ -187,7 +182,6 @@ function eventListeners(callback) {
 
   this.socket.on('connect_error', (error) => {
     console.log(`unable to establish connection with the server: `, error.message);
-    localStorage.setItem("widget-error", "1");
     callback({ type: "CONNECT_ERROR", data: error });
   });
   this.socket.on('CHAT_ENDED', (data) => {

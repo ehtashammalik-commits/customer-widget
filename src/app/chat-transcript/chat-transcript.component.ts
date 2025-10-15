@@ -235,4 +235,20 @@ export class TranscriptComponent implements OnInit {
       ''
     );
   }
+
+  getAgentDisplayName(keycloakUser: any): string {
+    if (this.__appConfig.appConfig.USERNAME_ENABLED) {
+      return keycloakUser.username || 'Agent';
+    }
+
+    if (keycloakUser.firstName && keycloakUser.lastName) {
+      return `${keycloakUser.firstName} ${keycloakUser.lastName}`;
+    } else if (keycloakUser.firstName) {
+      return keycloakUser.firstName;
+    } else if (keycloakUser.lastName) {
+      return keycloakUser.lastName;
+    } else {
+      return keycloakUser.username || 'Agent';
+    }
+  }
 }
