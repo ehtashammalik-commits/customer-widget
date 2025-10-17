@@ -1856,16 +1856,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
           case 'SOCKET_DISCONNECTED':
             console.log('event response:', event.data);
-            if (event.data.includes('server')) {
-              if (messageType !== 'survey') {
-                this.cimMessage = [];
-                this.clearMessageData();
-                this.isChatActive = false;
-                this.composerDisable();
+            this.isChatActive = false;
+            this.composerDisable();
+            this.eventTriggerType = '';
+            if (messageType !== 'survey') {
+              this.cimMessage = [];
+              this.clearMessageData();
+              if (event.data.includes('server')) {
                 this.changeScreen('end');
+              } else {
+                this.changeScreen('error');
               }
-            } else {
-              this.changeScreen('error');
             }
             break;
           case 'SOCKET_REPLACED':
