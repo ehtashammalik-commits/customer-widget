@@ -2713,7 +2713,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     let header = {
       originalMessageId: null as null | string,
       intent: null as null | string,
-      entities: null as null | string,
+      entities: this.getAdditionalParamsAsEntities(),
       additionalData: {} as any,
       sender: {
         id: '460df46c-adf9-11ed-afa1-0242ac120002',
