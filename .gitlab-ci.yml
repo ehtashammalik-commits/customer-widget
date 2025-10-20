@@ -28,7 +28,7 @@ stages:
   - publish_dockerhub
 
 
-# #+===================Runs on Every Commit and merge requests========================+
+#+===================Runs on Every Commit and merge requests========================+
 node-test:
   stage: test
   when: on_success
