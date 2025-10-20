@@ -357,6 +357,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   isStarRating = true;
   isCarouselView = true;
+  
+  // Additional Schema and Values from Widget Config
+  additionalSchema: any[] = [];
+  additionalValues: any[] = [];
+  additionalValuesMap: { [key: string]: any } = {};
+  
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -469,12 +475,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.callbackFormGroup = this.fb.group({});
 
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe(
-      (configs: { form: string }) => {
-        console.log("SUBSCRIBERS: first conigs", configs)
+      (configs: any) => {
+        console.log("SUBSCRIBERS: Widget configs received", configs);
         this.setWidgetConfigs(configs);
 
         this.loadBrowserLanguage();
         console.log('Widget configurations:', configs);
+        
+        // Log additional schema and values processing
+        if (configs.additionalSchema || configs.additionalValues) {
+          console.log('Processing additional schema and values...');
+          this.changeScreen('widget');
+        }
+
         if (this.enabledCallback) {
           this.sdk.renderCallbackForm(this.callbackConfig.callBackForm);
         }
@@ -503,6 +516,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.formValidations,
             'preChatForm',
           );
+          if (this.getAdditionalValue('AUTO_MAXIMIZE_WIDGET') === true) {
+            this.changeScreen('chatForm');
+          }
         },
       );
     });
@@ -836,6 +852,61 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.webhookUrl = configs.webhook?.webhookUrl;
       this.enabledWebhook = configs.webhook?.enableWebhook;
     }
+
+    // Process additional schema and values
+    this.processAdditionalSchemaAndValues(configs);
+  }
+
+
+  private processAdditionalSchemaAndValues(configs: any): void {
+    // Store additional schema
+    this.additionalSchema = configs.additionalSchema || [];
+    
+    // Store additional values
+    this.additionalValues = configs.additionalValues || [];
+    
+    // Create a map for easy lookup of values by key
+    this.additionalValuesMap = {};
+    if (this.additionalValues && Array.isArray(this.additionalValues)) {
+      this.additionalValues.forEach((item: any) => {
+        if (item.key) {
+          this.additionalValuesMap[item.key] = {
+            type: item.type,
+            value: item.value
+          };
+        }
+      });
+    }
+    
+    console.log('Additional Schema:', this.additionalSchema);
+    console.log('Additional Values:', this.additionalValues);
+    console.log('Additional Values Map:', this.additionalValuesMap);
+  }
+
+  getAdditionalValue(key: string): any {
+    return this.additionalValuesMap[key]?.value || null;
+  }
+
+  getAdditionalValueWithType(key: string): { type: string; value: any } | null {
+    return this.additionalValuesMap[key] || null;
+  }
+
+  hasAdditionalValue(key: string): boolean {
+    return key in this.additionalValuesMap;
+  }
+
+  getAdditionalParamsAsEntities(): any {
+    const entities: any = {};
+    let additionalParamList = this.getAdditionalValue('INPUT_PARAMS_LIST');
+    additionalParamList = additionalParamList ? additionalParamList.split(',').map(item => item.trim()) : [];
+    if (additionalParamList && Array.isArray(additionalParamList)) {
+      additionalParamList.forEach((paramKey: string) => {
+        if (this.hasAdditionalValue(paramKey)) {
+          entities[paramKey] = this.getAdditionalValue(paramKey);
+        }
+      });
+    }
+    return entities;
   }
 
   async onFormMessageTypeSubmit(message: any): Promise<void> {
@@ -1310,6 +1381,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       formId: this.preChatFormId,
       filledBy: 'web-widget',
       attributes: this.convertJsonToArray(preChatFormData),
+      entities: this.getAdditionalParamsAsEntities(),
       createdOn: new Date(),
     };
   }
@@ -1344,7 +1416,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (
           this.storageService.getItem('wrapper-hide', this.storageType) ===
             'true' ||
-          this.__appConfig.appConfig.ADDITIONAL_PANEL !== true
+          this.__appConfig.appConfig.ADDITIONAL_PANEL !== true ||
+          this.getAdditionalValue('HIDE_CALLOUT_PANEL') === true
         ) {
           this.additionalPanel = false;
           this.resizeWidget('icon-view');
@@ -1367,13 +1440,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
         this.fileName = '';
-        if (this.source === 'UApp') {
-          this.additionalPanel = false;
-          this.isIconWidget = false;
-        } else {
-          this.isIconWidget = true;
-          this.resizeWidget('icon-view');
-        }
+        this.isIconWidget = true;
+        this.resizeWidget('icon-view');
         break;
       case 'chat':
         this.additionalPanel = false;
@@ -3089,8 +3157,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.serviceIdentifier,
         parsedUserData.data.channelCustomerIdentifier,
       );
-    } else {
-      this.changeScreen('widget');
+    // } else {
+    //     this.changeScreen('widget');
     }
   }
 

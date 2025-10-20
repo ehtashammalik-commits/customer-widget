@@ -25,7 +25,7 @@
           </div>
         </div>
         <div class="widget-wrapper-content">
-          <p>{{ 'tagline' | translate }}.</p>
+          <p>{{ getAdditionalValue('CALLOUT_MESSAGE') || ('tagline' | translate) }}.</p>
           <button class="widget-color" (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
             {{ 'button.connect-with-us' | translate }}
           </button>
