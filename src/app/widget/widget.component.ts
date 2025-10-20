@@ -986,6 +986,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.serviceIdentifier !== null &&
           this.serviceIdentifier !== undefined
         ) {
+          console.log('Pre Chat Form Data:', this.preChatFormData); 
           let eventPayload = this.getEventPayload(this.preChatFormData);
           console.log('Event Payload: ==>', eventPayload);
           // If Error is false than proceed with the start Chat and user data setting
@@ -1004,6 +1005,28 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     } catch (error) {
       alert('Error while submitting the form');
+    }
+  }
+
+  initializeChatWithRandomIdentifier(): void {
+    try {
+      this.preChatFormData = {
+          "sections": [
+              {
+                  "name": "Test User",
+                  "phone": Math.floor(10000000 + Math.random() * 90000000).toString()
+              }
+          ]
+      }
+      console.log('Pre Chat Form Data:', this.preChatFormData); 
+      let eventPayload = this.getEventPayload(this.preChatFormData);
+      console.log('Event Payload: ==>', eventPayload);
+      // If Error is false than proceed with the start Chat and user data setting
+      if (!eventPayload.error) {
+        this.setUserData(eventPayload.data, 'startChat');
+      }
+    } catch (error) {
+      
     }
   }
 
@@ -1368,7 +1391,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           optionWeightage: option.optionWeightage || null,
           enableStyle: attribute.attributeOptions?.enableStyle || false,
           optionStyle: option.optionStyle || null,
-
         }
       }))
     }
@@ -1461,6 +1483,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.resizeWidget('form-view');
         break;
       case 'chatForm':
+        if (this.getAdditionalValue("PRECHAT_FORM_DISABLED")){
+          this.changeScreen('chat');
+          this.initializeChatWithRandomIdentifier()
+          return;
+        }
         this.preChatFormScreen = true;
         this.callbackFormScreen = false;
         this.webRtcVideoCallScreen = false;
@@ -1472,7 +1499,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatEndScreen = false;
         this.isChatMax = true;
         this.isCallbackMax = false;
-        this.isWebRtcMax = false;
+        this.isWebRtcMax = false;        
         this.resizeWidget('form-view');
 
         break;

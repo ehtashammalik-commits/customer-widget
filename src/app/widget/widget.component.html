@@ -226,7 +226,7 @@
           <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
             <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
             <!-- Custom Widget logo -->
-            <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg"
+            <img class="custom-form-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
               alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
             <!-- Global error message for the form -->
             <div class="fields-validation-error mr-2">
@@ -472,8 +472,8 @@
               </p>
 
               <!-- Custom Widget logo -->
-              <img *ngIf="logoEnabled" class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg"
-                alt="Live Chat" />
+              <!-- <img *ngIf="logoEnabled" class="custom-form-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png" -->
+                <!-- alt="Live Chat" /> -->
 
               <!-- Global error message for the form -->
               <div class="fields-validation-error mr-2">
@@ -1584,7 +1584,7 @@
                         message.header.sender.type == 'AGENT'
                           ? 'user.png'
                           : logoEnabled === true
-                          ? 'custom-logo.svg'
+                          ? 'bot-ava.png'
                           : 'robot-dark.svg'
                       }}" alt="avatar" />
                   </div>
@@ -2852,7 +2852,7 @@
             close
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg"
+          <img class="custom-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
             alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
         </button>
       </div>
@@ -2865,7 +2865,7 @@
             video_call
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg"
+          <img class="custom-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
             alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
         </button>
       </div>
@@ -2888,7 +2888,7 @@
             sms
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg"
+          <img class="custom-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
             alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
         </button>
       </div>
