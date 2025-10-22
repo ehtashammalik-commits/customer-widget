@@ -1733,7 +1733,7 @@
                 <span>{{ file.fileName }}</span>
               </div>
             </div>
-            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()">close</mat-icon>
+            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()" class="remove-all-icon">close</mat-icon>
           </div>
           <!-- Widget Message Composer -->
           <div class="maxLimitError" *ngIf="text.length == messageLimit">

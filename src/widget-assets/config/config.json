@@ -8,7 +8,7 @@
   "AUTHENTICATOR_URL": "https://ux-controls-01.expertflow.com/secure-link",
   "BUSINESSCALENDAR_URL": "https://ux-controls-01.expertflow.com/business-calendar",
   "CX_ACTIVITY": "https://ux-controls-01.expertflow.com/conversation-manager/activities",
-  "CHANNEL_IDENTIFIER": "هاتف",
+  "CHANNEL_IDENTIFIER": "phone",
   "ENABLE_LOGO": false,
   "ADDITIONAL_PANEL": true,
   "VIDEO": true,
