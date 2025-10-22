@@ -1431,7 +1431,7 @@
                       </div>
                     </div>
                     <span class="message msg-1" *ngIf="message.body.type == 'PLAIN'" innerHTML="{{
-                        (message.body.markdownText | tagFormat:enableDynamicLink)
+                        (message.body.markdownText| linkify | tagFormat:enableDynamicLink)
                       }}" [ngStyle]="{
                         'font-size': fontSize.value + 'px',
                         'line-height':
@@ -1495,7 +1495,7 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                        (message.body.markdownText | tagFormat:enableDynamicLink)
+                        (message.body.markdownText| linkify | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -1604,7 +1604,7 @@
                     </div>
 
                     <span class="message" *ngIf="message.body.type == 'PLAIN'" innerHTML="{{
-                      (message.body.markdownText | tagFormat:enableDynamicLink)
+                      (message.body.markdownText| linkify | tagFormat:enableDynamicLink)
                       }}" [ngStyle]="{
                         'font-size': fontSize.value + 'px',
                         'line-height':
@@ -2002,7 +2002,7 @@
                       <span class="structured-btn-heading" innerHTML="{{
                         (message.body.additionalDetails.interactive.header
                                 .text
-                              | tagFormat:enableDynamicLink)
+                              | linkify | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -2016,7 +2016,7 @@
                       <span class="message" innerHTML="{{
                         (message.body.additionalDetails.interactive.body
                                 .text
-                              | tagFormat:enableDynamicLink)
+                              | linkify | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':
@@ -2093,7 +2093,7 @@
                         message.body.type == 'AUDIO'
                       " class="file-message">
                       <span class="message" innerHTML="{{
-                        (message.body.markdownText | tagFormat:enableDynamicLink)
+                        (message.body.markdownText| linkify | tagFormat:enableDynamicLink)
                         }}" [ngStyle]="{
                           'font-size': fontSize.value + 'px',
                           'line-height':

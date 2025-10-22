@@ -18,8 +18,8 @@ export class tagFormatPipe implements PipeTransform {
         ['strike', '~'],
         ['mark', '!'],
       ],
-      { detectLinks: /\bhttps?:\/\/|www\./i.test(value), target: "_blank" },
-      { allowXssEscaping: true }
+      { detectLinks: false, target: "_blank" },
+      { allowXssEscaping: false }
     );
   }
 }
