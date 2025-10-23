@@ -118,7 +118,7 @@ window.addEventListener('message', (event) => {
   }
   if (event.data.state == 'wraper-view') {
     parentSection.style.width = '312px';
-    parentSection.style.height = '290px';
+    parentSection.style.height = '300px';
   }
   if (event.data.state == 'form-view') {
     if (Source == 'UApp') {

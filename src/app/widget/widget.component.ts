@@ -598,12 +598,37 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.loadBrowserLanguage();
     this.setFontFromLocalStorage();
     this.getCalendarEvents();
+    window.addEventListener('message', this.receiveMessage.bind(this), false);
   }
 
   initPrechatform() {
     this.preChatFormGroup = this.fb.group({
       sections: this.fb.array([]),
     });
+  }
+
+  receiveMessage(event: MessageEvent): void {
+    // Check the origin of the message to ensure it comes from a trusted domain
+
+    // Handle the start chat message event
+    if (event.data.action == 'Initialize Chat' && this.isChatActive == false){
+      this.changeScreen('chatForm');
+    } else if (event.data.action == 'Initialize Chat' && this.isChatActive == true){
+      this.changeScreen('chat');
+    } else if (event.data.action == 'Update Input Params'){
+      console.log('Update Input Params:', event.data.inputParams);
+      let inputParams = event.data.inputParams
+      // verify input params is not null or empty
+      if (inputParams != null && Object.keys(inputParams).length > 0){
+        let storedInputParams = this.getAdditionalValue('INPUT_PARAMS') || {};
+        Object.keys(inputParams).forEach(element => {
+          storedInputParams[element] = inputParams[element];
+        });
+        this.setAdditionalValue('INPUT_PARAMS', storedInputParams);
+        console.log('Updated INPUT_PARAMS:', this.getAdditionalValue('INPUT_PARAMS'));
+      }
+    }
+    
   }
 
   async getCalendarEvents() {
@@ -878,6 +903,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       });
     }
     
+    this.additionalValuesMap['INPUT_PARAMS'] = {
+      type: 'object',
+      value: this.getInputParamsAsEntities()
+    };
     console.log('Additional Schema:', this.additionalSchema);
     console.log('Additional Values:', this.additionalValues);
     console.log('Additional Values Map:', this.additionalValuesMap);
@@ -885,6 +914,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   getAdditionalValue(key: string): any {
     return this.additionalValuesMap[key]?.value || null;
+  }
+
+  setAdditionalValue(key: string, value: any): void {
+    if (this.additionalValuesMap[key]) {
+      this.additionalValuesMap[key].value = value;
+    } else {
+      this.additionalValuesMap[key] = { type: typeof value, value: value };
+    }
   }
 
   getAdditionalValueWithType(key: string): { type: string; value: any } | null {
@@ -895,12 +932,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return key in this.additionalValuesMap;
   }
 
-  getAdditionalParamsAsEntities(): any {
+  getInputParamsAsEntities(): any {
     const entities: any = {};
-    let additionalParamList = this.getAdditionalValue('INPUT_PARAMS_LIST');
-    additionalParamList = additionalParamList ? additionalParamList.split(',').map(item => item.trim()) : [];
-    if (additionalParamList && Array.isArray(additionalParamList)) {
-      additionalParamList.forEach((paramKey: string) => {
+    let inputParamList = this.getAdditionalValue('INPUT_PARAMS_LIST');
+    inputParamList = inputParamList ? inputParamList.split(',').map(item => item.trim()) : [];
+    if (inputParamList && Array.isArray(inputParamList)) {
+      inputParamList.forEach((paramKey: string) => {
         if (this.hasAdditionalValue(paramKey)) {
           entities[paramKey] = this.getAdditionalValue(paramKey);
         }
@@ -1403,7 +1440,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       formId: this.preChatFormId,
       filledBy: 'web-widget',
       attributes: this.convertJsonToArray(preChatFormData),
-      entities: this.getAdditionalParamsAsEntities(),
+      entities: this.getAdditionalValue('INPUT_PARAMS'),
       createdOn: new Date(),
     };
   }
@@ -1439,7 +1476,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.storageService.getItem('wrapper-hide', this.storageType) ===
             'true' ||
           this.__appConfig.appConfig.ADDITIONAL_PANEL !== true ||
-          this.getAdditionalValue('HIDE_CALLOUT_PANEL') === true
+          this.getAdditionalValue('HIDE_CALLOUT_PANEL')
         ) {
           this.additionalPanel = false;
           this.resizeWidget('icon-view');
@@ -1455,15 +1492,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.webRtcVideoCallScreen = false;
         this.callbackResponseScreen = false;
         this.widgetChatScreen = false;
-        this.isIconWidget = true;
         this.chatError = false;
         this.chatEndScreen = false;
         this.isChatMax = false;
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
         this.fileName = '';
-        this.isIconWidget = true;
-        this.resizeWidget('icon-view');
+        if(this.getAdditionalValue('HIDE_WIDGET_ICON')){
+          this.isIconWidget = false;
+        } else{
+          this.isIconWidget = true;
+        }
         break;
       case 'chat':
         this.additionalPanel = false;
@@ -1472,7 +1511,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.webRtcVideoCallScreen = false;
         this.callbackResponseScreen = false;
         this.widgetChatScreen = true;
-        this.isIconWidget = true;
+        this.isIconWidget = false;
         this.chatError = false;
         this.isSecureWebCall = false;
         this.chatEndScreen = false;
@@ -1493,7 +1532,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.webRtcVideoCallScreen = false;
         this.callbackResponseScreen = false;
         this.additionalPanel = false;
-        this.isIconWidget = true;
+        this.isIconWidget = false;
         this.widgetChatScreen = false;
         this.chatError = false;
         this.chatEndScreen = false;
@@ -1510,7 +1549,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.callbackFormScreen = false;
         this.callbackResponseScreen = false;
         this.additionalPanel = false;
-        this.isIconWidget = true;
+        this.isIconWidget = false;
         this.widgetChatScreen = false;
         this.chatError = false;
         this.chatEndScreen = false;
@@ -1523,7 +1562,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.webRtcVideoCallScreen = false;
         this.callbackResponseScreen = false;
         this.additionalPanel = false;
-        this.isIconWidget = true;
+        this.isIconWidget = false;
         this.widgetChatScreen = false;
         this.chatError = false;
         this.chatEndScreen = false;
@@ -1536,7 +1575,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.preChatFormScreen = false;
         this.callbackResponseScreen = true;
         this.widgetChatScreen = false;
-        this.isIconWidget = true;
+        this.isIconWidget = false;
         this.chatError = false;
         this.chatEndScreen = false;
         this.isChatMax = false;
@@ -1551,7 +1590,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.widgetChatScreen = false;
         this.chatEndScreen = true;
         this.chatError = false;
-        this.isIconWidget = true;
+        this.isIconWidget = false;
         this.isChatMax = true;
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
@@ -1564,7 +1603,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.widgetChatScreen = false;
         this.chatEndScreen = false;
         this.chatError = true;
-        this.isIconWidget = true;
+        this.isIconWidget = false;
         this.isChatMax = true;
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
@@ -2740,7 +2779,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     let header = {
       originalMessageId: null as null | string,
       intent: null as null | string,
-      entities: this.getAdditionalParamsAsEntities(),
+      entities: this.getAdditionalValue('INPUT_PARAMS'),
       additionalData: {} as any,
       sender: {
         id: '460df46c-adf9-11ed-afa1-0242ac120002',
