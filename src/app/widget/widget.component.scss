@@ -718,6 +718,9 @@ button.close-widget-wrapper {
     height: 22px;
     margin: 5px 2px;
 
+    &:focus{
+      outline: none;
+    }
 
     mat-icon {
       line-height: 20px !important;

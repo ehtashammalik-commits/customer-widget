@@ -26,7 +26,7 @@ export class ConfigService {
     //#####################################################################################################################
     const currentFQDN = window.location.hostname;
 
-    // const currentFQDN = "ux-controls-01.expertflow.com"
+    // const currentFQDN = "mtt02.expertflow.com"
     console.log("Current FQDN:", currentFQDN);
 
     for (let key of this.configsToOverride) {
