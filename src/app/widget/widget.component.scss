@@ -1232,6 +1232,12 @@ button.close-widget-wrapper {
   left: 5px;
   z-index: 999999;
 
+  &.main-composer-area {
+    position: fixed;
+    width: calc(100% - 20px);
+  }
+
+
   .emoji-btn {
     position: absolute;
     bottom: 10px;
@@ -1246,16 +1252,14 @@ button.close-widget-wrapper {
     border-radius: 10px;
     border: none;
     height: 40px;
-    padding: 10px 30px 10px 30px;
+    padding: 0 30px;
     outline: none;
     width: 95%;
     font-size: 13px !important;
     background: #eff2f7;
     color: #3e3e3e;
     margin: 0px 8px;
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
+    align-content: center;
   }
 
   .send-btn {
@@ -1379,7 +1383,6 @@ mat-spinner {
 .preview-file {
   position: relative;
   display: inline-block;
-  margin-right: 10px;
   text-align: center;
   overflow: hidden;
 
@@ -2109,11 +2112,11 @@ mat-spinner {
 }
 
 .maxLimitError {
-  position: relative;
-  bottom: 75px;
-  left: 225px;
+  position: absolute;
+  top: -17px;
   font-size: 10px;
   color: red;
+  margin: 0 15px;
 }
 
 // Loader Circle
