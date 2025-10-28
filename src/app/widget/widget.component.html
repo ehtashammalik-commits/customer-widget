@@ -1641,7 +1641,6 @@
 
                       <a *ngIf="message.body.type == 'URL' && message.header.additionalData.secureWebRTCLink"
                         target="_blank">
-                        <!-- <div class="s-link quoted-message-url" (click)="isSecureLinkExpired = true"> -->
                         <div class="s-link quoted-message-url" (click)="processSecureLinkMessage(message)">
                           <span class="video-call-detail"><mat-icon>videocam</mat-icon> Video Call</span>
                           <span class="video-call-link">Join Video Call
