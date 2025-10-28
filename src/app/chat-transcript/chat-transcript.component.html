@@ -214,15 +214,6 @@
         <div *ngSwitchCase="'EMAIL'" class="chat-message user-message email-case user-activity"
           [ngClass]="{'message-blurred': message.isBlurred}">
           <div class="profile-pic">
-            <!--                <div class="active-channel channel-icon web">-->
-            <!--                  <img-->
-            <!--                    [src]="getChannelIconURL(-->
-            <!--                      message.header.sender.senderName,-->
-            <!--                      message.header.sender.id-->
-            <!--                    )"-->
-            <!--                    width="20"-->
-            <!--                  />-->
-            <!--                </div>-->
             <div class="profile-pic-area user-img" [matTooltip]="message.header.customer.firstName">
               {{ getInitialsFromFullName(message.header.customer.firstName) }}
             </div>
