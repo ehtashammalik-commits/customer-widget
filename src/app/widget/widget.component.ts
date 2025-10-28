@@ -33,6 +33,7 @@ import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import { DOCUMENT } from '@angular/common';
 
+declare let EmojiPicker: any;
 interface Shift {
   id: string;
   name: string;
@@ -1419,6 +1420,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // ----------------- Handlers -----------------
   private handleChatView() {
     this.setView({ chat: true });
+    if(this.enableEmoji) {
+        setTimeout(() => {
+        // Intentionally instantiate EmojiPicker for DOM side effects
+        new EmojiPicker(); // NOSONAR
+      }, 500);
+    }
   }
 
   private handleCallbackView() {
