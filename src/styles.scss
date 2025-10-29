@@ -141,3 +141,9 @@ body {
   .mat-chip.mat-standard-chip.mat-chip-disabled {
     cursor: default !important;
 }
+
+.message {
+  a {
+    overflow-wrap: break-word !important;
+  }
+}
