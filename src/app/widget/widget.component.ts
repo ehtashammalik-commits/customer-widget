@@ -1738,18 +1738,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private handleSocketDisconnected(event: any, messageType: string) {
     console.log('event response:', event.data);
+    this.isChatActive = false;
+    this.composerDisable();
+    this.eventTriggerType = '';
 
-    if (event.data.includes('server')) {
-      if (messageType !== 'survey') {
-        this.cimMessage = [];
-        this.clearMessageData();
-        this.isChatActive = false;
-        this.composerDisable();
+    if (messageType !== 'survey') {
+      this.cimMessage = [];
+      this.clearMessageData();
+
+      if (event.data.includes('server')) {
         this.changeScreen('end');
+      } else {
+        this.changeScreen('error');
       }
-    } 
-    else {
-      this.changeScreen('error');
     }
   }
 
