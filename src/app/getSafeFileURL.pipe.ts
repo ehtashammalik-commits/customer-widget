@@ -10,8 +10,8 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 export class SafeFileURLPipe implements PipeTransform {
   private cache: { [url: string]: SafeUrl } = {};
   constructor(
-    private sdk: SdkService,
-    private sanitizer: DomSanitizer,
+    private readonly sdk: SdkService,
+    private readonly sanitizer: DomSanitizer,
   ) {}
 
   transform(imageUrl: string): any {

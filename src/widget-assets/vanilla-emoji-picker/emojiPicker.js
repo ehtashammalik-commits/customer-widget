@@ -99,10 +99,10 @@
             }, false);
 
               emojiPicker.id = "EmojiLink";
-              emojiPicker.style.position = "relative";
-              emojiPicker.style.left = "2px";
+              emojiPicker.style.position = "absolute";
+              emojiPicker.style.left = "10px";
               emojiPicker.style.outline = "none";
-              emojiPicker.style.top = "-40px";
+              emojiPicker.style.bottom = "40px";
               emojiPicker.style.zIndex = "99";
               emojiPicker.style.display = "none";
               emojiPicker.style.width = "232px";

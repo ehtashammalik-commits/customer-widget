@@ -214,15 +214,6 @@
         <div *ngSwitchCase="'EMAIL'" class="chat-message user-message email-case user-activity"
           [ngClass]="{'message-blurred': message.isBlurred}">
           <div class="profile-pic">
-            <!--                <div class="active-channel channel-icon web">-->
-            <!--                  <img-->
-            <!--                    [src]="getChannelIconURL(-->
-            <!--                      message.header.sender.senderName,-->
-            <!--                      message.header.sender.id-->
-            <!--                    )"-->
-            <!--                    width="20"-->
-            <!--                  />-->
-            <!--                </div>-->
             <div class="profile-pic-area user-img" [matTooltip]="message.header.customer.firstName">
               {{ getInitialsFromFullName(message.header.customer.firstName) }}
             </div>
@@ -258,17 +249,18 @@
           </div>
         </div>
 
+
         <div *ngSwitchCase="'PLAIN'" class="chat-message agent-message"
           [ngClass]="{'message-blurred': message.isBlurred}">
           <div class="profile-pic">
             <div class="profile-pic-area user-img">
-              {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender.additionalDetail)) }}
+              {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender)) }}
             </div>
           </div>
 
           <div class="chat-message-content">
             <div class="user-name">
-              <span>{{ getAgentDisplayName(message.header.sender.additionalDetail) }}</span>
+              <span>{{ getAgentDisplayName(message.header.sender) }}</span>
             </div>
             <p>
               <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
@@ -287,12 +279,12 @@
           [ngClass]="{'message-blurred': message.isBlurred}">
           <div class="profile-pic">
             <div class="profile-pic-area user-img">
-              {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender.additionalDetail)) }}
+              {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender)) }}
             </div>
           </div>
           <div class="chat-message-content file-type-message image-type">
             <div class="user-name">
-              <span>{{ getAgentDisplayName(message.header.sender.additionalDetail) }}</span>
+              <span>{{ getAgentDisplayName(message.header.sender) }}</span>
             </div>
             <p>
               <span>
@@ -313,12 +305,12 @@
           [ngClass]="{'message-blurred': message.isBlurred}">
           <div class="profile-pic">
             <div class="profile-pic-area user-img">
-              {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender.additionalDetail)) }}
+              {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender)) }}
             </div>
           </div>
           <div class="chat-message-content file-type-message image-type">
             <div class="user-name">
-              <span>{{ getAgentDisplayName(message.header.sender.additionalDetail) }}</span>
+              <span>{{ getAgentDisplayName(message.header.sender) }}</span>
             </div>
             <p>
               <span>
@@ -338,12 +330,12 @@
           [ngClass]="{'message-blurred': message.isBlurred}">
           <div class="profile-pic">
             <div class="profile-pic-area user-img">
-              {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender.additionalDetail)) }}
+              {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender)) }}
             </div>
           </div>
           <div class="chat-message-content">
             <div class="user-name">
-              <span>{{ getAgentDisplayName(message.header.sender.additionalDetail) }}</span>
+              <span>{{ getAgentDisplayName(message.header.sender) }}</span>
             </div>
             <p>
               <a target="_blank" [href]="message.body.attachment.mediaUrl | safeFileURL">
@@ -362,12 +354,12 @@
             [ngClass]="{'message-blurred': message.isBlurred}">
             <div class="profile-pic">
               <div class="profile-pic-area user-img">
-                {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender.additionalDetail)) }}
+                {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender)) }}
               </div>
             </div>
             <div class="chat-message-content">
               <div class="user-name">
-                <span>{{ getAgentDisplayName(message.header.sender.additionalDetail) }}</span>
+                <span>{{ getAgentDisplayName(message.header.sender) }}</span>
               </div>
               <ng-container [ngSwitch]="message.body.itemType">
                 <!-- TEXT comment -->
@@ -430,12 +422,12 @@
           [ngClass]="{'message-blurred': message.isBlurred}">
           <div class="profile-pic">
             <div class="profile-pic-area user-img">
-              {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender.additionalDetail)) }}
+              {{ getInitialsFromFullName(getAgentDisplayName(message.header.sender)) }}
             </div>
           </div>
           <div class="chat-message-content file-type-message contact-type">
             <div class="user-name">
-              <span>{{ getAgentDisplayName(message.header.sender.additionalDetail) }}</span>
+              <span>{{ getAgentDisplayName(message.header.sender) }}</span>
             </div>
             <span class="display-file contact-logo file-message">
               <img src="widget-assets/images/file-type.svg" alt="{{ message.body.additionalDetails.fileName }}" />
@@ -752,7 +744,7 @@
     <ng-container *ngIf="enableTranscriptNotifications && message?.body?.notificationType === 'AGENT_SUBSCRIBED'">
       <div class="line-info agent-typing">
         <span>
-          {{ getAgentDisplayName(message.body.notificationData.data.agentParticipant.participant.keycloakUser) }}
+         {{ getAgentDisplayName(message.body.notificationData.data.agentParticipant.participant.keycloakUser) }}
           {{ 'agent-notifications.joined' | translate }}
           | {{ message.header.timestamp | formatTime }}
         </span>

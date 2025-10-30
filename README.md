@@ -30,3 +30,11 @@ After a successful deployment, add the following script in the head section of y
 1. `Customer Widget Url` is the IP or FQDN of server where Customer Widget is hosted.
 2. `Widget Identifier` is the web identifier for CIM chat.
 3. `Service Identifier` is the service identifier for CIM chat.
+
+
+
+<!-- comment the below line out the index.html for local dev  -->
+  <!-- <base href="/customer-widget/"> -->
+
+<!-- uncomment the below line for local dev -->
+  <!-- <base href="/"> -->
