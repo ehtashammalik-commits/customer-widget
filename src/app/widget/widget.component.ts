@@ -497,9 +497,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         });
 
         window.parent.postMessage({
-						state: "EF_WIDGET_LOADED",
-						message: "Customer Widget Loaded Successfully",
-					}, "*");
+          state: "EF_WIDGET_LOADED",
+          message: "Customer Widget Loaded Successfully",
+				}, "*");
 
       },
     );
