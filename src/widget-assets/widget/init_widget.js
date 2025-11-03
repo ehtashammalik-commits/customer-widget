@@ -36,7 +36,7 @@ if (Source == 'UApp') {
   params.append('msisdn', __cim.msisdn);
 }
 
-const URL = `${customerWidgetUrl}/#/widget?${params.toString()}`;
+const EF_WIDGET_URL = `${customerWidgetUrl}/#/widget?${params.toString()}`;
 var parentSection = document.createElement('div');
 parentSection.setAttribute('id', 'init_widget_main');
 parentSection.style.border = '0';
@@ -59,7 +59,7 @@ var chatIframe = document.createElement('iframe');
 chatIframe.setAttribute('id', 'init_widget');
 chatIframe.setAttribute('width', '100%');
 chatIframe.setAttribute('height', '100%');
-chatIframe.setAttribute('src', URL);
+chatIframe.setAttribute('src', EF_WIDGET_URL);
 chatIframe.setAttribute('allow', 'camera *;microphone *;autoplay *');
 chatIframe.setAttribute('allowusermedia', 'camera *;microphone *');
 chatIframe.style.border = '0';

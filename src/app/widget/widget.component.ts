@@ -495,6 +495,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           if (configs.form !== '')
             this.sdk.renderPreChatForm(this.preChatFormId);
         });
+
+        window.parent.postMessage({
+						state: "EF_WIDGET_LOADED",
+						message: "Customer Widget Loaded Successfully",
+					}, "*");
+
       },
     );
 
@@ -608,16 +614,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   receiveMessage(event: MessageEvent): void {
-    // Check the origin of the message to ensure it comes from a trusted domain
-
-    // Handle the start chat message event
-    if (event.data.action == 'Initialize Chat' && this.isChatActive == false){
+    if (event.data?.action?.toLowerCase() == 'initialize_chat' && this.isChatActive == false){
       this.changeScreen('chatForm');
-    } else if (event.data.action == 'Initialize Chat' && this.isChatActive == true){
+    } else if (event.data?.action?.toLowerCase() == 'initialize_chat' && this.isChatActive == true){
       this.changeScreen('chat');
-    } else if (event.data.action == 'Update Input Params'){
-      console.log('Update Input Params:', event.data.inputParams);
-      let inputParams = event.data.inputParams
+    } else if (event.data?.action?.toLowerCase() == 'update_input_params'){
+      let inputParams = event.data?.inputParams;
       // verify input params is not null or empty
       if (inputParams != null && Object.keys(inputParams).length > 0){
         let storedInputParams = this.getAdditionalValue('INPUT_PARAMS') || {};
