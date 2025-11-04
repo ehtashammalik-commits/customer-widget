@@ -1888,11 +1888,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   resizeWidget(state: string): void {
     // send height and width of widget-form-area to parent window
-    const widgetFormArea = document.getElementsByClassName('widget-form-area')[0];
-    if (widgetFormArea) {
-      const { clientWidth, clientHeight } = widgetFormArea;
-      window.parent.postMessage({ state, width: clientWidth, height: clientHeight }, '*');
-    }
+      window.parent.postMessage({ state }, '*');
   }
 
   eventListener(event: any) {

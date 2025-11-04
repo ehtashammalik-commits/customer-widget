@@ -126,14 +126,8 @@ window.addEventListener('message', (event) => {
       parentSection.style.height = '100%';
     }
     else {
-      if (event.data.width && event.data.height) {
-        parentSection.style.width = (event.data.width + 15) + 'px';
-        parentSection.style.height = (event.data.height + 30) + 'px';
-        return;
-      }
       parentSection.style.width = (currentWindowWidth > 440) ? '360px' : 'calc(100% - 5vw)';
-      parentSection.style.height = '600px';
+      parentSection.style.height = '620px';
     }
-
   }
 }, false);

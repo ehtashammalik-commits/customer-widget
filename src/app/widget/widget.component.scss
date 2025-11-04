@@ -98,14 +98,14 @@ $emoji-margin: 6px;
   bottom: 0px;
   right: 0px;
   width: 350px;
-  height: 600px;
+  height: 100%;
 }
 
 /*/----------------------------/*/
 /*/ Style For Welcome Wrapper /*/
 /*/--------------------------/*/
 .widget-wrapper {
-  background: #ffffff;
+  background: transparent;
   border-radius: 10px;
   // box-shadow: 45px 55px 100px #efefef;
   transition: all 0.3s;
@@ -331,7 +331,7 @@ button.close-widget-wrapper {
   right: 15px;
   display: block;
   width: 335px;
-  height: 559px;
+  height: 96%;
   border-radius: 10px;
   filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2));
   background: #ffffff;
@@ -793,7 +793,7 @@ button.close-widget-wrapper {
   border-radius: 10px;
   position: relative;
   top: 20px;
-  height: 78%;
+  height: calc(100% - 120px); // Subtract space for header (20px top) + composer (60px) + padding (60px)
   overflow-y: scroll;
 }
 
