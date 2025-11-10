@@ -235,6 +235,7 @@ button.close-widget-wrapper {
   height: auto;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   right: 25px;
+  bottom: 82px;
   .wrapper-inner {
     position: static;
     .widget-wrapper-header {
@@ -245,7 +246,7 @@ button.close-widget-wrapper {
 
       button {
         position: absolute;
-        top: -40px;
+        top: -35px;
       }
       .wrappper-inner-content {
         display: none;
@@ -257,13 +258,19 @@ button.close-widget-wrapper {
       justify-content: center;
       align-items: center;
       height: auto;
-      padding: 20px;
-      width: 160px;
+      padding: 15px 10px;
+      width: 150px;
       bottom: 0;
       border-radius: 8px;
       border-bottom-right-radius: 0;
+      
       button {
         display: none;
+      }
+
+      p {
+        font-size: 14px;
+        font-family: Arial, Helvetica, sans-serif;
       }
     }
   }

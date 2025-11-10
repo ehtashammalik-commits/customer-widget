@@ -7,7 +7,7 @@
   <!--------------------------->
   <!-- /Addition Panel HTML/ -->
   <!--------------------------->
-  <ng-container *ngIf="additionalPanel && !standaloneWebRtc">
+  <ng-container *ngIf="additionalPanel && !standaloneWebRtc && !isChatActive">
     <div class="widget-wrapper" [ngClass]="{'compact-widget': widgetType ==='COMPACT'}">
       <div class="wrapper-inner">
 
