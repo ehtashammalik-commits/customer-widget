@@ -9,6 +9,9 @@ export class tagFormatPipe implements PipeTransform {
   transform(value: string | null | undefined, enableDynamicLink: boolean): string {
     if (!value) return '';
 
+    value = value.replace(/&amp;#039;/g, "'")
+                .replace(/&amp;quot;/g, '\"');
+
     return ibsFormat(
       value,
       [
