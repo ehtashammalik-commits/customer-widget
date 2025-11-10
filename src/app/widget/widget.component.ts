@@ -362,6 +362,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   additionalSchema: any[] = [];
   additionalValues: any[] = [];
   additionalValuesMap: { [key: string]: any } = {};
+  widgetType = "COMPACT";
   
   constructor(
     private route: ActivatedRoute,

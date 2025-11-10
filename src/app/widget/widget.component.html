@@ -8,7 +8,7 @@
   <!-- /Addition Panel HTML/ -->
   <!--------------------------->
   <ng-container *ngIf="additionalPanel && !standaloneWebRtc">
-    <div class="widget-wrapper">
+    <div class="widget-wrapper" [ngClass]="{'compact-widget': widgetType ==='COMPACT'}">
       <div class="wrapper-inner">
 
         <div class="widget-wrapper-header widget-color">

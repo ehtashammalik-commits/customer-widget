@@ -227,6 +227,47 @@ button.close-widget-wrapper {
   display: inline-block;
   transition: all 0.3s;
 }
+// widget-wrap with compact type
+.widget-wrapper.compact-widget {
+
+  background-color: black;
+  width: auto;
+  height: auto;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  right: 25px;
+  .wrapper-inner {
+    position: static;
+    .widget-wrapper-header {
+      border-bottom: none;
+      position: static;
+      padding: 0px;
+      display: inline;
+
+      button {
+        position: absolute;
+        top: -40px;
+      }
+      .wrappper-inner-content {
+        display: none;
+      }
+    }
+
+    .widget-wrapper-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: auto;
+      padding: 20px;
+      width: 160px;
+      bottom: 0;
+      border-radius: 8px;
+      border-bottom-right-radius: 0;
+      button {
+        display: none;
+      }
+    }
+  }
+}
 
 /**
 * Bar View Chat Button
