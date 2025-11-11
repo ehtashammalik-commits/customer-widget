@@ -2779,6 +2779,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     carousalCardId?: null | string,
     formMessageTypeData?: any,
     status?: 'filled' | 'cancelled',
+    additionalButtonDetails?: any,
   ) {
     let header = {
       originalMessageId: null as null | string,
@@ -2821,6 +2822,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (transformedIntent.entities) {
         header.entities = transformedIntent.entities;
       }
+      
+      // Extract and merge additionalButtonDetails parameters into entities
+      if (additionalButtonDetails && additionalButtonDetails.parameters) {
+        try {
+          let buttonParameters: any = {};
+          
+          // Parse the parameters if it's a string
+          if (typeof additionalButtonDetails.parameters === 'string') {
+            buttonParameters = JSON.parse(additionalButtonDetails.parameters);
+          } else if (typeof additionalButtonDetails.parameters === 'object') {
+            buttonParameters = additionalButtonDetails.parameters;
+          }
+          
+          // Merge with existing entities
+          if (header.entities && typeof header.entities === 'object') {
+            header.entities = { ...header.entities, ...buttonParameters };
+          } else {
+            header.entities = buttonParameters;
+          }
+          
+          console.log('Merged button parameters into entities:', header.entities);
+        } catch (error) {
+          console.error('Error parsing additionalButtonDetails parameters:', error);
+        }
+      }
+      
       header.additionalData = {
         carousalCardId:
           typeof carousalCardId === 'string' && carousalCardId.trim() !== ''
@@ -3078,7 +3105,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   sendButtonMessage(
-    data: { title: string; payload: any },
+    data: { title: string; payload: any , additionalButtonDetails?: any},
     originalMessageId: any,
   ) {
     console.log('Button data is ', data);
@@ -3087,7 +3114,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         'PLAIN',
         data.title.trim(),
         data.payload,
-        originalMessageId
+        originalMessageId,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        data.additionalButtonDetails
       );
     }
   }
