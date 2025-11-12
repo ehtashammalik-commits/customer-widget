@@ -363,6 +363,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   additionalValues: any[] = [];
   additionalValuesMap: { [key: string]: any } = {};
   widgetType = "COMPACT";
+  appliedColorTheme: string = '';
+  avaClientId: string = '';
   
   constructor(
     private route: ActivatedRoute,
@@ -615,21 +617,41 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   receiveMessage(event: MessageEvent): void {
-    if (event.data?.action?.toLowerCase() == 'initialize_chat' && this.isChatActive == false){
-      this.changeScreen('chatForm');
-    } else if (event.data?.action?.toLowerCase() == 'initialize_chat' && this.isChatActive == true){
-      this.changeScreen('chat');
-    } else if (event.data?.action?.toLowerCase() == 'update_input_params'){
-      let inputParams = event.data?.inputParams;
-      // verify input params is not null or empty
-      if (inputParams != null && Object.keys(inputParams).length > 0){
-        let storedInputParams = this.getAdditionalValue('INPUT_PARAMS') || {};
-        Object.keys(inputParams).forEach(element => {
-          storedInputParams[element] = inputParams[element];
-        });
-        this.setAdditionalValue('INPUT_PARAMS', storedInputParams);
-        console.log('Updated INPUT_PARAMS:', this.getAdditionalValue('INPUT_PARAMS'));
-      }
+    const action = event.data?.action?.toLowerCase();
+    
+    switch (action) {
+      case 'initialize_chat':
+        if (this.isChatActive === false) {
+          this.changeScreen('chatForm');
+        } else if (this.isChatActive === true) {
+          this.changeScreen('chat');
+        }
+        break;
+        
+      case 'update_input_params':
+        let inputParams = event.data?.inputParams;
+        // verify input params is not null or empty
+        if (inputParams != null && Object.keys(inputParams).length > 0) {
+          let storedInputParams = this.getAdditionalValue('INPUT_PARAMS') || {};
+          Object.keys(inputParams).forEach(element => {
+            storedInputParams[element] = inputParams[element];
+          });
+          this.setAdditionalValue('INPUT_PARAMS', storedInputParams);
+          console.log('Updated INPUT_PARAMS:', this.getAdditionalValue('INPUT_PARAMS'));
+        }
+        break;
+
+      case 'update_theme':
+        let themeColor = event.data?.value.toLowerCase();
+        console.log('Updating theme color to:', themeColor);
+        this.appliedColorTheme = themeColor;
+        break;
+
+      case 'set_ava_client_id':
+        let avaClientId = event.data?.value.toLowerCase();
+        console.log('Setting AVA Client ID to:', avaClientId);
+        this.avaClientId = avaClientId;
+        break;
     }
     
   }
@@ -1054,7 +1076,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           "sections": [
               {
                   "name": "Test User",
-                  "phone": Math.floor(10000000 + Math.random() * 90000000).toString()
+                  "phone": this.avaClientId !== '' ? this.avaClientId : Math.floor(10000000 + Math.random() * 90000000).toString()
               }
           ]
       }

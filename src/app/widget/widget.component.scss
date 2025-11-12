@@ -11,6 +11,7 @@ $medium-font: 13px;
 $text-color: #464646;
 $emoji-margin: 6px;
 
+
 /*/--------------------------/*/
 /*/ Style for Widget Scroll /*/
 /*/------------------------/*/
@@ -99,6 +100,107 @@ $emoji-margin: 6px;
   right: 0px;
   width: 350px;
   height: 100%;
+}
+
+.top-wrapper.dark-theme {
+  .widget-form-area {
+    background-color: #232323;
+    .widget-form {
+      background-color: #000000;
+
+      .widget-chat-navbar {
+        background-color: #232323;
+        border-bottom: 1px solid #5b5b5b;
+      }
+
+      .widget-chat-content {
+        background-color: #000000;
+        color: #dddddd;
+
+        .widget-chat-messages {
+          .widget-chat-message-agent {
+            .bot-img {
+              background-color: #000000;
+              border: none;
+            }
+
+            .agent-message {
+                background-color: #232323;
+                border: none;
+                
+                .message {
+                  color: #dddddd;
+                }
+
+                .structured-message-area.custom-theme mat-chip.mat-chip {
+                  border: none;
+                }
+            }
+          }
+
+          .widget-chat-message-customer {
+            .customer-message {
+              background-color: #232323;
+              border: none;
+              .header {
+                .name {
+                  color: #dddddd;
+                }
+              }
+
+              .message {
+                color: #dddddd;
+              }
+            }
+          }
+        }
+      }
+
+      .widget-composer {
+        left: 10px;
+        textarea {
+          background: #232323;
+          color: #dddddd;
+          
+          &::placeholder {
+            color: #888888;
+          }
+        }
+        span {
+          color: #dddddd;
+        }
+        .widget-error-button {
+          input {
+            background-color: #232323;
+            color: #dddddd;
+          }
+        }
+      }
+
+      .widget-error-content {
+        background-color: #000000;
+
+        .error-message {
+          color: #dddddd;
+        }
+      }
+    }
+  }
+
+  .widget-wrapper.compact-widget .wrapper-inner .widget-wrapper-content {
+    background-color: #232323;
+
+    p {
+       color: #dddddd;
+    }
+  }
+  .typing-indicator {
+    background-color: #232323;
+  }
+
+  .message-type-form .message-inner-form .mat-form-field-outline {
+    background-color: #232323;
+  }
 }
 
 /*/----------------------------/*/

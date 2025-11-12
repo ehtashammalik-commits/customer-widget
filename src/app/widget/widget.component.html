@@ -1,6 +1,7 @@
 <div class="top-wrapper" [ngClass]="{
     'right-direction': selectedLanguage == 'ar',
-    'mobile-view': isMobile
+    'mobile-view': isMobile,
+    'dark-theme': appliedColorTheme == 'dark'
   }">
   <mat-spinner [diameter]="50" color="primary" *ngIf="preChatFormLoader"></mat-spinner>
 
