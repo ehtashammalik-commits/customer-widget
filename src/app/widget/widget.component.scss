@@ -103,33 +103,39 @@ $emoji-margin: 6px;
 }
 
 .top-wrapper.dark-theme {
+  --dark-bg-primary: #000000;
+  --dark-bg-secondary: #232323;
+  --dark-text: #dddddd;
+  --dark-border: #5b5b5b;
+  --dark-placeholder: #888888;
+
   .widget-form-area {
-    background-color: #232323;
+    background-color: var(--dark-bg-secondary);
     .widget-form {
-      background-color: #000000;
+      background-color: var(--dark-bg-primary);
 
       .widget-chat-navbar {
-        background-color: #232323;
-        border-bottom: 1px solid #5b5b5b;
+        background-color: var(--dark-bg-secondary);
+        border-bottom: 1px solid var(--dark-border);
       }
 
       .widget-chat-content {
-        background-color: #000000;
-        color: #dddddd;
+        background-color: var(--dark-bg-primary);
+        color: var(--dark-text);
 
         .widget-chat-messages {
           .widget-chat-message-agent {
             .bot-img {
-              background-color: #000000;
+              background-color: var(--dark-bg-primary);
               border: none;
             }
 
             .agent-message {
-                background-color: #232323;
+                background-color: var(--dark-bg-secondary);
                 border: none;
                 
                 .message {
-                  color: #dddddd;
+                  color: var(--dark-text);
                 }
 
                 .structured-message-area.custom-theme mat-chip.mat-chip {
@@ -140,16 +146,16 @@ $emoji-margin: 6px;
 
           .widget-chat-message-customer {
             .customer-message {
-              background-color: #232323;
+              background-color: var(--dark-bg-secondary);
               border: none;
               .header {
                 .name {
-                  color: #dddddd;
+                  color: var(--dark-text);
                 }
               }
 
               .message {
-                color: #dddddd;
+                color: var(--dark-text);
               }
             }
           }
@@ -159,47 +165,47 @@ $emoji-margin: 6px;
       .widget-composer {
         left: 10px;
         textarea {
-          background: #232323;
-          color: #dddddd;
+          background: var(--dark-bg-secondary);
+          color: var(--dark-text);
           
           &::placeholder {
-            color: #888888;
+            color: var(--dark-placeholder);
           }
         }
         span {
-          color: #dddddd;
+          color: var(--dark-text);
         }
         .widget-error-button {
           input {
-            background-color: #232323;
-            color: #dddddd;
+            background-color: var(--dark-bg-secondary);
+            color: var(--dark-text);
           }
         }
       }
 
       .widget-error-content {
-        background-color: #000000;
+        background-color: var(--dark-bg-primary);
 
         .error-message {
-          color: #dddddd;
+          color: var(--dark-text);
         }
       }
     }
   }
 
   .widget-wrapper.compact-widget .wrapper-inner .widget-wrapper-content {
-    background-color: #232323;
+    background-color: var(--dark-bg-secondary);
 
     p {
-       color: #dddddd;
+       color: var(--dark-text);
     }
   }
   .typing-indicator {
-    background-color: #232323;
+    background-color: var(--dark-bg-secondary);
   }
 
   .message-type-form .message-inner-form .mat-form-field-outline {
-    background-color: #232323;
+    background-color: var(--dark-bg-secondary);
   }
 }
 
