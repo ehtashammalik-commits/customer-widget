@@ -340,6 +340,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   isFileSelected: any;
   isFileUploading: any = {};
+  disableMic: any = false;
+  disableCam: any = false;
+  @ViewChild('micTooltip', { static: false }) micTooltip!: MatTooltip;
+  @ViewChild('camTooltip', { static: false }) camTooltip!: MatTooltip;
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly fb: FormBuilder,
@@ -2984,12 +2989,70 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   /** mediaPermissionStatus: just log for now (keeps previous behaviour) */
   private handleMediaPermissionStatusEvent(data: any): void {
     console.log('[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ', data.dialog);
+    this.dialogId = data.id;
+      console.log(
+        '[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ',
+        data.dialog,
+      );
+
+      const type = data.dialog.permissionType.toLowerCase();
+      const isDenied = data.dialog.permissionStatus.toLowerCase() === 'denied';
+      const isGranted = data.dialog.permissionStatus.toLowerCase() === 'granted';
+      console.log('data.dialog.errorReason:========>', data.dialog.errorReason);
+      if (data.dialog.errorReason === "Audio/Video Device is being used by Someother Party") {
+        console.log('Permission Status DENIED:========>', "Audio/Video Device is being used by Someother Party");
+      } else {
+        console.log('Permission Status:========>', type);
+        switch (type) {
+
+          case 'microphone':
+            this.disableMic = isDenied ? true : isGranted ? false : this.disableMic;
+            if (isGranted) {
+              // //  Call toggleCallMic when mic permission is granted
+
+              // const action = !this.isCallMute ? 'mute_call' : 'unmute_call';
+              //     //this.isCallMute=true;
+              //     //if(action === 'mute_call'){this.toggleCallMicPermission(action, data.id); // pass tooltip reference if you have it
+
+              //   //}
+              //   this.toggleCallMic(this.micTooltip);
+              //  console.log('MICROPHONE Status with tooltip ref:========>',data.id,action)
+              //  Only mute if call is currently unmuted
+              if (!this.isCallMute) {
+                this.toggleCallMic(this.micTooltip);
+                console.log(' MIC forced muted due to permission grant', data.id);
+              } else {
+                console.log(' MIC already muted, no action needed', data.id);
+              }
+
+            }
+            console.log('[disableMic Status] ===>', this.disableMic);
+            break;
+
+          case 'video':
+            this.disableCam = isDenied ? true : isGranted ? false : this.disableCam;
+            console.log('[disableCam Status] ===>', this.disableCam);
+            if (isGranted) {
+              // this.handleVideoIconClick(this.camTooltip)
+              // console.log('CAMERA Status with tooltip ref:========>',this.camTooltip)
+              if (!this.isVideoHide) {
+                this.handleVideoIconClick(this.camTooltip);
+                console.log('CAMERA Status with tooltip ref:========>');
+              } else {
+                console.log("Video is already OFF, skipping toggle.");
+              }
+
+            }
+            break;
+        }
+      }
+
   }
 
   /** Error: big handler — map response.type + description to user-friendly message and take appropriate actions */
   private handleErrorEvent(data: any): void {
     // Clear dialogId on error (same as original)
-    this.dialogId = undefined;
+    //this.dialogId = undefined;
 
     let errorMessage = '';
 
@@ -3005,6 +3068,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           case 'Session.getOffer unknown error.':
             errorMessage = 'Please check Audio / Video permissions in your browser.';
             break;
+          case "Microphone permission denied. Please enable.":
+              errorMessage = `Please add microphone permissions in your browser.`;
+              break;
+            case "Audio/Video Device Not Found. Please make sure your Audio/Video Device are working":
+            case "Camera permission denied. Please enable.":
+              errorMessage = `Please add Camera permissions in your browser to enable video.`;
+              break;
+            case "Audio/Video Device is being used by Someother Party":
+              errorMessage = `Audio/Video Device is being used by Someother Party`;
+              break;
+
           default:
             errorMessage = 'An unknown general error occurred.';
         }
@@ -3026,27 +3100,106 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         errorMessage = 'An unknown error occurred.';
         break;
     }
+     
+    //if (!errorMessage) return;
 
-    if (!errorMessage) return;
+    // this.showAuthenticationResponseMessage = errorMessage;
+    // this.activeVideoView = false;
 
-    this.showAuthenticationResponseMessage = errorMessage;
-    this.activeVideoView = false;
-
-    if (this.standaloneWebRtc) {
-      this.showInvalidCodeError = true;
-      this.callPopUpView = false;
-      this.activeVideoView = false;
-      this.isWebRtcVideoCallActive = false;
-      this.showSnackbar(this.showAuthenticationResponseMessage, 3000, ['error-snackbar']);
-    } else {
-      this.showSnackbar(this.showAuthenticationResponseMessage, 3000, ['error-snackbar']);
-      this.isAudioCallActive = false;
-      this.isSecureWebCall = false;
-      this.isVideoCallActive = false;
-      this.activeVideoView = false;
-      this.errorDuringWebRTCCall = true;
-      this.changeView('chat');
+    // if (this.standaloneWebRtc) {
+    //   this.showInvalidCodeError = true;
+    //   this.callPopUpView = false;
+    //   this.activeVideoView = false;
+    //   this.isWebRtcVideoCallActive = false;
+    //   this.showSnackbar(this.showAuthenticationResponseMessage, 3000, ['error-snackbar']);
+    // } else {
+    //   this.showSnackbar(this.showAuthenticationResponseMessage, 3000, ['error-snackbar']);
+    //   this.isAudioCallActive = false;
+    //   this.isSecureWebCall = false;
+    //   this.isVideoCallActive = false;
+    //   this.activeVideoView = false;
+    //   this.errorDuringWebRTCCall = true;
+    //   this.changeView('chat');
+    // }
+    //new code 
+     console.log("========>test 1",data)
+      if (errorMessage === "Audio/Video Device is being used by Someother Party" && this.dialogId != undefined) {
+        console.log("=========>test Audio/Video Device ", this.dialogId)
+        this.snackBar.open(errorMessage, 'Dismiss', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'right',
+        });
+        
     }
+      if (errorMessage != "Please add Camera permissions in your browser to enable video." && errorMessage != "Audio/Video Device is being used by Someother Party") {
+        this.showAuthenticationResponseMessage = errorMessage;
+        this.activeVideoView = false;
+
+        if (this.standaloneWebRtc ) {
+          console.log("=========>test 1.1", this.dialogId)
+         if(this.dialogId === null || this.dialogId === undefined){
+          this.showInvalidCodeError = true;
+          this.callPopUpView = false;
+          this.activeVideoView = false;
+          this.isWebRtcVideoCallActive = false;
+         }
+          
+          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+            duration: 3000,
+            panelClass: ['error-snackbar'],
+            horizontalPosition: 'right',
+          });
+
+        } else if ((this.dialogId != null || this.dialogId != undefined) && errorMessage === "Please add microphone permissions in your browser.") {
+          console.log("=========>test 1.2", this.dialogId)
+          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+            duration: 3000,
+            panelClass: ['error-snackbar'],
+            horizontalPosition: 'right',
+          });
+
+          this.isAudioCallActive = false;
+          this.isSecureWebCall = true;
+          this.isVideoCallActive = true;
+          this.activeVideoView = true;
+          this.errorDuringWebRTCCall = false;
+          //this.changeView('chat')
+          if (this.__appConfig.appConfig.VIDEO == false) {
+            this.isAudioCallActive = true;
+            this.activeVideoView = false;
+          }
+        }
+        else {
+          console.log("=========>test 1.1", this.dialogId)
+          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+            duration: 3000,
+            panelClass: ['error-snackbar'],
+            horizontalPosition: 'right',
+          });
+          this.isAudioCallActive = false;
+          this.isSecureWebCall = false;
+          this.isVideoCallActive = false;
+          this.activeVideoView = false;
+          this.errorDuringWebRTCCall = true;
+          this.changeView('chat')
+        }
+      } else if (errorMessage === "Please add Camera permissions in your browser to enable video.") {
+
+        //console.log("test 1.1")
+        this.snackBar.open(errorMessage, 'Dismiss', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'right',
+        });
+
+      }
+    
+
+
+
+
+
   }
 
 

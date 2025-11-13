@@ -109,19 +109,20 @@
                     present_to_all
                   </span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isVideoHide === true }">
-                  <span class="material-symbols-outlined"
-                    [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
+                <div class="control-btn" [ngClass]="{ 'disabled': disableCam ,'end-call': isVideoHide === true }">
+                  <span class="material-symbols-outlined"  [matTooltip]="disableCam ? 'Camera is disabled due to permissions issue' : (isVideoHide ? 'Turn on camera' : 'Turn off camera')"
                     [matTooltipPosition]="this.positionOptions[2]"
                     innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}" (click)="toggleCallVideo(tooltip1);"
                     #tooltip1="matTooltip">
                   </span>
+                  <span *ngIf="disableCam" class="error-badge">!</span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isCallMute === true }">
-                  <span class="material-symbols-outlined" [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
-                    [matTooltipPosition]="this.positionOptions[2]" innerHTML="{{ isCallMute ? 'mic_off' : 'mic' }}"
+                <div [class.disabled]="disableMic" class="control-btn" [ngClass]="{ 'end-call': isCallMute === true }">
+                  <span class="material-symbols-outlined" [matTooltip]=  "disableMic ? 'Microphone is disabled due to permissions/device issue'  : (isCallMute ? 'Unmute' : 'Mute')"
+                  [matTooltipPosition]="this.positionOptions[2]" innerHTML="{{ isCallMute ? 'mic_off' : 'mic' }}"
                     (click)="toggleCallMic(tooltip)" #tooltip="matTooltip">
                   </span>
+                  <span *ngIf="disableMic" class="error-badge">!</span>
                 </div>
                 <div class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
@@ -1833,7 +1834,7 @@
                   </span>
                 </div>
                 
-                <div class="control-btn" [ngClass]="{
+                <div class="control-btn" [ngClass]="{'disabled': disableCam,
                     'end-call': isVideoHide,
                     'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
                     'focus-icon-video ': isVideoCallActive === true
@@ -1841,17 +1842,19 @@
                   <span class="material-symbols-outlined"
                     [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
                     [matTooltipPosition]="this.positionOptions[2]"
-                    [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="handleVideoIconClick(tooltip5)"
+                    [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="handleVideoIconClick(camTooltip)"
                     [ngClass]="{
                   'disable-icon-callControl': isAudioCallActive
-                }" [attr.aria-disabled]="isAudioCallActive" #tooltip5="matTooltip">
+                }" [attr.aria-disabled]="isAudioCallActive" #camTooltip="matTooltip">
                   </span>
+                  <span *ngIf="disableCam" class="error-badge">!</span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
+                <div [class.disabled]="disableMic" class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallMute ? 'mic_off' : 'mic'"
-                    (click)="toggleCallMic(tooltip3);" #tooltip3="matTooltip">
+                    (click)="toggleCallMic(micTooltip);" #micTooltip="matTooltip">
                   </span>
+                   <span *ngIf="disableMic" class="error-badge">!</span>
                 </div>
                 <div class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
