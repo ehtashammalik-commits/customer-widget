@@ -120,7 +120,8 @@
                 <div [class.disabled]="disableMic" class="control-btn" [ngClass]="{ 'end-call': isCallMute === true }">
                   <span class="material-symbols-outlined" [matTooltip]=  "disableMic ? 'Microphone is disabled due to permissions/device issue'  : (isCallMute ? 'Unmute' : 'Mute')"
                   [matTooltipPosition]="this.positionOptions[2]" innerHTML="{{ isCallMute ? 'mic_off' : 'mic' }}"
-                    (click)="toggleCallMic(tooltip)" #tooltip="matTooltip">
+                    (click)="toggleCallMic(tooltip)" (keydown.enter)="toggleCallMic(tooltip)"
+  (keydown.space)="toggleCallMic(tooltip)" #tooltip="matTooltip">
                   </span>
                   <span *ngIf="disableMic" class="error-badge">!</span>
                 </div>
@@ -1852,14 +1853,16 @@
                 <div [class.disabled]="disableMic" class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallMute ? 'mic_off' : 'mic'"
-                    (click)="toggleCallMic(micTooltip);" #micTooltip="matTooltip">
+                    (click)="toggleCallMic(micTooltip);"  (keydown.enter)="toggleCallMic(micTooltip)"
+  (keydown.space)="toggleCallMic(micTooltip)" #micTooltip="matTooltip">
                   </span>
                    <span *ngIf="disableMic" class="error-badge">!</span>
                 </div>
                 <div class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
-                    (click)="toggleCallHold(tooltip2);" #tooltip2="matTooltip">
+                    (click)="toggleCallHold(tooltip2);" (keydown.enter)="toggleCallHold(tooltip2)"
+  (keydown.space)="toggleCallHold(tooltip2)" #tooltip2="matTooltip">
                   </span>
                 </div>
                 <div class="control-btn disable-icon-callControl">
