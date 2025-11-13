@@ -33,3 +33,22 @@ Feature: WebRTC Video Channel for Customer-Agent Communication
     When the customer clicks the Hold button
     And the customer's audio and video streams are paused
     And the Agent hears hold music
+   
+   Scenario: Customer resumes the call after hold
+   Given the customer has put the call on hold
+   When the customer clicks the Resume button
+   Then the customer's audio and video streams resume
+   And the agent sees that the call is active again
+
+   Scenario: Customer refreshes the browser mid-call
+   Given a WebRTC video call is active
+   When the customer refreshes the browser
+   Then the call should end gracefully
+   And the agent sees a Customer left message
+   And conversation view should close
+
+   Scenario: Call ends gracefully on customer end
+   Given a WebRTC video call is active
+   When the agent ends the call
+   Then the customer sees a Call Ended screen with a close button
+   And is returned to the widget home screen
