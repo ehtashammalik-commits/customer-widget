@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ConfigService } from '../services/config.service';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject ,BehaviorSubject} from 'rxjs';
 
 declare let widgetConfigs: any,
+  remote_stream:any, 
+  local_stream:any,
   getPreChatForm: any,
   formValidation: any,
   establishConnection: any,
@@ -77,6 +79,15 @@ export class SdkService {
   // private setupRemoteMediaRequest: Subject<any> = new Subject<any>();
   // public setupRemoteMediaResponse$: Observable<any> =
   // this.setupRemoteMediaRequest.asObservable();
+
+     // ---- Add your streams here to aceess during minimize or maximize widget ----
+private localStreamSubject = new BehaviorSubject<MediaStream | null>(null);
+public localStream$ = this.localStreamSubject.asObservable();
+
+private remoteStreamSubject = new BehaviorSubject<MediaStream | null>(null);
+public remoteStreamObs$ = this.remoteStreamSubject.asObservable();
+
+
 
   constructor(private readonly _ConfigService: ConfigService) {
     this.ConfigData = this._ConfigService.appConfig;
@@ -363,6 +374,13 @@ export class SdkService {
         authData: callPayload.authConfigs,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
+            if (typeof local_stream !== 'undefined' && local_stream) {
+          this.setLocalStream(local_stream);
+        }
+        if (typeof remote_stream !== 'undefined' && remote_stream) {
+          this.setRemoteStream(remote_stream);
+        }
+
         },
       },
     };
@@ -441,6 +459,10 @@ export class SdkService {
           dialogId: sessionDialogId,
           clientCallbackFunction: (res: any) => {
             this.onWebRtcCallSubject.next(res);
+             if (typeof local_stream !== 'undefined' && local_stream) {
+          this.setLocalStream(local_stream);
+        }
+
           },
           streamStatus: streamStatus, ////on , off
           streamType: streamType, //screenshare, video
@@ -458,6 +480,17 @@ export class SdkService {
       callback(res);
     });
   }
+    // ---- Methods to set streams ----
+setLocalStream(stream: MediaStream) {
+  this.localStreamSubject.next(stream);
+  //console.log('>>> Emitting local stream', stream);
+}
+
+setRemoteStream(stream: MediaStream) {
+  this.remoteStreamSubject.next(stream);
+  //console.log('>>> Emitting remote stream', stream);
+}
+
 }
 
 interface Attribute {

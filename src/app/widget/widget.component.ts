@@ -6,7 +6,7 @@ import {
   Renderer2,
   ViewChild,
   Input,
-  ChangeDetectorRef,Inject
+  ChangeDetectorRef, Inject
 } from '@angular/core';
 import {
   FormGroup,
@@ -88,10 +88,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private scrollContainer!: ElementRef;
   @Input() conversation: any;
 
-  // @ViewChild('remoteVideo') remoteVideo!: ElementRef;
-  // @ViewChild('localVideo') myVideoLocal!: ElementRef;
-  @ViewChild('remoteVideo', { static: false }) remoteVideo!: ElementRef;
-  @ViewChild('localVideo', { static: false }) localVideo!: ElementRef;
+  @ViewChild('remoteVideo', { static: false }) remoteVideoRef!: ElementRef<HTMLVideoElement>;
+  @ViewChild('localVideo', { static: false }) localVideoRef!: ElementRef<HTMLVideoElement>;
+
+  localStream!: MediaStream | null;
+  remoteStream!: MediaStream | null;
 
   scrollTop = 0;
   fontSize = new FormControl('12');
@@ -263,8 +264,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   preChatformTitle: string = '';
   preChatformDescription: string = '';
   preChatFormInfo: any;
-  remoteStream: any = [];
-  localStream: any = [];
+
 
   @Input() formData!: any[];
   @Input() callbackFormData!: any[];
@@ -446,7 +446,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
       if (
         this.__appConfig.appConfig.CHANNEL_IDENTIFIER ===
-          'channel_customer_identifier' &&
+        'channel_customer_identifier' &&
         !this.customerIdentifier
       ) {
         alert(
@@ -489,7 +489,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private subscribeToValidations(): void {
-     this.sdk.validationsSubcription.subscribe((res) => {
+    this.sdk.validationsSubcription.subscribe((res) => {
       this.formValidations = res;
       this.preChatFormSubscription = this.sdk.renderPreChatForm$.subscribe(
         (formData: {
@@ -710,7 +710,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
   }
 
-   createFormValidationControls(
+  createFormValidationControls(
     formSchema: any[],
     formValidation: any[],
     formType: string,
@@ -1024,7 +1024,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   calculateAttributeScore(formData: any) {
     formData.body.sections.forEach((section: any) => {
-      
+
       section.attributes.forEach((attribute: any) => {
         let selectedOption = attribute?.answer.find(
           (option: any) => option?.isSelected === true,
@@ -1059,7 +1059,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   calculateFormScore(formData: any): any {
-    
+
     if (!formData) return;
 
     let totalSectionWeightages = 0;
@@ -1237,7 +1237,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       case 'widget':
         if (
           this.storageService.getItem('wrapper-hide', this.storageType) ===
-            'true' ||
+          'true' ||
           this.__appConfig.appConfig.ADDITIONAL_PANEL !== true
         ) {
           this.additionalPanel = false;
@@ -1425,8 +1425,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // ----------------- Handlers -----------------
   private handleChatView() {
     this.setView({ chat: true });
-    if(this.enableEmoji) {
-        setTimeout(() => {
+    if (this.enableEmoji) {
+      setTimeout(() => {
         // Intentionally instantiate EmojiPicker for DOM side effects
         new EmojiPicker(); // NOSONAR
       }, 500);
@@ -1451,6 +1451,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleVideoView() {
+    // Subscribe to local stream updates
+    this.sdk.localStream$.subscribe(stream => {
+      this.localStream = stream;
+      if (this.localVideoRef?.nativeElement) {
+        this.localVideoRef.nativeElement.srcObject = stream;
+      }
+
+    });
+    // Subscribe to remote stream updates
+    this.sdk.remoteStreamObs$.subscribe(stream => {
+      this.remoteStream = stream;
+      if (this.remoteVideoRef?.nativeElement) {
+        this.remoteVideoRef.nativeElement.srcObject = stream;
+      }
+    });
+
     if (this.isVideoCallActive) {
       this.setView({ video: true });
       this.isSecureWebCall = false;
@@ -1459,6 +1475,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.isSecureWebCall = false;
       this.startWebRtcCall('video');
     }
+
   }
 
   private handleScreenShareView() {
@@ -1532,6 +1549,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.logInToFreeSwitch();
     }
     this.initiateWebRtcCall(view);
+
   }
 
 
@@ -1670,7 +1688,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
 
       console.log('New Chat Start Request Sent');
-    } 
+    }
     else if (this.eventTriggerType === '') {
       console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
 
@@ -1679,7 +1697,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.customerData.serviceIdentifier,
           this.customerData.channelCustomerIdentifier,
         );
-      } 
+      }
       else {
         if (event?.data?.auth) {
           this.sdk.onChatResumed(
@@ -1699,7 +1717,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.enableComposer();
   }
 
-  
+
 
   private handleConversationResumed(event: any) {
     console.log('[CONVERSATION_RESUMED] ==> Chat Resumed Response:', event.data);
@@ -1752,7 +1770,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.composerDisable();
         this.changeScreen('end');
       }
-    } 
+    }
     else {
       this.changeScreen('error');
     }
@@ -1787,7 +1805,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-    
+
   handleCimMessage(cimMessage: any) {
     const type = cimMessage.body.type?.toLowerCase();
     const senderType = cimMessage.header.sender?.type?.toLowerCase();
@@ -1812,7 +1830,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
 
-    private isDeliveryNotification(type: string, senderType: string): boolean {
+  private isDeliveryNotification(type: string, senderType: string): boolean {
     return (
       type === 'deliverynotification' &&
       (senderType === 'agent' || senderType === 'bot')
@@ -1828,8 +1846,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private isTypingNotification(type: string, cimMessage: any, senderType: string): boolean {
     return type === 'notification' &&
-          cimMessage.body.notificationType?.toLowerCase() === 'typing_started' &&
-          senderType === 'agent';
+      cimMessage.body.notificationType?.toLowerCase() === 'typing_started' &&
+      senderType === 'agent';
   }
 
   private handleTypingNotification(cimMessage: any) {
@@ -1850,7 +1868,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return type === 'plain' && (senderType === 'agent' || senderType === 'bot');
   }
 
-  private handlePlainMessage(cimMessage: any, intent: string, senderType:string) {
+  private handlePlainMessage(cimMessage: any, intent: string, senderType: string) {
     this.extractSurveyFromPlainMessage(cimMessage);
     if (senderType === 'agent') {
       this.setAgentName(cimMessage);
@@ -1968,7 +1986,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
 
-  enableComposer() {  
+  enableComposer() {
     console.log('message element is ', this.messageElement);
     const messageRef: any = this.messageElement?.nativeElement;
     if (messageRef) {
@@ -2004,10 +2022,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       } else {
         this.clearTypingIndicatorIfNeeded(type, senderType, cimMessage);
 
-        if(type === 'notification' && senderType === 'agent'){
+        if (type === 'notification' && senderType === 'agent') {
           this.enrichNotificationWithNames(cimMessage);
         }
-        if(senderType === 'agent'){
+        if (senderType === 'agent') {
           this.enrichNotificationWithNames(cimMessage);
         }
 
@@ -2218,15 +2236,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
       this.uploadFile(this.selectedFile, additionalText);
     } else if (replyInputValue.trim() !== '') {
-        console.log('Customer message: ', replyInputValue.trim());
+      console.log('Customer message: ', replyInputValue.trim());
 
-        this.constructCimMessage('PLAIN', {
-          text: replyInputValue.trim(),
-          intent: null,
-          originalMessageId: null,
-        });
+      this.constructCimMessage('PLAIN', {
+        text: replyInputValue.trim(),
+        intent: null,
+        originalMessageId: null,
+      });
 
-        this.clearMessageData();
+      this.clearMessageData();
     }
   }
 
@@ -2378,9 +2396,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   previewFile(event: any) {
-    let filesAmount : any
+    let filesAmount: any
     if (event.target?.files?.[0]) {
-       filesAmount = event.target.files;
+      filesAmount = event.target.files;
     } else if (event.dataTransfer.files.length > 0) {
       filesAmount = event.dataTransfer.files;
     }
@@ -2533,7 +2551,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   ) {
     if (data.title.trim() !== '') {
 
-        this.constructCimMessage('PLAIN', {
+      this.constructCimMessage('PLAIN', {
         text: data.title.trim(),
         intent: data.payload,
         originalMessageId: originalMessageId,
@@ -2786,6 +2804,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (!this.errorDuringWebRTCCall) {
       this.isSecureWebCall = true;
       this.isVideoCallActive = true;
+
+
     }
   }
 
@@ -2815,6 +2835,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private setCallState(callType: string) {
     if (callType === 'video' && !this.isSecureWebCall) {
       this.isVideoCallActive = true;
+
     } else if (callType === 'screenshare') {
       this.isScreenShareActive = true;
     } else {
@@ -2846,6 +2867,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     if (this.isVideoCallActive) {
       this.toggleCallVideo(tooltip);
+
     } else {
       this.convertCallRequest('video');
     }
@@ -2990,62 +3012,62 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private handleMediaPermissionStatusEvent(data: any): void {
     console.log('[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ', data.dialog);
     this.dialogId = data.id;
-      console.log(
-        '[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ',
-        data.dialog,
-      );
+    console.log(
+      '[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ',
+      data.dialog,
+    );
 
-      const type = data.dialog.permissionType.toLowerCase();
-      const isDenied = data.dialog.permissionStatus.toLowerCase() === 'denied';
-      const isGranted = data.dialog.permissionStatus.toLowerCase() === 'granted';
-      console.log('data.dialog.errorReason:========>', data.dialog.errorReason);
-      if (data.dialog.errorReason === "Audio/Video Device is being used by Someother Party") {
-        console.log('Permission Status DENIED:========>', "Audio/Video Device is being used by Someother Party");
-      } else {
-        console.log('Permission Status:========>', type);
-        switch (type) {
+    const type = data.dialog.permissionType.toLowerCase();
+    const isDenied = data.dialog.permissionStatus.toLowerCase() === 'denied';
+    const isGranted = data.dialog.permissionStatus.toLowerCase() === 'granted';
+    console.log('data.dialog.errorReason:========>', data.dialog.errorReason);
+    if (data.dialog.errorReason === "Audio/Video Device is being used by Someother Party") {
+      console.log('Permission Status DENIED:========>', "Audio/Video Device is being used by Someother Party");
+    } else {
+      console.log('Permission Status:========>', type);
+      switch (type) {
 
-          case 'microphone':
-            this.disableMic = isDenied ? true : isGranted ? false : this.disableMic;
-            if (isGranted) {
-              // //  Call toggleCallMic when mic permission is granted
+        case 'microphone':
+          this.disableMic = isDenied ? true : isGranted ? false : this.disableMic;
+          if (isGranted) {
+            // //  Call toggleCallMic when mic permission is granted
 
-              // const action = !this.isCallMute ? 'mute_call' : 'unmute_call';
-              //     //this.isCallMute=true;
-              //     //if(action === 'mute_call'){this.toggleCallMicPermission(action, data.id); // pass tooltip reference if you have it
+            // const action = !this.isCallMute ? 'mute_call' : 'unmute_call';
+            //     //this.isCallMute=true;
+            //     //if(action === 'mute_call'){this.toggleCallMicPermission(action, data.id); // pass tooltip reference if you have it
 
-              //   //}
-              //   this.toggleCallMic(this.micTooltip);
-              //  console.log('MICROPHONE Status with tooltip ref:========>',data.id,action)
-              //  Only mute if call is currently unmuted
-              if (!this.isCallMute) {
-                this.toggleCallMic(this.micTooltip);
-                console.log(' MIC forced muted due to permission grant', data.id);
-              } else {
-                console.log(' MIC already muted, no action needed', data.id);
-              }
-
+            //   //}
+            //   this.toggleCallMic(this.micTooltip);
+            //  console.log('MICROPHONE Status with tooltip ref:========>',data.id,action)
+            //  Only mute if call is currently unmuted
+            if (!this.isCallMute) {
+              this.toggleCallMic(this.micTooltip);
+              console.log(' MIC forced muted due to permission grant', data.id);
+            } else {
+              console.log(' MIC already muted, no action needed', data.id);
             }
-            console.log('[disableMic Status] ===>', this.disableMic);
-            break;
 
-          case 'video':
-            this.disableCam = isDenied ? true : isGranted ? false : this.disableCam;
-            console.log('[disableCam Status] ===>', this.disableCam);
-            if (isGranted) {
-              // this.handleVideoIconClick(this.camTooltip)
-              // console.log('CAMERA Status with tooltip ref:========>',this.camTooltip)
-              if (!this.isVideoHide) {
-                this.handleVideoIconClick(this.camTooltip);
-                console.log('CAMERA Status with tooltip ref:========>');
-              } else {
-                console.log("Video is already OFF, skipping toggle.");
-              }
+          }
+          console.log('[disableMic Status] ===>', this.disableMic);
+          break;
 
+        case 'video':
+          this.disableCam = isDenied ? true : isGranted ? false : this.disableCam;
+          console.log('[disableCam Status] ===>', this.disableCam);
+          if (isGranted) {
+            // this.handleVideoIconClick(this.camTooltip)
+            // console.log('CAMERA Status with tooltip ref:========>',this.camTooltip)
+            if (!this.isVideoHide) {
+              this.handleVideoIconClick(this.camTooltip);
+              console.log('CAMERA Status with tooltip ref:========>');
+            } else {
+              console.log("Video is already OFF, skipping toggle.");
             }
-            break;
-        }
+
+          }
+          break;
       }
+    }
 
   }
 
@@ -3069,15 +3091,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             errorMessage = 'Please check Audio / Video permissions in your browser.';
             break;
           case "Microphone permission denied. Please enable.":
-              errorMessage = `Please add microphone permissions in your browser.`;
-              break;
-            case "Audio/Video Device Not Found. Please make sure your Audio/Video Device are working":
-            case "Camera permission denied. Please enable.":
-              errorMessage = `Please add Camera permissions in your browser to enable video.`;
-              break;
-            case "Audio/Video Device is being used by Someother Party":
-              errorMessage = `Audio/Video Device is being used by Someother Party`;
-              break;
+            errorMessage = `Please add microphone permissions in your browser.`;
+            break;
+          case "Audio/Video Device Not Found. Please make sure your Audio/Video Device are working":
+          case "Camera permission denied. Please enable.":
+            errorMessage = `Please add Camera permissions in your browser to enable video.`;
+            break;
+          case "Audio/Video Device is being used by Someother Party":
+            errorMessage = `Audio/Video Device is being used by Someother Party`;
+            break;
 
           default:
             errorMessage = 'An unknown general error occurred.';
@@ -3100,7 +3122,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         errorMessage = 'An unknown error occurred.';
         break;
     }
-     
+
     //if (!errorMessage) return;
 
     // this.showAuthenticationResponseMessage = errorMessage;
@@ -3122,79 +3144,79 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     //   this.changeView('chat');
     // }
     //new code 
-     console.log("========>test 1",data)
-      if (errorMessage === "Audio/Video Device is being used by Someother Party" && this.dialogId != undefined) {
-        console.log("=========>test Audio/Video Device ", this.dialogId)
-        this.snackBar.open(errorMessage, 'Dismiss', {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-          horizontalPosition: 'right',
-        });
-        
-    }
-      if (errorMessage != "Please add Camera permissions in your browser to enable video." && errorMessage != "Audio/Video Device is being used by Someother Party") {
-        this.showAuthenticationResponseMessage = errorMessage;
-        this.activeVideoView = false;
+    console.log("========>test 1", data)
+    if (errorMessage === "Audio/Video Device is being used by Someother Party" && this.dialogId != undefined) {
+      console.log("=========>test Audio/Video Device ", this.dialogId)
+      this.snackBar.open(errorMessage, 'Dismiss', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+        horizontalPosition: 'right',
+      });
 
-        if (this.standaloneWebRtc ) {
-          console.log("=========>test 1.1", this.dialogId)
-         if(this.dialogId === null || this.dialogId === undefined){
+    }
+    if (errorMessage != "Please add Camera permissions in your browser to enable video." && errorMessage != "Audio/Video Device is being used by Someother Party") {
+      this.showAuthenticationResponseMessage = errorMessage;
+      this.activeVideoView = false;
+
+      if (this.standaloneWebRtc) {
+        console.log("=========>test 1.1", this.dialogId)
+        if (this.dialogId === null || this.dialogId === undefined) {
           this.showInvalidCodeError = true;
           this.callPopUpView = false;
           this.activeVideoView = false;
           this.isWebRtcVideoCallActive = false;
-         }
-          
-          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-            duration: 3000,
-            panelClass: ['error-snackbar'],
-            horizontalPosition: 'right',
-          });
-
-        } else if ((this.dialogId != null || this.dialogId != undefined) && errorMessage === "Please add microphone permissions in your browser.") {
-          console.log("=========>test 1.2", this.dialogId)
-          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-            duration: 3000,
-            panelClass: ['error-snackbar'],
-            horizontalPosition: 'right',
-          });
-
-          this.isAudioCallActive = false;
-          this.isSecureWebCall = true;
-          this.isVideoCallActive = true;
-          this.activeVideoView = true;
-          this.errorDuringWebRTCCall = false;
-          //this.changeView('chat')
-          if (this.__appConfig.appConfig.VIDEO == false) {
-            this.isAudioCallActive = true;
-            this.activeVideoView = false;
-          }
         }
-        else {
-          console.log("=========>test 1.1", this.dialogId)
-          this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-            duration: 3000,
-            panelClass: ['error-snackbar'],
-            horizontalPosition: 'right',
-          });
-          this.isAudioCallActive = false;
-          this.isSecureWebCall = false;
-          this.isVideoCallActive = false;
-          this.activeVideoView = false;
-          this.errorDuringWebRTCCall = true;
-          this.changeView('chat')
-        }
-      } else if (errorMessage === "Please add Camera permissions in your browser to enable video.") {
 
-        //console.log("test 1.1")
-        this.snackBar.open(errorMessage, 'Dismiss', {
+        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
           duration: 3000,
           panelClass: ['error-snackbar'],
           horizontalPosition: 'right',
         });
 
+      } else if ((this.dialogId != null || this.dialogId != undefined) && errorMessage === "Please add microphone permissions in your browser.") {
+        console.log("=========>test 1.2", this.dialogId)
+        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'right',
+        });
+
+        this.isAudioCallActive = false;
+        this.isSecureWebCall = true;
+        this.isVideoCallActive = true;
+        this.activeVideoView = true;
+        this.errorDuringWebRTCCall = false;
+        //this.changeView('chat')
+        if (this.__appConfig.appConfig.VIDEO == false) {
+          this.isAudioCallActive = true;
+          this.activeVideoView = false;
+        }
       }
-    
+      else {
+        console.log("=========>test 1.1", this.dialogId)
+        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'right',
+        });
+        this.isAudioCallActive = false;
+        this.isSecureWebCall = false;
+        this.isVideoCallActive = false;
+        this.activeVideoView = false;
+        this.errorDuringWebRTCCall = true;
+        this.changeView('chat')
+      }
+    } else if (errorMessage === "Please add Camera permissions in your browser to enable video.") {
+
+      //console.log("test 1.1")
+      this.snackBar.open(errorMessage, 'Dismiss', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+        horizontalPosition: 'right',
+      });
+
+    }
+
 
 
 
@@ -3361,7 +3383,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-   setFontFromLocalStorage() {
+  setFontFromLocalStorage() {
     try {
       if (this.storageService.getItem('fontSize', this.storageType) !== null) {
         this.fontSize.setValue(
@@ -3433,7 +3455,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
       try {
         if (this.webRTCConfig && !this.IsRegisteredInFreeSwitch) {
-           this.logInToFreeSwitch();
+          this.logInToFreeSwitch();
         }
       } catch (error) {
         console.error('Error logging into FreeSwitch:', error);
@@ -3467,7 +3489,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // const baseUrl = "http://localhost:4000";
     // const fullUrl = `${baseUrl}${hashPart}`;
 
-    
+
 
     const widgetIdentifier = urlParams.get('widgetIdentifier');
     if (widgetIdentifier === this.widgetIdentifier) {
@@ -3877,9 +3899,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (!svg.dataset.originalColors) {
         // Store original colors in data attribute if not already stored
         const originalColors = [];
-          for (const path of paths) {
-            originalColors.push(path.getAttribute('fill'));
-          }
+        for (const path of paths) {
+          originalColors.push(path.getAttribute('fill'));
+        }
         svg.dataset.originalColors = JSON.stringify(originalColors);
       }
 
@@ -3915,7 +3937,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     console.log('file', file);
-    
+
     const uploadBtn: any = document.getElementById(`upload-btn-${id}`);
     uploadBtn.disabled = true;
 

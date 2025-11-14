@@ -1,4 +1,5 @@
 
+import { BehaviorSubject } from 'rxjs';
 import { SdkService } from '../services/sdk.service';
 import { WidgetComponent } from './widget.component';
 
@@ -14,6 +15,9 @@ const mockSdkService: Partial<SdkService> = {
   sendChatMessage: jest.fn(),
   handleChatEnd: jest.fn(), 
   moveToFileServer: jest.fn((fd, cb) => cb({})),
+  localStream$: new BehaviorSubject(null),
+  remoteStreamObs$: new BehaviorSubject(null),
+ 
 };
 
 const mockAppConfigService = {
