@@ -2071,7 +2071,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.renderer.setAttribute(
         messageRef,
         'placeholder',
-        'Type message here ...',
+        this.translate.instant('composer-placeholder'),
       );
       this.renderer.setProperty(messageRef, 'value', '');
       this.isComposerDisable = false;
@@ -2437,7 +2437,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.renderer.setAttribute(
         messageRef,
         'placeholder',
-        'Type message here ...'
+        this.translate.instant('composer-placeholder')
       );
       this.isComposerDisable = false;
     }
