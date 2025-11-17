@@ -1632,6 +1632,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isChatMax = true;
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
+
+        this.additionalPanel = false;
+        this.resizeWidget('form-view');
         break;
     }
     this.cdRef.detectChanges();
