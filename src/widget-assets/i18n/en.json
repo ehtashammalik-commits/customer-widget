@@ -75,5 +75,9 @@
         "choose-file": "Choose File",
         "sorry": "Sorry!",
         "thankyou": "Thank You!"
+    },
+    "message": {
+        "you": "Вие"
     }
+
 }

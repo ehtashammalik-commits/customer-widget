@@ -365,6 +365,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   widgetType = "COMPACT";
   appliedColorTheme: string = '';
   avaClientId: string = '';
+  defaultWidgetLanguage: string = 'en';
   
   constructor(
     private route: ActivatedRoute,
@@ -883,6 +884,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.enableFontResize = configs.enableFontResize;
     this.preChatFormId = configs.form;
     this.webRTCConfig = configs.webRtc;
+    this.defaultWidgetLanguage = configs.language.code || 'en';
     if (this.webRTCConfig !== null) {
       this.enableWebRtc = configs.webRtc?.enableWebRtc;
       console.log('List of webRTC Configs: ', this.webRTCConfig);
@@ -3401,8 +3403,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.textDirection = 'right-direction';
       this.translate.use(this.selectedLanguage);
       console.log(this.selectedLanguage, 'this.selectedLanguage');
+    } else {
+      this.selectedLanguage = this.defaultWidgetLanguage;
+      this.translate.use(this.selectedLanguage);
     }
+
+    console.log('Final selected language is :' + this.translate.currentLang);
   }
+  
 
   logInToFreeSwitch() {
     if (!this.IsRegisteredInFreeSwitch && this.webRTCConfig.sipExtension) {
