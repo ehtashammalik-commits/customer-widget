@@ -857,12 +857,10 @@ button.close-widget-wrapper {
 
 .widget-chat-header {
   padding: 0 5px;
-  height: 50px;
-  border-radius: 10px;
-  cursor: pointer;
-  display: flex;
+  border-radius: 10px 10px 0px 0px;
   flex-direction: row;
   justify-content: space-between;
+  margin-bottom: 10px;
 
   h5 {
     line-height: 36px;
@@ -871,9 +869,22 @@ button.close-widget-wrapper {
     left: 10px;
     font-family: "Roboto";
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
     font-style: normal;
     }
+  }
+
+  .widget-chat-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+
+  }
+
+  .widget-sub-heading {
+    font-size: 11px;
+    margin-top: -7px;
   }
 
 .widget-header-icon {
@@ -955,7 +966,6 @@ button.close-widget-wrapper {
 
 .widget-error-content {
   background-color: $white-color;
-  border-radius: 10px;
   position: relative;
   height: 78%;
   bottom: 14px;
@@ -1071,17 +1081,15 @@ button.close-widget-wrapper {
 }
 
 .widget-chat-navbar {
-  border-radius: 10px 10px 0px 0px;
   border-bottom: 1px solid #eff2f7;
-  cursor: pointer;
   position: absolute;
   background-color: rgb(255, 255, 255);
   z-index: 999999;
-  top: 32px;
   height: 36px;
   width: 100%;
   justify-content: end;
   display: flex;
+  margin-top: -10px;
 }
 
 .widget-navbar-icon {
@@ -1816,7 +1824,7 @@ mat-spinner {
   justify-content: center;
   align-items: center;
   left: 12px;
-  margin-top: 0px;
+  margin-top: -10px;
 
   span {
     height: 6px;

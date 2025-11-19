@@ -609,6 +609,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.setFontFromLocalStorage();
     this.getCalendarEvents();
     window.addEventListener('message', this.receiveMessage.bind(this), false);
+
   }
 
   initPrechatform() {

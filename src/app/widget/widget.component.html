@@ -43,16 +43,20 @@
       <div class="widget-form">
         <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
-          <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon"  *ngIf="!isWebRtcVideoCallActive">
-<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">-->
-<!--              minimize-->
-<!--            </span>-->
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
+
+          <div class="widget-chat-header-top">
+            <h5 id="title" [innerHTML]='title'></h5>
+            <div class="widget-header-icon"  *ngIf="!isWebRtcVideoCallActive">
+  <!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+  <!--              [matTooltipPosition]="matToolTipPosition!">-->
+  <!--              minimize-->
+  <!--            </span>-->
+                <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                  <mat-icon>remove</mat-icon>
+                </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
         </div>
         <!-- Widget Chat Control Toolbar -->
         <div class="widget-chat-navbar">
@@ -1123,8 +1127,9 @@
       <div class="widget-form">
         <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
-          <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon">
+          <div class="widget-chat-header-top">
+            <h5 id="title" [innerHTML]='title'></h5>
+            <div class="widget-header-icon">
             <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
               <mat-icon>remove</mat-icon>
             </button>
@@ -1140,7 +1145,10 @@
 <!--                  [matTooltipPosition]="matToolTipPosition!">-->
 <!--              close-->
 <!--            </span>-->
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
+
 <!--          <div class="widget-header-icon iconOne" mat-raised-button (click)="endChat()">-->
 <!--            <span class="material-symbols-outlined close-icon" matTooltip="{{ 'button.end-conversation' | translate }}"-->
 <!--              [matTooltipPosition]="matToolTipPosition!">-->
@@ -1148,6 +1156,7 @@
 <!--            </span>-->
 <!--          </div>-->
         </div>
+        
         <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
 
@@ -2654,8 +2663,9 @@
     <div class="widget-form-area">
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
-          <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon">
+          <div class="widget-chat-header-top">
+            <h5 id="title" [innerHTML]="title"></h5>
+            <div class="widget-header-icon">
 <!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
 <!--              [matTooltipPosition]="matToolTipPosition!">-->
 <!--              minimize-->
@@ -2663,7 +2673,9 @@
               <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                 <mat-icon>remove</mat-icon>
               </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]="subtitle"></p>
         </div>
         <div class="widget-error-content">
           <div class="error-icon">
@@ -2704,16 +2716,22 @@
     <div class="widget-form-area">
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
-          <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon">
-<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">-->
-<!--              minimize-->
-<!--            </span>-->
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
+
+          <div class="widget-chat-header-top">
+            <h5 id="title" [innerHTML]="title"></h5>
+            
+            <div class="widget-header-icon">
+  <!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+  <!--              [matTooltipPosition]="matToolTipPosition!">-->
+  <!--              minimize-->
+  <!--            </span>-->
+                <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                  <mat-icon>remove</mat-icon>
+                </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]="subtitle"></p>
+
         </div>
         <div class="widget-error-content">
           <div class="error-icon">
@@ -2768,16 +2786,19 @@
     <div class="widget-form-area">
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
-          <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon">
-<!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">-->
-<!--              minimize-->
-<!--            </span>-->
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
+          <div class="widget-chat-header-top">
+            <h5 id="title" [innerHTML]='title'></h5>
+            <div class="widget-header-icon">
+  <!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
+  <!--              [matTooltipPosition]="matToolTipPosition!">-->
+  <!--              minimize-->
+  <!--            </span>-->
+                <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                  <mat-icon>remove</mat-icon>
+                </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
         </div>
         <div class="widget-error-content">
           <div class="error-icon">
