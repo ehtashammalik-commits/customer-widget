@@ -98,7 +98,7 @@ $emoji-margin: 6px;
   position: fixed;
   bottom: 0px;
   right: 0px;
-  width: 350px;
+  width: 97%;
   height: 100%;
 }
 
@@ -487,7 +487,7 @@ button.close-widget-wrapper {
   position: absolute;
   right: 15px;
   display: block;
-  width: 335px;
+  width: inherit;
   height: 96%;
   border-radius: 10px;
   filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2));
@@ -1245,13 +1245,11 @@ button.close-widget-wrapper {
 .widget-chat-message-customer {
   display: flex;
   width: auto;
-  max-width: 280px;
   height: auto;
   margin-top: 25px;
   position: inherit;
   float: right;
   justify-content: flex-end;
-  left: 25px;
 
   .customer-message {
     display: grid;
@@ -1261,7 +1259,7 @@ button.close-widget-wrapper {
     border-radius: 3px;
     padding: 0px 5px;
     width: auto;
-    max-width: 250px;
+    max-width: 80%;
     min-width: 85px;
 
     .header {
@@ -1354,7 +1352,6 @@ button.close-widget-wrapper {
   display: flex;
   //float: left;
   width: auto;
-  max-width: 312px;
   height: auto;
   margin-top: 25px;
   margin-left: 5px;
