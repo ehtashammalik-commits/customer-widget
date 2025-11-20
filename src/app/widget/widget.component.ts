@@ -1188,9 +1188,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             timezone: this.browserInfoData?.geoLocationData?.time_zone?.name
               ? this.browserInfoData.geoLocationData.time_zone.name
               : null,
-            language: this.browserInfoData?.geoLocationData?.languages
-              ? this.browserInfoData.geoLocationData.languages
-              : this.browserLang || null,
+            language: this.translate.currentLang 
+              ? this.translate.currentLang
+              : this.browserInfoData?.geoLocationData?.languages || null,
             country: this.browserInfoData?.geoLocationData?.country_name
               ? this.browserInfoData.geoLocationData.country_name
               : null,
