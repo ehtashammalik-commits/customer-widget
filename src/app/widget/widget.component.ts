@@ -1190,7 +1190,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               : null,
             language: this.browserInfoData?.geoLocationData?.languages
               ? this.browserInfoData.geoLocationData.languages
-              : null,
+              : this.browserLang || null,
             country: this.browserInfoData?.geoLocationData?.country_name
               ? this.browserInfoData.geoLocationData.country_name
               : null,
