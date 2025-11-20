@@ -308,22 +308,23 @@ $emoji-margin: 6px;
 }
 
 button.close-widget-wrapper {
-  background: var(--main-color);
-    border: 1px solid #d8d8da;
+  background: transparent;
+    border: none;
     position: absolute;
     right: -10px;
     top: -13px;
     /* opacity: .8; */
-    color: #fff;
+    color: #6c757d;
     display: block;
     transition: all .3s;
     cursor: pointer;
     outline: none;
     /* padding: 0px; */
-    font-size: 18px;
+    font-size: 25px;
+    font-weight: 500;
     border-radius: 100%;
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 35px;
     line-height: 10px;
     padding: 0;
     .close-trigger{
