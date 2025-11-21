@@ -952,8 +952,9 @@ button.close-widget-wrapper {
   background-color: $white-color;
   border-radius: 10px;
   position: relative;
-  height: calc(100% - 120px); // Subtract space for header (20px top) + composer (60px) + padding (60px)
+  height: calc(100% - 140px); // Subtract space for header (20px top) + composer (60px) + padding (60px)
   overflow-y: scroll;
+  margin-top: 25px;
 }
 
 .widget-error-content {

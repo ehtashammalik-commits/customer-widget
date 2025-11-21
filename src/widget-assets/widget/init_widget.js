@@ -1,4 +1,4 @@
-const { customerWidgetUrl, serviceIdentifier, widgetIdentifier, Source } = __cim;
+const { customerWidgetUrl, serviceIdentifier, widgetIdentifier, Source, widgetWidth, widgetHeight } = __cim;
 const priorityCookies = ['mtc_id', '_ga']; // Add any other cookies you want to prioritize
 var currentWindowWidth = window.innerWidth;
 window.dataLayer = window.dataLayer || [];
@@ -126,8 +126,8 @@ window.addEventListener('message', (event) => {
       parentSection.style.height = '100%';
     }
     else {
-      parentSection.style.width = (currentWindowWidth > 440) ? '360px' : 'calc(100% - 5vw)';
-      parentSection.style.height = '620px';
+      parentSection.style.width = (currentWindowWidth > 440) ? widgetWidth || '360px' : 'calc(100% - 5vw)';
+      parentSection.style.height = widgetHeight || '620px';
     }
   }
 }, false);
