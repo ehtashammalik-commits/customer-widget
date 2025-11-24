@@ -115,10 +115,12 @@ window.addEventListener('message', (event) => {
   if (event.data.state == 'icon-view') {
     parentSection.style.width = '100px';
     parentSection.style.height = '80px';
+    parentSection.style.boxShadow = 'none';
   }
   if (event.data.state == 'wraper-view') {
     parentSection.style.width = '200px';
     parentSection.style.height = '210px';
+    parentSection.style.boxShadow = 'none';
   }
   if (event.data.state == 'form-view') {
     if (Source == 'UApp') {
@@ -128,6 +130,7 @@ window.addEventListener('message', (event) => {
     else {
       parentSection.style.width = (currentWindowWidth > 440) ? widgetWidth || '360px' : 'calc(100% - 5vw)';
       parentSection.style.height = widgetHeight || '620px';
+      parentSection.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
     }
   }
 }, false);
