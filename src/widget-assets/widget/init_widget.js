@@ -1,4 +1,4 @@
-const { customerWidgetUrl, serviceIdentifier, widgetIdentifier, Source, widgetWidth, widgetHeight } = __cim;
+const { customerWidgetUrl, serviceIdentifier, widgetIdentifier, Source, widgetWidth, widgetHeight, widgetBottomMargin, widgetBottomRightMargin } = __cim;
 const priorityCookies = ['mtc_id', '_ga']; // Add any other cookies you want to prioritize
 var currentWindowWidth = window.innerWidth;
 window.dataLayer = window.dataLayer || [];
@@ -42,15 +42,15 @@ parentSection.setAttribute('id', 'init_widget_main');
 parentSection.style.border = '0';
 parentSection.style.float = 'right';
 parentSection.style.position = 'fixed';
-parentSection.style.bottom = '10px';
-parentSection.style.maxHeight = 'calc(100vh - 10px)';
-parentSection.style.right = '15px';
+parentSection.style.bottom = widgetBottomMargin || '10px';
+parentSection.style.right = widgetBottomRightMargin || '15px';
+parentSection.style.maxHeight = `calc(100% - ${parentSection.style.bottom})`;
+parentSection.style.maxWidth = `calc(100% - ${parentSection.style.right})`;
 // parentSection.style.width = '355px';
 // parentSection.style.height = '665px';
 parentSection.style.width = '100px';
 parentSection.style.height = '80px';
 parentSection.style.background = 'transparent';
-parentSection.style.maxWidth = '100%';
 parentSection.style.minHeight = '0px';
 parentSection.style.minWidth = '0px';
 parentSection.style.zIndex = '9999';
