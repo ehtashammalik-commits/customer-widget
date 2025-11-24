@@ -273,6 +273,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   preChatFormInfo: any;
   remoteStream: any = [];
   localStream: any = [];
+  isMinimizeIconDisable: boolean = false;
+  isExitIconDisable: boolean = false;
 
 
   @Input() formData!: any[];
@@ -935,6 +937,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       type: 'object',
       value: this.getInputParamsAsEntities()
     };
+    this.isExitIconDisable = this.additionalValuesMap["HIDE_WIDGET_EXIT_ICON"]?.value || false;
+    this.isMinimizeIconDisable = this.additionalValuesMap["HIDE_WIDGET_MINIMIZE_ICON"]?.value || false;
     console.log('Additional Schema:', this.additionalSchema);
     console.log('Additional Values:', this.additionalValues);
     console.log('Additional Values Map:', this.additionalValuesMap);

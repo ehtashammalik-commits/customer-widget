@@ -51,7 +51,7 @@
   <!--              [matTooltipPosition]="matToolTipPosition!">-->
   <!--              minimize-->
   <!--            </span>-->
-                <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                   <mat-icon>remove</mat-icon>
                 </button>
             </div>
@@ -220,7 +220,7 @@
 <!--              [matTooltipPosition]="matToolTipPosition!">minimize</span>-->
 <!--          </span>-->
           <div class="widget-header-icon">
-            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+            <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
               <mat-icon>remove</mat-icon>
             </button>
           </div>
@@ -463,7 +463,7 @@
 <!--          </span>-->
 
           <div class="widget-header-icon">
-            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+            <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
               <mat-icon>remove</mat-icon>
             </button>
           </div>
@@ -1130,10 +1130,10 @@
           <div class="widget-chat-header-top">
             <h5 id="title" [innerHTML]='title'></h5>
             <div class="widget-header-icon">
-            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+            <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
               <mat-icon>remove</mat-icon>
             </button>
-            <button matMiniFab (click)="endChat()"  aria-label="close conversation" matTooltipPosition="above"  matTooltip="{{ 'button.end-conversation' | translate }}">
+            <button matMiniFab *ngIf="!isExitIconDisable" (click)="endChat()"  aria-label="close conversation" matTooltipPosition="above"  matTooltip="{{ 'button.end-conversation' | translate }}">
               <mat-icon>close</mat-icon>
             </button>
 
@@ -2670,7 +2670,7 @@
 <!--              [matTooltipPosition]="matToolTipPosition!">-->
 <!--              minimize-->
 <!--            </span>-->
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+              <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                 <mat-icon>remove</mat-icon>
               </button>
             </div>
@@ -2725,7 +2725,7 @@
   <!--              [matTooltipPosition]="matToolTipPosition!">-->
   <!--              minimize-->
   <!--            </span>-->
-                <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                   <mat-icon>remove</mat-icon>
                 </button>
             </div>
@@ -2793,7 +2793,7 @@
   <!--              [matTooltipPosition]="matToolTipPosition!">-->
   <!--              minimize-->
   <!--            </span>-->
-                <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                   <mat-icon>remove</mat-icon>
                 </button>
             </div>
