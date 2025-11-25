@@ -1516,10 +1516,16 @@
                               : '18px'
                         }">
                       </span>
-                      <a *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
-                        [href]="srcURL" target="_blank">
-                        <img class="message-image" *ngIf="srcURL" [src]="srcURL" alt="{{ message.body.caption }}" />
-                      </a>
+                      <button *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
+                        class="message-image-container"
+                        (click)="openImageOverlay(srcURL, message.body.caption)"
+                        [attr.aria-label]="'View image: ' + message.body.caption"
+                        style="cursor: pointer; border: none; background: none; padding: 0;">
+                        <img class="message-image" 
+                             *ngIf="srcURL" 
+                             [src]="srcURL" 
+                             alt="{{ message.body.caption }}" />
+                      </button>
                       <a *ngIf="message.body.type == 'VIDEO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
                         [href]="srcURL" target="_blank">
                         <video *ngIf="srcURL" width="238" height="120" controls>
@@ -2122,10 +2128,16 @@
                               : '18px'
                         }">
                       </span>
-                      <a *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
-                        [href]="srcURL" target="_blank">
-                        <img class="message-image" *ngIf="srcURL" [src]="srcURL" alt="{{ message.body.caption }}" />
-                      </a>
+                      <button *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
+                        class="message-image-container"
+                        (click)="openImageOverlay(srcURL, message.body.caption)"
+                        [attr.aria-label]="'View image: ' + message.body.caption"
+                        style="cursor: pointer; border: none; background: none; padding: 0;">
+                        <img class="message-image" 
+                             *ngIf="srcURL" 
+                             [src]="srcURL" 
+                             alt="{{ message.body.caption }}" />
+                      </button>
                       <a *ngIf="message.body.type == 'VIDEO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
                         [href]="srcURL" target="_blank">
                         <video *ngIf="srcURL" width="225" height="120" controls>
@@ -2926,6 +2938,14 @@
 
   </ng-container>
 </div>
+
+<!-- Image Overlay Component -->
+<app-image-overlay
+  [imageUrl]="overlayImageUrl"
+  [altText]="overlayImageAlt"
+  [isOpen]="isImageOverlayOpen"
+  (closeOverlay)="closeImageOverlay()">
+</app-image-overlay>
 
 <!-- Sound Notification Starts-->
 <div id="notificationSound">

@@ -276,6 +276,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isMinimizeIconDisable: boolean = false;
   isExitIconDisable: boolean = false;
 
+  // Image Overlay properties
+  isImageOverlayOpen: boolean = false;
+  overlayImageUrl: string = '';
+  overlayImageAlt: string = '';
+
 
   @Input() formData!: any[];
   @Input() callbackFormData!: any[];
@@ -1645,6 +1650,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         break;
     }
     this.cdRef.detectChanges();
+  }
+
+  // Image Overlay Methods
+  openImageOverlay(imageUrl: string, altText: string): void {
+    this.overlayImageUrl = imageUrl;
+    this.overlayImageAlt = altText;
+    this.isImageOverlayOpen = true;
+  }
+
+  closeImageOverlay(): void {
+    this.isImageOverlayOpen = false;
+    this.overlayImageUrl = '';
+    this.overlayImageAlt = '';
   }
 
   async changeView(view: any) {

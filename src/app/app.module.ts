@@ -46,6 +46,7 @@ import { SanitizeHtmlPipe } from './sanitizeHtml.pipe';
 import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
 import { SanitizeHtmlForEmail } from './pipes/sanitize-html-for-email.pipe';
 import {MatSliderModule} from "@angular/material/slider";
+import { ImageOverlayComponent } from './image-overlay/image-overlay.component';
 
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
@@ -75,6 +76,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     SanitizeHtmlPipe,
     SafeAttachmentUrlPipe,
     SanitizeHtmlForEmail,
+    ImageOverlayComponent,
   ],
   imports: [
     NgxLinkifyjsModule.forRoot({
