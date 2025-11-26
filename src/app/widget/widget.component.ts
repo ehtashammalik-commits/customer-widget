@@ -2015,12 +2015,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
           
           case 'CONVERSATION_RESUMED':
-            this.handleReconnectsAttempts(0);
             console.log(
               '[CONVERSATION_RESUMED] ==> Chat Resumed Response:',
               event.data,
             );
             this.isChatActive = true;
+            this.handleReconnectsAttempts(0);
+            
             this.preChatFormLoader = false;
             this.changeScreen('chat');
             this.enableComposer();
@@ -2059,7 +2060,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
           case 'SOCKET_DISCONNECTED':
             console.log('event response:', event.data);
-            this.isChatActive = false;
+            // this.isChatActive = false;
             this.composerDisable();
             this.eventTriggerType = '';
             if (messageType !== 'survey') {
@@ -5135,6 +5136,11 @@ replaceSpacesWithUnderscores(input: string): string {
   }
 
   handleReconnectsAttempts(currentAttempt: number) {
+    if (!this.isChatActive) {
+      this.changeScreen('error');
+      return;
+    }
+
     this.reconnectAttemptsConfig.currentAttempt = currentAttempt;
 
     if (this.reconnectAttemptsConfig.currentAttempt == 0) {
