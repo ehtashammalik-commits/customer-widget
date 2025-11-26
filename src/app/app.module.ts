@@ -47,7 +47,7 @@ import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
 import { SanitizeHtmlForEmail } from './pipes/sanitize-html-for-email.pipe';
 import {MatSliderModule} from "@angular/material/slider";
 import { ImageOverlayComponent } from './image-overlay/image-overlay.component';
-
+import { NgxSpinnerModule } from 'ngx-spinner';
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
     console.log('Initializing App');
@@ -89,6 +89,7 @@ export function initializeApp1(appConfigService: ConfigService) {
       pbDirection: 'ltr',
       text: 'Loading...',
     }),
+    NgxSpinnerModule.forRoot({ type: 'ball-spin' }),
     BrowserModule,
     HttpClientModule,
     TranslateModule.forRoot({

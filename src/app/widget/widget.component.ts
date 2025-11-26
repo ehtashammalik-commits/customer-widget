@@ -35,6 +35,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { DOCUMENT } from '@angular/common';
 import { Inject } from '@angular/core';
 import { FormMessageTypeService } from '../services/form-message-type.service';
+import { NgxSpinnerService } from "ngx-spinner";
 
 interface Shift {
   id: string;
@@ -373,6 +374,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   appliedColorTheme: string = '';
   avaClientId: string = '';
   defaultWidgetLanguage: string = 'en';
+
+  reconnectAttemptsConfig = {
+    currentAttempt: 0,
+    maxAttempts: 5,
+  }
   
   constructor(
     private route: ActivatedRoute,
@@ -392,7 +398,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private translate: TranslateService,
     private router: Router,
     @Inject(DOCUMENT) private doc: Document,
-    private formMessageTypeService: FormMessageTypeService
+    private formMessageTypeService: FormMessageTypeService,
+    private spinner: NgxSpinnerService
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
@@ -1965,6 +1972,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.composerDisable();
             break;
           case 'SOCKET_CONNECTED':
+            this.handleReconnectsAttempts(0);
             console.log(
               '[SOCKET_CONNECTED] ==> Connection Request Response:',
               event.data,
@@ -2007,6 +2015,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
           
           case 'CONVERSATION_RESUMED':
+            this.handleReconnectsAttempts(0);
             console.log(
               '[CONVERSATION_RESUMED] ==> Chat Resumed Response:',
               event.data,
@@ -2054,12 +2063,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.composerDisable();
             this.eventTriggerType = '';
             if (messageType !== 'survey') {
-              this.cimMessage = [];
-              this.clearMessageData();
               if (event.data.includes('server')) {
                 this.changeScreen('end');
               } else {
-                this.changeScreen('error');
+                this.handleReconnectsAttempts(this.reconnectAttemptsConfig.currentAttempt + 1);
               }
             }
             break;
@@ -2072,7 +2079,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.changeScreen('end');
             break;
           case 'CONNECT_ERROR':
-            this.changeScreen('error');
+            this.handleReconnectsAttempts(this.reconnectAttemptsConfig.currentAttempt + 1);
             console.log('event response:', event.data);
             break;
           case 'ERRORS':
@@ -2478,7 +2485,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleResumedMessages(cimMessages: any[]) {
-
+    this.cimMessage = [];
+    this.clearMessageData();
     cimMessages.forEach((cimMessage) => {
 
       if (cimMessage.body.type?.toLowerCase() === 'form_data') {
@@ -5123,6 +5131,24 @@ replaceSpacesWithUnderscores(input: string): string {
       }
     } catch (error) {
       console.error('Error onhandleRefreshCaseForWebRTC:', error);
+    }
+  }
+
+  handleReconnectsAttempts(currentAttempt: number) {
+    this.reconnectAttemptsConfig.currentAttempt = currentAttempt;
+
+    if (this.reconnectAttemptsConfig.currentAttempt == 0) {
+      this.spinner.hide();
+    } else {
+      this.spinner.show();
+    }
+
+    if (
+      this.reconnectAttemptsConfig.currentAttempt >=
+      this.reconnectAttemptsConfig.maxAttempts
+    ) {
+      this.spinner.hide();
+      this.changeScreen('error');
     }
   }
 }
