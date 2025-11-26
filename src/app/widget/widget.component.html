@@ -738,6 +738,7 @@
   : 'none'
   }"></textarea>
                         </ng-container>
+                        <!-- OPTIONS Fields -->
                         <ng-container *ngSwitchCase="'OPTIONS'">
                           <ng-container [ngSwitch]="attribute.valueType">
                             <ng-container *ngSwitchCase="'mcq'">
@@ -771,16 +772,15 @@
                                   }}</span>
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                               </label>
-
-                              <!-- <br /> -->
-
-                              <mat-select [formControlName]="attribute.key" name="questionnaire">
-                                <!-- <mat-option [value]="null">None</mat-option> -->
-                                <mat-option #optionLabel style="width:100%"
-                                  *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
-                                  [value]="option.label"><span>{{option.label}}</span></mat-option>
-                              </mat-select>
-                              <!-- <mat-error> *Required field</mat-error> -->
+                              <ngx-select-dropdown 
+                                [formControlName]="attribute.key"
+                                [required]="attribute?.isRequired" 
+                                [config]="dropdownConfig"
+                                [options]="attribute.attributeOptions.attributeData[0].values | simplifyOptions" 
+                                [multiple]="false"
+                                bindLabel="label"
+                                bindValue="label">
+                              </ngx-select-dropdown>
 
                             </ng-container>
 

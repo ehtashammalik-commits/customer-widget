@@ -76,8 +76,13 @@
         "sorry": "Sorry!",
         "thankyou": "Thank You!"
     },
+    "dropdown": {
+        "placeholder": "Select an option",
+        "search-placeholder": "🔍 Search",
+        "no-results": "No results found!"
+    },
     "message": {
-        "you": "Вие"
+        "you": "You"
     }
 
 }

@@ -45,9 +45,11 @@ import { NgxUiLoaderModule } from 'ngx-ui-loader';
 import { SanitizeHtmlPipe } from './sanitizeHtml.pipe';
 import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
 import { SanitizeHtmlForEmail } from './pipes/sanitize-html-for-email.pipe';
+import { SimplifyOptionsPipe } from  './pipes/simplify-options.pipe';
 import {MatSliderModule} from "@angular/material/slider";
 import { ImageOverlayComponent } from './image-overlay/image-overlay.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { SelectDropDownModule } from 'ngx-select-dropdown';
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
     console.log('Initializing App');
@@ -67,6 +69,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     ConfirmDialogComponent,
     tagFormatPipe,
     SafeFileURLPipe,
+    SimplifyOptionsPipe,
     getMediaFromTask,
     NpsColorPipe,
     SvgNpsFormatPipe,
@@ -122,7 +125,8 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatCheckboxModule,
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
-    MatSliderModule
+    MatSliderModule,
+    SelectDropDownModule,
   ],
   exports: [getMediaFromTask, TranscriptComponent],
   providers: [
