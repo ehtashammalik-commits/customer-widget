@@ -533,7 +533,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.formValidations,
             'preChatForm',
           );
-          if (this.getAdditionalValue('AUTO_MAXIMIZE_WIDGET') === true) {
+          let userData: string | null = this.storageService.getItem(
+            'user',
+            this.storageType,
+            false,
+          );
+          if (this.getAdditionalValue('AUTO_MAXIMIZE_WIDGET') === true && userData == null) {
             this.changeScreen('chatForm');
           }
         },
@@ -1083,6 +1088,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   initializeChatWithRandomIdentifier(): void {
+
     try {
       this.preChatFormData = {
           "sections": [
@@ -1561,7 +1567,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       case 'chatForm':
         if (this.getAdditionalValue("PRECHAT_FORM_DISABLED")){
           this.changeScreen('chat');
-          this.initializeChatWithRandomIdentifier()
+          this.initializeChatWithRandomIdentifier();
           return;
         }
         this.preChatFormScreen = true;
