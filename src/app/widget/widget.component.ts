@@ -359,7 +359,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     public dialog: MatDialog,
     private readonly browserNotificationService: BrowserNotificationService,
     private readonly deliveryNotificationService: DeliveryNotificationService,
-    private readonly __postMessageHandlerService: PostMessageHandlerService,
+    private __postMessageHandlerService: PostMessageHandlerService,
     private readonly translate: TranslateService,
     private readonly router: Router,
     @Inject(DOCUMENT) private readonly doc: Document,
@@ -3123,30 +3123,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         break;
     }
 
-    //if (!errorMessage) return;
 
-    // this.showAuthenticationResponseMessage = errorMessage;
-    // this.activeVideoView = false;
-
-    // if (this.standaloneWebRtc) {
-    //   this.showInvalidCodeError = true;
-    //   this.callPopUpView = false;
-    //   this.activeVideoView = false;
-    //   this.isWebRtcVideoCallActive = false;
-    //   this.showSnackbar(this.showAuthenticationResponseMessage, 3000, ['error-snackbar']);
-    // } else {
-    //   this.showSnackbar(this.showAuthenticationResponseMessage, 3000, ['error-snackbar']);
-    //   this.isAudioCallActive = false;
-    //   this.isSecureWebCall = false;
-    //   this.isVideoCallActive = false;
-    //   this.activeVideoView = false;
-    //   this.errorDuringWebRTCCall = true;
-    //   this.changeView('chat');
-    // }
-    //new code 
-    console.log("========>test 1", data)
     if (errorMessage === "Audio/Video Device is being used by Someother Party" && this.dialogId != undefined) {
-      console.log("=========>test Audio/Video Device ", this.dialogId)
+
       this.snackBar.open(errorMessage, 'Dismiss', {
         duration: 3000,
         panelClass: ['error-snackbar'],
@@ -3159,7 +3138,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.activeVideoView = false;
 
       if (this.standaloneWebRtc) {
-        console.log("=========>test 1.1", this.dialogId)
+
         if (this.dialogId === null || this.dialogId === undefined) {
           this.showInvalidCodeError = true;
           this.callPopUpView = false;
@@ -3174,7 +3153,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         });
 
       } else if ((this.dialogId != null || this.dialogId != undefined) && errorMessage === "Please add microphone permissions in your browser.") {
-        console.log("=========>test 1.2", this.dialogId)
+
         this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
           duration: 3000,
           panelClass: ['error-snackbar'],
@@ -3193,7 +3172,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
       }
       else {
-        console.log("=========>test 1.1", this.dialogId)
+
         this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
           duration: 3000,
           panelClass: ['error-snackbar'],
@@ -3207,8 +3186,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.changeView('chat')
       }
     } else if (errorMessage === "Please add Camera permissions in your browser to enable video.") {
-
-      //console.log("test 1.1")
       this.snackBar.open(errorMessage, 'Dismiss', {
         duration: 3000,
         panelClass: ['error-snackbar'],
@@ -3216,11 +3193,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       });
 
     }
-
-
-
-
-
 
   }
 

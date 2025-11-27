@@ -6,20 +6,15 @@ import { of, Subject } from 'rxjs';
 
 // 🟢 Load your feature
 const feature = loadFeature('./test/features/webrtcVideo.feature');
-
-
-
-// 🟢 Mock global navigator.mediaDevices
+//  Mock global navigator.mediaDevices
 const mockMediaDevices = {
   getUserMedia: jest.fn(),
   enumerateDevices: jest.fn(),
 };
-
 Object.defineProperty(global.navigator, 'mediaDevices', {
   value: mockMediaDevices,
 });
-
-// 🟢 Mock MediaStream globally
+//  Mock MediaStream globally
 global.MediaStream = jest.fn().mockImplementation((tracks: any[] = []) => {
   return {
     tracks,
@@ -33,8 +28,6 @@ global.MediaStream = jest.fn().mockImplementation((tracks: any[] = []) => {
 
 // Define the feature test
 defineFeature(feature, (test) => {
-
-
   let component: WidgetComponent;
   let spy: jest.SpyInstance;
   const mockChangeDetectorRef = {
@@ -46,8 +39,6 @@ defineFeature(feature, (test) => {
     use: jest.fn()
   } as any;
   const mockActivatedRoute = { snapshot: { params: {} }, queryParams: of({}) } as any;
-
-  const mockFormBuilder = { group: jest.fn() } as any;
   const mockSdkService = {
     sendChatMessage: jest.fn(),
     convertCall: jest.fn(),
@@ -78,15 +69,6 @@ defineFeature(feature, (test) => {
     localStream$: of(new MediaStream()),
     remoteStreamObs$: of(new MediaStream()),
   } as any;
-
-
-  const mockAppConfig = {
-    appConfig: {
-      ENABLE_LOGO: true,
-      ADDITIONAL_PANEL: false,
-      USERNAME_ENABLED: true,
-    },
-  } as any;
   const mockElementRef = {} as any;
   const mockRenderer2 = {} as any;
   const mockSanitizer = {} as any;
@@ -101,15 +83,39 @@ defineFeature(feature, (test) => {
   const mockPostMessageHandlerService = {} as any;
   const router = {} as any;
   const doc = {} as any;
+  const mockStorageService: any = {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+  };
   beforeAll(() => {
     window.alert = jest.fn();
+
   });
+
   beforeEach(() => {
+    // Create a fresh mock config for each test to avoid state corruption
+    const freshMockAppConfig: any = {
+      appConfig: {
+        ENABLE_LOGO: true,
+        ADDITIONAL_PANEL: false,
+        USERNAME_ENABLED: true,
+        AUTO_RESUME_ON_NEW_TAB: false,
+        CHANNEL_IDENTIFIER: "phone",
+        VIDEO: true,
+        MUTE_NOTIFICATIONS: false,
+        IS_DIRECT_WEBRTC_CALL_ENABLED: true,
+        ENABLE_TRANSCRIPT_NOTIFICATIONS: true,
+      },
+      loadConfig: jest.fn().mockResolvedValue(undefined)
+    };
+
     component = new WidgetComponent(
       mockActivatedRoute,
       new FormBuilder(),
       mockSdkService,
-      mockAppConfig,
+      freshMockAppConfig,
+      mockStorageService,
       mockElementRef,
       mockRenderer2,
       mockChangeDetectorRef,
@@ -124,7 +130,20 @@ defineFeature(feature, (test) => {
       doc
     );
 
-    // 🟢 Provide fake WebRTC config directly
+    // Mock the postMessageHandlerService browserInfoData$ observable
+    (component as any).__postMessageHandlerService.browserInfoData$ = of({
+      userAgent: 'jest-mock-agent',
+      platform: 'jest-test-platform',
+    });
+
+    // Mock the tooltip functionality by replacing the updateTooltip method
+    (component as any).updateTooltip = jest.fn((tooltip) => {
+      if (tooltip) {
+        tooltip.hide?.();
+      }
+    });
+
+    // Provide fake WebRTC config directly
     (component as any).webRTCConfig = {
       enableWebRtc: true,
       diallingUri: '26131',
@@ -135,18 +154,6 @@ defineFeature(feature, (test) => {
       uriFs: '192.168.1.17',
       iceServers: [{ urls: [] }]
     };
-    component['__postMessageHandlerService'] = {
-      browserInfoData$: of({
-        userAgent: 'jest-mock-agent',
-        platform: 'jest-test-platform',
-      }),
-    } as any;
-    component['__appConfig'] = {
-      appConfig: {
-        VIDEO: true,
-        IS_DIRECT_WEBRTC_CALL_ENABLED: false, // can be true if needed
-      },
-    } as any;
   });
   let mockAgentInfo;
   let mockOutboundDialing;
@@ -158,16 +165,12 @@ defineFeature(feature, (test) => {
     let mockSnackBarOpen: jest.Mock;
 
     given('the customer has not granted camera permission', () => {
-      // Mock the snackbar service
       mockSnackBarOpen = jest.fn();
       (component as any).snackBar = { open: mockSnackBarOpen };
-
-      // Create a stream with only audio (no video)
       mockStream = new MediaStream();
       const audioTrack = { kind: 'audio', stop: jest.fn() } as any;
       mockStream.addTrack(audioTrack);
 
-      // Mock getUserMedia to return only audio track
       mockMediaDevices.getUserMedia.mockImplementation((constraints) => {
         expect(constraints).toEqual({ video: true, audio: true });
         return Promise.resolve(mockStream);
@@ -189,7 +192,6 @@ defineFeature(feature, (test) => {
         }
       });
 
-      // Spy on initiateWebRtcCall
       initiateWebRtcCallSpy = jest.spyOn(component as any, 'initiateWebRtcCall')
         .mockImplementation(async (type: string) => {
           component.isVideoCallActive = true;
@@ -197,7 +199,7 @@ defineFeature(feature, (test) => {
           component.activeVideoView = true;
 
           const videoTracks = mockStream.getVideoTracks();
-          expect(videoTracks.length).toBe(0); // ✅ Ensure no camera
+          expect(videoTracks.length).toBe(0); // Ensure no camera
 
           if (videoTracks.length === 0) {
             const errorEvent = {
@@ -239,7 +241,7 @@ defineFeature(feature, (test) => {
     });
 
     and('an error is shown suggesting camera permission is required', () => {
-      expect(mockSnackBarOpen).toHaveBeenCalledTimes(1); // ✅ ensure only once
+      expect(mockSnackBarOpen).toHaveBeenCalledTimes(1); // ensure only once
       expect(mockSnackBarOpen).toHaveBeenCalledWith(
         'Camera permission is required for video. Call will continue with audio only.',
         'OK',
@@ -282,12 +284,12 @@ defineFeature(feature, (test) => {
     });
 
     when('the customer clicks Start Video Call', async () => {
-      // Simulate error being sent to handler
+
       (component as any).handleDialogState(errorEvent);
     });
 
     then('the call should not be initiated', () => {
-      // We expect no stream to be set
+
       expect(component['localStream']).toBeUndefined();
     });
 
@@ -474,8 +476,7 @@ defineFeature(feature, (test) => {
     });
 
     then('the call should not be initiated', () => {
-      // For audio call we just assert that the call never started
-      // e.g. no internal state like `activeCall` or `isInCall`
+
       expect((component as any).activeCall).toBeFalsy();
     });
 
@@ -494,309 +495,309 @@ defineFeature(feature, (test) => {
   });
 
 
- test('Customer mutes and unmutes microphone during call', ({ given, when, then }) => {
-  let mockHandleCallMic: jest.Mock;
-  let dialogEvent: any;
+  test('Customer mutes and unmutes microphone during call', ({ given, when, then }) => {
+    let mockHandleCallMic: jest.Mock;
+    let dialogEvent: any;
 
-  given('a WebRTC video call is active', () => {
-    mockHandleCallMic = jest.fn();
-    (component as any).sdk = { handleCallMic: mockHandleCallMic };
-    (component as any).dialogId = 'mock-dialog-id';
-  });
+    given('a WebRTC video call is active', () => {
+      mockHandleCallMic = jest.fn();
+      (component as any).sdk = { handleCallMic: mockHandleCallMic };
+      (component as any).dialogId = 'mock-dialog-id';
+    });
 
-  when('the customer clicks the Mute icon', async () => {
-    await (component as any).toggleCallMic({} as any); // simulate mute
-    
-    dialogEvent = {
-      event: 'dialogState',
-      response: {
-        dialog: {
-          participants: [{ mute: true }]
+    when('the customer clicks the Mute icon', async () => {
+      await (component as any).toggleCallMic({} as any); // simulate mute
+
+      dialogEvent = {
+        event: 'dialogState',
+        response: {
+          dialog: {
+            participants: [{ mute: true }]
+          }
         }
-      }
-    };
-  });
-
-  then('the agent cannot hear the customer', () => {
-    expect(mockHandleCallMic).toHaveBeenCalledWith('mute_call', 'mock-dialog-id');
-    expect(dialogEvent.response.dialog.participants[0].mute).toBe(true);
-  });
-
-  when('the customer clicks Unmute', async () => {
-    await (component as any).toggleCallMic({} as any); // simulate unmute
-    // fake SIP dialog event showing mute = false
-    dialogEvent = {
-      event: 'dialogState',
-      response: {
-        dialog: {
-          participants: [{ mute: false }]
-        }
-      }
-    };
-  });
-
-  then('the agent starts receiving audio from the customer', () => {
-    expect(mockHandleCallMic).toHaveBeenCalledWith('unmute_call', 'mock-dialog-id');
-    expect(dialogEvent.response.dialog.participants[0].mute).toBe(false);
-  });
-});
-
-
-test('Customer puts the call on hold', ({ given, when, and }) => {
-  let dialogEvent: any;
-
-  given('a WebRTC video call is active', () => {
-    // no-op, relying on beforeEach setup
-  });
-
-  when('the customer clicks the Hold button', async () => {
-    await component.toggleCallHold('Hold Call');
-  });
-
-  and('the customer\'s audio and video streams are paused', () => {
-    dialogEvent = {
-      response: {
-        dialog: {
-          id: component.dialogId,
-          state: 'HELD',
-          participants: [
-            {
-              mediaAddress: '8012',
-              state: 'HELD',
-              mute: false
-            }
-          ],
-          mediaType: 'audio',
-          channelType: 'WEB_RTC'
-        }
-      },
-      event: 'dialogState'
-    };
-
-    component.handleDialogStates(dialogEvent);
-
-    expect(dialogEvent.response.dialog.state).toBe('HELD');
-    expect(dialogEvent.response.dialog.participants[0].state).toBe('HELD');
-  });
-
-  and('the Agent hears hold music', () => {
-    expect(mockSdkService.handleCallHoldState).toHaveBeenCalledWith(
-      'holdCall',
-      component.dialogId
-    );
-  });
-});
-
-test('Customer resumes the call after hold', ({ given, when, then, and }) => {
-  let dialogEvent: any;
-
-  given('the customer has put the call on hold', () => {
-    // Set initial state
-    component.isCallOnHold = true;
-  });
-
-  when('the customer clicks the Resume button', async () => {
-    // Trigger the toggle function to resume call
-    await component.toggleCallHold('Resume Call');
-
-    // Simulate the dialogState event received after resuming
-    dialogEvent = {
-      response: {
-        dialog: {
-          id: component.dialogId,
-          state: 'ACTIVE',
-          participants: [
-            {
-              mediaAddress: '8012',
-              state: 'ACTIVE',
-              mute: false
-            }
-          ],
-          mediaType: 'audio',
-          channelType: 'WEB_RTC'
-        }
-      },
-      event: 'dialogState'
-    };
-
-    component.handleDialogStates(dialogEvent);
-  });
-
-  then("the customer's audio and video streams resume", () => {
-    // Since it's audio-only, just check participant state
-    const participant = dialogEvent.response.dialog.participants[0];
-    expect(participant.state).toBe('ACTIVE');
-    expect(participant.mute).toBe(false);
-  });
-
-  and('the agent sees that the call is active again', () => {
-    expect(dialogEvent.response.dialog.state).toBe('ACTIVE');
-    expect(component.isCallOnHold).toBe(false);
-  });
-});
-
-
-test('Customer refreshes the browser mid-call', ({ given, when, then, and }) => {
-  let dialogEvent: any;
-
-  given('a WebRTC video call is active', () => {
-    // Mock an active audio call dialog event
-    dialogEvent = {
-      response: {
-        loginId: '8012',
-        dialog: {
-          id: 'mock-dialog-id',
-          state: 'ACTIVE',
-          participants: [
-            { mediaAddress: '8012', state: 'ACTIVE', mute: false }
-          ],
-          mediaType: 'audio',
-          channelType: 'WEB_RTC'
-        }
-      },
-      event: 'dialogState'
-    };
-  });
-
-  when('the customer refreshes the browser', () => {
-    // Simulate end-of-call due to refresh
-    dialogEvent.response.dialog.state = 'ENDED';
-  });
-
-  then('the call should end gracefully', () => {
-    expect(dialogEvent.response.dialog.state).toBe('ENDED');
-  });
-
-  and('the agent sees a Customer left message', () => {
-    const agentMessage = 'Customer left';
-    // Here you can mock/verify the agent's notification logic
-    expect(agentMessage).toBe('Customer left');
-  });
-
-  and('conversation view should close', () => {
-    const isConversationViewOpen = false; // simulate view closed
-    expect(isConversationViewOpen).toBe(false);
-  });
-});
-
- test('Network disconnect on customer side', ({ given, when, then, and }) => {
-  let dialogEvent: any;
-  let reconnectionTimeout: NodeJS.Timeout | null = null;
-  let agentMessage: string | null = null;
-
-  given('a WebRTC video call is active', () => {
-    // Simulate an active audio call
-    dialogEvent = {
-      response: {
-        loginId: '8012',
-        dialog: {
-          id: 'mock-dialog-id',
-          state: 'ACTIVE',
-          participants: [
-            { mediaAddress: '8012', state: 'ACTIVE', mute: false }
-          ],
-          mediaType: 'audio',
-          channelType: 'WEB_RTC'
-        }
-      },
-      event: 'dialogState'
-    };
-  });
-
-  when('the customer\'s network drops', () => {
-    dialogEvent = {
-    event: 'dialogState',
-    response: {
-      dialog: {
-        id: 'mock-dialog-id',
-        state: 'DROPPED',   // 👈 simulate proper disconnect
-        mediaType: 'audio',
-        channelType: 'WEB_RTC',
-      },
-    },
-  };
-  agentMessage = 'Customer disconnected';
-    // emit socket disconnected
-  mockSdkService.connectionResponse$.next({ type: 'SOCKET_DISCONNECTED', data: 'ping timeout' });
-
-  // emit xmpp out of service event
-  mockSdkService.connectionResponse$.next({ event: 'xmppEvent', response: { loginId: '8012', type: 'OUT_OF_SERVICE', description: 'WebSocket closed wss://...' } });
-
-  // emit transport error
-  mockSdkService.connectionResponse$.next({ type: 'CONNECT_ERROR', data: { type: 'TransportError', description: 0 } });
-
-  });
-
-  then('the system should wait for reconnection for few seconds', () => {
-    // During the timeout, call state should be DISCONNECTED
-    expect(dialogEvent.response.dialog.state).toBe('DROPPED');
-    
-  });
-
-  and('if reconnection fails, the call ends with a proper message on Agent Desk', () => {
-    // Simulate timeout completion
-    if (reconnectionTimeout) {
-      clearTimeout(reconnectionTimeout);
-      dialogEvent.response.dialog.state = 'DROPPED';
-      agentMessage = 'Customer disconnected';
-    }
-
-    expect(dialogEvent.response.dialog.state).toBe('DROPPED');
-    expect(agentMessage).toBe('Customer disconnected');
-  });
-});
-
-test('Call ends gracefully on customer end', ({ given, when, then, and }) => {
-  let dialogEvent: any;
-  let agentEvent: any;
-
-  given('a WebRTC video call is active', () => {
-    component.dialogId = 'plcu0nnjqm50e24mcpkj';
-    component.callPopUpView = true;
-    component.isSecureWebCall = true;
-
-    // mock sdk logout handler
-    (component.sdk.handleLogOutAgent as jest.Mock).mockImplementation(() => {
-      agentEvent = {
-        event: "agentInfo",
-        response: { state: "LOGOUT" }
       };
+    });
+
+    then('the agent cannot hear the customer', () => {
+      expect(mockHandleCallMic).toHaveBeenCalledWith('mute_call', 'mock-dialog-id');
+      expect(dialogEvent.response.dialog.participants[0].mute).toBe(true);
+    });
+
+    when('the customer clicks Unmute', async () => {
+      await (component as any).toggleCallMic({} as any); // simulate unmute
+
+      dialogEvent = {
+        event: 'dialogState',
+        response: {
+          dialog: {
+            participants: [{ mute: false }]
+          }
+        }
+      };
+    });
+
+    then('the agent starts receiving audio from the customer', () => {
+      expect(mockHandleCallMic).toHaveBeenCalledWith('unmute_call', 'mock-dialog-id');
+      expect(dialogEvent.response.dialog.participants[0].mute).toBe(false);
     });
   });
 
-  when('the agent ends the call', () => {
-    component.callEnd();
 
-    // simulate dialog end event
-    dialogEvent = {
-      event: "dialogState",
-      response: {
-        dialog: { state: "DROPPED", isCallEnded: 1 }
+  test('Customer puts the call on hold', ({ given, when, and }) => {
+    let dialogEvent: any;
+
+    given('a WebRTC video call is active', () => {
+      // no-op, relying on beforeEach setup
+    });
+
+    when('the customer clicks the Hold button', async () => {
+      await component.toggleCallHold('Hold Call');
+    });
+
+    and('the customer\'s audio and video streams are paused', () => {
+      dialogEvent = {
+        response: {
+          dialog: {
+            id: component.dialogId,
+            state: 'HELD',
+            participants: [
+              {
+                mediaAddress: '8012',
+                state: 'HELD',
+                mute: false
+              }
+            ],
+            mediaType: 'audio',
+            channelType: 'WEB_RTC'
+          }
+        },
+        event: 'dialogState'
+      };
+
+      component.handleDialogStates(dialogEvent);
+
+      expect(dialogEvent.response.dialog.state).toBe('HELD');
+      expect(dialogEvent.response.dialog.participants[0].state).toBe('HELD');
+    });
+
+    and('the Agent hears hold music', () => {
+      expect(mockSdkService.handleCallHoldState).toHaveBeenCalledWith(
+        'holdCall',
+        component.dialogId
+      );
+    });
+  });
+
+  test('Customer resumes the call after hold', ({ given, when, then, and }) => {
+    let dialogEvent: any;
+
+    given('the customer has put the call on hold', () => {
+      // Set initial state
+      component.isCallOnHold = true;
+    });
+
+    when('the customer clicks the Resume button', async () => {
+      // Trigger the toggle function to resume call
+      await component.toggleCallHold('Resume Call');
+
+      // Simulate the dialogState event received after resuming
+      dialogEvent = {
+        response: {
+          dialog: {
+            id: component.dialogId,
+            state: 'ACTIVE',
+            participants: [
+              {
+                mediaAddress: '8012',
+                state: 'ACTIVE',
+                mute: false
+              }
+            ],
+            mediaType: 'audio',
+            channelType: 'WEB_RTC'
+          }
+        },
+        event: 'dialogState'
+      };
+
+      component.handleDialogStates(dialogEvent);
+    });
+
+    then("the customer's audio and video streams resume", () => {
+
+      const participant = dialogEvent.response.dialog.participants[0];
+      expect(participant.state).toBe('ACTIVE');
+      expect(participant.mute).toBe(false);
+    });
+
+    and('the agent sees that the call is active again', () => {
+      expect(dialogEvent.response.dialog.state).toBe('ACTIVE');
+      expect(component.isCallOnHold).toBe(false);
+    });
+  });
+
+
+  test('Customer refreshes the browser mid-call', ({ given, when, then, and }) => {
+    let dialogEvent: any;
+
+    given('a WebRTC video call is active', () => {
+      // Mock an active audio call dialog event
+      dialogEvent = {
+        response: {
+          loginId: '8012',
+          dialog: {
+            id: 'mock-dialog-id',
+            state: 'ACTIVE',
+            participants: [
+              { mediaAddress: '8012', state: 'ACTIVE', mute: false }
+            ],
+            mediaType: 'audio',
+            channelType: 'WEB_RTC'
+          }
+        },
+        event: 'dialogState'
+      };
+    });
+
+    when('the customer refreshes the browser', () => {
+
+      dialogEvent.response.dialog.state = 'ENDED';
+    });
+
+    then('the call should end gracefully', () => {
+      expect(dialogEvent.response.dialog.state).toBe('ENDED');
+    });
+
+    and('the agent sees a Customer left message', () => {
+      const agentMessage = 'Customer left';
+
+      expect(agentMessage).toBe('Customer left');
+    });
+
+    and('conversation view should close', () => {
+      const isConversationViewOpen = false; // simulate view closed
+      expect(isConversationViewOpen).toBe(false);
+    });
+  });
+
+  test('Network disconnect on customer side', ({ given, when, then, and }) => {
+    let dialogEvent: any;
+    let reconnectionTimeout: NodeJS.Timeout | null = null;
+    let agentMessage: string | null = null;
+
+    given('a WebRTC video call is active', () => {
+      // Simulate an active audio call
+      dialogEvent = {
+        response: {
+          loginId: '8012',
+          dialog: {
+            id: 'mock-dialog-id',
+            state: 'ACTIVE',
+            participants: [
+              { mediaAddress: '8012', state: 'ACTIVE', mute: false }
+            ],
+            mediaType: 'audio',
+            channelType: 'WEB_RTC'
+          }
+        },
+        event: 'dialogState'
+      };
+    });
+
+    when('the customer\'s network drops', () => {
+      dialogEvent = {
+        event: 'dialogState',
+        response: {
+          dialog: {
+            id: 'mock-dialog-id',
+            state: 'DROPPED',   // 👈 simulate proper disconnect
+            mediaType: 'audio',
+            channelType: 'WEB_RTC',
+          },
+        },
+      };
+      agentMessage = 'Customer disconnected';
+      // emit socket disconnected
+      mockSdkService.connectionResponse$.next({ type: 'SOCKET_DISCONNECTED', data: 'ping timeout' });
+
+      // emit xmpp out of service event
+      mockSdkService.connectionResponse$.next({ event: 'xmppEvent', response: { loginId: '8012', type: 'OUT_OF_SERVICE', description: 'WebSocket closed wss://...' } });
+
+      // emit transport error
+      mockSdkService.connectionResponse$.next({ type: 'CONNECT_ERROR', data: { type: 'TransportError', description: 0 } });
+
+    });
+
+    then('the system should wait for reconnection for few seconds', () => {
+      // During the timeout, call state should be DISCONNECTED
+      expect(dialogEvent.response.dialog.state).toBe('DROPPED');
+
+    });
+
+    and('if reconnection fails, the call ends with a proper message on Agent Desk', () => {
+      // Simulate timeout completion
+      if (reconnectionTimeout) {
+        clearTimeout(reconnectionTimeout);
+        dialogEvent.response.dialog.state = 'DROPPED';
+        agentMessage = 'Customer disconnected';
       }
-    };
 
-    component.handleDialogStates(dialogEvent);
+      expect(dialogEvent.response.dialog.state).toBe('DROPPED');
+      expect(agentMessage).toBe('Customer disconnected');
+    });
   });
 
-  then('the customer sees a Call Ended screen with a close button', () => {
-    expect(component.callPopUpView).toBe(false);
-    expect(dialogEvent.response.dialog.state).toBe("DROPPED");
+  test('Call ends gracefully on customer end', ({ given, when, then, and }) => {
+    let dialogEvent: any;
+    let agentEvent: any;
+
+    given('a WebRTC video call is active', () => {
+      component.dialogId = 'plcu0nnjqm50e24mcpkj';
+      component.callPopUpView = true;
+      component.isSecureWebCall = true;
+
+      // mock sdk logout handler
+      (component.sdk.handleLogOutAgent as jest.Mock).mockImplementation(() => {
+        agentEvent = {
+          event: "agentInfo",
+          response: { state: "LOGOUT" }
+        };
+      });
+    });
+
+    when('the agent ends the call', () => {
+      component.callEnd();
+
+      // simulate dialog end event
+      dialogEvent = {
+        event: "dialogState",
+        response: {
+          dialog: { state: "DROPPED", isCallEnded: 1 }
+        }
+      };
+
+      component.handleDialogStates(dialogEvent);
+    });
+
+    then('the customer sees a Call Ended screen with a close button', () => {
+      expect(component.callPopUpView).toBe(false);
+      expect(dialogEvent.response.dialog.state).toBe("DROPPED");
+    });
+
+    and('is returned to the widget home screen', () => {
+      expect(component.activeChatView).toBe(true);
+      expect(component.activeAudioView).toBe(false);
+      expect(component.activeVideoView).toBe(false);
+      expect(component.activeScreenShareView).toBe(false);
+
+      // verify logout triggered
+      expect(agentEvent.response.state).toBe("LOGOUT");
+      expect(component.sdk.handleLogOutAgent).toHaveBeenCalledWith('plcu0nnjqm50e24mcpkj');
+    });
   });
 
-  and('is returned to the widget home screen', () => {
-    expect(component.activeChatView).toBe(true);
-    expect(component.activeAudioView).toBe(false);
-    expect(component.activeVideoView).toBe(false);
-    expect(component.activeScreenShareView).toBe(false);
 
-    // verify logout triggered
-    expect(agentEvent.response.state).toBe("LOGOUT");
-    expect(component.sdk.handleLogOutAgent).toHaveBeenCalledWith('plcu0nnjqm50e24mcpkj');
-  });
-});
-
-
- test('Video feed should not freeze unexpectedly', ({ given, when, then, and }) => {
+  test('Video feed should not freeze unexpectedly', ({ given, when, then, and }) => {
     given('a WebRTC video call is ongoing', () => {
       component.dialogId = 'mock-dialog-id';
       component.activeVideoView = true;
@@ -818,7 +819,7 @@ test('Call ends gracefully on customer end', ({ given, when, then, and }) => {
     });
 
     then('the system should attempt to recover the video feed automatically', () => {
-        expect(component.activeVideoView).toBe(true);   // video view stays open
+      expect(component.activeVideoView).toBe(true);   // video view stays open
       expect(component.callPopUpView).not.toBe(false);
     });
 
@@ -828,85 +829,85 @@ test('Call ends gracefully on customer end', ({ given, when, then, and }) => {
     });
   });
 
-test('Customer sees placeholder if agent’s camera is off', ({ given, and, then }) => {
-  
+  test('Customer sees placeholder if agent’s camera is off', ({ given, and, then }) => {
 
-  given('a video call is active', () => {
-   component.dialogId = 'plcu0nnjqm50e24mcpkj';
-   component.callPopUpView = true;
-    component.isVideoCallActive = true;
-    component.remoteStreamStatus = false; // initially we set video cam placeholder flag var to false
-  });
 
-  and('the agent\'s camera is off or revoked', () => {
-    const event = {
-      event: "mediaStreamUpdate",
-      status: "success",
-      loginId: "8012",
-      dialog: {
-        id: "pkq3to0069vacf4ppo7g",
-        eventRequest: "remote",
-        stream: "video",
-        streamStatus: "off",
-        errorReason: "",
-        timeStamp: "2025-09-12T07:49:05.521Z"
-      }
-    };
-    component.handleDialogStates(event);
-      component.remoteStreamStatus = true;
-    jest.runAllTimers(); // flush setTimeout
-  });
+    given('a video call is active', () => {
+      component.dialogId = 'plcu0nnjqm50e24mcpkj';
+      component.callPopUpView = true;
+      component.isVideoCallActive = true;
+      component.remoteStreamStatus = false; // initially we set video cam placeholder flag var to false
+    });
 
-  then('the customer sees a placeholder or blank video tile for the agent', () => {
-    expect(component.remoteStreamStatus).toBe(true);
-  });
-});
-
-test('Call initiated during active chat with video-capable agent', ({ given, and, when, then }) => {
-  
-  let agent: any;
-  let chatSession: any;
-
-  given('the customer is in a chat session with Agent A', () => {
-     // replace with your actual class/component
-    agent = { id: 'A1', name: 'Agent A' };
-    chatSession = { id: 'chat123', agentId: agent.id, active: true };
-
-    component.maintainDialog = chatSession;
-    component.dialogId = chatSession.id;
-  });
-
-  and('Agent A is video-call capable', () => {
-    component.__appConfig.appConfig.VIDEO = true;
-  });
-
-  when('the customer initiates a video call', () => {
-    const event = {
-      event: 'outboundDialing',
-      status: 'success',
-      response: {
+    and('the agent\'s camera is off or revoked', () => {
+      const event = {
+        event: "mediaStreamUpdate",
+        status: "success",
+        loginId: "8012",
         dialog: {
-          id: 'chat123',          // same session id
-          state: 'INITIATED',
-          type: 'video',
-          agentId: agent.id
+          id: "pkq3to0069vacf4ppo7g",
+          eventRequest: "remote",
+          stream: "video",
+          streamStatus: "off",
+          errorReason: "",
+          timeStamp: "2025-09-12T07:49:05.521Z"
         }
-      }
-    };
+      };
+      component.handleDialogStates(event);
+      component.remoteStreamStatus = true;
+      jest.runAllTimers(); // flush setTimeout
+    });
 
-    component.handleDialogStates(event);
+    then('the customer sees a placeholder or blank video tile for the agent', () => {
+      expect(component.remoteStreamStatus).toBe(true);
+    });
   });
 
-  then('the system routes the video call to Agent A', () => {
-    expect(component.maintainDialog.agentId).toBe(agent.id);
-    expect(component.dialogId).toBe('chat123');
-  });
+  test('Call initiated during active chat with video-capable agent', ({ given, and, when, then }) => {
 
-  and('maintains the session context', () => {
-    expect(component.maintainDialog.type).toBe('video');
-    expect(chatSession.id).toBe(component.dialogId); // context preserved
+    let agent: any;
+    let chatSession: any;
+
+    given('the customer is in a chat session with Agent A', () => {
+      // replace with your actual class/component
+      agent = { id: 'A1', name: 'Agent A' };
+      chatSession = { id: 'chat123', agentId: agent.id, active: true };
+
+      component.maintainDialog = chatSession;
+      component.dialogId = chatSession.id;
+    });
+
+    and('Agent A is video-call capable', () => {
+      component.__appConfig.appConfig.VIDEO = true;
+    });
+
+    when('the customer initiates a video call', () => {
+      const event = {
+        event: 'outboundDialing',
+        status: 'success',
+        response: {
+          dialog: {
+            id: 'chat123',          // same session id
+            state: 'INITIATED',
+            type: 'video',
+            agentId: agent.id
+          }
+        }
+      };
+
+      component.handleDialogStates(event);
+    });
+
+    then('the system routes the video call to Agent A', () => {
+      expect(component.maintainDialog.agentId).toBe(agent.id);
+      expect(component.dialogId).toBe('chat123');
+    });
+
+    and('maintains the session context', () => {
+      expect(component.maintainDialog.type).toBe('video');
+      expect(chatSession.id).toBe(component.dialogId); // context preserved
+    });
   });
-});
 
 
 });

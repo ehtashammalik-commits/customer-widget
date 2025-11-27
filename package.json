@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "jest",
-    "bdd-test": "jest --testMatch '**/*.steps.ts'",
+    "bdd-test": "jest --testMatch \"<rootDir>/test/step-definitions/**/*.steps.ts\"",
     "test:watch": "jest -i --watchAll",
     "coverage": "jest -i --coverage",
     "coverage:coveralls": "jest -i --coverage --coverageReporters=text-lcov | coveralls",
