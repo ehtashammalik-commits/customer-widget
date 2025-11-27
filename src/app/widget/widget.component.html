@@ -44,7 +44,7 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon"  *ngIf="!isWebRtcVideoCallActive">
-            
+
               <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                 <mat-icon>remove</mat-icon>
               </button>
@@ -91,7 +91,7 @@
             <video #remoteVideo id="remoteVideo" autoplay="autoplay" class="remoteVideo">
               {{ 'error.html5-not-supported' | translate }}
             </video>
-            
+
             <video autoplay="autoplay" class="localVideo" id="localVideo"
               innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}">
               {{ 'error.html5-not-supported' | translate }}
@@ -445,7 +445,7 @@
                         <ng-container *ngSwitchCase="'INPUT'">
                           <label class="questionLabel">
                             <ng-container *ngIf="attribute.valueType === 'file'">
-                              
+
                               <span class="attributeName filetypeAttribute" id="{{ attribute.key }}">
                                 <span>
                                   {{ attribute.label }}
@@ -456,7 +456,7 @@
 
                             </ng-container>
                             <ng-container *ngIf="attribute?.valueType !== 'file'">
-    
+
                               <span class="attributeName" id="{{ attribute.key }}">{{
                                 attribute.label
                                 }}</span>
@@ -611,7 +611,7 @@
 
                           <!-- Date Input -->
                           <ng-container *ngIf="attribute.valueType === 'date'">
-                            
+
                             <div class="dateTime">
                               <span class="dateTime-icon" (click)="dateInput.showPicker()">
                                 <mat-icon>date_range</mat-icon>
@@ -621,11 +621,11 @@
                             </div>
 
 
-                           
+
                           </ng-container>
                           <!-- DateTime Input -->
                           <ng-container *ngIf="attribute.valueType === 'dateTime'">
-                            
+
                             <div class="dateTime">
                               <span class="dateTime-icon" (click)="dateTimeInput.showPicker()">
                                 <img src="widget-assets/images/date_time_icon.svg" alt="dateTime-icon">
@@ -637,7 +637,7 @@
 
                           </ng-container>
                           <ng-container *ngIf="attribute.valueType === 'time'">
-                            
+
                             <div class="dateTime">
                               <span class="dateTime-icon" (click)="timeInput.showPicker()">
                                 <mat-icon>access_time</mat-icon>
@@ -651,7 +651,7 @@
                         <!-- TEXTAREA Fields -->
                         <ng-container *ngSwitchCase="'TEXTAREA'">
                           <label class="questionLabel">
-                           
+
                             <span class="attributeName" id="{{ attribute.key }}">{{
                               attribute.label
                               }}</span>
@@ -673,7 +673,7 @@
                           <ng-container [ngSwitch]="attribute.valueType">
                             <ng-container *ngSwitchCase="'mcq'">
                               <label class="questionLabel">
-                               
+
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -696,28 +696,28 @@
                             <!-- DROPDOWN Question ValueType -->
                             <ng-container *ngSwitchCase="'dropdown'">
                               <label class="questionLabel">
-                               
+
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                               </label>
 
-                              
+
 
                               <mat-select [formControlName]="attribute.key" name="questionnaire">
-                                
+
                                 <mat-option #optionLabel style="width:100%"
                                   *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
                                   [value]="option.label"><span>{{option.label}}</span></mat-option>
                               </mat-select>
-                              
+
 
                             </ng-container>
 
                             <ng-container *ngSwitchCase="'checkbox'">
                               <label class="questionLabel">
-                                
+
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -734,7 +734,7 @@
                                       {{ category.label }}
                                     </h3>
 
-                                   
+
                                     <div class="option_field" [attr.data-required]="attribute.isRequired">
                                       <label *ngFor="let option of category.values; let optionIndex = index"
                                         class="checkbox-label">
@@ -754,7 +754,7 @@
 
                             <ng-container *ngSwitchCase="'boolean'">
                               <label class=" questionLabel">
-                               
+
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -794,7 +794,7 @@
                               <ng-container
                                 *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type=='star' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'filled' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'outlined'">
                                 <label class="questionLabel">
-                                 
+
                                   <span class="attributeName" id="{{ attribute.key }}">{{
                                     attribute.label
                                     }}</span>
@@ -1062,7 +1062,7 @@
         <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
 
-          
+
           <span class="widget-navbar-icon material-symbols-outlined"
             matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
               btnTwo: enableFontResize === true,
@@ -1074,7 +1074,7 @@
             }" (click)="changeView('callback')" *ngIf="enabledCallback" [matTooltipPosition]="matToolTipPosition!">
             perm_phone_msg
           </span>
-          
+
           <span class="widget-navbar-icon material-symbols-outlined" (click)="
               activeScreenShareView || activeAudioView || activeVideoView
                 ? convertCallView('video')
@@ -1177,7 +1177,7 @@
             <div class="call-session-expired-inner">
               <span class="icon-error"><mat-icon>priority_high</mat-icon></span>
               <h3>The link has expired</h3>
-              
+
             </div>
           </div>
 
@@ -1510,7 +1510,7 @@
                     </div>
                     <!--              Securelink -->
 
-                    
+
 
                     <!--              /Securelink -->
                     <!-- Message Type Button -->
@@ -1738,22 +1738,21 @@
           </div>
           <!-- Widget Message Composer -->
           <div class="widget-composer main-composer-area">
-            <div class="maxLimitError" *ngIf="text.length == messageLimit">
+            <div class="maxLimitError" *ngIf="messageElement?.nativeElement?.value?.length >= messageLimit">
             <span>Max Limit Reached</span>
            </div>
-            
             <textarea class="widget-chat-composer" #messageComposer [attr.data-emoji-picker]="enableEmoji" matInput
               id="messageTextarea" cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
               cdkAutosizeMaxRows="4" placeholder="{{ 'composer-placeholder' | translate }}" #message
               maxlength="{{ messageLimit }}" [(ngModel)]="text" (change)="textChanged()" (focus)="onTextAreaFocus()"
               (keyup)="onKeyPress($event)" (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)"
               (keydown.enter)="onEnterKey($event)" [ngClass]="{
-                'error-border': text.length == messageLimit,
+                'error-border': messageElement?.nativeElement?.value?.length >= messageLimit,
                 'resize-left': enableEmoji === false,
                 'resize-right': enableFileTransfer === false
               }"></textarea>
             <div id="file-btn" *ngIf="
-                enableFileTransfer && text.length < 1 && imageUrls?.length == 0
+                enableFileTransfer && messageElement?.nativeElement?.value?.length < 1 && imageUrls?.length == 0
               ">
               <label for="file-upload">
                 <span class="material-symbols-outlined file-btn" matTooltip="{{ 'button.file-transfer' | translate }}"
@@ -1778,14 +1777,14 @@
               'widget-audio-section': activeAudioView,
               'widget-video-section': activeVideoView || activeScreenShareView
             }">
-            
+
             <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
-           
+
 
              <!-- test  div start -->
             <div class="video-container">
               <!-- Remote video when visible -->
-              
+
               <video #remoteVideo id="remoteVideo" autoplay playsinline
                 class="remoteVideo"></video>
 
@@ -1795,7 +1794,7 @@
               </div>
 
               <!-- Optional fallback message -->
-             
+
             </div>
 
             <!-- test div end -->
