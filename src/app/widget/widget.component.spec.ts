@@ -17,6 +17,23 @@ const mockAppConfigService = {
 const mockTranslateService = {
   setDefaultLang: jest.fn(),
   use: jest.fn(),
+  instant: jest.fn((key: string) => {
+    // Return mock translations for dropdown keys
+    const translations: { [key: string]: string } = {
+      'dropdown.placeholder': 'Select an option',
+      'dropdown.search-placeholder': '🔍 Search',
+      'dropdown.no-results': 'No results found!',
+    };
+    return translations[key] || key;
+  }),
+  onLangChange: {
+    subscribe: jest.fn((callback) => {
+      // Return a mock subscription object
+      return {
+        unsubscribe: jest.fn(),
+      };
+    }),
+  },
 };
 
 const mockElementRef = {
