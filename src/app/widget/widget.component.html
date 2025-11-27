@@ -1124,6 +1124,7 @@
   <ng-container *ngIf="widgetChatScreen">
     <!-- Active chat screen -->
     <div class="widget-form-area">
+      <ngx-spinner type="ball-spin" size = "default" [fullScreen] = "false"></ngx-spinner>
       <div class="widget-form">
         <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
@@ -1305,9 +1306,7 @@
 
           <!-- Widget Chat Content -->
           <div class="widget-chat-content" #scrollMe>
-            <!-- Loading icon -->
-            <ngx-spinner type="ball-spin" size = "default" [fullScreen] = "false"></ngx-spinner>
-            <!-- Loading icon End -->
+
             <div *ngFor="let message of cimMessage">
               <div class="widget-chat-notification-area" *ngIf="
                   message.body.type == 'NOTIFICATION' &&

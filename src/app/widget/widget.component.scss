@@ -883,6 +883,7 @@ button.close-widget-wrapper {
 .widget-header-icon {
   //position: absolute;
   top: 5px;
+  z-index: 999999;
   //width: 22px;
   //height: 22px;
   //border: 1px solid #FFFFFF;
@@ -1077,7 +1078,7 @@ button.close-widget-wrapper {
   border-bottom: 1px solid #eff2f7;
   position: absolute;
   background-color: rgb(255, 255, 255);
-  z-index: 999999;
+  z-index: 1;
   height: 36px;
   width: 100%;
   justify-content: end;
@@ -1481,7 +1482,7 @@ button.close-widget-wrapper {
   bottom: 10px;
   width: 100%;
   left: 5px;
-  z-index: 999999;
+  z-index: 1;
 
   &.main-composer-area {
     position: fixed;
