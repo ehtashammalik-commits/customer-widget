@@ -7,6 +7,7 @@ import {
   ViewChild,
   Input,
   ChangeDetectorRef,
+  HostListener
 } from '@angular/core';
 import {
   FormGroup,
@@ -1553,6 +1554,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         } else{
           this.isIconWidget = true;
         }
+        if (this.isChatActive) {
+          this.__postMessageHandlerService.sendPostMessage({
+            type: "EF_WIDGET_STATE_CHANGED",
+            state: "CHAT_MINIMIZED"
+          });
+        }
         break;
       case 'chat':
         this.additionalPanel = false;
@@ -1970,6 +1977,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               this.isChatActive = false;
             }
             this.composerDisable();
+            this.__postMessageHandlerService.sendPostMessage({
+              type: "EF_WIDGET_STATE_CHANGED",
+              state: "CHAT_SESSION_ENDED",
+              reason: event.type
+            });
             break;
           case 'SOCKET_CONNECTED':
             this.handleReconnectsAttempts(0);
@@ -3305,6 +3317,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.IsRegisteredInFreeSwitch = false;
         }
         this.clearSession();
+        this.__postMessageHandlerService.sendPostMessage({
+          type: "EF_WIDGET_STATE_CHANGED",
+          state: "CHAT_SESSION_ENDED",
+          reason: "MANUAL_CLOSURE"
+        });
       }
     });
   }
@@ -5154,7 +5171,27 @@ replaceSpacesWithUnderscores(input: string): string {
       this.reconnectAttemptsConfig.maxAttempts
     ) {
       this.spinner.hide();
+      this.__postMessageHandlerService.sendPostMessage({
+        type: "EF_WIDGET_STATE_CHANGED",
+        state: "CHAT_SESSION_ENDED",
+        reason: "SOCKET_DISCONNECTED"
+      })
       this.changeScreen('error');
+    }
+  }
+
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const link = target.closest('a');
+    if (link) {
+      const linkUrl = link.href;
+      const chatContainer = document.getElementsByClassName('widget-chat-content')[0];
+      if (chatContainer && chatContainer.contains(link)) {
+        console.log('Link detected:', linkUrl);
+        this.__postMessageHandlerService.sendLinkClickedPostMessage(linkUrl);
+      }
     }
   }
 }

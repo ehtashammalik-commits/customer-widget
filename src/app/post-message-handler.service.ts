@@ -28,4 +28,32 @@ export class PostMessageHandlerService {
       false,
     );
   }
+
+  /**
+   * Send a post message to the parent window
+   * @param msg The type of message being sent
+   */
+  sendPostMessage(msg): void {
+    const message = msg;
+    message['timestamp'] = new Date().toISOString();
+    console.log('Sending Post Message:', message);
+
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(message, '*');
+      console.log('Post message sent:', message);
+    }
+  }
+
+  sendLinkClickedPostMessage(link: any): void {
+    const message = {
+      type: 'LINK_CLICKED',
+      url: link,
+      timestamp: new Date().toISOString(),
+    };
+
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(message, '*');
+      console.log('Post message sent:', message);
+    }
+  }
 }

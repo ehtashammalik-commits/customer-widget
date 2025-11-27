@@ -1305,6 +1305,9 @@
 
           <!-- Widget Chat Content -->
           <div class="widget-chat-content" #scrollMe>
+            <!-- Loading icon -->
+            <ngx-spinner type="ball-spin" size = "default" [fullScreen] = "false"></ngx-spinner>
+            <!-- Loading icon End -->
             <div *ngFor="let message of cimMessage">
               <div class="widget-chat-notification-area" *ngIf="
                   message.body.type == 'NOTIFICATION' &&
@@ -2956,6 +2959,3 @@
   </audio>
 </div>
 <!-- Sound Notification Ends-->
-
-<!-- Loading icon -->
-<ngx-spinner type="ball-spin" size = "default"></ngx-spinner>
