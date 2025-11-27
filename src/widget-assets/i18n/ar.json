@@ -75,5 +75,10 @@
     "choose-file": "اختر ملف",
     "sorry": "عذرًا!",
     "thankyou": "شكرًا لك!"
+  },
+  "dropdown": {
+    "placeholder": "اختر خياراً",
+    "search-placeholder": "🔍 ابحث",
+    "no-results": "لا توجد نتائج!"
   }
 }

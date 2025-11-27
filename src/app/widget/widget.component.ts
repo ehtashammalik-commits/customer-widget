@@ -70,6 +70,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private onWebRtcCallSubject: Subscription = new Subscription();
   private onCallbackRequestSubject: Subscription = new Subscription();
   private onDataRequest: Subscription = new Subscription();
+  private onLanguageChangeSubscription: Subscription = new Subscription();
   @ViewChild('autosize')
   autosize!: CdkTextareaAutosize;
   @ViewChild('myFileInput')
@@ -283,6 +284,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   overlayImageUrl: string = '';
   overlayImageAlt: string = '';
 
+  // Prechat dropdown config strings pulled from i18n
+  dropdownConfig = {
+    displayKey: 'label',
+    search: true,
+    placeholder: '',
+    searchPlaceholder: '',
+    noResultsFound: '',
+    searchOnKey: 'label',
+    height: '300px',
+    valueKey: 'label',
+    singleValue: true,
+  };
+
 
   @Input() formData!: any[];
   @Input() callbackFormData!: any[];
@@ -411,6 +425,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     translate.setDefaultLang('en');
     translate.use('en');
+    this.setDropdownTranslations();
+    this.onLanguageChangeSubscription = this.translate.onLangChange.subscribe(
+      () => this.setDropdownTranslations()
+    );
   }
 
   async ngAfterViewInit(): Promise<void> {
@@ -636,6 +654,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.preChatFormGroup = this.fb.group({
       sections: this.fb.array([]),
     });
+  }
+
+  setDropdownTranslations(): void {
+    this.dropdownConfig.placeholder =
+      this.translate.instant('dropdown.placeholder') || '';
+    this.dropdownConfig.searchPlaceholder =
+      this.translate.instant('dropdown.search-placeholder') || '';
+    this.dropdownConfig.noResultsFound =
+      this.translate.instant('dropdown.no-results') || '';
   }
 
   receiveMessage(event: MessageEvent): void {

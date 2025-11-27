@@ -76,6 +76,11 @@
         "sorry": "Съжаляваме!",
         "thankyou": "Благодаря!"
     },
+    "dropdown": {
+        "placeholder": "Изберете опция",
+        "search-placeholder": "🔍 търсене",
+        "no-results": "Няма намерени резултати!"
+    },
     "message": {
         "you": "Вие"
     }
