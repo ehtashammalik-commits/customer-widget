@@ -1260,7 +1260,18 @@
             }">
             forum
           </span>
-
+          <span class="material-symbols-outlined widget-navbar-icon"
+                *ngIf="!__appConfig.appConfig.MUTE_NOTIFICATIONS" (click)="toggleMute()"
+            [ngClass]="{
+              btnOne: enableFontResize === false && enabledCallback === false,
+              btnTwo: enableFontResize === true && enabledCallback === false,
+              btnThree: enableFontResize === false && enabledCallback === true,
+              btnFour: enableFontResize === true && enabledCallback === true
+            }" 
+            [matTooltip]="isMuted ? 'Unmute' : 'Mute'"
+            [matTooltipPosition]="matToolTipPosition!">
+            {{ isMuted ? 'volume_off' : 'volume_up' }}
+          </span>
           <span class="font-selection material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
             [ngClass]="{ btnOne: enableFontResize === true }" matTooltip="{{ 'button.change-font-size' | translate }}"
             [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
@@ -2951,7 +2962,7 @@
 
 <!-- Sound Notification Starts-->
 <div id="notificationSound">
-  <audio controls id="soundNotif" [muted]="false" [hidden]="true">
+  <audio controls id="soundNotif" [muted]="isMuted" [hidden]="true">
     <source src="widget-assets/sounds/beep.ogg" type="audio/ogg" />
     <source src="widget-assets/sounds/beep.mp3" type="audio/mpeg" />
     <source src="widget-assets/sounds/beep.wav" type="audio/wav" />

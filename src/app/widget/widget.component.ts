@@ -263,6 +263,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   enableDynamicLink = false;
   enableEmoji = false;
   enableFontResize = false;
+  isMuted = false;
   preChatFormId = '';
   enableWebRtc: boolean = false;
   webRTCConfig: any;
@@ -4018,6 +4019,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   changeFont() {
     console.log('font dropdown clicked');
     this.fontDropDown = !this.fontDropDown; // Toggle the fontDropDown variable
+  }
+
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+    console.log('Mute toggled:', this.isMuted);
+    // Add your audio mute/unmute logic here
   }
 
   setFontSize(e: any) {
