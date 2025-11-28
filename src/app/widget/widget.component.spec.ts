@@ -1903,14 +1903,12 @@ describe('WidgetComponent', () => {
       // Arrange
       const mockSetValue = jest.fn();
       const mockSvg = {
-        getElementsByTagName: jest
-          .fn()
-          .mockReturnValue([
-            {
-              setAttribute: jest.fn(),
-              getAttribute: jest.fn().mockReturnValue('#000'),
-            },
-          ]),
+        getElementsByTagName: jest.fn().mockReturnValue([
+          {
+            setAttribute: jest.fn(),
+            getAttribute: jest.fn().mockReturnValue('#000'),
+          },
+        ]),
         dataset: {},
       };
       (document.querySelectorAll as jest.Mock).mockReturnValue([
