@@ -50,7 +50,9 @@
         "send-me-transcript": "Send me Transcript",
         "call-on-my-number": "Call on my number",
         "request-callback": "Request Callback",
-        "video-call": "Video Call"
+        "video-call": "Video Call",
+        "unmute": "Unmute",
+        "mute": "Mute"
     },
     "callback": {
         "title": "Callback",

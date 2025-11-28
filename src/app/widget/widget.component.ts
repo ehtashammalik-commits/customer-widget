@@ -263,7 +263,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   enableDynamicLink = false;
   enableEmoji = false;
   enableFontResize = false;
-  isMuted = false;
+  isMuted = true;
   preChatFormId = '';
   enableWebRtc: boolean = false;
   webRTCConfig: any;

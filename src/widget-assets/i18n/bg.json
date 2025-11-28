@@ -50,7 +50,9 @@
         "send-me-transcript": "Изпрати ми Препис",
         "call-on-my-number": "Обадете ми се на моя номер",
         "request-callback": "Заявка за Обратно Обаждане",
-        "video-call": "Видео Обаждане"
+        "video-call": "Видео Обаждане",
+        "unmute": "Включи звук",
+        "mute": "Изключи звук"
     },
     "callback": {
         "title": "Обратно Обаждане",

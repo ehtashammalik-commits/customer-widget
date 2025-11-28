@@ -1268,7 +1268,7 @@
               btnThree: enableFontResize === false && enabledCallback === true,
               btnFour: enableFontResize === true && enabledCallback === true
             }" 
-            [matTooltip]="isMuted ? 'Unmute' : 'Mute'"
+            [matTooltip]="isMuted ? ('button.unmute' | translate) : ('button.mute' | translate)"
             [matTooltipPosition]="matToolTipPosition!">
             {{ isMuted ? 'volume_off' : 'volume_up' }}
           </span>
