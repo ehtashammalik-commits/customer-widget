@@ -3469,7 +3469,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     //state=download&browserLang=en&conversationId=
     const params = new URLSearchParams({
       state: 'download',
-      browserLang: browserLang || '',
+      browserLang: this.translate.currentLang || '',
       conversationId: conversationId || '',
     });
 

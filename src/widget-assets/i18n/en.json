@@ -85,6 +85,9 @@
     },
     "message": {
         "you": "You"
+    },
+    "chat-transcript": {
+        "title": "Conversation Transcript",
+        "disclaimer-text": "Below is the transcript of your recent chat session with our support team."
     }
-
 }

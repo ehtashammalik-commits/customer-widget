@@ -48,6 +48,7 @@ export class TranscriptComponent implements OnInit {
     this.route.queryParams.subscribe(async (params) => {
       const conversationId = params['conversationId'] || '';
       this.browserLang = params['browserLang'] || '';
+      this.translate.use(this.browserLang || 'en');
       this.state = params['state'] || '';
 
       if (!conversationId) {

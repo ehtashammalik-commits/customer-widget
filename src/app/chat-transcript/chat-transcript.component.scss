@@ -157,10 +157,11 @@
 }
 
 .transcript-header img {
-    width: 100px;
+    width: auto;
     vertical-align: middle;
     position: absolute;
     top: 10px;
+    height: 26px;
 }
 
 .transcript-header h3 {
@@ -715,3 +716,8 @@ small.edit-message {
     transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
+.disclaimer-text {
+    text-align: center;
+    font-weight: 500;
+    color: #ff4b4b;
+}
