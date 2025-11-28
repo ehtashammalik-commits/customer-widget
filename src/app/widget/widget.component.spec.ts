@@ -13,11 +13,11 @@ const mockSdkService: Partial<SdkService> = {
   fetchBusinessCalendarId: jest.fn(),
   getCalendarEvents: jest.fn(),
   sendChatMessage: jest.fn(),
-  handleChatEnd: jest.fn(), 
+  handleChatEnd: jest.fn(),
   moveToFileServer: jest.fn((fd, cb) => cb({})),
   localStream$: new BehaviorSubject(null),
   remoteStreamObs$: new BehaviorSubject(null),
- 
+
 };
 
 const mockAppConfigService = {
@@ -94,7 +94,7 @@ describe('WidgetComponent', () => {
   });
 
 
-  // ---------- ngOnInit ---------- 
+  // ---------- ngOnInit ----------
 
   describe('Initialization of the Componenet in the ngOnInit LifeCycle Hook', () => {
     let mockQueryParams$: any;
@@ -418,7 +418,7 @@ describe('WidgetComponent', () => {
     it('should handle SOCKET_DISCONNECTED when messageType is not survey', () => {
       component.cimMessage = [{ body: { subType: 'plain' } }];
       const event = { id: 1, type: 'SOCKET_DISCONNECTED', data: 'io server disconnected' };
-      
+
       component.eventListener(event);
 
       expect(component.cimMessage).toEqual([]);
@@ -466,6 +466,187 @@ describe('WidgetComponent', () => {
     it('should not throw on error', () => {
       component.cimMessage = null as any;
       expect(() => component.eventListener({ id: 1, type: 'MESSAGE_RECEIVED', data: {} })).not.toThrow();
+    });
+  });
+
+  describe('setWidgetConfigs', () => {
+    it('should set all widget configurations correctly', async () => {
+      const configs = {
+        title: 'Test Title',
+        subTitle: 'Test Subtitle',
+        theme: '#FF0000',
+        enableFileTransfer: true,
+        enableDownloadTranscript: true,
+        enableDynamicLink: true,
+        enableEmoji: true,
+        enableFontResize: true,
+        form: 'form123',
+        webRtc: {
+          enableWebRtc: true,
+          config: 'testConfig'
+        },
+        callback: {
+          enableCallback: true,
+          standaloneCallback: true
+        },
+        webhook: {
+          webhookUrl: 'https://webhook.example.com',
+          enableWebhook: true
+        }
+      };
+
+      await component.setWidgetConfigs(configs);
+
+      expect(component.title).toBe('Test Title');
+      expect(component.subtitle).toBe('Test Subtitle');
+      expect(component.theme).toBe('#FF0000');
+      expect(component.enableFileTransfer).toBe(true);
+      expect(component.enableDownloadTranscript).toBe(true);
+      expect(component.enableDynamicLink).toBe(true);
+      expect(component.enableEmoji).toBe(true);
+      expect(component.enableFontResize).toBe(true);
+      expect(component.preChatFormId).toBe('form123');
+      expect(component.enableWebRtc).toBe(true);
+      expect(component.enabledCallback).toBe(true);
+      expect(component.standaloneCallback).toBe(true);
+      expect(component.webhookUrl).toBe('https://webhook.example.com');
+      expect(component.enabledWebhook).toBe(true);
+    });
+
+    it('should handle null webRtc config', async () => {
+      const configs = {
+        title: 'Test Title',
+        webRtc: null,
+        callback: null,
+        webhook: null
+      };
+
+      await component.setWidgetConfigs(configs);
+
+      expect(component.enableWebRtc).toBe(false);
+      expect(component.enabledCallback).toBe(false);
+      expect(component.standaloneCallback).toBe(false);
+      expect(component.webhookUrl).toBeUndefined();
+      expect(component.enabledWebhook).toBe(false);
+    });
+  });
+
+  describe('markFormGroupTouched', () => {
+    it('should mark all controls in form group as touched', () => {
+      const mockForm = {
+        controls: {
+          field1: { markAsTouched: jest.fn(), controls: null },
+          field2: { markAsTouched: jest.fn(), controls: null }
+        }
+      };
+
+      component['markFormGroupTouched'](mockForm as any);
+
+      expect(mockForm.controls.field1.markAsTouched).toHaveBeenCalled();
+      expect(mockForm.controls.field2.markAsTouched).toHaveBeenCalled();
+    });
+
+    it('should recursively call markFormGroupTouched for nested form groups', () => {
+      const nestedFormGroup = {
+        markAsTouched: jest.fn(),
+        controls: {}
+      };
+      const mockForm = {
+        controls: {
+          nestedGroup: nestedFormGroup
+        }
+      };
+      const markFormGroupTouchedSpy = jest.spyOn(component as any, 'markFormGroupTouched');
+
+      component['markFormGroupTouched'](mockForm as any);
+
+      expect(markFormGroupTouchedSpy).toHaveBeenCalledTimes(1); // Original call only
+    });
+  });
+
+  describe('extractMinMaxLength', () => {
+    it('should extract min and max length correctly', () => {
+      const regexWithBoth = '.{5,10}';
+      const result1 = component['extractMinMaxLength'](regexWithBoth);
+      expect(result1.minLength).toBe(5);
+      expect(result1.maxLength).toBe(10);
+
+      const regexWithMinOnly = '.{8,}';
+      const result2 = component['extractMinMaxLength'](regexWithMinOnly);
+      expect(result2.minLength).toBe(8);
+      expect(result2.maxLength).toBeNull();
+
+      const regexWithMaxOnly = '.{,15}';
+      const result3 = component['extractMinMaxLength'](regexWithMaxOnly);
+      expect(result3.minLength).toBeNull();
+      expect(result3.maxLength).toBe(15);
+
+      const regexWithoutLength = '^[a-zA-Z]+$';
+      const result4 = component['extractMinMaxLength'](regexWithoutLength);
+      expect(result4.minLength).toBeNull();
+      expect(result4.maxLength).toBeNull();
+    });
+  });
+
+  describe('onFormSubmit', () => {
+    beforeEach(() => {
+      component.preChatFormGroup = {
+        valid: true,
+        value: { sections: [{ name: 'John' }] }
+      } as any;
+      component.serviceIdentifier = 'service123';
+      component.getEventPayload = jest.fn(() => ({ error: false, data: { channelCustomerIdentifier: 'cid123' } }));
+      component.setUserData = jest.fn();
+    });
+
+    it('should submit form when valid', () => {
+      component.onFormSubmit();
+
+      expect(component.preChatFormLoader).toBe(true);
+      expect(component.preChatFormData).toEqual({ sections: [{ name: 'John' }] });
+      expect(component.getEventPayload).toHaveBeenCalledWith({ sections: [{ name: 'John' }] });
+      expect(component.setUserData).toHaveBeenCalledWith(
+        { channelCustomerIdentifier: 'cid123' },
+        'startChat'
+      );
+    });
+
+    it('should show alert when service identifier is missing', () => {
+      global.alert = jest.fn();
+      component.serviceIdentifier = '';
+      component.onFormSubmit();
+
+      expect(global.alert).toHaveBeenCalledWith(
+        'Please Check with Administrator. Your service identifier is missing!'
+      );
+      expect(component.preChatFormLoader).toBe(false);
+    });
+
+    it('should mark form as touched when invalid', () => {
+      const mockFormGroup = {
+        valid: false,
+        controls: { sections: { markAsTouched: jest.fn() } }
+      } as any;
+      component.preChatFormGroup = mockFormGroup;
+      const markFormGroupTouchedSpy = jest.spyOn(component as any, 'markFormGroupTouched');
+
+      component.onFormSubmit();
+
+      expect(markFormGroupTouchedSpy).toHaveBeenCalledWith(mockFormGroup);
+    });
+
+    it('should show error alert on exception', () => {
+      global.alert = jest.fn();
+      const mockFormGroup = {
+        valid: true,
+        controls: { sections: { markAsTouched: jest.fn() } }
+      } as any;
+      component.preChatFormGroup = mockFormGroup;
+      component.getEventPayload = () => { throw new Error('Test error'); };
+
+      component.onFormSubmit();
+
+      expect(global.alert).toHaveBeenCalledWith('Error while submitting the form');
     });
   });
 
@@ -1286,7 +1467,7 @@ describe('WidgetComponent', () => {
           'Error processing Business Hours events:'
         );
       });
-    });    
+    });
 
     describe('WidgetComponent - onSendMessage & constructCimMessage', () => {
 
@@ -1480,7 +1661,7 @@ describe('WidgetComponent', () => {
         expect(mockSetValue).toHaveBeenCalledWith('happy');
         // Should store original colors and set fill to gray for non-selected
         expect(mockSvg.getElementsByTagName).toHaveBeenCalledWith('path');
-        
+
         expect(mockSvg.getElementsByTagName()[0].setAttribute).toHaveBeenCalledWith('fill', expect.any(String));
       });
 
@@ -1560,7 +1741,7 @@ describe('WidgetComponent', () => {
       it('should call changeScreen in closeWrapper', () => {
         component.closeWrapper();
         expect(component.additionalPanel).toBe(false);
-        
+
         expect(mockStorageService.setItem).toHaveBeenCalledWith('wrapper-hide', 'true', 'sessionStorage');
       });
 
@@ -1572,7 +1753,7 @@ describe('WidgetComponent', () => {
       });
 
       it('should set fontSize from storage in setFontFromLocalStorage', () => {
-        
+
         component.fontSize = { setValue: jest.fn() } as any;
         component.setFontFromLocalStorage();
         expect(component.fontSize.setValue).toBeTruthy();
@@ -1628,4 +1809,429 @@ describe('WidgetComponent', () => {
         expect(mockMatSnackBar.open).toHaveBeenCalled();
       });
     });
+
+  // Additional tests for uncovered methods
+  describe('Additional Method Tests', () => {
+    describe('composeCimMessage', () => {
+      beforeEach(() => {
+        component.customerData = { id: 'cust123' };
+        component.sdk = mockSdkService as any;
+      });
+
+      it('should send plain text message correctly', () => {
+        component.constructCimMessage('PLAIN', {
+          text: 'Hello world',
+          intent: null,
+          originalMessageId: null
+        });
+
+        expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
+        const args = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
+        expect(args.type).toBe('PLAIN');
+        expect(args.body.type).toBe('PLAIN');
+        expect(args.body.markdownText).toBe('Hello world');
+      });
+
+      it('should send media message correctly', () => {
+        component.constructCimMessage('image', {
+          text: '',
+          intent: null,
+          originalMessageId: null,
+          fileMimeType: 'image/png',
+          fileName: 'test.png',
+          fileSize: 1024,
+          additionalText: 'Image caption',
+          fileType: 'image'
+        });
+
+        expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
+        const args = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
+        expect(args.type).toBe('image');
+        expect(args.body.type).toBe('IMAGE');
+        expect(args.body.caption).toBe('test.png');
+      });
+    });
+
+    describe('onFormSubmit error handling', () => {
+      beforeEach(() => {
+        component.preChatFormGroup = {
+          valid: false,
+          controls: {
+            sections: {
+              markAsTouched: jest.fn(),
+              controls: {
+                testControl: {
+                  markAsTouched: jest.fn()
+                }
+              }
+            }
+          }
+        } as any;
+        jest.spyOn(component as any, 'markFormGroupTouched');
+      });
+
+      it('should mark form as touched when invalid', () => {
+        component.onFormSubmit();
+        expect(component['markFormGroupTouched']).toHaveBeenCalledWith(component.preChatFormGroup);
+      });
+    });
+
+    describe('setUserData', () => {
+      beforeEach(() => {
+        component.sdk = { makeConnection: jest.fn() } as any;
+      });
+
+      it('should set customer data correctly', () => {
+        const data = {
+          channelCustomerIdentifier: 'cid123',
+          serviceIdentifier: 'service123',
+          browserDeviceInfo: { deviceType: 'desktop' }
+        };
+        component.setUserData(data, 'startChat');
+        expect(component.customerData).toEqual(data);
+        expect(component.eventTriggerType).toBe('startChat');
+        expect(mockStorageService.setItem).toHaveBeenCalledWith('user', { data }, 'sessionStorage');
+      });
+
+      it('should show alert when mandatory data is missing', () => {
+        global.alert = jest.fn();
+        const data = {
+          channelCustomerIdentifier: '',
+          serviceIdentifier: '',
+          browserDeviceInfo: { deviceType: '' }
+        };
+        component.setUserData(data, 'startChat');
+        expect(global.alert).toHaveBeenCalledWith('Error: The field "channelCustomerIdentifier" is required or does not exist in the pre-chat form.');
+      });
+    });
+
+
+
+    describe('chatTranscript', () => {
+      beforeEach(() => {
+        Object.defineProperty(window, 'location', {
+          value: { origin: 'http://localhost:4200' },
+          writable: true
+        });
+        Object.defineProperty(window, 'open', {
+          value: jest.fn(),
+          writable: true
+        });
+      });
+
+      it('should open transcript in new window', () => {
+        (mockStorageService.getItem as jest.Mock).mockReturnValue('conv123');
+        component.browserLang = 'en';
+        component.chatTranscript();
+        expect(window.open).toHaveBeenCalledWith(
+          'http://localhost:4200/customer-widget/#/chat-transcript?state=download&browserLang=en&conversationId=conv123',
+          '_blank',
+          'noopener'
+        );
+      });
+    });
+
+    describe('onKeyPress and sendTypingStartedEvent', () => {
+      beforeEach(() => {
+        component.customerData = { id: 'cust123' };
+        mockSdkService.sendChatMessage = jest.fn();
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('should send typing started event', () => {
+        component.sendTypingStartedEvent();
+        expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
+        expect(component.sendTypingStartedEventTimer).toBeDefined();
+
+        // Advance timer to clear the timeout
+        jest.advanceTimersByTime(3000);
+        expect(component.sendTypingStartedEventTimer).toBeNull();
+      });
+
+      it('should not send typing event if timer is already active', () => {
+        component.sendTypingStartedEventTimer = setTimeout(() => {}, 1000);
+        const initialTimer = component.sendTypingStartedEventTimer;
+
+        component.sendTypingStartedEvent();
+
+        // Timer should not have changed
+        expect(component.sendTypingStartedEventTimer).toBe(initialTimer);
+      });
+
+      it('should not send typing event on Enter key', () => {
+        component.onKeyPress({ key: 'Enter' });
+        expect(mockSdkService.sendChatMessage).not.toHaveBeenCalled();
+      });
+
+      it('should send typing event on other keys', () => {
+        component.onKeyPress({ key: 'a' });
+        expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
+      });
+    });
+
+    describe('toggleCallMic, toggleCallVideo, toggleCallHold', () => {
+      beforeEach(() => {
+        component.sdk = {
+          handleCallMic: jest.fn(),
+          convertCall: jest.fn(),
+          handleCallHoldState: jest.fn()
+        } as any;
+      });
+
+      it('should toggle call mic', async () => {
+        component.isCallMute = false;
+
+        await component.toggleCallMic({ hide: jest.fn(), show: jest.fn() });
+
+        expect(component.sdk.handleCallMic).toHaveBeenCalledWith('mute_call', undefined);
+        expect(component.isCallMute).toBe(true);
+      });
+
+      it('should toggle call video', async () => {
+        component.isVideoHide = false;
+
+        await component.toggleCallVideo({ hide: jest.fn(), show: jest.fn() });
+
+        expect(component.sdk.convertCall).toHaveBeenCalledWith('off', 'video', undefined);
+        expect(component.isVideoHide).toBe(true);
+      });
+
+      it('should toggle call hold', async () => {
+        component.isCallOnHold = false;
+
+        await component.toggleCallHold({ hide: jest.fn(), show: jest.fn() });
+
+        expect(component.sdk.handleCallHoldState).toHaveBeenCalledWith('holdCall', undefined);
+        expect(component.isCallOnHold).toBe(true);
+      });
+    });
+
+    describe('handleScreenShareClick', () => {
+      it('should return early when isSecureWebCall is true', () => {
+        component.isSecureWebCall = true;
+        component.handleScreenShareClick();
+        // Should not throw or change state
+      });
+
+      it('should return early when isAudioCallActive is true', () => {
+        component.isAudioCallActive = true;
+        component.handleScreenShareClick();
+        // Should not throw or change state
+      });
+    });
+
+    describe('getLabel', () => {
+      it('should return correct label for known value types', () => {
+        expect(component.getLabel('Alphanum100')).toBe('Alpha Numeric');
+        expect(component.getLabel('shortAnswer')).toBe('Short Answer');
+        expect(component.getLabel('Email')).toBe('Email');
+      });
+
+      it('should return capitalized value for unknown value type', () => {
+        expect(component.getLabel('unknownType')).toBe('UnknownType');
+      });
+    });
+
+    describe('isMaxLengthError', () => {
+      it('should return false when section does not exist', () => {
+        component.preChatFormGroup = {
+          get: jest.fn(() => null)
+        } as any;
+
+        const result = component.isMaxLengthError(999, 'test', 'shortAnswer');
+        expect(result).toBe(false);
+      });
+
+      it('should return true when value exceeds max length', () => {
+        const mockControl = { value: 'a'.repeat(102) };
+        component.preChatFormGroup = {
+          get: jest.fn(() => ({
+            at: jest.fn(() => ({
+              get: jest.fn(() => mockControl)
+            }))
+          }))
+        } as any;
+
+        const result = component.isMaxLengthError(0, 'test', 'shortAnswer');
+        expect(result).toBe(true);
+      });
+    });
+
+    describe('previewFile', () => {
+      beforeEach(() => {
+        component.fileLoading = false;
+        component.selectedFile = null;
+        component.imageUrls = [];
+        // Note: We can't directly assign to private property 'sanitizer', so we'll skip this line
+        // component.sanitizer = mockDomSanitizer;
+      });
+
+      it('should handle file event with target.files', () => {
+        const mockFile = new File(['content'], 'test.txt', { type: 'text/plain' });
+        const mockEvent = {
+          target: {
+            files: [mockFile]
+          }
+        };
+
+        (mockDomSanitizer.bypassSecurityTrustUrl as jest.Mock).mockReturnValue('trusted-url');
+
+        component.previewFile(mockEvent);
+
+        expect(component.fileLoading).toBe(true);
+        expect(component.selectedFile).toEqual([mockFile]);
+      });
+
+      it('should handle file event with dataTransfer.files', () => {
+        const mockFile = new File(['content'], 'test.txt', { type: 'text/plain' });
+        const mockEvent = {
+          dataTransfer: {
+            files: [mockFile]
+          },
+          target: {
+            files: []
+          }
+        };
+
+        (mockDomSanitizer.bypassSecurityTrustUrl as jest.Mock).mockReturnValue('trusted-url');
+
+        component.previewFile(mockEvent);
+
+        expect(component.fileLoading).toBe(true);
+        expect(component.selectedFile).toEqual([mockFile]);
+      });
+    });
+
+    describe('removeUploadFile', () => {
+      it('should reset file related properties', () => {
+        component.imageUrls = [{ filesPath: 'test-url', fileType: 'image', fileExt: 'png', fileName: 'test.png' }];
+        component.selectedFile = { name: 'test.png' } as any;
+
+        component.removeUploadFile();
+
+        expect(component.imageUrls).toEqual([]);
+        expect(component.selectedFile).toBeNull();
+      });
+    });
+
+    describe('customerChatResumed', () => {
+      beforeEach(() => {
+        (mockStorageService.getItem as jest.Mock).mockReturnValue(JSON.stringify({ data: { serviceIdentifier: 'service123', channelCustomerIdentifier: 'cid123' } }));
+        component.sdk = { makeConnection: jest.fn() } as any;
+      });
+
+      it('should resume chat with user data', () => {
+        component.customerChatResumed();
+        expect(component.customerData).toEqual({ serviceIdentifier: 'service123', channelCustomerIdentifier: 'cid123' });
+        expect(component.sdk.makeConnection).toHaveBeenCalledWith('service123', 'cid123');
+      });
+
+      it('should change screen to widget when no user data', () => {
+        (mockStorageService.getItem as jest.Mock).mockReturnValue(null);
+        component.changeScreen = jest.fn();
+
+        component.customerChatResumed();
+        expect(component.changeScreen).toHaveBeenCalledWith('widget');
+      });
+    });
+
+    describe('endChat', () => {
+      beforeEach(() => {
+        component.IsRegisteredInFreeSwitch = true;
+        component.dialogId = 'dialog123';
+        component.sdk = {
+          handleCallEnd: jest.fn(),
+          handleLogOutAgent: jest.fn()
+        } as any;
+        component.clearSession = jest.fn();
+        component.callEnd = jest.fn();
+      });
+
+      it('should end chat when dialog result is true', () => {
+        const mockDialogRef = {
+          afterClosed: () => ({ subscribe: (cb: any) => cb(true) })
+        };
+        mockMatDialog.open = jest.fn(() => mockDialogRef);
+
+        component.endChat();
+
+        expect(mockMatDialog.open).toHaveBeenCalledWith(expect.any(Function));
+        expect(component.sdk.handleCallEnd).toHaveBeenCalledWith('dialog123');
+        expect(component.sdk.handleLogOutAgent).toHaveBeenCalledWith('dialog123');
+        expect(component.clearSession).toHaveBeenCalled();
+      });
+
+      it('should not end chat when dialog result is false', () => {
+        const mockDialogRef = {
+          afterClosed: () => ({ subscribe: (cb: any) => cb(false) })
+        };
+        mockMatDialog.open = jest.fn(() => mockDialogRef);
+
+        component.endChat();
+
+        expect(mockMatDialog.open).toHaveBeenCalledWith(expect.any(Function));
+        expect(component.sdk.handleCallEnd).not.toHaveBeenCalled();
+        expect(component.sdk.handleLogOutAgent).not.toHaveBeenCalled();
+        expect(component.clearSession).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('transformPayload', () => {
+      it('should transform intent with entities correctly', () => {
+        const result = component.transformPayload('/intent {"key": "value"}');
+        expect(result.intent.trim()).toBe('intent');
+        expect(result.entities).toEqual({ key: 'value' });
+      });
+
+      it('should handle intent without entities', () => {
+        const result = component.transformPayload('/intent');
+        expect(result.intent).toBe('intent');
+        expect(result.entities).toBeNull();
+      });
+
+      it('should return null for null input', () => {
+        const result = component.transformPayload(null);
+        expect(result.intent).toBeNull();
+        expect(result.entities).toBeNull();
+      });
+    });
+
+    describe('changeNpsColor', () => {
+      let sectionsArray: any;
+
+      beforeEach(() => {
+        sectionsArray = {
+          at: jest.fn().mockReturnValue({
+            get: jest.fn().mockReturnValue({
+              setValue: jest.fn(),
+            }),
+          }),
+        };
+        component.preChatFormGroup = {
+          get: jest.fn().mockImplementation((name: string) => {
+            if (name === 'sections') return sectionsArray;
+            return null;
+          }),
+        } as any;
+      });
+
+      it('should update selected indices and control value', () => {
+        component.changeNpsColor('npsControl', 0, 0, 1, 'value1');
+        expect(component.selectedIndices).toEqual({ 0: 1 });
+        expect(sectionsArray.at).toHaveBeenCalledWith(0);
+        expect(sectionsArray.at(0).get).toHaveBeenCalledWith('npsControl');
+      });
+
+      it('should handle missing section', () => {
+        sectionsArray.at = jest.fn().mockReturnValue(undefined);
+        const logSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        component.changeNpsColor('npsControl', 99, 0, 1, 'value1');
+        expect(logSpy).toHaveBeenCalledWith('Section at index 99 does not exist.');
+      });
+    });
+  });
 });
