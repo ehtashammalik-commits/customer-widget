@@ -359,7 +359,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     public dialog: MatDialog,
     private readonly browserNotificationService: BrowserNotificationService,
     private readonly deliveryNotificationService: DeliveryNotificationService,
-    private __postMessageHandlerService: PostMessageHandlerService,
+    private readonly __postMessageHandlerService: PostMessageHandlerService,
     private readonly translate: TranslateService,
     private readonly router: Router,
     @Inject(DOCUMENT) private readonly doc: Document,
