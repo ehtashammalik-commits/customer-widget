@@ -36,13 +36,24 @@ describe('SvgNpsFormatPipe', () => {
     mockHttp.get.mockReturnValue(of(sampleSvg));
 
     pipe
-      .transform('http://test.com/icon.svg', 'imageSvg', '100', '200', 'my-class', '#FF0000', 'Hello')
+      .transform(
+        'http://test.com/icon.svg',
+        'imageSvg',
+        '100',
+        '200',
+        'my-class',
+        '#FF0000',
+        'Hello',
+      )
       .subscribe((result) => {
-        expect(mockHttp.get).toHaveBeenCalledWith('http://test.com/icon.svg', { responseType: 'text' });
+        expect(mockHttp.get).toHaveBeenCalledWith('http://test.com/icon.svg', {
+          responseType: 'text',
+        });
 
         // Ensure sanitizer was called with modified SVG
         expect(mockSanitizer.bypassSecurityTrustHtml).toHaveBeenCalled();
-        const sanitizedSvg = mockSanitizer.bypassSecurityTrustHtml.mock.calls[0][0];
+        const sanitizedSvg =
+          mockSanitizer.bypassSecurityTrustHtml.mock.calls[0][0];
 
         expect(sanitizedSvg).toContain('width="100"');
         expect(sanitizedSvg).toContain('height="200"');

@@ -39,7 +39,7 @@ describe('ConfigService', () => {
     it('should not override keys if they are not strings with http', async () => {
       const fakeConfig = {
         SOCKET_URL: 123, // not a string
-        CCM_URL: null,   // not a string
+        CCM_URL: null, // not a string
       };
       httpClientMock.get.mockReturnValue(of(fakeConfig));
 

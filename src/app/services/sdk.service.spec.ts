@@ -149,7 +149,11 @@ describe('SdkService', () => {
 
       expect((service as any).widgetIdentifier).toBe('wid');
       expect((service as any).serviceIdentifier).toBe('sid');
-      expect(widgetConfigsMock).toHaveBeenCalledWith(mockConfig!.appConfig.CCM_URL, 'wid', expect.any(Function));
+      expect(widgetConfigsMock).toHaveBeenCalledWith(
+        mockConfig!.appConfig.CCM_URL,
+        'wid',
+        expect.any(Function),
+      );
     });
 
     it('widgetConfigs next value is emitted on widgetConfigs$', (done) => {
@@ -168,7 +172,9 @@ describe('SdkService', () => {
 
   describe('fetchBusinessCalendarId', () => {
     it('resolves with calendarId when getCalendarId returns', async () => {
-      getCalendarIdMock.mockImplementation((_url, _sid, cb) => cb({ calendarId: 'cal-123' }));
+      getCalendarIdMock.mockImplementation((_url, _sid, cb) =>
+        cb({ calendarId: 'cal-123' }),
+      );
       const id = await service.fetchBusinessCalendarId();
       expect(id).toBe('cal-123');
       expect(getCalendarIdMock).toHaveBeenCalled();
@@ -176,23 +182,29 @@ describe('SdkService', () => {
 
     it('rejects when getCalendarId returns invalid response', async () => {
       getCalendarIdMock.mockImplementation((_url, _sid, cb) => cb({}));
-      await expect(service.fetchBusinessCalendarId())
-        .rejects.toThrow('Failed to fetch calendar ID.');
+      await expect(service.fetchBusinessCalendarId()).rejects.toThrow(
+        'Failed to fetch calendar ID.',
+      );
     });
   });
 
   describe('getCalendarEvents', () => {
     it('resolves when getCalendarEvents returns response', async () => {
-      getCalendarEventsMock.mockImplementation((_cid, _url, _s, _e, cb) => cb({ events: [1, 2, 3] }));
+      getCalendarEventsMock.mockImplementation((_cid, _url, _s, _e, cb) =>
+        cb({ events: [1, 2, 3] }),
+      );
       const res = await service.getCalendarEvents('cid-1');
       expect(res).toEqual({ events: [1, 2, 3] });
       expect(getCalendarEventsMock).toHaveBeenCalled();
     });
 
     it('rejects when getCalendarEvents returns falsy', async () => {
-      getCalendarEventsMock.mockImplementation((_cid, _url, _s, _e, cb) => cb(null));
-      await expect(service.getCalendarEvents('cid-1'))
-        .rejects.toThrow('Failed to fetch calendar events.');
+      getCalendarEventsMock.mockImplementation((_cid, _url, _s, _e, cb) =>
+        cb(null),
+      );
+      await expect(service.getCalendarEvents('cid-1')).rejects.toThrow(
+        'Failed to fetch calendar events.',
+      );
     });
   });
 
@@ -203,7 +215,11 @@ describe('SdkService', () => {
       const emitPromise = firstValueFrom(service.renderPreChatForm$);
       service.renderPreChatForm('form-id');
       await expect(emitPromise).resolves.toEqual(fakeForm);
-      expect(getPreChatFormMock).toHaveBeenCalledWith(mockConfig!.appConfig.FORM_URL, 'form-id', expect.any(Function));
+      expect(getPreChatFormMock).toHaveBeenCalledWith(
+        mockConfig!.appConfig.FORM_URL,
+        'form-id',
+        expect.any(Function),
+      );
     });
 
     it('getFormValidation pushes to validation subject and calls callback', async () => {
@@ -213,7 +229,10 @@ describe('SdkService', () => {
       service.getFormValidation(cb);
       await expect(emitPromise).resolves.toEqual({ ok: true });
       expect(cb).toHaveBeenCalled();
-      expect(formValidationMock).toHaveBeenCalledWith(mockConfig!.appConfig.FORM_URL, expect.any(Function));
+      expect(formValidationMock).toHaveBeenCalledWith(
+        mockConfig!.appConfig.FORM_URL,
+        expect.any(Function),
+      );
     });
 
     it('renderCallbackForm forwards to renderCallbackForm$', async () => {
@@ -228,7 +247,9 @@ describe('SdkService', () => {
   describe('makeConnection', () => {
     it('does not call establishConnection when sdkLoaded is false', () => {
       (service as any).sdkLoaded = false;
-      const spyError = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const spyError = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       service.makeConnection('svc', 'cid');
       expect(establishConnectionMock).not.toHaveBeenCalled();
       expect(spyError).toHaveBeenCalledWith('SDK script is not loaded yet');
@@ -237,7 +258,9 @@ describe('SdkService', () => {
 
     it('calls establishConnection when sdkLoaded true and forwards response', (done) => {
       (service as any).sdkLoaded = true;
-      establishConnectionMock.mockImplementation((_socket, _sid, _cid, cb) => cb({ connected: true }));
+      establishConnectionMock.mockImplementation((_socket, _sid, _cid, cb) =>
+        cb({ connected: true }),
+      );
 
       service.connectionResponse$.subscribe((val) => {
         expect(val).toEqual({ connected: true });
@@ -245,14 +268,23 @@ describe('SdkService', () => {
       });
 
       service.makeConnection('svc', 'cid');
-      expect(establishConnectionMock).toHaveBeenCalledWith(mockConfig!.appConfig.SOCKET_URL, 'svc', 'cid', expect.any(Function));
+      expect(establishConnectionMock).toHaveBeenCalledWith(
+        mockConfig!.appConfig.SOCKET_URL,
+        'svc',
+        'cid',
+        expect.any(Function),
+      );
     });
   });
 
   describe('setConversationDataAgainstCustomerIdentifier / postFormDataAsActivity / onChatResumed / sendChatRequest', () => {
     it('postFormDataAsActivity calls pushFormDataAsActivity', () => {
       service.postFormDataAsActivity({ my: 'data' });
-      expect(pushFormDataAsActivityMock).toHaveBeenCalledWith(mockConfig!.appConfig.CX_ACTIVITY, { my: 'data' }, expect.any(Function));
+      expect(pushFormDataAsActivityMock).toHaveBeenCalledWith(
+        mockConfig!.appConfig.CX_ACTIVITY,
+        { my: 'data' },
+        expect.any(Function),
+      );
     });
 
     it('sendChatRequest calls chatRequest', () => {
@@ -264,15 +296,25 @@ describe('SdkService', () => {
 
   describe('createStandardFormObj and sendWebhookNotification', () => {
     it('createStandardFormObj converts attributes list into object', () => {
-      const attrs = [{ key: 'name', value: 'bob' }, { key: 'phone', value: '123' }, { key: '', value: 'x' }];
+      const attrs = [
+        { key: 'name', value: 'bob' },
+        { key: 'phone', value: '123' },
+        { key: '', value: 'x' },
+      ];
       const out = service.createStandardFormObj(attrs as any);
       expect(out).toEqual({ name: 'bob', phone: '123' });
     });
 
     it('sendWebhookNotification should call webhookNotifications with expected args', () => {
-      const fakePayload = { data: { formData: { attributes: [{ key: 'name', value: 'bob' }] } } };
+      const fakePayload = {
+        data: { formData: { attributes: [{ key: 'name', value: 'bob' }] } },
+      };
       service.sendWebhookNotification('https://webhook', fakePayload);
-      expect(webhookNotificationsMock).toHaveBeenCalledWith('https://webhook', expect.any(Object), { name: 'bob' });
+      expect(webhookNotificationsMock).toHaveBeenCalledWith(
+        'https://webhook',
+        expect.any(Object),
+        { name: 'bob' },
+      );
     });
   });
 
@@ -286,15 +328,28 @@ describe('SdkService', () => {
     });
 
     it('sendCallbackRequest constructs payload and calls callbackRequest and onCallbackRequestResponse$', (done) => {
-      const configs = { campaignId: 'camp', allowDuplicate: true, callbackUrl: 'https://cb' };
-      const formData = [{ key: 'phone', value: '999' }, { key: 'name', value: 'n' }];
-      callbackRequestMock.mockImplementation((_url, _payload, cb) => cb({ ok: true }));
+      const configs = {
+        campaignId: 'camp',
+        allowDuplicate: true,
+        callbackUrl: 'https://cb',
+      };
+      const formData = [
+        { key: 'phone', value: '999' },
+        { key: 'name', value: 'n' },
+      ];
+      callbackRequestMock.mockImplementation((_url, _payload, cb) =>
+        cb({ ok: true }),
+      );
       service.onCallbackRequestResponse$.subscribe((val) => {
         expect(val).toEqual({ ok: true });
         done();
       });
       service.sendCallbackRequest(configs, formData as any);
-      expect(callbackRequestMock).toHaveBeenCalledWith(configs.callbackUrl, expect.any(Object), expect.any(Function));
+      expect(callbackRequestMock).toHaveBeenCalledWith(
+        configs.callbackUrl,
+        expect.any(Object),
+        expect.any(Function),
+      );
     });
   });
 
@@ -313,21 +368,33 @@ describe('SdkService', () => {
     });
 
     it('moveToFileServer calls uploadToFileEngine and returns via callback', (done) => {
-      uploadToFileEngineMock.mockImplementation((_url, _filePayload, cb) => cb({ type: 'ok', name: 'f', size: 10 }));
+      uploadToFileEngineMock.mockImplementation((_url, _filePayload, cb) =>
+        cb({ type: 'ok', name: 'f', size: 10 }),
+      );
       service.moveToFileServer({ file: 'x' } as any, (res: any) => {
         expect(res).toEqual({ type: 'ok', name: 'f', size: 10 });
         done();
       });
-      expect(uploadToFileEngineMock).toHaveBeenCalledWith(mockConfig!.appConfig.FILE_SERVER_URL, { file: 'x' }, expect.any(Function));
+      expect(uploadToFileEngineMock).toHaveBeenCalledWith(
+        mockConfig!.appConfig.FILE_SERVER_URL,
+        { file: 'x' },
+        expect.any(Function),
+      );
     });
 
     it('authenticateKey delegates to authenticateRequest', (done) => {
-      authenticateRequestMock.mockImplementation((_url, _payload, cb) => cb({ ok: true }));
+      authenticateRequestMock.mockImplementation((_url, _payload, cb) =>
+        cb({ ok: true }),
+      );
       service.authenticateKey({ roomId: 'r' }, (res: any) => {
         expect(res).toEqual({ ok: true });
         done();
       });
-      expect(authenticateRequestMock).toHaveBeenCalledWith(mockConfig!.appConfig.AUTHENTICATOR_URL, { roomId: 'r' }, expect.any(Function));
+      expect(authenticateRequestMock).toHaveBeenCalledWith(
+        mockConfig!.appConfig.AUTHENTICATOR_URL,
+        { roomId: 'r' },
+        expect.any(Function),
+      );
     });
 
     it('handleChatEnd calls global chatEnd', () => {
@@ -352,8 +419,13 @@ describe('SdkService', () => {
     });
 
     it('handleCallStart posts makeCall with diallingUri', () => {
-      const callPayload = { type: 'video', authConfigs: { diallingUri: 'sip:123' } };
-      postMessagesMock.mockImplementation((payload: any) => payload.parameter.clientCallbackFunction({ started: true }));
+      const callPayload = {
+        type: 'video',
+        authConfigs: { diallingUri: 'sip:123' },
+      };
+      postMessagesMock.mockImplementation((payload: any) =>
+        payload.parameter.clientCallbackFunction({ started: true }),
+      );
       (global as any).postMessages = postMessagesMock;
       const spy = jest.fn();
       service.onWebRtcCallResponse$.subscribe(spy);
@@ -363,52 +435,72 @@ describe('SdkService', () => {
     });
 
     it('handleCallEnd posts releaseCall', () => {
-      postMessagesMock.mockImplementation((payload: any) => payload.parameter.clientCallbackFunction({ ended: true }));
+      postMessagesMock.mockImplementation((payload: any) =>
+        payload.parameter.clientCallbackFunction({ ended: true }),
+      );
       (global as any).postMessages = postMessagesMock;
       const spy = jest.fn();
       service.onWebRtcCallResponse$.subscribe(spy);
       service.handleCallEnd('dialog-1');
-      expect(postMessagesMock).toHaveBeenCalledWith(expect.objectContaining({ action: 'releaseCall' }));
+      expect(postMessagesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'releaseCall' }),
+      );
       expect(spy).toHaveBeenCalledWith({ ended: true });
     });
 
     it('handleLogOutAgent posts logout action', () => {
-      postMessagesMock.mockImplementation((payload: any) => payload.parameter.clientCallbackFunction({ loggedOut: true }));
+      postMessagesMock.mockImplementation((payload: any) =>
+        payload.parameter.clientCallbackFunction({ loggedOut: true }),
+      );
       (global as any).postMessages = postMessagesMock;
       const spy = jest.fn();
       service.onWebRtcCallResponse$.subscribe(spy);
       service.handleLogOutAgent('dialog-2');
-      expect(postMessagesMock).toHaveBeenCalledWith(expect.objectContaining({ action: 'logout' }));
+      expect(postMessagesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'logout' }),
+      );
       expect(spy).toHaveBeenCalledWith({ loggedOut: true });
     });
 
     it('handleCallMic posts mic payload', () => {
-      postMessagesMock.mockImplementation((payload: any) => payload.parameter.clientCallbackFunction({ mic: 'ok' }));
+      postMessagesMock.mockImplementation((payload: any) =>
+        payload.parameter.clientCallbackFunction({ mic: 'ok' }),
+      );
       (global as any).postMessages = postMessagesMock;
       const spy = jest.fn();
       service.onWebRtcCallResponse$.subscribe(spy);
       service.handleCallMic('mute', 'd1');
-      expect(postMessagesMock).toHaveBeenCalledWith(expect.objectContaining({ action: 'mute' }));
+      expect(postMessagesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'mute' }),
+      );
       expect(spy).toHaveBeenCalledWith({ mic: 'ok' });
     });
 
     it('handleCallHoldState posts hold action', () => {
-      postMessagesMock.mockImplementation((payload: any) => payload.parameter.clientCallbackFunction({ hold: 'ok' }));
+      postMessagesMock.mockImplementation((payload: any) =>
+        payload.parameter.clientCallbackFunction({ hold: 'ok' }),
+      );
       (global as any).postMessages = postMessagesMock;
       const spy = jest.fn();
       service.onWebRtcCallResponse$.subscribe(spy);
       service.handleCallHoldState('hold', 'd2');
-      expect(postMessagesMock).toHaveBeenCalledWith(expect.objectContaining({ action: 'hold' }));
+      expect(postMessagesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'hold' }),
+      );
       expect(spy).toHaveBeenCalledWith({ hold: 'ok' });
     });
 
     it('convertCall posts convertCall and catches errors gracefully', () => {
-      postMessagesMock.mockImplementation((payload: any) => payload.parameter.clientCallbackFunction({ converted: true }));
+      postMessagesMock.mockImplementation((payload: any) =>
+        payload.parameter.clientCallbackFunction({ converted: true }),
+      );
       (global as any).postMessages = postMessagesMock;
       const spy = jest.fn();
       service.onWebRtcCallResponse$.subscribe(spy);
       service.convertCall('on', 'video', 'd3');
-      expect(postMessagesMock).toHaveBeenCalledWith(expect.objectContaining({ action: 'convertCall' }));
+      expect(postMessagesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'convertCall' }),
+      );
       expect(spy).toHaveBeenCalledWith({ converted: true });
     });
   });
@@ -420,7 +512,10 @@ describe('SdkService', () => {
         expect(res).toEqual({ file: 'ok' });
         done();
       });
-      expect(getFileURLMock).toHaveBeenCalledWith('some-url', expect.any(Function));
+      expect(getFileURLMock).toHaveBeenCalledWith(
+        'some-url',
+        expect.any(Function),
+      );
     });
   });
 });

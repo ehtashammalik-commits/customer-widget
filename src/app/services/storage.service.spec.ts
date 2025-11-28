@@ -21,7 +21,7 @@ describe('StorageService', () => {
       removeItem: jest.fn(),
       clear: jest.fn(),
     };
-    
+
     const createStorageMock = (): Storage => {
       let store: Record<string, string> = {};
       return {
