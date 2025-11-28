@@ -81,10 +81,10 @@ export class SdkService {
   // this.setupRemoteMediaRequest.asObservable();
 
      // ---- Add your streams here to aceess during minimize or maximize widget ----
-private localStreamSubject = new BehaviorSubject<MediaStream | null>(null);
+private readonly localStreamSubject = new BehaviorSubject<MediaStream | null>(null);
 public localStream$ = this.localStreamSubject.asObservable();
 
-private remoteStreamSubject = new BehaviorSubject<MediaStream | null>(null);
+private readonly remoteStreamSubject = new BehaviorSubject<MediaStream | null>(null);
 public remoteStreamObs$ = this.remoteStreamSubject.asObservable();
 
 
@@ -483,12 +483,12 @@ public remoteStreamObs$ = this.remoteStreamSubject.asObservable();
     // ---- Methods to set streams ----
 setLocalStream(stream: MediaStream) {
   this.localStreamSubject.next(stream);
-  //console.log('>>> Emitting local stream', stream);
+  
 }
 
 setRemoteStream(stream: MediaStream) {
   this.remoteStreamSubject.next(stream);
-  //console.log('>>> Emitting remote stream', stream);
+  
 }
 
 }
