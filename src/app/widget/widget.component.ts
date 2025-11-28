@@ -3009,194 +3009,286 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   /** mediaPermissionStatus: just log for now (keeps previous behaviour) */
-  private handleMediaPermissionStatusEvent(data: any): void {
-    console.log('[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ', data.dialog);
-    this.dialogId = data.id;
-    console.log(
-      '[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus: ===> ',
-      data.dialog,
-    );
+ private handleMediaPermissionStatusEvent(data: any): void {
+  console.log('[mediaBrowserPermissionStatus] ACTIVE CALL mediaBrowserPermissionStatus:', data.dialog);
 
-    const type = data.dialog.permissionType.toLowerCase();
-    const isDenied = data.dialog.permissionStatus.toLowerCase() === 'denied';
-    const isGranted = data.dialog.permissionStatus.toLowerCase() === 'granted';
-    console.log('data.dialog.errorReason:========>', data.dialog.errorReason);
-    if (data.dialog.errorReason === "Audio/Video Device is being used by Someother Party") {
-      console.log('Permission Status DENIED:========>', "Audio/Video Device is being used by Someother Party");
-    } else {
-      console.log('Permission Status:========>', type);
-      switch (type) {
+  this.dialogId = data.id;
 
-        case 'microphone':
-          this.disableMic = isDenied ? true : isGranted ? false : this.disableMic;
-          if (isGranted) {
-            // //  Call toggleCallMic when mic permission is granted
+  const dialog = data.dialog;
+  const type = dialog.permissionType?.toLowerCase();
+  const status = dialog.permissionStatus?.toLowerCase();
+  const isDenied = status === 'denied';
+  const isGranted = status === 'granted';
 
-            // const action = !this.isCallMute ? 'mute_call' : 'unmute_call';
-            //     //this.isCallMute=true;
-            //     //if(action === 'mute_call'){this.toggleCallMicPermission(action, data.id); // pass tooltip reference if you have it
-
-            //   //}
-            //   this.toggleCallMic(this.micTooltip);
-            //  console.log('MICROPHONE Status with tooltip ref:========>',data.id,action)
-            //  Only mute if call is currently unmuted
-            if (!this.isCallMute) {
-              this.toggleCallMic(this.micTooltip);
-              console.log(' MIC forced muted due to permission grant', data.id);
-            } else {
-              console.log(' MIC already muted, no action needed', data.id);
-            }
-
-          }
-          console.log('[disableMic Status] ===>', this.disableMic);
-          break;
-
-        case 'video':
-          this.disableCam = isDenied ? true : isGranted ? false : this.disableCam;
-          console.log('[disableCam Status] ===>', this.disableCam);
-          if (isGranted) {
-            // this.handleVideoIconClick(this.camTooltip)
-            // console.log('CAMERA Status with tooltip ref:========>',this.camTooltip)
-            if (!this.isVideoHide) {
-              this.handleVideoIconClick(this.camTooltip);
-              console.log('CAMERA Status with tooltip ref:========>');
-            } else {
-              console.log("Video is already OFF, skipping toggle.");
-            }
-
-          }
-          break;
-      }
-    }
-
+  // 🔹 Special case: Device busy
+  if (dialog.errorReason === "Audio/Video Device is being used by Someother Party") {
+    console.error("Audio/Video Device is being used by Someother Party");
+    return;
   }
+
+  if (!type) return;
+
+  switch (type) {
+    case 'microphone':
+      this.handleMicrophonePermission(isGranted, isDenied);
+      break;
+
+    case 'video':
+      this.handleCameraPermission(isGranted, isDenied);
+      break;
+  }
+}
+private handleMicrophonePermission(isGranted: boolean, isDenied: boolean): void {
+  if (isDenied) this.disableMic = true;
+  else if (isGranted) this.disableMic = false;
+
+  if (isGranted) {
+    if (!this.isCallMute) {
+      this.toggleCallMic(this.micTooltip);
+    } else {
+      console.warn('MIC already muted, no action needed');
+    }
+  }
+}
+
+private handleCameraPermission(isGranted: boolean, isDenied: boolean): void {
+  
+  if (isDenied) this.disableCam = true;
+  else if (isGranted) this.disableCam = false;
+
+  if (isGranted) {
+    if (!this.isVideoHide) {
+      this.handleVideoIconClick(this.camTooltip);
+    } else {
+      console.warn('Video is already OFF, skipping toggle.');
+    }
+  }
+}
+
 
   /** Error: big handler — map response.type + description to user-friendly message and take appropriate actions */
-  private handleErrorEvent(data: any): void {
-    // Clear dialogId on error (same as original)
-    //this.dialogId = undefined;
+  // private handleErrorEvent(data: any): void {
+  //   // Clear dialogId on error (same as original)
+  //   //this.dialogId = undefined;
 
-    let errorMessage = '';
+  //   let errorMessage = '';
 
-    switch (data.response?.type) {
-      case 'generalError':
-        switch (data.response?.description) {
-          case 'Service Unavailable':
-            errorMessage = 'The service is currently unavailable. Please check your network connection and try again.';
-            break;
-          case 'Forbidden':
-            errorMessage = 'Authentication failed. Please verify your SIP credentials and try again.';
-            break;
-          case 'Session.getOffer unknown error.':
-            errorMessage = 'Please check Audio / Video permissions in your browser.';
-            break;
-          case "Microphone permission denied. Please enable.":
-            errorMessage = `Please add microphone permissions in your browser.`;
-            break;
-          case "Audio/Video Device Not Found. Please make sure your Audio/Video Device are working":
-          case "Camera permission denied. Please enable.":
-            errorMessage = `Please add Camera permissions in your browser to enable video.`;
-            break;
-          case "Audio/Video Device is being used by Someother Party":
-            errorMessage = `Audio/Video Device is being used by Someother Party`;
-            break;
+  //   switch (data.response?.type) {
+  //     case 'generalError':
+  //       switch (data.response?.description) {
+  //         case 'Service Unavailable':
+  //           errorMessage = 'The service is currently unavailable. Please check your network connection and try again.';
+  //           break;
+  //         case 'Forbidden':
+  //           errorMessage = 'Authentication failed. Please verify your SIP credentials and try again.';
+  //           break;
+  //         case 'Session.getOffer unknown error.':
+  //           errorMessage = 'Please check Audio / Video permissions in your browser.';
+  //           break;
+  //         case "Microphone permission denied. Please enable.":
+  //           errorMessage = `Please add microphone permissions in your browser.`;
+  //           break;
+  //         case "Audio/Video Device Not Found. Please make sure your Audio/Video Device are working":
+  //         case "Camera permission denied. Please enable.":
+  //           errorMessage = `Please add Camera permissions in your browser to enable video.`;
+  //           break;
+  //         case "Audio/Video Device is being used by Someother Party":
+  //           errorMessage = `Audio/Video Device is being used by Someother Party`;
+  //           break;
 
-          default:
-            errorMessage = 'An unknown general error occurred.';
-        }
-        console.log('[Error] Call terminated:', errorMessage);
-        break;
+  //         default:
+  //           errorMessage = 'An unknown general error occurred.';
+  //       }
+  //       console.log('[Error] Call terminated:', errorMessage);
+  //       break;
 
-      case 'subscriptionFailed':
-        errorMessage = 'Certificate Issues: Please contact with your administrator';
-        console.log('[Error] Call terminated:', errorMessage);
-        break;
+  //     case 'subscriptionFailed':
+  //       errorMessage = 'Certificate Issues: Please contact with your administrator';
+  //       console.log('[Error] Call terminated:', errorMessage);
+  //       break;
 
-      case 'invalidState':
-        errorMessage = 'Invalid State: Session not found';
-        console.log('[Error] Call terminated:', errorMessage);
-        break;
+  //     case 'invalidState':
+  //       errorMessage = 'Invalid State: Session not found';
+  //       console.log('[Error] Call terminated:', errorMessage);
+  //       break;
 
-      default:
-        console.log(`[Error] Unknown: ${data.response?.description}`);
-        errorMessage = 'An unknown error occurred.';
-        break;
-    }
+  //     default:
+  //       console.log(`[Error] Unknown: ${data.response?.description}`);
+  //       errorMessage = 'An unknown error occurred.';
+  //       break;
+  //   }
 
 
-    if (errorMessage === "Audio/Video Device is being used by Someother Party" && this.dialogId != undefined) {
+  //   if (errorMessage === "Audio/Video Device is being used by Someother Party" && this.dialogId != undefined) {
 
-      this.snackBar.open(errorMessage, 'Dismiss', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-        horizontalPosition: 'right',
-      });
+  //     this.snackBar.open(errorMessage, 'Dismiss', {
+  //       duration: 3000,
+  //       panelClass: ['error-snackbar'],
+  //       horizontalPosition: 'right',
+  //     });
 
-    }
-    if (errorMessage != "Please add Camera permissions in your browser to enable video." && errorMessage != "Audio/Video Device is being used by Someother Party") {
-      this.showAuthenticationResponseMessage = errorMessage;
-      this.activeVideoView = false;
+  //   }
+  //   if (errorMessage != "Please add Camera permissions in your browser to enable video." && errorMessage != "Audio/Video Device is being used by Someother Party") {
+  //     this.showAuthenticationResponseMessage = errorMessage;
+  //     this.activeVideoView = false;
 
-      if (this.standaloneWebRtc) {
+  //     if (this.standaloneWebRtc) {
 
-        if (this.dialogId === null || this.dialogId === undefined) {
-          this.showInvalidCodeError = true;
-          this.callPopUpView = false;
-          this.activeVideoView = false;
-          this.isWebRtcVideoCallActive = false;
-        }
+  //       if (this.dialogId === null || this.dialogId === undefined) {
+  //         this.showInvalidCodeError = true;
+  //         this.callPopUpView = false;
+  //         this.activeVideoView = false;
+  //         this.isWebRtcVideoCallActive = false;
+  //       }
 
-        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-          horizontalPosition: 'right',
-        });
+  //       this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+  //         duration: 3000,
+  //         panelClass: ['error-snackbar'],
+  //         horizontalPosition: 'right',
+  //       });
 
-      } else if ((this.dialogId != null || this.dialogId != undefined) && errorMessage === "Please add microphone permissions in your browser.") {
+  //     } else if ((this.dialogId != null || this.dialogId != undefined) && errorMessage === "Please add microphone permissions in your browser.") {
 
-        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-          horizontalPosition: 'right',
-        });
+  //       this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+  //         duration: 3000,
+  //         panelClass: ['error-snackbar'],
+  //         horizontalPosition: 'right',
+  //       });
 
-        this.isAudioCallActive = false;
-        this.isSecureWebCall = true;
-        this.isVideoCallActive = true;
-        this.activeVideoView = true;
-        this.errorDuringWebRTCCall = false;
-        //this.changeView('chat')
-        if (this.__appConfig.appConfig.VIDEO == false) {
-          this.isAudioCallActive = true;
-          this.activeVideoView = false;
-        }
-      }
-      else {
+  //       this.isAudioCallActive = false;
+  //       this.isSecureWebCall = true;
+  //       this.isVideoCallActive = true;
+  //       this.activeVideoView = true;
+  //       this.errorDuringWebRTCCall = false;
+  //       //this.changeView('chat')
+  //       if (this.__appConfig.appConfig.VIDEO == false) {
+  //         this.isAudioCallActive = true;
+  //         this.activeVideoView = false;
+  //       }
+  //     }
+  //     else {
 
-        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-          horizontalPosition: 'right',
-        });
-        this.isAudioCallActive = false;
-        this.isSecureWebCall = false;
-        this.isVideoCallActive = false;
-        this.activeVideoView = false;
-        this.errorDuringWebRTCCall = true;
-        this.changeView('chat')
-      }
-    } else if (errorMessage === "Please add Camera permissions in your browser to enable video.") {
-      this.snackBar.open(errorMessage, 'Dismiss', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-        horizontalPosition: 'right',
-      });
+  //       this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
+  //         duration: 3000,
+  //         panelClass: ['error-snackbar'],
+  //         horizontalPosition: 'right',
+  //       });
+  //       this.isAudioCallActive = false;
+  //       this.isSecureWebCall = false;
+  //       this.isVideoCallActive = false;
+  //       this.activeVideoView = false;
+  //       this.errorDuringWebRTCCall = true;
+  //       this.changeView('chat')
+  //     }
+  //   } else if (errorMessage === "Please add Camera permissions in your browser to enable video.") {
+  //     this.snackBar.open(errorMessage, 'Dismiss', {
+  //       duration: 3000,
+  //       panelClass: ['error-snackbar'],
+  //       horizontalPosition: 'right',
+  //     });
 
-    }
+  //   }
 
+  // }
+private handleErrorEvent(data: any): void {
+  const type = data.response?.type;
+  const description = data.response?.description;
+  const errorMessage = this.getErrorMessage(type, description);
+
+  // 🔹 Special case 1: Device-in-use + dialog present
+  if (errorMessage === "Audio/Video Device is being used by Someother Party" && this.dialogId != undefined) {
+    return this.showSnackBar(errorMessage);
   }
 
+  // 🔹 Special case 2: Camera permission error
+  if (errorMessage === "Please add Camera permissions in your browser to enable video.") {
+    return this.showSnackBar(errorMessage);
+  }
 
+  // All other cases
+  this.showAuthenticationResponseMessage = errorMessage;
+  this.activeVideoView = false;
+
+  if (this.standaloneWebRtc) {
+    this.handleStandaloneError(errorMessage);
+  } else {
+    this.handleIntegratedError(errorMessage);
+  }
+}
+ // MAP ALL ERROR MESSAGES IN ONE PLACE
+
+private getErrorMessage(type: string, description: string): string {
+  const generalErrorMap: Record<string, string> = {
+    'Service Unavailable': 'The service is currently unavailable. Please check your network connection and try again.',
+    'Forbidden': 'Authentication failed. Please verify your SIP credentials and try again.',
+    'Session.getOffer unknown error.': 'Please check Audio / Video permissions in your browser.',
+    'Microphone permission denied. Please enable.': 'Please add microphone permissions in your browser.',
+    'Audio/Video Device Not Found. Please make sure your Audio/Video Device are working': 'Please add Camera permissions in your browser to enable video.',
+    'Camera permission denied. Please enable.': 'Please add Camera permissions in your browser to enable video.',
+    'Audio/Video Device is being used by Someother Party': 'Audio/Video Device is being used by Someother Party'
+  };
+
+  switch (type) {
+    case 'generalError':
+      return generalErrorMap[description] || 'An unknown general error occurred.';
+
+    case 'subscriptionFailed':
+      return 'Certificate Issues: Please contact with your administrator';
+
+    case 'invalidState':
+      return 'Invalid State: Session not found';
+
+    default:
+      console.log(`[Error] Unknown: ${description}`);
+      return 'An unknown error occurred.';
+  }
+}
+private handleIntegratedError(message: string): void {
+  if (message === "Please add microphone permissions in your browser.") {
+    this.showSnackBar(message);
+
+    this.isAudioCallActive = false;
+    this.isSecureWebCall = true;
+    this.isVideoCallActive = true;
+    this.activeVideoView = true;
+    this.errorDuringWebRTCCall = false;
+
+    // If video is disabled from config → fallback to audio
+    if (!this.__appConfig.appConfig.VIDEO) {
+      this.isAudioCallActive = true;
+      this.activeVideoView = false;
+    }
+    return;
+  }
+
+  // Default fallback for all other errors
+  this.showSnackBar(message);
+
+  this.isAudioCallActive = false;
+  this.isSecureWebCall = false;
+  this.isVideoCallActive = false;
+  this.activeVideoView = false;
+  this.errorDuringWebRTCCall = true;
+
+  this.changeView('chat');
+}
+private handleStandaloneError(message: string): void {
+  if (this.dialogId == null) {
+    this.showInvalidCodeError = true;
+    this.callPopUpView = false;
+    this.activeVideoView = false;
+    this.isWebRtcVideoCallActive = false;
+  }
+
+  this.showSnackBar(message);
+}
+private showSnackBar(message: string): void {
+  this.snackBar.open(message, 'Dismiss', {
+    duration: 3000,
+    panelClass: ['error-snackbar'],
+    horizontalPosition: 'right',
+  });
+}
   /** Process a dialog object (shared between dialogState & outboundDialing) */
   private processDialogByState(dialog: any, originalEventData?: any): void {
     const state = dialog?.state;
