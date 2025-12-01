@@ -3481,8 +3481,594 @@ describe('booleanEmojiSet', () => {
         expect(mockControl.markAsDirty).toHaveBeenCalled();
       });
 
+    });
 
+    describe('getFileName', () => {
+      let sectionsArray: any;
+      let mockControl: any;
 
+      beforeEach(() => {
+        mockControl = {
+          value: 'test-file.txt'
+        };
+        sectionsArray = {
+          at: jest.fn().mockReturnValue({
+            get: jest.fn().mockReturnValue(mockControl),
+          }),
+        };
+
+        component.preChatFormGroup = {
+          get: jest.fn().mockImplementation((name: string) => {
+            if (name === 'sections') return sectionsArray;
+            return null;
+          }),
+        } as any;
+      });
+
+      it('should return correct filename when section and control exist', () => {
+        const fileName = component.getFileName(0, 'fileControlName');
+
+        expect(sectionsArray.at).toHaveBeenCalledWith(0);
+        expect(sectionsArray.at(0).get).toHaveBeenCalledWith('fileControlName');
+        expect(fileName).toBe('test-file.txt');
+      });
+
+      it('should return empty string when control value is undefined', () => {
+        mockControl.value = undefined;
+        const fileName = component.getFileName(0, 'fileControlName');
+
+        expect(fileName).toBe('');
+      });
+
+      it('should return empty string when control is null', () => {
+        sectionsArray.at(0).get = jest.fn().mockReturnValue(null);
+        const fileName = component.getFileName(0, 'fileControlName');
+
+        expect(fileName).toBe('');
+      });
+    });
+
+    describe('disableUploadBtn', () => {
+      let mockElement: any;
+      let mockUploadedBtn: any;
+
+      beforeEach(() => {
+        mockElement = { disabled: false };
+        mockUploadedBtn = { disabled: false };
+
+        // Mock querySelector to return the button element
+        jest.spyOn(document, 'querySelector').mockReturnValue(mockUploadedBtn);
+
+        // Since renderer is private, we directly access it via internal object
+        (component as any).renderer = { setAttribute: jest.fn() };
+      });
+
+      it('should disable the upload button', () => {
+        component.disableUploadBtn('testId');
+
+        expect(document.querySelector).toHaveBeenCalledWith('#upload-btn-testId');
+        expect((component as any).renderer.setAttribute).toHaveBeenCalledWith(mockUploadedBtn, 'disabled', 'true');
+      });
+
+      it('should handle null button element', () => {
+        jest.spyOn(document, 'querySelector').mockReturnValue(null);
+
+        component.disableUploadBtn('testId');
+
+        expect((component as any).renderer.setAttribute).toHaveBeenCalledWith(null, 'disabled', 'true');
+      });
+    });
+
+    describe('previewFileForm', () => {
+      let mockFile: any;
+      let mockReader: any;
+      let originalFileReader: any;
+
+      beforeEach(() => {
+        originalFileReader = global.FileReader;
+
+        mockFile = {
+          name: 'test.txt',
+          type: 'text/plain',
+          size: 1024
+        };
+
+        mockReader = {
+          onload: null,
+          readAsText: jest.fn(),
+          readAsDataURL: jest.fn()
+        };
+
+        global.FileReader = jest.fn(() => mockReader) as any;
+      });
+
+      afterEach(() => {
+        global.FileReader = originalFileReader;
+      });
+
+      it('should handle text file preview', () => {
+        mockFile.name = 'test.txt';
+        mockFile.type = 'text/plain';
+
+        component.previewFileForm(mockFile, 0, 0);
+
+        expect(global.FileReader).toHaveBeenCalled();
+        expect(mockReader.readAsText).toHaveBeenCalledWith(mockFile);
+
+        // Trigger onload to test the callback
+        mockReader.onload({ target: { result: 'file content' } });
+
+        expect(component.fileContent['0-0']).toBe('file content');
+      });
+
+      it('should handle JSON file preview', () => {
+        mockFile.name = 'test.json';
+        mockFile.type = 'application/json';
+
+        component.previewFileForm(mockFile, 1, 0);
+
+        expect(global.FileReader).toHaveBeenCalled();
+        expect(mockReader.readAsText).toHaveBeenCalledWith(mockFile);
+
+        // Trigger onload to test the callback with proper JSON string
+        // The implementation stringifies the content again for JSON files
+        const originalJson = JSON.stringify({key: "value"});
+        const expectedDoubleStringified = JSON.stringify(originalJson);
+        mockReader.onload({ target: { result: originalJson } });
+
+        expect(component.fileContent['1-0']).toBe(expectedDoubleStringified);
+      });
+
+      it('should handle image file preview', () => {
+        mockFile.name = 'test.png';
+        mockFile.type = 'image/png';
+
+        component.previewFileForm(mockFile, 2, 1);
+
+        expect(global.FileReader).toHaveBeenCalled();
+        expect(mockReader.readAsDataURL).toHaveBeenCalledWith(mockFile);
+
+        // Mock URL.createObjectURL to return a blob URL
+        const originalCreateObjectURL = URL.createObjectURL;
+        URL.createObjectURL = jest.fn(() => 'blob:test');
+
+        // Trigger onload to test the callback
+        mockReader.onload({ target: { result: 'blob:test' } });
+
+        expect(component.fileHistory['2-1']).toEqual({ isImage: true });
+
+        URL.createObjectURL = originalCreateObjectURL;
+      });
+
+      it('should handle null file', () => {
+        component.previewFileForm(null as any, 0, 0);
+
+        expect(global.FileReader).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('clearFile', () => {
+      let mockUploadBtn: any;
+      let mockInput: any;
+      let originalGetElementById: any;
+
+      beforeEach(() => {
+        originalGetElementById = document.getElementById;
+
+        mockUploadBtn = {
+          disabled: false,
+          textContent: 'Upload'
+        };
+
+        mockInput = {
+          value: 'some-file.txt'
+        };
+
+        (document.getElementById as jest.Mock) = jest.fn((id) => {
+          if (id.includes('upload-btn-')) {
+            return mockUploadBtn;
+          }
+          return mockInput;
+        });
+
+        component.filePreviewUrl = { '0-1': 'preview-url' };
+        component.fileHistory = { '0-1': { isImage: true } };
+
+        // Mock setFileControl to track calls
+        component.setFileControl = jest.fn();
+      });
+
+      afterEach(() => {
+        document.getElementById = originalGetElementById;
+      });
+
+      it('should clear file and reset button', () => {
+        component.clearFile(0, 1, 'controlName', 'testId');
+
+        expect(mockUploadBtn.disabled).toBe(true);
+        expect(mockUploadBtn.textContent).toBe('Upload');
+        expect(mockInput.value).toBe('');
+        expect(component.filePreviewUrl['0-1']).toBeUndefined();
+        expect(component.fileHistory['0-1']).toBeUndefined();
+      });
+
+      it('should call setFileControl with empty string', () => {
+        component.clearFile(0, 1, 'controlName', 'testId');
+
+        expect(component.setFileControl).toHaveBeenCalledWith(0, '', 'controlName');
+      });
+    });
+
+    describe('getFileType', () => {
+      it('should return correct file type for text files', () => {
+        expect(component.getFileType('test.txt')).toBe('text');
+      });
+
+      it('should return correct file type for JSON files', () => {
+        expect(component.getFileType('test.json')).toBe('json');
+      });
+
+      it('should return correct file type for PDF files', () => {
+        expect(component.getFileType('test.pdf')).toBe('document');
+      });
+
+      it('should return correct file type for DOC files', () => {
+        expect(component.getFileType('test.doc')).toBe('document');
+        expect(component.getFileType('test.docx')).toBe('document');
+      });
+
+      it('should return correct file type for audio files', () => {
+        expect(component.getFileType('test.mp3')).toBe('audio');
+        expect(component.getFileType('test.wav')).toBe('audio');
+      });
+
+      it('should return correct file type for video files', () => {
+        expect(component.getFileType('test.mp4')).toBe('video');
+        expect(component.getFileType('test.webm')).toBe('video');
+      });
+
+      it('should return correct file type for image files', () => {
+        expect(component.getFileType('test.png')).toBe('image');
+        expect(component.getFileType('test.jpg')).toBe('image');
+        expect(component.getFileType('test.jpeg')).toBe('image');
+      });
+
+      it('should return unknown for unrecognized file types', () => {
+        expect(component.getFileType('test.xyz')).toBe('unknown');
+      });
+
+      it('should handle files without extension', () => {
+        expect(component.getFileType('test')).toBe('unknown');
+      });
+    });
+
+    describe('isErrorExist', () => {
+      let sectionsArray: any;
+      let mockControl: any;
+
+      beforeEach(() => {
+        mockControl = { test: 'value' };
+        sectionsArray = {
+          at: jest.fn().mockReturnValue({
+            get: jest.fn().mockReturnValue(mockControl),
+          }),
+        };
+
+        component.preChatFormGroup = {
+          get: jest.fn().mockImplementation((name: string) => {
+            if (name === 'sections') return sectionsArray;
+            return null;
+          }),
+        } as any;
+      });
+
+      it('should return undefined and log to console', () => {
+        const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+        const result = component.isErrorExist(0, 0, 'testControl');
+
+        expect(sectionsArray.at).toHaveBeenCalledWith(0);
+        expect(sectionsArray.at(0).get).toHaveBeenCalledWith('testControl');
+        expect(consoleSpy).toHaveBeenCalledWith('error control ', mockControl);
+        expect(result).toBeUndefined();
+
+        consoleSpy.mockRestore();
+      });
+    });
+
+    describe('disableTooltip', () => {
+      it('should return true when titleElement is null', () => {
+        expect(component.disableTooltip(null)).toBe(true);
+      });
+
+      it('should return true when titleElement scrollWidth is less than or equal to clientWidth', () => {
+        const mockElement = {
+          scrollWidth: 100,
+          clientWidth: 150
+        };
+
+        expect(component.disableTooltip(mockElement)).toBe(true);
+      });
+
+      it('should return false when titleElement scrollWidth is greater than clientWidth', () => {
+        const mockElement = {
+          scrollWidth: 150,
+          clientWidth: 100
+        };
+
+        expect(component.disableTooltip(mockElement)).toBe(false);
+      });
+    });
+
+    describe('openFileInNewTab', () => {
+      let originalWindowOpen: any;
+
+      beforeEach(() => {
+        originalWindowOpen = window.open;
+      });
+
+      afterEach(() => {
+        window.open = originalWindowOpen;
+      });
+
+      it('should open file in new tab when fileUrl is provided', () => {
+        const mockUrl = 'http://example.com/file.pdf';
+        const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+
+        component.openFileInNewTab(mockUrl);
+
+        expect(windowOpenSpy).toHaveBeenCalledWith(mockUrl, '_blank');
+      });
+
+      it('should not open new tab when fileUrl is empty', () => {
+        const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+
+        component.openFileInNewTab('');
+
+        expect(windowOpenSpy).not.toHaveBeenCalled();
+      });
+
+      it('should not open new tab when fileUrl is null', () => {
+        const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+
+        component.openFileInNewTab(null as any);
+
+        expect(windowOpenSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    // describe('hasRequiredError', () => {
+    //   let sectionsArray: any;
+    //   let mockControl: any;
+
+    //   beforeEach(() => {
+    //     mockControl = {
+    //       hasError: jest.fn().mockReturnValue(false),
+    //       touched: false,
+    //       dirty: false
+    //     };
+    //     sectionsArray = {
+    //       at: jest.fn().mockReturnValue({
+    //         get: jest.fn().mockReturnValue(mockControl),
+    //       }),
+    //     };
+
+    //     component.preChatFormGroup = {
+    //       get: jest.fn().mockImplementation((path) => {
+    //         if (Array.isArray(path) && path[0] === 'sections' && path[1] === 0) {
+    //           return sectionsArray;
+    //         }
+    //         return null;
+    //       }),
+    //     } as any;
+    //   });
+
+    //   // it('should return false when control does not have required error', () => {
+    //   //   const result = component.hasRequiredError('testControl', 0);
+
+    //   //   expect(sectionsArray.at).toHaveBeenCalledWith(0);
+    //   //   expect(sectionsArray.at(0).get).toHaveBeenCalledWith('testControl');
+    //   //   expect(mockControl.hasError).toHaveBeenCalledWith('required');
+    //   //   expect(result).toBe(false);
+    //   // });
+
+    //   it('should return false when control has required error but is not touched or dirty', () => {
+    //     mockControl.hasError = jest.fn().mockReturnValue(true);
+
+    //     const result = component.hasRequiredError('testControl', 0);
+
+    //     expect(result).toBe(false);
+    //   });
+
+    //   it('should return true when control has required error and is touched', () => {
+    //     mockControl.hasError = jest.fn().mockReturnValue(true);
+    //     mockControl.touched = true;
+
+    //     const result = component.hasRequiredError('testControl', 0);
+
+    //     expect(result).toBe(true);
+    //   });
+
+    //   it('should return true when control has required error and is dirty', () => {
+    //     mockControl.hasError = jest.fn().mockReturnValue(true);
+    //     mockControl.dirty = true;
+
+    //     const result = component.hasRequiredError('testControl', 0);
+
+    //     expect(result).toBe(true);
+    //   });
+    // });
+
+    describe('getTextAlignment', () => {
+      it('should return left for left alignment', () => {
+        expect(component.getTextAlignment('left')).toBe('left');
+      });
+
+      it('should return right for right alignment', () => {
+        expect(component.getTextAlignment('right')).toBe('right');
+      });
+
+      it('should return null for center alignment', () => {
+        expect(component.getTextAlignment('center')).toBeNull();
+      });
+
+      it('should return null for undefined alignment', () => {
+        expect(component.getTextAlignment(undefined)).toBeNull();
+      });
+
+      it('should return null for unrecognized alignment', () => {
+        expect(component.getTextAlignment('unknown')).toBeNull();
+      });
+
+      it('should handle case insensitive alignments', () => {
+        expect(component.getTextAlignment('Left')).toBe('left');
+        expect(component.getTextAlignment('RIGHT')).toBe('right');
+      });
+    });
+
+    describe('booleanEmojiSet', () => {
+      let mockSvg1: any;
+      let mockSvg2: any;
+      let mockPath1: any;
+      let mockPath2: any;
+      let mockPath3: any;
+
+      beforeEach(() => {
+        mockPath1 = { getAttribute: jest.fn().mockReturnValue('red'), setAttribute: jest.fn() };
+        mockPath2 = { getAttribute: jest.fn().mockReturnValue('blue'), setAttribute: jest.fn() };
+        mockPath3 = { getAttribute: jest.fn().mockReturnValue('green'), setAttribute: jest.fn() };
+
+        mockSvg1 = {
+          getElementsByTagName: jest.fn().mockReturnValue([mockPath1, mockPath2]),
+          dataset: {},
+        };
+        mockSvg2 = {
+          getElementsByTagName: jest.fn().mockReturnValue([mockPath3]),
+          dataset: {},
+        };
+
+        (document.querySelectorAll as jest.Mock).mockReturnValue([mockSvg1, mockSvg2]);
+      });
+
+      it('should store original colors and update colors as expected', () => {
+        component.booleanEmojiSet(0, 0, 0);
+
+        // Check that original colors were stored
+        expect(mockSvg1.dataset.originalColors).toBe('["red","blue"]');
+        expect(mockSvg2.dataset.originalColors).toBe('["green"]');
+
+        // Check that paths in the clicked SVG (index 0) kept original colors
+        expect(mockPath1.setAttribute).toHaveBeenCalledWith('fill', 'red');
+        expect(mockPath2.setAttribute).toHaveBeenCalledWith('fill', 'blue');
+
+        // Check that paths in other SVGs (index 1) were set to gray
+        expect(mockPath3.setAttribute).toHaveBeenCalledWith('fill', 'gray');
+      });
+
+      it('should handle when itemIndex points to second SVG', () => {
+        component.booleanEmojiSet(0, 0, 1);
+
+        // Check that original colors were stored
+        expect(mockSvg1.dataset.originalColors).toBe('["red","blue"]');
+        expect(mockSvg2.dataset.originalColors).toBe('["green"]');
+
+        // Check that paths in the clicked SVG (index 1) kept original colors
+        expect(mockPath3.setAttribute).toHaveBeenCalledWith('fill', 'green');
+
+        // Check that paths in other SVGs (index 0) were set to gray
+        expect(mockPath1.setAttribute).toHaveBeenCalledWith('fill', 'gray');
+        expect(mockPath2.setAttribute).toHaveBeenCalledWith('fill', 'gray');
+      });
+    });
+
+    describe('handleFileChange', () => {
+      let mockFile: any;
+      let mockInput: any;
+      let mockUploadBtn: any;
+
+      beforeEach(() => {
+        mockFile = new File(['content'], 'test.txt', { type: 'text/plain' });
+
+        mockInput = {
+          files: [mockFile]
+        };
+
+        mockUploadBtn = {
+          disabled: false
+        };
+
+        (document.getElementById as jest.Mock) = jest.fn((id) => {
+          if (id.includes('upload-btn-')) {
+            return mockUploadBtn;
+          }
+          return mockInput;
+        });
+
+        component.setFileControl = jest.fn();
+        component.previewFileForm = jest.fn();
+      });
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should process allowed file type correctly', () => {
+        const allowedTypes = ['txt', 'pdf'];
+        const attribute = { key: 'fileControl' };
+
+        // Create a mock upload button with tracking of disabled state
+        let disabledState = false;
+        let wasDisabled = false; // Track if it was ever disabled during execution
+        const originalMockUploadBtn = {
+          get disabled() {
+            return disabledState;
+          },
+          set disabled(value: boolean) {
+            disabledState = value;
+            if(value) wasDisabled = true;
+          }
+        };
+
+        (document.getElementById as jest.Mock) = jest.fn((id) => {
+          if (id.includes('upload-btn-')) {
+            return originalMockUploadBtn;
+          }
+          return mockInput;
+        });
+
+        component.handleFileChange(mockInput, 0, 0, 100, 'testId', allowedTypes, attribute);
+
+        // The button should have been disabled during processing (at some point)
+        expect(wasDisabled).toBe(true);
+
+        // Final state should be that the upload button is re-enabled
+        expect(originalMockUploadBtn.disabled).toBe(false);
+
+        // Check all the expected method calls were made
+        expect(component.setFileControl).toHaveBeenCalledWith(0, 'test.txt', 'fileControl');
+        expect(component.previewFileForm).toHaveBeenCalledWith(mockFile, 0, 0);
+      });
+
+      it('should show snackbar for disallowed file type', () => {
+        const allowedTypes = ['pdf', 'doc'];
+        const attribute = { key: 'fileControl' };
+
+        component.handleFileChange(mockInput, 0, 0, 100, 'testId', allowedTypes, attribute);
+
+        expect(mockUploadBtn.disabled).toBe(true);
+        expect(mockMatSnackBar.open).toHaveBeenCalledWith("File extension not allowed'", 'X', expect.any(Object));
+      });
+
+      it('should handle when file is not provided', () => {
+        const mockEmptyInput = { files: [] };
+        const allowedTypes = ['txt'];
+        const attribute = { key: 'fileControl' };
+
+        component.handleFileChange(mockEmptyInput, 0, 0, 100, 'testId', allowedTypes, attribute);
+
+        expect(component.setFileControl).not.toHaveBeenCalled();
+        expect(component.previewFileForm).not.toHaveBeenCalled();
+      });
     });
   });
 });
