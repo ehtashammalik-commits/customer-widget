@@ -455,7 +455,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
       if (
         this.__appConfig.appConfig.CHANNEL_IDENTIFIER ===
-          'channel_customer_identifier' &&
+        'channel_customer_identifier' &&
         !this.customerIdentifier
       ) {
         alert(
@@ -911,10 +911,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   setUserData(data: any, eventType: any) {
     this.customerData = data;
-    if (
-      !this.customerData.channelCustomerIdentifier ||
-      !this.customerData.serviceIdentifier ||
-      !this.customerData.browserDeviceInfo?.deviceType
+    if (this.customerData.channelCustomerIdentifier == '' ||
+      this.customerData.serviceIdentifier == '' ||
+      this.customerData.browserDeviceInfo.deviceType == ''
     ) {
       this.preChatFormLoader = false;
       let Response = {
@@ -1255,7 +1254,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       case 'widget':
         if (
           this.storageService.getItem('wrapper-hide', this.storageType) ===
-            'true' ||
+          'true' ||
           this.__appConfig.appConfig.ADDITIONAL_PANEL !== true
         ) {
           this.additionalPanel = false;
@@ -3125,40 +3124,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   /** Error: big handler — map response.type + description to user-friendly message and take appropriate actions */
   private handleErrorEvent(data: any): void {
-    // Clear dialogId on error (same as original)
-    //this.dialogId = undefined;
-
     let errorMessage = '';
 
     switch (data.response?.type) {
       case 'generalError':
-        switch (data.response?.description) {
-          case 'Service Unavailable':
-            errorMessage =
-              'The service is currently unavailable. Please check your network connection and try again.';
-            break;
-          case 'Forbidden':
-            errorMessage =
-              'Authentication failed. Please verify your SIP credentials and try again.';
-            break;
-          case 'Session.getOffer unknown error.':
-            errorMessage =
-              'Please check Audio / Video permissions in your browser.';
-            break;
-          case 'Microphone permission denied. Please enable.':
-            errorMessage = `Please add microphone permissions in your browser.`;
-            break;
-          case 'Audio/Video Device Not Found. Please make sure your Audio/Video Device are working':
-          case 'Camera permission denied. Please enable.':
-            errorMessage = `Please add Camera permissions in your browser to enable video.`;
-            break;
-          case 'Audio/Video Device is being used by Someother Party':
-            errorMessage = `Audio/Video Device is being used by Someother Party`;
-            break;
-
-          default:
-            errorMessage = 'An unknown general error occurred.';
-        }
+        errorMessage = this.getGeneralErrorMessage(data.response?.description);
         console.log('[Error] Call terminated:', errorMessage);
         break;
 
@@ -3179,19 +3149,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         break;
     }
 
+    // ---------------- Snackbar #1 ----------------
     if (
       errorMessage === 'Audio/Video Device is being used by Someother Party' &&
       this.dialogId != undefined
     ) {
-      this.snackBar.open(errorMessage, 'Dismiss', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-        horizontalPosition: 'right',
-      });
+      this.showErrorSnack(errorMessage);
     }
+
+    // ---------------- Snackbar #2 / 3 / 4 ----------------
     if (
       errorMessage !=
-        'Please add Camera permissions in your browser to enable video.' &&
+      'Please add Camera permissions in your browser to enable video.' &&
       errorMessage != 'Audio/Video Device is being used by Someother Party'
     ) {
       this.showAuthenticationResponseMessage = errorMessage;
@@ -3205,37 +3174,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.isWebRtcVideoCallActive = false;
         }
 
-        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-          horizontalPosition: 'right',
-        });
+        this.showErrorSnack(this.showAuthenticationResponseMessage);
       } else if (
         (this.dialogId != null || this.dialogId != undefined) &&
         errorMessage === 'Please add microphone permissions in your browser.'
       ) {
-        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-          horizontalPosition: 'right',
-        });
+        this.showErrorSnack(this.showAuthenticationResponseMessage);
 
         this.isAudioCallActive = false;
         this.isSecureWebCall = true;
         this.isVideoCallActive = true;
         this.activeVideoView = true;
         this.errorDuringWebRTCCall = false;
-        //this.changeView('chat')
+
         if (this.__appConfig.appConfig.VIDEO == false) {
           this.isAudioCallActive = true;
           this.activeVideoView = false;
         }
       } else {
-        this.snackBar.open(this.showAuthenticationResponseMessage, 'Dismiss', {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-          horizontalPosition: 'right',
-        });
+        this.showErrorSnack(this.showAuthenticationResponseMessage);
+
         this.isAudioCallActive = false;
         this.isSecureWebCall = false;
         this.isVideoCallActive = false;
@@ -3247,11 +3205,34 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       errorMessage ===
       'Please add Camera permissions in your browser to enable video.'
     ) {
-      this.snackBar.open(errorMessage, 'Dismiss', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-        horizontalPosition: 'right',
-      });
+      this.showErrorSnack(errorMessage);
+    }
+  }
+
+  private showErrorSnack(message: string): void {
+    this.snackBar.open(message, 'Dismiss', {
+      duration: 3000,
+      panelClass: ['error-snackbar'],
+      horizontalPosition: 'right',
+    });
+  }
+  private getGeneralErrorMessage(description: string = ''): string {
+    switch (description) {
+      case 'Service Unavailable':
+        return 'The service is currently unavailable. Please check your network connection and try again.';
+      case 'Forbidden':
+        return 'Authentication failed. Please verify your SIP credentials and try again.';
+      case 'Session.getOffer unknown error.':
+        return 'Please check Audio / Video permissions in your browser.';
+      case 'Microphone permission denied. Please enable.':
+        return 'Please add microphone permissions in your browser.';
+      case 'Audio/Video Device Not Found. Please make sure your Audio/Video Device are working':
+      case 'Camera permission denied. Please enable.':
+        return 'Please add Camera permissions in your browser to enable video.';
+      case 'Audio/Video Device is being used by Someother Party':
+        return 'Audio/Video Device is being used by Someother Party';
+      default:
+        return 'An unknown general error occurred.';
     }
   }
 
