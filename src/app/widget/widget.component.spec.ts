@@ -45,7 +45,7 @@ const mockStorageService = {
 
 const mockRoute = {};
 const mockFormBuilder = {
-  group: jest.fn(() => ({})), 
+  group: jest.fn(() => ({})),
 };
 
 const mockBrowserNotificationService: any = {
@@ -316,6 +316,326 @@ describe('WidgetComponent', () => {
       expect(component.webRTCConfig.customerName).toBe('Initial Name');
       expect(component.webRTCConfig.customerNumber).toBe('Initial Number');
     });
+  });
+
+  // ---------- subscribeToBrowserInfo ----------
+  describe('subscribeToBrowserInfo', () => {
+    let mockBrowserInfoData$: any;
+    let mockPostMessageHandlerService: any;
+
+    beforeEach(() => {
+      mockBrowserInfoData$ = {
+        subscribe: jest.fn(),
+      };
+
+      mockPostMessageHandlerService = {
+        browserInfoData$: mockBrowserInfoData$,
+      };
+
+      (component as any).__postMessageHandlerService = mockPostMessageHandlerService;
+    });
+
+    it('should subscribe to browserInfoData$ observable', () => {
+      const mockBrowserInfo = {
+        systemInfo: {
+          browserId: 'test-browser-id',
+          browserName: 'Chrome',
+          deviceType: 'Desktop',
+        },
+        geoLocationData: {
+          time_zone: { name: 'UTC' },
+          languages: ['en'],
+          country_name: 'US',
+        },
+      };
+
+      // Mock the subscription to call the callback with test data
+      mockBrowserInfoData$.subscribe.mockImplementation((callback) => {
+        callback(mockBrowserInfo);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToBrowserInfo']();
+
+      expect(mockBrowserInfoData$.subscribe).toHaveBeenCalled();
+      expect(component.browserInfoData).toEqual(mockBrowserInfo);
+    });
+
+    it('should handle null browser info data', () => {
+      mockBrowserInfoData$.subscribe.mockImplementation((callback) => {
+        callback(null);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToBrowserInfo']();
+
+      expect(component.browserInfoData).toBeNull();
+    });
+  });
+
+  // ---------- subscribeToConnectionResponse ----------
+  describe('subscribeToConnectionResponse', () => {
+    let mockConnectionResponse$: any;
+    let mockSdk: any;
+
+    beforeEach(() => {
+      mockConnectionResponse$ = {
+        subscribe: jest.fn(),
+      };
+
+      mockSdk = {
+        connectionResponse$: mockConnectionResponse$,
+      };
+
+      component.sdk = mockSdk;
+      component.eventListener = jest.fn();
+    });
+
+    it('should subscribe to connectionResponse$ observable', () => {
+      const mockResponse = {
+        id: 1,
+        type: 'SOCKET_CONNECTED',
+        data: { message: 'Connected successfully' },
+      };
+
+      // Mock the subscription to call the callback with test data
+      mockConnectionResponse$.subscribe.mockImplementation((callback) => {
+        callback(mockResponse);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToConnectionResponse']();
+
+      expect(mockConnectionResponse$.subscribe).toHaveBeenCalled();
+      expect(component.eventListener).toHaveBeenCalledWith(mockResponse);
+    });
+
+    it('should handle null response data (should not call eventListener)', () => {
+      component.eventListener = jest.fn(); // Reset the mock
+      mockConnectionResponse$.subscribe.mockImplementation((callback) => {
+        callback(null);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToConnectionResponse']();
+
+      expect(component.eventListener).not.toHaveBeenCalled();
+    });
+
+    it('should not call eventListener if response is falsy (undefined)', () => {
+      component.eventListener = jest.fn(); // Reset the mock
+      mockConnectionResponse$.subscribe.mockImplementation((callback) => {
+        callback(undefined);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToConnectionResponse']();
+
+      expect(component.eventListener).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- ngAfterViewInit ----------
+  describe('ngAfterViewInit', () => {
+    beforeEach(() => {
+      // Reset any existing timer
+      jest.useFakeTimers();
+      component.theme = '#FF5733';
+      component.standaloneWebRtc = false;
+      component.customerChatResumed = jest.fn();
+    });
+
+    afterEach(() => {
+      // Restore real timers
+      jest.useRealTimers();
+    });
+
+    it('should call customerChatResumed when standaloneWebRtc is false', () => {
+      component.ngAfterViewInit();
+      expect(component.customerChatResumed).toHaveBeenCalled();
+    });
+
+    it('should not call customerChatResumed when standaloneWebRtc is true', () => {
+      component.standaloneWebRtc = true;
+      component.ngAfterViewInit();
+      expect(component.customerChatResumed).not.toHaveBeenCalled();
+    });
+
+    it('should set the theme color after timeout', () => {
+      const mockElement = {
+        style: {
+          setProperty: jest.fn(),
+        },
+      };
+
+      (component as any).el = { nativeElement: mockElement };
+
+      component.ngAfterViewInit();
+
+      // Fast-forward time
+      jest.advanceTimersByTime(1000);
+
+      expect(mockElement.style.setProperty).toHaveBeenCalledWith(
+        '--main-color',
+        '#FF5733'
+      );
+    });
+
+    it('should not set theme color if timeout is not reached', () => {
+      const mockElement = {
+        style: {
+          setProperty: jest.fn(),
+        },
+      };
+
+      (component as any).el = { nativeElement: mockElement };
+
+      component.ngAfterViewInit();
+
+      // Fast-forward less than 1000ms
+      jest.advanceTimersByTime(500);
+
+      expect(mockElement.style.setProperty).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- subscribeToValidations ----------
+  describe('subscribeToValidations', () => {
+    let mockValidations$: any;
+    let mockRenderPreChatForm$: any;
+    let mockSdk: any;
+
+    beforeEach(() => {
+      mockValidations$ = {
+        subscribe: jest.fn(),
+      };
+      mockRenderPreChatForm$ = {
+        subscribe: jest.fn(),
+      };
+
+      mockSdk = {
+        validationsSubcription: mockValidations$,
+        renderPreChatForm$: mockRenderPreChatForm$,
+      };
+
+      component.sdk = mockSdk;
+      component.createFormValidationControls = jest.fn();
+    });
+
+    it('should subscribe to validationsSubcription and set formValidations', () => {
+      const mockValidationData = {
+        type: 'string',
+        regex: '.{5,10}',
+      };
+
+      // Mock the subscription to call the callback with test data
+      mockValidations$.subscribe.mockImplementation((callback) => {
+        callback(mockValidationData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToValidations']();
+
+      expect(mockValidations$.subscribe).toHaveBeenCalled();
+      expect(component.formValidations).toEqual(mockValidationData);
+    });
+
+    it('should subscribe to renderPreChatForm$ and call createFormValidationControls', () => {
+      const mockValidationData = {
+        type: 'string',
+        regex: '.{5,10}',
+      };
+      const mockFormData = {
+        sections: [
+          {
+            attributes: [
+              { key: 'name', valueType: 'string50' },
+              { key: 'email', valueType: 'email' }
+            ]
+          }
+        ],
+        formTitle: 'Test Form',
+        formDescription: 'Test Description'
+      };
+
+      // Mock the subscription to call the callback with test data
+      mockValidations$.subscribe.mockImplementation((callback) => {
+        callback(mockValidationData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      mockRenderPreChatForm$.subscribe.mockImplementation((callback) => {
+        callback(mockFormData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToValidations']();
+
+      expect(mockValidations$.subscribe).toHaveBeenCalled();
+      expect(component.formValidations).toEqual(mockValidationData);
+      expect(mockRenderPreChatForm$.subscribe).toHaveBeenCalled();
+      expect(component.preChatFormInfo).toEqual(mockFormData);
+      expect(component.formData).toEqual(mockFormData.sections);
+      expect(component.preChatformTitle).toBe('Test Form');
+      expect(component.preChatformDescription).toBe('Test Description');
+      expect(component.createFormValidationControls).toHaveBeenCalledWith(
+        mockFormData.sections,
+        component.formValidations,
+        'preChatForm'
+      );
+    });
+
+   it('should handle multiple sections in form data', () => {
+    const mockFormData = {
+      sections: [
+        { attributes: [{ key: 'name', valueType: 'string50' }] },
+        {
+          attributes: [
+            { key: 'email', valueType: 'email' },
+            { key: 'phone', valueType: 'phoneNumber' }
+          ]
+        }
+      ],
+      formTitle: 'Multi Section Form',
+      formDescription: 'Form with multiple sections'
+    };
+
+    const mockValidationData = {
+      type: 'string',
+      regex: '.{5,10}',
+    };
+
+    // Mock the subscription to call the callback with test data
+    mockValidations$.subscribe.mockImplementation((callback) => {
+      callback(mockValidationData);
+      return { unsubscribe: jest.fn() };
+    });
+
+    mockRenderPreChatForm$.subscribe.mockImplementation((callback) => {
+      callback(mockFormData);
+      return { unsubscribe: jest.fn() };
+    });
+
+    // spy on createFormValidationControls
+    component.createFormValidationControls = jest.fn();
+
+    // trigger subscribeToValidations
+    component['subscribeToValidations']();
+
+    expect(mockValidations$.subscribe).toHaveBeenCalled();
+    expect(component.formValidations).toEqual(mockValidationData);
+    expect(mockRenderPreChatForm$.subscribe).toHaveBeenCalled();
+    expect(component.preChatFormInfo).toEqual(mockFormData);
+    expect(component.formData).toEqual(mockFormData.sections);
+    expect(component.preChatformTitle).toBe('Multi Section Form');
+    expect(component.preChatformDescription).toBe('Form with multiple sections');
+    expect(component.createFormValidationControls).toHaveBeenCalledWith(
+      mockFormData.sections,
+      component.formValidations,
+      'preChatForm'
+    );
+  });
+
   });
 
   // ---------- eventListener ----------
@@ -2449,7 +2769,7 @@ it('should subscribe to local and remote streams and update video elements + cal
         component.fileLoading = false;
         component.selectedFile = null;
         component.imageUrls = [];
-        
+
       });
 
       it('should handle file event with target.files', () => {
@@ -2612,13 +2932,13 @@ it('should subscribe to local and remote streams and update video elements + cal
       });
     });
 
-   
+
 
    describe('ChangeNPSColor', () => {
   let sectionsArray: any;
 
   beforeEach(() => {
-    
+
     const mockControl = { setValue: jest.fn() };
     sectionsArray = {
       at: jest.fn().mockReturnValue({
@@ -2633,10 +2953,10 @@ it('should subscribe to local and remote streams and update video elements + cal
       }),
     } as any;
 
-    
+
     jest.spyOn(document, 'querySelectorAll').mockImplementation(
       (selector: string) => {
-        
+
         if (selector.includes('#npsOption')) {
           const mockPath1 = { setAttribute: jest.fn() };
           const mockPath2 = { setAttribute: jest.fn() };
@@ -2674,7 +2994,7 @@ it('should subscribe to local and remote streams and update video elements + cal
     expect(mockControl.setValue).toHaveBeenCalledWith('value1');
   });
 
- 
+
 
 
 
@@ -2714,40 +3034,40 @@ it('should subscribe to local and remote streams and update video elements + cal
       });
 
       it('should update control, toggle icon classes, and set radio input checked', () => {
-  
+
   const mockControl = { setValue: jest.fn() };
   const mockSectionsArray = {
     at: jest.fn().mockReturnValue({ get: jest.fn().mockReturnValue(mockControl) }),
   };
   (component.preChatFormGroup.get as jest.Mock).mockReturnValue(mockSectionsArray);
 
-  
-  const mockIconElement1 = { 
-    classList: { add: jest.fn(), remove: jest.fn() }, 
-    getAttribute: jest.fn().mockReturnValue('0') 
+
+  const mockIconElement1 = {
+    classList: { add: jest.fn(), remove: jest.fn() },
+    getAttribute: jest.fn().mockReturnValue('0')
   };
-  const mockIconElement2 = { 
-    classList: { add: jest.fn(), remove: jest.fn() }, 
-    getAttribute: jest.fn().mockReturnValue('1') 
+  const mockIconElement2 = {
+    classList: { add: jest.fn(), remove: jest.fn() },
+    getAttribute: jest.fn().mockReturnValue('1')
   };
   const mockRadioInput1 = { checked: false };
   const mockRadioInput2 = { checked: false };
 
-  
+
   (document.querySelectorAll as jest.Mock).mockImplementation((selector: string) => {
     if (selector === '#arrow-0') return [mockIconElement1, mockIconElement2];
     if (selector === 'input[name="attrKey"]') return [mockRadioInput1, mockRadioInput2];
     return [];
   });
 
-  
+
   component.ChangeBarColor('barControl', 0, 0, 1, 'attrKey', 'value1');
- 
+
   expect(mockSectionsArray.at).toHaveBeenCalledWith(0);
   expect(mockSectionsArray.at(0).get).toHaveBeenCalledWith('barControl');
   expect(mockControl.setValue).toHaveBeenCalledWith('value1');
 
-  
+
   expect(mockIconElement1.classList.add).toHaveBeenCalledWith('bar-icon-hide');
   expect(mockIconElement2.classList.add).toHaveBeenCalledWith('bar-icon-show');
 
@@ -2963,7 +3283,7 @@ it('should subscribe to local and remote streams and update video elements + cal
 
     describe('isChecked', () => {
   beforeEach(() => {
-    
+
     component.preChatFormGroup = {
       get: jest.fn().mockImplementation((path: string) => {
         if (path === 'sections.0.testControl') {
@@ -2981,9 +3301,9 @@ it('should subscribe to local and remote streams and update video elements + cal
     const result2 = component.isChecked('testControl', 0, 'option2', 'Category2');
     const result3 = component.isChecked('testControl', 0, 'option1', 'Category2');
 
-    expect(result1).toBe(true); 
-    expect(result2).toBe(true); 
-    expect(result3).toBe(false); 
+    expect(result1).toBe(true);
+    expect(result2).toBe(true);
+    expect(result3).toBe(false);
   });
 });
 
@@ -2995,11 +3315,11 @@ describe('booleanEmojiSet', () => {
   let path2: any;
 
   beforeEach(() => {
-   
+
     path1 = { setAttribute: jest.fn(), getAttribute: jest.fn().mockReturnValue('red') };
     path2 = { setAttribute: jest.fn(), getAttribute: jest.fn().mockReturnValue('blue') };
 
-    
+
     mockSvg1 = { getElementsByTagName: jest.fn().mockReturnValue([path1]), dataset: {} };
     mockSvg2 = { getElementsByTagName: jest.fn().mockReturnValue([path2]), dataset: {} };
 
@@ -3007,18 +3327,18 @@ describe('booleanEmojiSet', () => {
   });
 
   it('should set clicked SVG to original colors and others to gray', () => {
-    
+
     component.booleanEmojiSet(0, 0, 0);
 
     expect(path1.setAttribute).toHaveBeenCalledWith('fill', 'red');
-   
+
     expect(path2.setAttribute).toHaveBeenCalledWith('fill', 'gray');
 
     component.booleanEmojiSet(0, 0, 1);
 
-   
+
     expect(path1.setAttribute).toHaveBeenCalledWith('fill', 'gray');
-   
+
     expect(path2.setAttribute).toHaveBeenCalledWith('fill', 'blue');
   });
 
@@ -3068,7 +3388,7 @@ describe('booleanEmojiSet', () => {
   });
 
  it('should handle multiple allowed extensions correctly', () => {
-  
+
   const mockFile = new File(['content'], 'test.pdf', { type: 'application/pdf' });
   const mockInput = { files: [mockFile] } as any;
 
@@ -3081,7 +3401,7 @@ describe('booleanEmojiSet', () => {
   const allowedExtensions = ['pdf', 'doc'];
   const attribute = { key: 'fileControl' };
 
-  
+
   component.handleFileChange(mockInput,0, 0,100,'upload1',allowedExtensions, attribute );
 
   expect(component.setFileControl).toHaveBeenCalledWith(0, 'test.pdf', 'fileControl');
@@ -3161,7 +3481,7 @@ describe('booleanEmojiSet', () => {
         expect(mockControl.markAsDirty).toHaveBeenCalled();
       });
 
-  
+
 
     });
   });
