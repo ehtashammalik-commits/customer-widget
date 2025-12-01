@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { SdkService } from '../services/sdk.service';
 import { WidgetComponent } from './widget.component';
 
@@ -45,7 +45,7 @@ const mockStorageService = {
 
 const mockRoute = {};
 const mockFormBuilder = {
-  group: jest.fn(() => ({})), // returns an empty object or a mock FormGroup
+  group: jest.fn(() => ({})), 
 };
 
 const mockBrowserNotificationService: any = {
@@ -1080,6 +1080,56 @@ describe('WidgetComponent', () => {
       component.setAuthorizedResponse = { token: 'auth-token' };
     });
 
+
+
+it('should subscribe to local and remote streams and update video elements + call setView/startWebRtcCall', () => {
+  const mockLocalStream = {} as MediaStream;
+  const mockRemoteStream = {} as MediaStream;
+
+  // Mock video HTML elements
+  const mockLocalVideoElement = { srcObject: null };
+  const mockRemoteVideoElement = { srcObject: null };
+
+  (component as any).localVideoRef = { nativeElement: mockLocalVideoElement };
+  (component as any).remoteVideoRef = { nativeElement: mockRemoteVideoElement };
+
+  // Mock subjects for SDK streams
+  const localStreamSubject = new Subject<MediaStream>();
+  const remoteStreamSubject = new Subject<MediaStream>();
+
+  mockSdkService.localStream$ = localStreamSubject.asObservable();
+  mockSdkService.remoteStreamObs$ = remoteStreamSubject.asObservable();
+
+  // Attach full mock sdk to component
+  (component as any).sdk = mockSdkService;
+
+  const spySetView = jest.spyOn(component as any, 'setView');
+  const spyStartWebRtcCall = jest.spyOn(component as any, 'startWebRtcCall');
+
+  // ensure video call is NOT active so startWebRtcCall is triggered
+  component.isVideoCallActive = false;
+
+  // --- Act ---
+  (component as any).handleVideoView();
+
+  // Emit streams
+  localStreamSubject.next(mockLocalStream);
+  remoteStreamSubject.next(mockRemoteStream);
+
+  // --- Assert ---
+  expect(component.localStream).toBe(mockLocalStream);
+  expect(component.remoteStream).toBe(mockRemoteStream);
+
+  expect(mockLocalVideoElement.srcObject).toBe(mockLocalStream);
+  expect(mockRemoteVideoElement.srcObject).toBe(mockRemoteStream);
+
+  expect(spySetView).toHaveBeenCalledWith({ video: true, popup: true });
+  expect(spyStartWebRtcCall).toHaveBeenCalledWith('video');
+  expect(component.isSecureWebCall).toBe(false);
+});
+
+
+
     it('should reset isVideoHide and isCallMute when callType is video', () => {
       component.isVideoHide = true;
       component.isCallMute = true;
@@ -1102,6 +1152,9 @@ describe('WidgetComponent', () => {
       });
       expect(component.isWebRtcVideoCallActive).toBe(true);
     });
+
+
+
 
     it('should not activate standalone call when showInvalidCodeError is true', () => {
       component.standaloneWebRtc = true;
@@ -2396,8 +2449,7 @@ describe('WidgetComponent', () => {
         component.fileLoading = false;
         component.selectedFile = null;
         component.imageUrls = [];
-        // Note: We can't directly assign to private property 'sanitizer', so we'll skip this line
-        // component.sanitizer = mockDomSanitizer;
+        
       });
 
       it('should handle file event with target.files', () => {
@@ -2560,7 +2612,89 @@ describe('WidgetComponent', () => {
       });
     });
 
-    describe('changeNpsColor', () => {
+   
+
+   describe('ChangeNPSColor', () => {
+  let sectionsArray: any;
+
+  beforeEach(() => {
+    
+    const mockControl = { setValue: jest.fn() };
+    sectionsArray = {
+      at: jest.fn().mockReturnValue({
+        get: jest.fn().mockReturnValue(mockControl),
+      }),
+    };
+
+    component.preChatFormGroup = {
+      get: jest.fn().mockImplementation((name: string) => {
+        if (name === 'sections') return sectionsArray;
+        return null;
+      }),
+    } as any;
+
+    
+    jest.spyOn(document, 'querySelectorAll').mockImplementation(
+      (selector: string) => {
+        
+        if (selector.includes('#npsOption')) {
+          const mockPath1 = { setAttribute: jest.fn() };
+          const mockPath2 = { setAttribute: jest.fn() };
+          const mockSvg1 = {
+            dataset: { index: '1' },
+            getElementsByTagName: jest.fn().mockReturnValue([mockPath1, mockPath2]),
+          };
+          const mockSvg2 = {
+            dataset: { index: '0' },
+            getElementsByTagName: jest.fn().mockReturnValue([mockPath1, mockPath2]),
+          };
+          return [mockSvg1, mockSvg2] as unknown as NodeListOf<SVGElement>;
+        }
+        return [] as unknown as NodeListOf<SVGElement>;
+      },
+    );
+  });
+
+  it('should update control value and selectedIndices', () => {
+    const mockControl = sectionsArray.at(0).get('npsControl');
+    component.changeNpsColor('npsControl', 0, 1, 2, 'value1');
+
+    expect(sectionsArray.at).toHaveBeenCalledWith(0);
+    expect(sectionsArray.at(0).get).toHaveBeenCalledWith('npsControl');
+    expect(mockControl.setValue).toHaveBeenCalledWith('value1');
+    expect(component.selectedIndices[1]).toBe(2);
+  });
+
+  it('should update control value and set NPS option colors', () => {
+    const mockControl = sectionsArray.at(0).get('npsControl');
+    component.changeNpsColor('npsControl', 0, 0, 1, 'value1');
+
+    expect(sectionsArray.at).toHaveBeenCalledWith(0);
+    expect(sectionsArray.at(0).get).toHaveBeenCalledWith('npsControl');
+    expect(mockControl.setValue).toHaveBeenCalledWith('value1');
+  });
+
+ 
+
+
+
+  it('should log error if section does not exist', () => {
+    sectionsArray.at = jest.fn().mockReturnValue(undefined);
+    const logSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    component.changeNpsColor('npsControl', 99, 0, 0, 'value1');
+    expect(logSpy).toHaveBeenCalledWith('Section at index 99 does not exist.');
+  });
+
+  it('should log error if control does not exist', () => {
+    sectionsArray.at = jest.fn().mockReturnValue({ get: jest.fn().mockReturnValue(undefined) });
+    const logSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    component.changeNpsColor('npsControl', 0, 0, 0, 'value1');
+    expect(logSpy).toHaveBeenCalledWith('Control "npsControl" not found in section 0.');
+  });
+});
+
+
+    describe('ChangeBarColor', () => {
       let sectionsArray: any;
 
       beforeEach(() => {
@@ -2579,23 +2713,456 @@ describe('WidgetComponent', () => {
         } as any;
       });
 
-      it('should update selected indices and control value', () => {
-        component.changeNpsColor('npsControl', 0, 0, 1, 'value1');
-        expect(component.selectedIndices).toEqual({ 0: 1 });
+      it('should update control, toggle icon classes, and set radio input checked', () => {
+  
+  const mockControl = { setValue: jest.fn() };
+  const mockSectionsArray = {
+    at: jest.fn().mockReturnValue({ get: jest.fn().mockReturnValue(mockControl) }),
+  };
+  (component.preChatFormGroup.get as jest.Mock).mockReturnValue(mockSectionsArray);
+
+  
+  const mockIconElement1 = { 
+    classList: { add: jest.fn(), remove: jest.fn() }, 
+    getAttribute: jest.fn().mockReturnValue('0') 
+  };
+  const mockIconElement2 = { 
+    classList: { add: jest.fn(), remove: jest.fn() }, 
+    getAttribute: jest.fn().mockReturnValue('1') 
+  };
+  const mockRadioInput1 = { checked: false };
+  const mockRadioInput2 = { checked: false };
+
+  
+  (document.querySelectorAll as jest.Mock).mockImplementation((selector: string) => {
+    if (selector === '#arrow-0') return [mockIconElement1, mockIconElement2];
+    if (selector === 'input[name="attrKey"]') return [mockRadioInput1, mockRadioInput2];
+    return [];
+  });
+
+  
+  component.ChangeBarColor('barControl', 0, 0, 1, 'attrKey', 'value1');
+ 
+  expect(mockSectionsArray.at).toHaveBeenCalledWith(0);
+  expect(mockSectionsArray.at(0).get).toHaveBeenCalledWith('barControl');
+  expect(mockControl.setValue).toHaveBeenCalledWith('value1');
+
+  
+  expect(mockIconElement1.classList.add).toHaveBeenCalledWith('bar-icon-hide');
+  expect(mockIconElement2.classList.add).toHaveBeenCalledWith('bar-icon-show');
+
+  expect(mockRadioInput1.checked).toBe(false);
+  expect(mockRadioInput2.checked).toBe(true);
+});
+
+      it('should update control value and set bar option colors', () => {
+        const mockPath1 = { setAttribute: jest.fn() };
+        const mockSvg1 = {
+          dataset: { index: '1' },
+          getElementsByTagName: jest.fn().mockReturnValue([mockPath1]),
+        };
+        const mockIconElement = {
+          getAttribute: jest.fn().mockReturnValue('0'),
+          classList: {
+            remove: jest.fn(),
+            add: jest.fn(),
+          }
+        };
+        const mockRadioInput = {
+          checked: false
+        };
+
+        (document.querySelectorAll as jest.Mock).mockReturnValue([mockIconElement]);
+        (document.querySelectorAll as jest.Mock).mockImplementation((selector) => {
+          if (selector.startsWith('#arrow-')) {
+            return [mockIconElement];
+          } else if (selector.startsWith('input[name="')) {
+            return [mockRadioInput];
+          }
+          return [];
+        });
+
+        component.ChangeBarColor('barControl', 0, 0, 0, 'attrKey', 'value1');
         expect(sectionsArray.at).toHaveBeenCalledWith(0);
-        expect(sectionsArray.at(0).get).toHaveBeenCalledWith('npsControl');
+        expect(sectionsArray.at(0).get).toHaveBeenCalledWith('barControl');
+        expect(sectionsArray.at(0).get(0).setValue).toHaveBeenCalledWith('value1');
+        expect(mockIconElement.classList.remove).toHaveBeenCalledWith('bar-icon-hide');
+        expect(mockIconElement.classList.add).toHaveBeenCalledWith('bar-icon-show');
+        expect(mockRadioInput.checked).toBe(true);
       });
 
-      it('should handle missing section', () => {
+      it('should uncheck other radio inputs when updating bar color', () => {
+        const mockRadioInput1 = {
+          checked: false
+        };
+        const mockRadioInput2 = {
+          checked: true
+        };
+
+        (document.querySelectorAll as jest.Mock).mockImplementation((selector) => {
+          if (selector.startsWith('input[name="attrKey"]')) {
+            return [mockRadioInput1, mockRadioInput2];
+          }
+          return [];
+        });
+
+        component.ChangeBarColor('barControl', 0, 0, 1, 'attrKey', 'value1');
+        expect(mockRadioInput1.checked).toBe(false);
+        expect(mockRadioInput2.checked).toBe(true); // Only this one should be checked
+      });
+
+      it('should log error if section does not exist', () => {
         sectionsArray.at = jest.fn().mockReturnValue(undefined);
         const logSpy = jest
           .spyOn(console, 'error')
           .mockImplementation(() => {});
-        component.changeNpsColor('npsControl', 99, 0, 1, 'value1');
+        component.ChangeBarColor('barControl', 99, 0, 0, 'attrKey', 'value1');
         expect(logSpy).toHaveBeenCalledWith(
           'Section at index 99 does not exist.',
         );
       });
+
+      it('should log error if control does not exist', () => {
+        sectionsArray.at = jest.fn().mockReturnValue({
+          get: jest.fn().mockReturnValue(undefined),
+        });
+        const logSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation(() => {});
+        component.ChangeBarColor('barControl', 0, 0, 0, 'attrKey', 'value1');
+        expect(logSpy).toHaveBeenCalledWith(
+          'Control "barControl" not found in section 0.',
+        );
+      });
+    });
+
+    describe('onCheckboxChange', () => {
+      let sectionsArray: any;
+      let mockControl: any;
+
+      beforeEach(() => {
+        mockControl = {
+          markAsTouched: jest.fn(),
+          value: '',
+          setValue: jest.fn(),
+        };
+        sectionsArray = {
+          at: jest.fn().mockReturnValue({
+            get: jest.fn().mockReturnValue(mockControl),
+          }),
+        };
+        component.preChatFormGroup = {
+          get: jest.fn().mockImplementation((name: string) => {
+            if (name === 'sections.0.testControl') return mockControl;
+            if (name === 'sections') return sectionsArray;
+            return null;
+          }),
+        } as any;
+      });
+
+      it('should return early if optionValue is falsy', () => {
+        const mockEvent = {
+          target: { checked: true }
+        };
+        component.onCheckboxChange(mockEvent as any, 'testControl', 0, null, 'category', false);
+        expect(mockControl.markAsTouched).not.toHaveBeenCalled();
+        expect(mockControl.setValue).not.toHaveBeenCalled();
+      });
+
+      it('should add new value to empty control value', () => {
+        mockControl.value = '';
+        const mockEvent = {
+          target: { checked: true }
+        };
+
+        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
+        expect(mockControl.markAsTouched).toHaveBeenCalled();
+        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option1"]}', { emitEvent: true });
+      });
+
+      it('should add new value to existing control value', () => {
+        mockControl.value = '{"category1":["option1"]}';
+        const mockEvent = {
+          target: { checked: true }
+        };
+
+        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option2', 'category1', false);
+        expect(mockControl.markAsTouched).toHaveBeenCalled();
+        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option1","option2"]}', { emitEvent: true });
+      });
+
+      it('should remove value when checkbox is unchecked', () => {
+        mockControl.value = '{"category1":["option1","option2"]}';
+        const mockEvent = {
+          target: { checked: false }
+        };
+
+        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
+        expect(mockControl.markAsTouched).toHaveBeenCalled();
+        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option2"]}', { emitEvent: true });
+      });
+
+      it('should remove entire category when no values remain', () => {
+        mockControl.value = '{"category1":["option1"]}';
+        const mockEvent = {
+          target: { checked: false }
+        };
+
+        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
+        expect(mockControl.markAsTouched).toHaveBeenCalled();
+        expect(mockControl.setValue).toHaveBeenCalledWith('', { emitEvent: true });
+      });
+
+      it('should handle invalid JSON gracefully', () => {
+        mockControl.value = 'invalid json';
+        const mockEvent = {
+          target: { checked: true }
+        };
+
+        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
+        expect(mockControl.markAsTouched).toHaveBeenCalled();
+        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option1"]}', { emitEvent: true });
+      });
+    });
+
+    describe('parseCheckboxValue', () => {
+      it('should parse valid JSON string', () => {
+        const result = component.parseCheckboxValue('{"category1":["option1","option2"]}');
+        expect(result).toEqual({ category1: ["option1", "option2"] });
+      });
+
+      it('should return empty object for empty string', () => {
+        const result = component.parseCheckboxValue('');
+        expect(result).toEqual({});
+      });
+
+      it('should return empty object for null input', () => {
+        const result = component.parseCheckboxValue(null);
+        expect(result).toEqual({});
+      });
+
+      it('should return empty object for undefined input', () => {
+        const result = component.parseCheckboxValue(undefined);
+        expect(result).toEqual({});
+      });
+
+      it('should return empty object for invalid JSON', () => {
+        const result = component.parseCheckboxValue('invalid json');
+        expect(result).toEqual({});
+      });
+
+      it('should handle JSON with multiple categories', () => {
+        const json = '{"category1":["option1"],"category2":["option2","option3"]}';
+        const result = component.parseCheckboxValue(json);
+        expect(result).toEqual({
+          category1: ["option1"],
+          category2: ["option2", "option3"]
+        });
+      });
+    });
+
+    describe('isChecked', () => {
+  beforeEach(() => {
+    
+    component.preChatFormGroup = {
+      get: jest.fn().mockImplementation((path: string) => {
+        if (path === 'sections.0.testControl') {
+          return {
+            value: 'Category1, option1, Category2, option2',
+          };
+        }
+        return null;
+      }),
+    } as any;
+  });
+
+  it('should handle multiple categories correctly', () => {
+    const result1 = component.isChecked('testControl', 0, 'option1', 'Category1');
+    const result2 = component.isChecked('testControl', 0, 'option2', 'Category2');
+    const result3 = component.isChecked('testControl', 0, 'option1', 'Category2');
+
+    expect(result1).toBe(true); 
+    expect(result2).toBe(true); 
+    expect(result3).toBe(false); 
+  });
+});
+
+
+describe('booleanEmojiSet', () => {
+  let mockSvg1: any;
+  let mockSvg2: any;
+  let path1: any;
+  let path2: any;
+
+  beforeEach(() => {
+   
+    path1 = { setAttribute: jest.fn(), getAttribute: jest.fn().mockReturnValue('red') };
+    path2 = { setAttribute: jest.fn(), getAttribute: jest.fn().mockReturnValue('blue') };
+
+    
+    mockSvg1 = { getElementsByTagName: jest.fn().mockReturnValue([path1]), dataset: {} };
+    mockSvg2 = { getElementsByTagName: jest.fn().mockReturnValue([path2]), dataset: {} };
+
+    jest.spyOn(document, 'querySelectorAll').mockReturnValue([mockSvg1, mockSvg2] as any);
+  });
+
+  it('should set clicked SVG to original colors and others to gray', () => {
+    
+    component.booleanEmojiSet(0, 0, 0);
+
+    expect(path1.setAttribute).toHaveBeenCalledWith('fill', 'red');
+   
+    expect(path2.setAttribute).toHaveBeenCalledWith('fill', 'gray');
+
+    component.booleanEmojiSet(0, 0, 1);
+
+   
+    expect(path1.setAttribute).toHaveBeenCalledWith('fill', 'gray');
+   
+    expect(path2.setAttribute).toHaveBeenCalledWith('fill', 'blue');
+  });
+
+  it('should store original colors in dataset', () => {
+    component.booleanEmojiSet(0, 0, 0);
+
+    expect(mockSvg1.dataset.originalColors).toBeDefined();
+    expect(mockSvg2.dataset.originalColors).toBeDefined();
+
+    const originalColors1 = JSON.parse(mockSvg1.dataset.originalColors);
+    const originalColors2 = JSON.parse(mockSvg2.dataset.originalColors);
+
+    expect(originalColors1[0]).toBe('red');
+    expect(originalColors2[0]).toBe('blue');
+  });
+});
+
+
+
+
+
+    describe('handleFileChange', () => {
+  let sectionsArray: any;
+  let mockControl: any;
+  let mockUploadBtn: any;
+
+  beforeEach(() => {
+    mockControl = { setValue: jest.fn() };
+    sectionsArray = {
+      at: jest.fn().mockReturnValue({
+        get: jest.fn().mockReturnValue(mockControl),
+      }),
+    };
+    mockUploadBtn = { disabled: false, click: jest.fn() };
+
+    component.preChatFormGroup = {
+      get: jest.fn().mockImplementation((name: string) => {
+        if (name === 'sections') return sectionsArray;
+        return null;
+      }),
+    } as any;
+
+    jest.spyOn(document, 'getElementById').mockReturnValue(mockUploadBtn as any);
+
+    component.setFileControl = jest.fn();
+    component.previewFileForm = jest.fn();
+  });
+
+ it('should handle multiple allowed extensions correctly', () => {
+  
+  const mockFile = new File(['content'], 'test.pdf', { type: 'application/pdf' });
+  const mockInput = { files: [mockFile] } as any;
+
+  const mockUploadBtn = { disabled: false, click: jest.fn() };
+  jest.spyOn(document, 'getElementById').mockReturnValue(mockUploadBtn as any);
+
+  component.setFileControl = jest.fn();
+  component.previewFileForm = jest.fn();
+
+  const allowedExtensions = ['pdf', 'doc'];
+  const attribute = { key: 'fileControl' };
+
+  
+  component.handleFileChange(mockInput,0, 0,100,'upload1',allowedExtensions, attribute );
+
+  expect(component.setFileControl).toHaveBeenCalledWith(0, 'test.pdf', 'fileControl');
+  expect(component.previewFileForm).toHaveBeenCalledWith(mockFile, 0, 0);
+  expect(mockUploadBtn.disabled).toBe(false); // re-enabled at the end
+});
+
+
+});
+
+
+    describe('setFileControl', () => {
+      let sectionsArray: any;
+      let mockControl: any;
+
+      beforeEach(() => {
+        mockControl = {
+          setValue: jest.fn(),
+          markAsTouched: jest.fn(),
+          markAsDirty: jest.fn(),
+        };
+        sectionsArray = {
+          at: jest.fn().mockReturnValue({
+            get: jest.fn().mockReturnValue(mockControl),
+          }),
+        };
+
+        component.preChatFormGroup = {
+          get: jest.fn().mockImplementation((name: string) => {
+            if (name === 'sections') return sectionsArray;
+            return null;
+          }),
+        } as any;
+      });
+
+      it('should set the control value and mark as touched and dirty for valid section', () => {
+        component.setFileControl(0, 'test-file.txt', 'fileControlName');
+
+        expect(sectionsArray.at).toHaveBeenCalledWith(0);
+        expect(sectionsArray.at(0).get).toHaveBeenCalledWith('fileControlName');
+        expect(mockControl.setValue).toHaveBeenCalledWith('test-file.txt');
+        expect(mockControl.markAsTouched).toHaveBeenCalled();
+        expect(mockControl.markAsDirty).toHaveBeenCalled();
+      });
+
+      it('should log error and return when section does not exist', () => {
+        sectionsArray.at = jest.fn().mockReturnValue(undefined);
+        const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        component.setFileControl(99, 'test-file.txt', 'fileControlName');
+
+        expect(errorSpy).toHaveBeenCalledWith('Section at index 99 does not exist.');
+        expect(mockControl.setValue).not.toHaveBeenCalled();
+        expect(mockControl.markAsTouched).not.toHaveBeenCalled();
+        expect(mockControl.markAsDirty).not.toHaveBeenCalled();
+
+        errorSpy.mockRestore();
+      });
+
+      it('should set control value to empty string when fileName is empty', () => {
+        component.setFileControl(0, '', 'fileControlName');
+
+        expect(sectionsArray.at).toHaveBeenCalledWith(0);
+        expect(sectionsArray.at(0).get).toHaveBeenCalledWith('fileControlName');
+        expect(mockControl.setValue).toHaveBeenCalledWith('');
+        expect(mockControl.markAsTouched).toHaveBeenCalled();
+        expect(mockControl.markAsDirty).toHaveBeenCalled();
+      });
+
+      it('should handle null fileName correctly', () => {
+        component.setFileControl(0, null as any, 'fileControlName');
+
+        expect(sectionsArray.at).toHaveBeenCalledWith(0);
+        expect(sectionsArray.at(0).get).toHaveBeenCalledWith('fileControlName');
+        expect(mockControl.setValue).toHaveBeenCalledWith(null);
+        expect(mockControl.markAsTouched).toHaveBeenCalled();
+        expect(mockControl.markAsDirty).toHaveBeenCalled();
+      });
+
+  
+
     });
   });
 });
