@@ -237,14 +237,14 @@ export class TranscriptComponent implements OnInit {
   }
 
   getAgentDisplayName(keycloakUser: any): string {
-
     if (this.__appConfig.appConfig.USERNAME_ENABLED) {
-
-      return keycloakUser.username || keycloakUser.senderName ||'Agent';
+      return keycloakUser.username || keycloakUser.senderName || 'Agent';
     }
 
-    const firstName = keycloakUser.firstName || keycloakUser.additionalDetail?.firstName;
-    const lastName = keycloakUser.lastName || keycloakUser.additionalDetail?.lastName;
+    const firstName =
+      keycloakUser.firstName || keycloakUser.additionalDetail?.firstName;
+    const lastName =
+      keycloakUser.lastName || keycloakUser.additionalDetail?.lastName;
     if (firstName && lastName) {
       return `${firstName} ${lastName}`;
     } else if (firstName) {

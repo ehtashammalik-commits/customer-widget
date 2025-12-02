@@ -2085,13 +2085,42 @@ mat-spinner {
     background: #000000;
     cursor: pointer;
 
-    span {
+    span.material-symbols-outlined {
       font-size: 20px;
       position: relative;
       top: 5px;
       left: 5px;
     }
+
+    &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    // ❌ prevent clicks but still allow hover/tooltip
+    .material-symbols-outlined {
+      pointer-events: none;
+    }
   }
+
+  .error-badge {
+  position: absolute;
+  top: -4px;    /* slightly above the circle */
+  right: -4px;  /* slightly outside to the right */
+  background: rgba(225, 210, 0, 0.926);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1; /* ensure it stays above the button */
+}
+
+  }
+
 
   .end-call {
     background: #da3030 !important;

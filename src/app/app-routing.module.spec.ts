@@ -23,19 +23,19 @@ describe('AppRoutingModule', () => {
   });
 
   it('should have "widget" route', () => {
-    const widgetRoute = router.config.find(r => r.path === 'widget');
+    const widgetRoute = router.config.find((r) => r.path === 'widget');
     expect(widgetRoute).toBeTruthy();
     expect(widgetRoute?.component).toBe(WidgetComponent);
   });
 
   it('should have "chat-transcript" route', () => {
-    const chatRoute = router.config.find(r => r.path === 'chat-transcript');
+    const chatRoute = router.config.find((r) => r.path === 'chat-transcript');
     expect(chatRoute).toBeTruthy();
     expect(chatRoute?.component).toBe(TranscriptComponent);
   });
 
   it('should redirect "" to "widget"', () => {
-    const redirectRoute = router.config.find(r => r.path === '');
+    const redirectRoute = router.config.find((r) => r.path === '');
     expect(redirectRoute).toBeTruthy();
     expect(redirectRoute?.redirectTo).toBe('widget');
     expect(redirectRoute?.pathMatch).toBe('full');

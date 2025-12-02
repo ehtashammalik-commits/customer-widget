@@ -14,7 +14,7 @@ describe('ConfirmDialogComponent', () => {
     component = new ConfirmDialogComponent(
       mockDialogRef as unknown as MatDialogRef<ConfirmDialogComponent>,
       mockTranslate as TranslateService,
-      { title: 'Test Title', message: 'Test Message' }
+      { title: 'Test Title', message: 'Test Message' },
     );
   });
 

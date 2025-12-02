@@ -43,11 +43,12 @@
         <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon"  *ngIf="!isWebRtcVideoCallActive">
+          <div class="widget-header-icon" *ngIf="!isWebRtcVideoCallActive">
 
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
+            <button matMiniFab (click)="changeScreen('widget')" aria-label="minimize conversation"
+              matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+              <mat-icon>remove</mat-icon>
+            </button>
           </div>
         </div>
         <!-- Widget Chat Control Toolbar -->
@@ -109,31 +110,39 @@
                     present_to_all
                   </span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isVideoHide === true }">
+                <div class="control-btn" [ngClass]="{ 'disabled': disableCam ,'end-call': isVideoHide === true }">
                   <span class="material-symbols-outlined"
-                    [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
+                    [matTooltip]="disableCam ? 'Camera is disabled due to permissions issue' : (isVideoHide ? 'Turn on camera' : 'Turn off camera')"
                     [matTooltipPosition]="this.positionOptions[2]"
                     innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}" (click)="toggleCallVideo(tooltip1);"
+                    (keydown)="($event.key === 'Enter' || $event.key === ' ') && toggleCallVideo(tooltip1)"
                     #tooltip1="matTooltip">
                   </span>
+                  <span *ngIf="disableCam" class="error-badge">!</span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isCallMute === true }">
-                  <span class="material-symbols-outlined" [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
+                <div [class.disabled]="disableMic" class="control-btn" [ngClass]="{ 'end-call': isCallMute === true }">
+                  <span class="material-symbols-outlined"
+                    [matTooltip]="disableMic ? 'Microphone is disabled due to permissions/device issue'  : (isCallMute ? 'Unmute' : 'Mute')"
                     [matTooltipPosition]="this.positionOptions[2]" innerHTML="{{ isCallMute ? 'mic_off' : 'mic' }}"
-                    (click)="toggleCallMic(tooltip)" #tooltip="matTooltip">
+                    (click)="toggleCallMic(tooltip)" (keydown.enter)="toggleCallMic(tooltip)"
+                    (keydown.space)="toggleCallMic(tooltip)" #tooltip="matTooltip">
                   </span>
+                  <span *ngIf="disableMic" class="error-badge">!</span>
                 </div>
                 <div class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
-                    (click)="toggleCallHold(tooltip6)" #tooltip6="matTooltip">
+                    (click)="toggleCallHold(tooltip6)"
+                    (keydown)="($event.key === 'Enter' || $event.key === ' ') && toggleCallHold(tooltip6)"
+                    #tooltip6="matTooltip">
                   </span>
                 </div>
                 <div class="control-btn disable-icon-callControl">
                   <span matTooltip="More Options" [matTooltipPosition]="this.positionOptions[2]"
                     class="material-symbols-outlined"> more_horiz </span>
                 </div>
-                <div class="control-btn end-call" (click)="callEnd()">
+                <div class="control-btn end-call" (click)="callEnd()"
+                  (keydown)="($event.key === 'Enter' || $event.key === ' ') && callEnd()">
                   <span matTooltip="End Call" [matTooltipPosition]="this.positionOptions[2]"
                     class="material-symbols-outlined"> call_end </span>
                 </div>
@@ -154,7 +163,8 @@
         <div class="widget-form-header widget-chat-header widget-color">
           <h5 id="headerHeading">{{ title }}</h5>
           <div class="widget-header-icon">
-            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+            <button matMiniFab (click)="changeScreen('widget')" aria-label="minimize conversation"
+              matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
               <mat-icon>remove</mat-icon>
             </button>
           </div>
@@ -385,17 +395,18 @@
   <ng-container *ngIf="preChatFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-chat-header widget-color" [ngClass]="{'exist-calendar':daySummary}"
-          >
+        <div class="widget-form-header widget-chat-header widget-color" [ngClass]="{'exist-calendar':daySummary}">
           <h5 id="headerHeading">{{ title }}
-            <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
+            <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{
+              daySummary.endOfDay
               | date: 'shortTime' }}</p>
           </h5>
 
 
 
           <div class="widget-header-icon">
-            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+            <button matMiniFab (click)="changeScreen('widget')" aria-label="minimize conversation"
+              matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
               <mat-icon>remove</mat-icon>
             </button>
           </div>
@@ -611,7 +622,8 @@
                           <ng-container *ngIf="attribute.valueType === 'date'">
 
                             <div class="dateTime">
-                              <span class="dateTime-icon" (click)="dateInput.showPicker()">
+                              <span class="dateTime-icon" (click)="dateInput.showPicker()"
+                                (keydown)="($event.key === 'Enter' || $event.key === ' ') && dateInput.showPicker()">
                                 <mat-icon>date_range</mat-icon>
                               </span>
                               <input #dateInput id="date" matInput type="date" [formControlName]="attribute.key"
@@ -818,6 +830,7 @@
                                     <ng-template #normalImage>
                                       <div
                                         (click)="selected5starOption(attribute.key, i, j, index, attribute.attributeOptions.attributeData[0].values[0].optionStyle.type, option.label)"
+                                        (keydown)="($event.key === 'Enter' || $event.key === ' ') && selected5starOption(attribute.key, i, j, index, attribute.attributeOptions.attributeData[0].values[0].optionStyle.type, option.label)"
                                         [innerHtml]="option.optionStyle.media | svgFormat:'imageSvg':'32px':'32px':('option-' + i + '-' + j + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type) | async">
                                         >
                                       </div>
@@ -937,7 +950,8 @@
 
                                       <div class="nps-option"
                                         [style.background]="j | npsColor : index : selectedIndices"
-                                        (click)="changeNpsColor(attribute.key, i, j, index, option.value)">
+                                        (click)="changeNpsColor(attribute.key, i, j, index, option.value)"
+                                        (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeNpsColor(attribute.key, i, j, index, option.value)">
                                         {{ option.value }}
                                       </div>
 
@@ -1047,10 +1061,12 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon">
-            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+            <button matMiniFab (click)="changeScreen('widget')" aria-label="minimize conversation"
+              matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
               <mat-icon>remove</mat-icon>
             </button>
-            <button matMiniFab (click)="endChat()"  aria-label="close conversation" matTooltipPosition="above"  matTooltip="{{ 'button.end-conversation' | translate }}">
+            <button matMiniFab (click)="endChat()" aria-label="close conversation" matTooltipPosition="above"
+              matTooltip="{{ 'button.end-conversation' | translate }}">
               <mat-icon>close</mat-icon>
             </button>
 
@@ -1069,7 +1085,9 @@
                 isChatActive === true && activeCallbackView === true,
               'away-chat-icon':
                 isChatActive === true && activeCallbackView === false
-            }" (click)="changeView('callback')" *ngIf="enabledCallback" [matTooltipPosition]="matToolTipPosition!">
+            }" (click)="changeView('callback')"
+            (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeView('callback')" *ngIf="enabledCallback"
+            [matTooltipPosition]="matToolTipPosition!">
             perm_phone_msg
           </span>
 
@@ -1077,8 +1095,9 @@
               activeScreenShareView || activeAudioView || activeVideoView
                 ? convertCallView('video')
                 : changeView('video')
-            "
-            *ngIf=" (__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED || isVideoCallActive === true) && enableWebRtc && __appConfig.appConfig.VIDEO"
+            " (keydown)="($event.key === 'Enter' || $event.key === ' ') && (activeScreenShareView || activeAudioView || activeVideoView ? convertCallView('video')
+ : changeView('video'))
+  " *ngIf=" (__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED || isVideoCallActive === true) && enableWebRtc && __appConfig.appConfig.VIDEO"
             [ngClass]="{
               btnOne: enabledCallback === false && enableFontResize === false,
               btnThree: enabledCallback === true && enableFontResize === true,
@@ -1107,7 +1126,7 @@
             }">
             call
           </span>
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')" [ngClass]="{
+          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')"  (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeView('chat')" [ngClass]="{
               btnOne:
                 enabledCallback === false &&
                 enableFontResize === false &&
@@ -1140,7 +1159,7 @@
             forum
           </span>
 
-          <span class="font-selection material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
+          <span class="font-selection material-symbols-outlined widget-navbar-icon" (click)="changeFont()" (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeFont()"
             [ngClass]="{ btnOne: enableFontResize === true }" matTooltip="{{ 'button.change-font-size' | translate }}"
             [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
             text_fields
@@ -1148,18 +1167,18 @@
           <ng-container *ngIf="fontDropDown">
             <div class="font-dropdown-container">
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
-                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12' }"
-                (click)="setFontSize('12')" [ngClass]="{ btnOne: enableFontResize === true }">
+                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12' }" (click)="setFontSize('12')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('12')"
+                [ngClass]="{ btnOne: enableFontResize === true }">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px"
-                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14' }"
-                (click)="setFontSize('14')" [ngClass]="{ btnOne: enableFontResize === true }">
+                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14' }" (click)="setFontSize('14')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('14')"
+                [ngClass]="{ btnOne: enableFontResize === true }">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px"
-                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16' }"
-                (click)="setFontSize('16')" [ngClass]="{ btnOne: enableFontResize === true }">
+                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16' }" (click)="setFontSize('16')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('16')"
+                [ngClass]="{ btnOne: enableFontResize === true }">
                 text_fields
               </span>
             </div>
@@ -1171,7 +1190,7 @@
           <!-- If secure link is expired -->
 
           <div class="call-session-expired" *ngIf="isSecureLinkExpired">
-            <mat-icon class="discard-error-notify" (click)="isSecureLinkExpired = false">cancel</mat-icon>
+            <mat-icon class="discard-error-notify" (click)="isSecureLinkExpired = false" (keydown)="($event.key === 'Enter' || $event.key === ' ') && isSecureLinkExpired = false">cancel</mat-icon>
             <div class="call-session-expired-inner">
               <span class="icon-error"><mat-icon>priority_high</mat-icon></span>
               <h3>The link has expired</h3>
@@ -1545,7 +1564,7 @@
                       <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
                         <mat-chip *ngFor="let btn of message.body.buttons"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
-                          (click)="sendButtonMessage(btn, message.id)">
+                          (click)="sendButtonMessage(btn, message.id)" (keydown)="($event.key === 'Enter' || $event.key === ' ') && sendButtonMessage(btn, message.id)">
                           {{ btn.title }}
                         </mat-chip>
                       </mat-chip-list>
@@ -1641,7 +1660,7 @@
 
                       <a *ngIf="message.body.type == 'URL' && message.header.additionalData.secureWebRTCLink"
                         target="_blank">
-                        <div class="s-link quoted-message-url" (click)="processSecureLinkMessage(message)">
+                        <div class="s-link quoted-message-url" (click)="processSecureLinkMessage(message)" (keydown)="($event.key === 'Enter' || $event.key === ' ') && processSecureLinkMessage(message)">
                           <span class="video-call-detail"><mat-icon>videocam</mat-icon> Video Call</span>
                           <span class="video-call-link">Join Video Call
                             <span class="call-link">{{message.body.mediaUrl}}</span>
@@ -1701,7 +1720,7 @@
                     file.fileType == 'image'
                       ? file.filesPath
                       : 'widget-assets/images/file-type.svg'
-                  " />
+                  " alt="upload" />
                 <span>{{ file.fileName }}</span>
                 <span *ngIf="file.fileType !== 'image'" class="file-type">
                   {{
@@ -1737,8 +1756,8 @@
           <!-- Widget Message Composer -->
           <div class="widget-composer main-composer-area">
             <div class="maxLimitError" *ngIf="messageElement?.nativeElement?.value?.length >= messageLimit">
-            <span>Max Limit Reached</span>
-           </div>
+              <span>Max Limit Reached</span>
+            </div>
             <textarea class="widget-chat-composer" #messageComposer [attr.data-emoji-picker]="enableEmoji" matInput
               id="messageTextarea" cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
               cdkAutosizeMaxRows="4" placeholder="{{ 'composer-placeholder' | translate }}" #message
@@ -1763,7 +1782,7 @@
                 id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
             </div>
             <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined send-btn"
-              *ngIf="isTyping" (click)="onSendMessage(messageComposer.value);">
+              *ngIf="isTyping" (click)="onSendMessage(messageComposer.value);" (keydown)="($event.key === 'Enter' || $event.key === ' ') && onSendMessage(messageComposer.value)">
               send
             </span>
           </div>
@@ -1779,12 +1798,11 @@
             <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
 
 
-             <!-- test  div start -->
+            <!-- test  div start -->
             <div class="video-container">
               <!-- Remote video when visible -->
 
-              <video #remoteVideo id="remoteVideo" autoplay playsinline
-                class="remoteVideo"></video>
+              <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
 
               <!-- Full-size cam-off icon placeholder -->
               <div *ngIf="remoteStreamStatus" class="remoteVideo cam-off-placeholder">
@@ -1804,7 +1822,7 @@
 
             <div class="localVideoView" *ngIf="activeVideoView">
               <span class="material-symbols-outlined localVideoIcon" [ngClass]="{ iconHide: isVideoHide }"
-                [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="toggleCallVideo(null)">
+                [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="toggleCallVideo(null)" (keydown)="($event.key === 'Enter' || $event.key === ' ') && toggleCallVideo(null)">
               </span>
             </div>
 
@@ -1816,9 +1834,7 @@
 
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div *ngIf="!__appConfig.appConfig.VIDEO"
-                  class="control-btn"
-                  [ngClass]="{
+                <div *ngIf="!__appConfig.appConfig.VIDEO" class="control-btn" [ngClass]="{
                     'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
 
                     'focus-icon-video ': isScreenShareActive === true
@@ -1827,12 +1843,12 @@
                   'disable-icon-callControl': isSecureWebCall || isAudioCallActive
                 }" matTooltip="Screen Share" [matTooltipPosition]="this.positionOptions[2]"
                     class="material-symbols-outlined" [attr.aria-disabled]="isSecureWebCall || isAudioCallActive"
-                    (click)="handleScreenShareClick()">
+                    (click)="handleScreenShareClick()" (keydown)="($event.key === 'Enter' || $event.key === ' ') && handleScreenShareClick()">
                     present_to_all
                   </span>
                 </div>
 
-                <div class="control-btn" [ngClass]="{
+                <div class="control-btn" [ngClass]="{'disabled': disableCam,
                     'end-call': isVideoHide,
                     'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
                     'focus-icon-video ': isVideoCallActive === true
@@ -1840,22 +1856,27 @@
                   <span class="material-symbols-outlined"
                     [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
                     [matTooltipPosition]="this.positionOptions[2]"
-                    [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="handleVideoIconClick(tooltip5)"
+                    [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="handleVideoIconClick(camTooltip)"
+                    (keydown)="($event.key === 'Enter' || $event.key === ' ') && handleVideoIconClick(camTooltip)"
                     [ngClass]="{
                   'disable-icon-callControl': isAudioCallActive
-                }" [attr.aria-disabled]="isAudioCallActive" #tooltip5="matTooltip">
+                }" [attr.aria-disabled]="isAudioCallActive" #camTooltip="matTooltip">
                   </span>
+                  <span *ngIf="disableCam" class="error-badge">!</span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
+                <div [class.disabled]="disableMic" class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallMute ? 'mic_off' : 'mic'"
-                    (click)="toggleCallMic(tooltip3);" #tooltip3="matTooltip">
+                    (click)="toggleCallMic(micTooltip);" (keydown.enter)="toggleCallMic(micTooltip)"
+                    (keydown.space)="toggleCallMic(micTooltip)" #micTooltip="matTooltip">
                   </span>
+                  <span *ngIf="disableMic" class="error-badge">!</span>
                 </div>
                 <div class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
-                    (click)="toggleCallHold(tooltip2);" #tooltip2="matTooltip">
+                    (click)="toggleCallHold(tooltip2);" (keydown.enter)="toggleCallHold(tooltip2)"
+                    (keydown.space)="toggleCallHold(tooltip2)" #tooltip2="matTooltip">
                   </span>
                 </div>
                 <div class="control-btn disable-icon-callControl">
@@ -1863,7 +1884,7 @@
                     class="material-symbols-outlined"> more_horiz </span>
                 </div>
                 <div matTooltip="End Call" [matTooltipPosition]="this.positionOptions[2]" class="control-btn end-call"
-                  (click)="callEnd()">
+                  (click)="callEnd()" (keydown)="($event.key === 'Enter' || $event.key === ' ') && callEnd()">
                   <span class="material-symbols-outlined"> call_end </span>
                 </div>
               </div>
@@ -2146,9 +2167,10 @@
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon">
 
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
+            <button matMiniFab (click)="changeScreen('widget')" aria-label="minimize conversation"
+              matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+              <mat-icon>remove</mat-icon>
+            </button>
           </div>
         </div>
         <div class="widget-error-content">
@@ -2168,14 +2190,9 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input
-              id="formTrigger"
-              type="submit"
-              class="widget-error-trigger"
+            <input id="formTrigger" type="submit" class="widget-error-trigger"
               value="{{ 'button.download-transcript' | translate }}"
-              *ngIf="enableDownloadTranscript && !standaloneWebRtc"
-              (click)="chatTranscript()"
-            />
+              *ngIf="enableDownloadTranscript && !standaloneWebRtc" (click)="chatTranscript()" />
           </div>
         </div>
       </div>
@@ -2192,9 +2209,10 @@
         <div class="widget-chat-header widget-color">
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon">
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
+            <button matMiniFab (click)="changeScreen('widget')" aria-label="minimize conversation"
+              matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+              <mat-icon>remove</mat-icon>
+            </button>
           </div>
         </div>
         <div class="widget-error-content">
@@ -2253,9 +2271,10 @@
           <h5 id="title">{{ title }}</h5>
           <div class="widget-header-icon">
 
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
+            <button matMiniFab (click)="changeScreen('widget')" aria-label="minimize conversation"
+              matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+              <mat-icon>remove</mat-icon>
+            </button>
           </div>
         </div>
         <div class="widget-error-content">
@@ -2275,8 +2294,8 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="{{ 'button.call-on-my-number' | translate }}"
-              *ngIf="enableWebRtc" />
+            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn"
+              value="{{ 'button.call-on-my-number' | translate }}" *ngIf="enableWebRtc" />
 
             <input id="formTrigger" typCall pope="submit" class="widget-error-trigger"
               value="{{ 'button.send-me-transcript' | translate }}" *ngIf="enableDownloadTranscript" />
@@ -2300,7 +2319,7 @@
         <div class="agent-detail">
           <p class="name">{{ agentName }}</p>
         </div>
-        <div class="end-call-btn" [class.disabled]="!dialogId" (click)="callEnd()">
+        <div class="end-call-btn" [class.disabled]="!dialogId" (click)="callEnd()" (keydown)="($event.key === 'Enter' || $event.key === ' ') && callEnd()">
           <div class="end-call-btn-sm">
             <span class="material-symbols-outlined"> call_end </span>
           </div>

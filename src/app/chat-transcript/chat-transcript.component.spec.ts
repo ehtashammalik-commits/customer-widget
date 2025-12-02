@@ -1,7 +1,11 @@
 // chat-transcript.component.spec.ts
 import { TranscriptComponent } from './chat-transcript.component';
 import { of, throwError } from 'rxjs';
-import { DomSanitizer, SafeUrl, SafeResourceUrl } from '@angular/platform-browser';
+import {
+  DomSanitizer,
+  SafeUrl,
+  SafeResourceUrl,
+} from '@angular/platform-browser';
 
 describe('TranscriptComponent (unit)', () => {
   let component: TranscriptComponent;
@@ -25,14 +29,15 @@ describe('TranscriptComponent (unit)', () => {
 
   const mockSanitizer: Partial<DomSanitizer> = {
     bypassSecurityTrustUrl: jest.fn((v) => v as unknown as SafeUrl),
-    bypassSecurityTrustResourceUrl: jest.fn((v) => v as unknown as SafeResourceUrl),
+    bypassSecurityTrustResourceUrl: jest.fn(
+      (v) => v as unknown as SafeResourceUrl,
+    ),
   };
 
   const mockNgxLoader: any = { start: jest.fn(), stop: jest.fn() };
   const mockTitle: any = { setTitle: jest.fn() };
   const mockTranslate: any = { setDefaultLang: jest.fn(), use: jest.fn() };
   const mockStorageService: any = { getItem: jest.fn() };
-
 
   Object.defineProperty(URL, 'createObjectURL', {
     writable: true,
@@ -44,7 +49,6 @@ describe('TranscriptComponent (unit)', () => {
     value: jest.fn(),
   });
 
-
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -53,8 +57,8 @@ describe('TranscriptComponent (unit)', () => {
       mockTranscriptService,
       mockConfigService,
       mockSanitizer as DomSanitizer,
-      mockNgxLoader ,
-      mockTitle ,
+      mockNgxLoader,
+      mockTitle,
       mockTranslate,
       mockStorageService,
     );
@@ -86,16 +90,24 @@ describe('TranscriptComponent (unit)', () => {
       const delivery = {
         id: 'm3',
         header: { timestamp: rawTs },
-        body: { type: 'DELIVERYNOTIFICATION', messageId: 'm1', status: 'FAILED' },
+        body: {
+          type: 'DELIVERYNOTIFICATION',
+          messageId: 'm1',
+          status: 'FAILED',
+        },
       };
 
-      mockTranscriptService.getTranscriptData.mockReturnValue(of([original, updateMsg, delivery]));
+      mockTranscriptService.getTranscriptData.mockReturnValue(
+        of([original, updateMsg, delivery]),
+      );
 
       await component.loadChatData({ conversationId: 'c1' });
 
       // processedMessages should contain the original message only (update modifies it)
       expect(component.processedMessages.length).toBe(2);
-      expect(component.processedMessages[0].body.markdownText).toBe('updated text');
+      expect(component.processedMessages[0].body.markdownText).toBe(
+        'updated text',
+      );
       expect(component.processedMessages[0].isEdited).toBe(true);
       expect(component.processedMessages[0].isBlurred).toBe(true);
 
@@ -104,15 +116,23 @@ describe('TranscriptComponent (unit)', () => {
     });
 
     it('should handle messages without timestamp gracefully and not throw', async () => {
-      const msg = { id: 'x', header: {}, body: { type: 'PLAIN', markdownText: 't' } };
+      const msg = {
+        id: 'x',
+        header: {},
+        body: { type: 'PLAIN', markdownText: 't' },
+      };
       mockTranscriptService.getTranscriptData.mockReturnValue(of([msg]));
-      await expect(component.loadChatData({ conversationId: 'c1' })).resolves.not.toThrow();
+      await expect(
+        component.loadChatData({ conversationId: 'c1' }),
+      ).resolves.not.toThrow();
       expect(component.processedMessages.length).toBe(1);
     });
 
     it('should log error on failure and not throw', async () => {
       const err = new Error('network');
-      mockTranscriptService.getTranscriptData.mockReturnValue(throwError(() => err));
+      mockTranscriptService.getTranscriptData.mockReturnValue(
+        throwError(() => err),
+      );
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await component.loadChatData({ conversationId: 'c1' });
       expect(spy).toHaveBeenCalledWith('Error loading chat data:', err);
@@ -124,7 +144,9 @@ describe('TranscriptComponent (unit)', () => {
   // -------------------------------
   describe('loadIcons', () => {
     const fakeBlob = new Blob(['svgdata'], { type: 'image/svg+xml' });
-    const createObjectUrlSpy = jest.spyOn(URL, 'createObjectURL').mockImplementation(() => 'blob:mock');
+    const createObjectUrlSpy = jest
+      .spyOn(URL, 'createObjectURL')
+      .mockImplementation(() => 'blob:mock');
 
     beforeEach(() => {
       createObjectUrlSpy.mockClear();
@@ -222,7 +244,10 @@ describe('TranscriptComponent (unit)', () => {
   // -------------------------------
   describe('getGoogleMapsUrl', () => {
     it('should call sanitizer.bypassSecurityTrustResourceUrl and return the safe url', () => {
-      const spy = jest.spyOn(mockSanitizer, 'bypassSecurityTrustResourceUrl' as any);
+      const spy = jest.spyOn(
+        mockSanitizer,
+        'bypassSecurityTrustResourceUrl' as any,
+      );
       const result = component.getGoogleMapsUrl(10, 20);
       expect(spy).toHaveBeenCalled();
       expect(result).toBeDefined();
@@ -249,7 +274,8 @@ describe('TranscriptComponent (unit)', () => {
     });
 
     it('maps docx long mime to DOCX', () => {
-      const mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      const mime =
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
       expect(component.getFileExtension(mime)).toBe('DOCX');
     });
 
@@ -281,18 +307,22 @@ describe('TranscriptComponent (unit)', () => {
     it('prefers senderIconMapSafe by lowercased name then id then default then empty', () => {
       component.senderIconMapSafe = {
         'facebook-connector': 'fb-url',
-        'abc': 'by-id',
+        abc: 'by-id',
         default: 'default-url',
       };
 
       // senderName exact key present in map:
-      expect(component.getChannelIconURL('facebook-connector', 'whatever')).toBe('fb-url');
+      expect(
+        component.getChannelIconURL('facebook-connector', 'whatever'),
+      ).toBe('fb-url');
 
       // fallback to id lowercased:
       expect(component.getChannelIconURL('missing', 'abc')).toBe('by-id');
 
       // fallback to default:
-      expect(component.getChannelIconURL('missing', 'missing')).toBe('default-url');
+      expect(component.getChannelIconURL('missing', 'missing')).toBe(
+        'default-url',
+      );
 
       // fallback to empty string if nothing available:
       component.senderIconMapSafe = {};
@@ -309,10 +339,14 @@ describe('TranscriptComponent (unit)', () => {
         },
       } as any;
 
-      const spyError = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const spyError = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       const originalURL = global.URL;
-      global.URL = jest.fn(() => { throw new Error('bad url'); }) as any;
+      global.URL = jest.fn(() => {
+        throw new Error('bad url');
+      }) as any;
 
       mockRoute.queryParams.subscribe.mockImplementation((cb: any) => {
         cb({ conversationId: 'c1', browserLang: 'en', state: 'view' });
@@ -331,12 +365,11 @@ describe('TranscriptComponent (unit)', () => {
 
       component.ngOnInit();
 
-      expect(spyError).toBeTruthy(); 
+      expect(spyError).toBeTruthy();
 
-      global.URL = originalURL; 
+      global.URL = originalURL;
       spyError.mockRestore();
     });
-
   });
 
   describe('loadChatData (extra cases)', () => {
@@ -348,10 +381,16 @@ describe('TranscriptComponent (unit)', () => {
         body: { type: 'PLAIN', markdownText: 'ok' },
       };
       const delivery = {
-        body: { type: 'DELIVERYNOTIFICATION', messageId: 'm1', status: 'DELIVERED' },
+        body: {
+          type: 'DELIVERYNOTIFICATION',
+          messageId: 'm1',
+          status: 'DELIVERED',
+        },
         header: { timestamp: ts },
       };
-      mockTranscriptService.getTranscriptData.mockReturnValue(of([msg, delivery]));
+      mockTranscriptService.getTranscriptData.mockReturnValue(
+        of([msg, delivery]),
+      );
       await component.loadChatData({ conversationId: 'c' });
       expect(component.processedMessages[0].isBlurred).toBe(false);
     });
@@ -360,18 +399,23 @@ describe('TranscriptComponent (unit)', () => {
       const ts = new Date().toISOString();
       const updateMsg = {
         id: 'mX',
-        header: { originalMessageId: 'not-found', intent: 'update', timestamp: ts },
+        header: {
+          originalMessageId: 'not-found',
+          intent: 'update',
+          timestamp: ts,
+        },
         body: { type: 'PLAIN', markdownText: 'updated text' },
       };
 
       mockTranscriptService.getTranscriptData.mockReturnValue(of([updateMsg]));
 
-      await expect(component.loadChatData({ conversationId: 'c' })).resolves.not.toThrow();
+      await expect(
+        component.loadChatData({ conversationId: 'c' }),
+      ).resolves.not.toThrow();
 
       // update message is discarded since original not found
       expect(component.processedMessages.length).toBe(0);
     });
-
   });
 
   describe('getFileExtension (extra cases)', () => {
@@ -387,7 +431,7 @@ describe('TranscriptComponent (unit)', () => {
     });
   });
 
-    // -------------------------------
+  // -------------------------------
   // getAgentDisplayName tests
   // -------------------------------
   describe('getAgentDisplayName', () => {
@@ -399,7 +443,11 @@ describe('TranscriptComponent (unit)', () => {
     it('should return username when USERNAME_ENABLED and username exists', () => {
       mockConfigService.appConfig.USERNAME_ENABLED = true;
 
-      const user = { username: 'agent123', senderName: 'fallback', firstName: 'John' };
+      const user = {
+        username: 'agent123',
+        senderName: 'fallback',
+        firstName: 'John',
+      };
       const result = component.getAgentDisplayName(user);
       expect(result).toBe('agent123');
     });
@@ -430,7 +478,9 @@ describe('TranscriptComponent (unit)', () => {
     it('should use additionalDetail names if main ones missing', () => {
       mockConfigService.appConfig.USERNAME_ENABLED = false;
 
-      const user = { additionalDetail: { firstName: 'Jane', lastName: 'Smith' } };
+      const user = {
+        additionalDetail: { firstName: 'Jane', lastName: 'Smith' },
+      };
       expect(component.getAgentDisplayName(user)).toBe('Jane Smith');
     });
 

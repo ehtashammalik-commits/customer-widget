@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ConfigService } from '../services/config.service';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, BehaviorSubject } from 'rxjs';
 
 declare let widgetConfigs: any,
+  remote_stream: any,
+  local_stream: any,
   getPreChatForm: any,
   formValidation: any,
   establishConnection: any,
@@ -46,7 +48,8 @@ export class SdkService {
   public renderPreChatForm$: Observable<any> =
     this.preChatFormSubject.asObservable();
 
-  private readonly preChatFormValidationSubject: Subject<any> = new Subject<any>();
+  private readonly preChatFormValidationSubject: Subject<any> =
+    new Subject<any>();
   public validationsSubcription: Observable<any> =
     this.preChatFormValidationSubject.asObservable();
 
@@ -54,7 +57,8 @@ export class SdkService {
   public renderCallbackForm$: Observable<any> =
     this.callbackFormSubject.asObservable();
 
-  private readonly establishConnectionSubject: Subject<any> = new Subject<any>();
+  private readonly establishConnectionSubject: Subject<any> =
+    new Subject<any>();
   public connectionResponse$: Observable<any> =
     this.establishConnectionSubject.asObservable();
 
@@ -78,11 +82,20 @@ export class SdkService {
   // public setupRemoteMediaResponse$: Observable<any> =
   // this.setupRemoteMediaRequest.asObservable();
 
+  // ---- Add your streams here to aceess during minimize or maximize widget ----
+  private readonly localStreamSubject = new BehaviorSubject<MediaStream | null>(
+    null,
+  );
+  public localStream$ = this.localStreamSubject.asObservable();
+
+  private readonly remoteStreamSubject =
+    new BehaviorSubject<MediaStream | null>(null);
+  public remoteStreamObs$ = this.remoteStreamSubject.asObservable();
+
   constructor(private readonly _ConfigService: ConfigService) {
     this.ConfigData = this._ConfigService.appConfig;
     this.loadSdk();
   }
-
 
   receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
     this.widgetIdentifier = widgetIdentifier;
@@ -363,6 +376,12 @@ export class SdkService {
         authData: callPayload.authConfigs,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
+          if (typeof local_stream !== 'undefined' && local_stream) {
+            this.setLocalStream(local_stream);
+          }
+          if (typeof remote_stream !== 'undefined' && remote_stream) {
+            this.setRemoteStream(remote_stream);
+          }
         },
       },
     };
@@ -441,6 +460,9 @@ export class SdkService {
           dialogId: sessionDialogId,
           clientCallbackFunction: (res: any) => {
             this.onWebRtcCallSubject.next(res);
+            if (typeof local_stream !== 'undefined' && local_stream) {
+              this.setLocalStream(local_stream);
+            }
           },
           streamStatus: streamStatus, ////on , off
           streamType: streamType, //screenshare, video
@@ -457,6 +479,14 @@ export class SdkService {
     getFileURL(fileURL, (res: any) => {
       callback(res);
     });
+  }
+  // ---- Methods to set streams ----
+  setLocalStream(stream: MediaStream) {
+    this.localStreamSubject.next(stream);
+  }
+
+  setRemoteStream(stream: MediaStream) {
+    this.remoteStreamSubject.next(stream);
   }
 }
 

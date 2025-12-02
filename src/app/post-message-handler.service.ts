@@ -16,8 +16,6 @@ export class PostMessageHandlerService {
     window.addEventListener(
       'message',
       (event) => {
-        
-
         if (event.data.type === 'browserInfoData') {
           this.browserInfoDataSubject.next(event.data.data);
         }

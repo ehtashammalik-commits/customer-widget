@@ -4574,3 +4574,10 @@ const createMediaPermissionStatusUpdateEvent = (dialogId, mediaType, status, err
   };
 }
 
+function getLocalStream(){
+  return local_stream;
+}
+
+function getRemoteStream(){
+  return remote_stream;
+}
