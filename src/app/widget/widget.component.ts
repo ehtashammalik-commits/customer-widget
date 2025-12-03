@@ -24,7 +24,7 @@ import { StorageType } from './../services/storage.service';
 import { BrowserNotificationService } from '../services/browser-notification.service';
 import { DeliveryNotificationService } from '../services/delivery-notification.service';
 import { PostMessageHandlerService } from '../post-message-handler.service';
-import { lastValueFrom, Subscription } from 'rxjs';
+import { interval, lastValueFrom, Subscription } from 'rxjs';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -395,6 +395,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     currentAttempt: 0,
     maxAttempts: 5,
   }
+  private endViewTimerSubscription: Subscription | null = null;
   
   constructor(
     private route: ActivatedRoute,
@@ -1679,6 +1680,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isChatMax = true;
         this.isCallbackMax = false;
         this.isWebRtcMax = false;
+        this.startEndViewTimer();
         break;
       case 'error':
         this.preChatFormScreen = false;
@@ -5214,6 +5216,31 @@ replaceSpacesWithUnderscores(input: string): string {
     }
   }
 
+  startEndViewTimer() {
+    console.log('Starting end view timer');
+    this.stopEndViewTimer();
+    const startDate = new Date();
+    const duration = this.__appConfig.appConfig.WIDGET_END_VIEW_TIMEOUT_SECONDS * 1000 || 60 * 1000;
+
+    this.endViewTimerSubscription = interval(1000).subscribe(() => {
+        const currentTime = new Date();
+        const elapsed = currentTime.getTime() - startDate.getTime();
+
+        if (elapsed >= duration) {
+            console.log('End view timer completed, switching to widget view');
+            this.changeScreen('widget');
+            this.stopEndViewTimer();
+        }
+    });
+  }
+
+  // Ensure you call this on component destruction for cleanup
+  stopEndViewTimer() {
+      if (this.endViewTimerSubscription) {
+          this.endViewTimerSubscription.unsubscribe();
+          this.endViewTimerSubscription = null;
+      }
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
