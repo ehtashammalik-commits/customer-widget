@@ -44,6 +44,38 @@
         font-weight: 600;
         letter-spacing: 1px;
     }
+
+    .download-pdf-btn {
+        position: absolute;
+        right: 15px;
+        padding: 8px 16px;
+        background-color: #4773b5;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+            background-color: #365a94;
+        }
+
+        &:active {
+            background-color: #2d4a7a;
+        }
+
+        @media(max-width: 480px){
+            position: static;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        @media print {
+            display: none;
+        }
+    }
 }
 
 /* Right direction */

@@ -1110,6 +1110,10 @@ button.close-widget-wrapper {
       color: #ccc;
     }
   }
+
+  &:hover {
+    cursor: pointer;
+  }
 }
 
 .focus-icon {

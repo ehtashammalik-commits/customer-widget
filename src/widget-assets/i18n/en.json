@@ -88,6 +88,7 @@
     },
     "chat-transcript": {
         "title": "Conversation Transcript",
-        "disclaimer-text": "Below is the transcript of your recent chat session with our support team."
+        "disclaimer-text": "Below is the transcript of your recent chat session with our support team.",
+        "print-or-download-pdf": "Print / Save as PDF"
     }
 }

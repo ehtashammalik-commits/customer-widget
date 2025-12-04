@@ -68,7 +68,7 @@ export class TranscriptComponent implements OnInit {
       this.ngxLoader.start();
       await this.loadChatData(req);
       this.ngxLoader.stop();
-      this.printChatTranscript();
+      // this.printChatTranscript();
 
       // Prepare icon URLs
       let originURL = '';
@@ -251,5 +251,9 @@ export class TranscriptComponent implements OnInit {
     } else {
       return keycloakUser.username || 'Agent';
     }
+  }
+
+  async downloadAsPDF() {
+    window.print();
   }
 }
