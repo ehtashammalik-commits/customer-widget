@@ -9,7 +9,6 @@ const mockSdkService = {
 const mockAppConfigService = {
   appConfig: {
     ENABLE_LOGO: false,
-    ADDITIONAL_PANEL: false,
     USERNAME_ENABLED: true,
   },
 };

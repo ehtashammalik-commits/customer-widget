@@ -419,7 +419,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private spinner: NgxSpinnerService
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
-    this.additionalPanel = __appConfig.appConfig.ADDITIONAL_PANEL;
     this.isUsernameEnabled = __appConfig.appConfig.USERNAME_ENABLED;
     this.storageType = this.__appConfig.appConfig.AUTO_RESUME_ON_NEW_TAB
       ? 'localStorage'
@@ -1555,7 +1554,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (
           this.storageService.getItem('wrapper-hide', this.storageType) ===
             'true' ||
-          this.__appConfig.appConfig.ADDITIONAL_PANEL !== true ||
           this.getAdditionalValue('HIDE_CALLOUT_PANEL')
         ) {
           this.additionalPanel = false;

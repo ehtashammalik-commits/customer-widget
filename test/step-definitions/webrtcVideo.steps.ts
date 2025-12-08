@@ -80,7 +80,6 @@ const createMockComponent = () => {
   const mockAppConfig = {
     appConfig: {
       ENABLE_LOGO: true,
-      ADDITIONAL_PANEL: false,
       USERNAME_ENABLED: true,
     },
   } as any;
