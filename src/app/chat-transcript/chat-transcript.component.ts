@@ -26,6 +26,7 @@ export class TranscriptComponent implements OnInit {
   conversationAreaClass = '';
   state: string = '';
   enableTranscriptNotifications: boolean = false;
+  private receivedToken: string = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -39,6 +40,29 @@ export class TranscriptComponent implements OnInit {
   ) {
     translate.setDefaultLang('en');
     translate.use('en');
+
+    // Listen for JWT token via postMessage
+    window.addEventListener('message', (event) => {
+      // Validate origin for security - allow same origin and opener's origin
+      const trustedOrigins = [window.location.origin];
+      if (window.opener) {
+        try {
+          trustedOrigins.push(new URL(window.opener.location.href).origin);
+        } catch (e) {
+          // Cross-origin opener, can't access location
+        }
+      }
+
+      if (!trustedOrigins.includes(event.origin)) {
+        console.warn('Received message from untrusted origin:', event.origin);
+        return;
+      }
+
+      if (event.data && event.data.type === 'JWT_TOKEN') {
+        this.receivedToken = event.data.token;
+        console.log('JWT token received via postMessage');
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -66,6 +90,11 @@ export class TranscriptComponent implements OnInit {
       };
 
       this.ngxLoader.start();
+      // Wait briefly for postMessage token, then fallback to storage
+      await new Promise(resolve => setTimeout(resolve, 1000)); 
+      const jwtToken = this.receivedToken || 
+                       this.storageService.getItem('jwt_token') || '';
+      this.storageService.setItem('jwt_token', jwtToken);
       await this.loadChatData(req);
       this.ngxLoader.stop();
       // this.printChatTranscript();
@@ -92,8 +121,6 @@ export class TranscriptComponent implements OnInit {
         'smpp-connector': `${originURL}/file-engine/api/downloadFileStream?filename=_SMS.svg`,
         default: `${originURL}/file-engine/api/downloadFileStream?filename=_WEB.svg`,
       };
-
-      const jwtToken = this.storageService.getItem('jwt_token') || '';
       await this.loadIcons(senderIconMap, jwtToken);
     });
   }

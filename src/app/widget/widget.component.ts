@@ -1551,6 +1551,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('Change Screen:', screen);
     switch (screen) {
       case 'widget':
+        this.stopEndViewTimer();
         if (
           this.storageService.getItem('wrapper-hide', this.storageType) ===
             'true' ||
@@ -3458,15 +3459,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   //   localStorage.removeItem('conversationId');
   // }
 
-  chatTranscript(): void {
+  async chatTranscript() {
     const conversationId = this.storageService.getItem(
       'conversationId',
       this.storageType,
     );
-    const browserLang = this.browserLang;
-
-    // Build the query string
-    //state=download&browserLang=en&conversationId=
+    const jwtToken = this.storageService.getItem('jwt_token', this.storageType);
     const params = new URLSearchParams({
       state: 'download',
       browserLang: this.translate.currentLang || '',
@@ -3474,7 +3472,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     });
 
     const absoluteUrl = `${window.location.origin}/customer-widget/#/chat-transcript?${params.toString()}`;
-    window.open(absoluteUrl, '_blank', 'noopener');
+    const transcriptWindow = window.open(absoluteUrl, '_blank');
+    console.log(absoluteUrl);
+    
+    // Send JWT token via postMessage after window loads
+    if (transcriptWindow && jwtToken) {
+      setTimeout(() => {
+        try {
+          transcriptWindow.postMessage({
+            type: 'JWT_TOKEN',
+            token: jwtToken
+          }, window.location.origin);
+          console.log('JWT token sent via postMessage');
+        } catch (error) {
+          console.error('Error sending token via postMessage:', error);
+        }
+      }, 500);
+    }
   }
 
   loadBrowserLanguage() {
@@ -5227,7 +5241,6 @@ replaceSpacesWithUnderscores(input: string): string {
         if (elapsed >= duration) {
             console.log('End view timer completed, switching to widget view');
             this.changeScreen('widget');
-            this.stopEndViewTimer();
         }
     });
   }
