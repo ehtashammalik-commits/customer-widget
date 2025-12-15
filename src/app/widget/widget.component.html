@@ -214,16 +214,19 @@
     <div class="widget-form-area">
       <div class="widget-form">
         <div class="widget-form-header widget-chat-header widget-color">
-          <h5 id="headerHeading">{{ title }}</h5>
+          <div class="widget-chat-header-top">
+            <h5 id="headerHeading">{{ title }}</h5>
 <!--          <span class="widget-header-icon">-->
 <!--            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"-->
 <!--              [matTooltipPosition]="matToolTipPosition!">minimize</span>-->
 <!--          </span>-->
-          <div class="widget-header-icon">
-            <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-              <mat-icon>remove</mat-icon>
-            </button>
+            <div class="widget-header-icon">
+              <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
         </div>
         <div class="widget-form-content">
           <h4 class="callback-title">{{ 'callback.request' | translate }}</h4>
@@ -453,20 +456,23 @@
       <div class="widget-form">
         <div class="widget-form-header widget-chat-header widget-color" [ngClass]="{'exist-calendar':daySummary}"
           >
-          <h5 id="headerHeading">{{ title }}
-            <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
+          <div class="widget-chat-header-top">
+            <h5 id="title" [innerHTML]='title'>
+              <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
               | date: 'shortTime' }}</p>
-          </h5>
-<!--          <span class="widget-header-icon" (click)="changeScreen('widget')">-->
-<!--            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"-->
-<!--              [matTooltipPosition]="matToolTipPosition!">minimize</span>-->
-<!--          </span>-->
+            </h5>
+  <!--          <span class="widget-header-icon" (click)="changeScreen('widget')">-->
+  <!--            <span class="topbar-icon material-symbols-outlined" matTooltip="{{'button.minimize' | translate}}"-->
+  <!--              [matTooltipPosition]="matToolTipPosition!">minimize</span>-->
+  <!--          </span>-->
 
-          <div class="widget-header-icon">
-            <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-              <mat-icon>remove</mat-icon>
-            </button>
+            <div class="widget-header-icon">
+              <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
         </div>
 
         <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
@@ -1127,7 +1133,7 @@
       <ngx-spinner type="ball-spin" size = "default" [fullScreen] = "false"></ngx-spinner>
       <div class="widget-form">
         <!-- Widget Chat Header -->
-        <div class="widget-chat-header widget-color">
+        <div class="widget-form-header widget-chat-header widget-color">
           <div class="widget-chat-header-top">
             <h5 id="title" [innerHTML]='title'></h5>
             <div class="widget-header-icon">

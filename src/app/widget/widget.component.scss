@@ -538,7 +538,7 @@ button.close-widget-wrapper {
 
 .widget-form-header {
   padding: 0 10px;
-  height: 50px;
+  // height: 50px;
   border-radius: 10px;
   cursor: pointer;
 
@@ -562,7 +562,7 @@ button.close-widget-wrapper {
   display: inline-block;
   // position: absolute;
   left: 10px;
-  height: 15px;
+  // height: 15px;
   font-family: "Roboto";
   font-size: 14px;
   font-weight: 500;
@@ -601,7 +601,6 @@ button.close-widget-wrapper {
   background-color: $white-color;
   border-radius: 10px;
   position: absolute;
-  top: 34px;
   overflow-y: scroll;
   height: 100%;
   // padding: 10px 5px 5px 10px;
@@ -1083,7 +1082,7 @@ button.close-widget-wrapper {
   width: 100%;
   justify-content: end;
   display: flex;
-  margin-top: -10px;
+  // margin-top: -10px;
 }
 
 .widget-navbar-icon {
