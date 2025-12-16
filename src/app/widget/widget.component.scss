@@ -568,10 +568,10 @@ button.close-widget-wrapper {
   }
 
   p {
-    font-size: 10px;
+    font-size: 11px;
     margin: 0;
     position: relative;
-    line-height: 10px;
+    // line-height: 10px;
   }
 }
 
@@ -895,7 +895,7 @@ button.close-widget-wrapper {
 
   .widget-sub-heading {
     font-size: 11px;
-    margin-top: -7px;
+    margin-top: -7px !important;
   }
 
 .widget-header-icon {
@@ -1566,7 +1566,7 @@ button.close-widget-wrapper {
   font-family: "Roboto";
   font-size: 13px;
   font-weight: normal;
-  line-height: 16px;
+  // line-height: 16px;
   font-style: normal;
   text-align: center;
   color: var(--main-color);
