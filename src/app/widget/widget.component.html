@@ -9,7 +9,7 @@
   <!-- /Addition Panel HTML/ -->
   <!--------------------------->
   <ng-container *ngIf="additionalPanel && !standaloneWebRtc && !isChatActive">
-    <div class="widget-wrapper" [ngClass]="{'compact-widget': widgetType ==='COMPACT'}">
+    <div class="widget-wrapper" [ngClass]="{'compact-widget': isCalloutViewCompact}">
       <div class="wrapper-inner">
 
         <div class="widget-wrapper-header widget-color">

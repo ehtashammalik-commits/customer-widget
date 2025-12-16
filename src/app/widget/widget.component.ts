@@ -387,6 +387,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   additionalValues: any[] = [];
   additionalValuesMap: { [key: string]: any } = {};
   widgetType = "COMPACT";
+  isCalloutViewCompact = false;
   appliedColorTheme: string = '';
   avaClientId: string = '';
   defaultWidgetLanguage: string = 'en';
@@ -985,6 +986,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     };
     this.isExitIconDisable = this.additionalValuesMap["HIDE_WIDGET_EXIT_ICON"]?.value || false;
     this.isMinimizeIconDisable = this.additionalValuesMap["HIDE_WIDGET_MINIMIZE_ICON"]?.value || false;
+    this.isCalloutViewCompact = this.additionalValuesMap["IS_CALLOUT_VIEW_COMPACT"]?.value || false;
     console.log('Additional Schema:', this.additionalSchema);
     console.log('Additional Values:', this.additionalValues);
     console.log('Additional Values Map:', this.additionalValuesMap);
