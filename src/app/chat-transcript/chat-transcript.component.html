@@ -1,7 +1,8 @@
 <ngx-ui-loader></ngx-ui-loader>
 <div class="transcript-header print-header">
-  <img src="../../widget-assets/chat-transcript/images/transcript-logo.jpeg" >
-    <h3>{{ 'chat-transcript.title' | translate }}</h3>
+  <img
+    [src]="__appConfig.appConfig.ENABLE_LOGO ? '../../widget-assets/chat-transcript/images/transcript-logo.jpeg' : '../../widget-assets/chat-transcript/images/expertflow-logo.png'">
+  <h3>{{ 'chat-transcript.title' | translate }}</h3>
     <button class="download-pdf-btn" (click)="downloadAsPDF()" *ngIf="state === 'download'">
       {{ 'chat-transcript.print-or-download-pdf' | translate }}
     </button>

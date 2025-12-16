@@ -1,4 +1,4 @@
-<div class="top-wrapper" [ngClass]="{
+<div class="top-wrapper" *ngIf="widgetLoaded" [ngClass]="{
     'right-direction': selectedLanguage == 'ar',
     'mobile-view': isMobile,
     'dark-theme': appliedColorTheme == 'dark'

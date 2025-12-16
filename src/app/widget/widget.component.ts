@@ -99,7 +99,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   sendTypingStartedEventTimer: any = null;
   eventTriggerType = '';
 
-  additionalPanel = false; // If true will show Popup Panel on top of widget icon
+  additionalPanel = true; // If true will show Popup Panel on top of widget icon
   isIconWidget = true; // If true will show widget icon
   preChatFormScreen = false; // If true will show pre chat form screen
   widgetChatScreen = false; // If true will show widget Chat screen
@@ -391,6 +391,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   appliedColorTheme: string = '';
   avaClientId: string = '';
   defaultWidgetLanguage: string = 'en';
+  widgetLoaded = false;
 
   reconnectAttemptsConfig = {
     currentAttempt: 0,
@@ -534,7 +535,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           if (configs.form !== '')
             this.sdk.renderPreChatForm(this.preChatFormId);
         });
-
+        this.widgetLoaded = true;
         window.parent.postMessage({
           state: "EF_WIDGET_LOADED",
           message: "Customer Widget Loaded Successfully",
