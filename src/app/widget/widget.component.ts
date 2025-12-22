@@ -1133,7 +1133,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           "sections": [
               {
                   "name": "Test User",
-                  "phone": this.avaClientId !== '' ? this.avaClientId : Math.floor(10000000 + Math.random() * 90000000).toString()
+                  [this.__appConfig.appConfig.CHANNEL_IDENTIFIER]: this.avaClientId !== '' ? this.avaClientId : Math.floor(10000000 + Math.random() * 90000000).toString()
               }
           ]
       }
