@@ -67,17 +67,40 @@
             if (document.getElementById("EmojiLink")) {
               return;
             }
-            var clickLink = function clickLink(event) {
-              event.preventDefault();
-              var caretPos = emojiInput.selectionStart;
-              emojiInput.value = emojiInput.value.substring(0, caretPos) + " " + event.target.innerHTML + emojiInput.value.substring(caretPos);
-              // emojiPicker.style.display = "none";
-              // emojiInput.focus();
 
-              //trigger ng-change for angular
+            var clickLink = function(event) {
+              event.preventDefault();
+
+              const caretPos = emojiInput.selectionStart;
+              const emoji = event.target.innerHTML;
+
+              // Count current text length including emojis correctly
+              const currentLength = Array.from(emojiInput.value).length;
+              const emojiLength = Array.from(emoji).length;
+
+              // Respect max length
+              const messageLimit = parseInt(emojiInput.getAttribute('data-maxlength'), 10) || 300;
+              if (currentLength + emojiLength > messageLimit) return; // don't insert
+
+              // Insert emoji at caret
+              emojiInput.value =
+                emojiInput.value.substring(0, caretPos) +
+                emoji +
+                emojiInput.value.substring(caretPos);
+
+              // Move caret after the inserted emoji
+              const newCaretPos = caretPos + emoji.length;
+              emojiInput.setSelectionRange(newCaretPos, newCaretPos);
+
               if (typeof angular !== "undefined") {
-                angular.element(emojiInput).triggerHandler("change");
+                const ngModelCtrl = angular.element(emojiInput).controller('ngModel');
+                if (ngModelCtrl) {
+                  ngModelCtrl.$setViewValue(emojiInput.value);
+                  ngModelCtrl.$render();
+                }
               }
+
+              emojiInput.focus();
             };
 
             emojiInput.style.width = "100%";
@@ -99,10 +122,10 @@
             }, false);
 
               emojiPicker.id = "EmojiLink";
-              emojiPicker.style.position = "relative";
-              emojiPicker.style.left = "2px";
+              emojiPicker.style.position = "absolute";
+              emojiPicker.style.left = "10px";
               emojiPicker.style.outline = "none";
-              emojiPicker.style.top = "-40px";
+              emojiPicker.style.bottom = "40px";
               emojiPicker.style.zIndex = "99";
               emojiPicker.style.display = "none";
               emojiPicker.style.width = "232px";
@@ -119,7 +142,7 @@
               emojiTrigger.style.position = "absolute";
               emojiTrigger.style.bottom = "10px";
               emojiTrigger.style.fontSize = "20px";
-              emojiTrigger.style.left = "5px";
+              emojiTrigger.style.left = "15px";
               emojiTrigger.style.zIndex = "99";
 
 
@@ -133,16 +156,17 @@
               emojiTrigger.innerText = ' add_reaction ';
               emojiTrigger.classList.add('material-symbols-outlined');
               emojiTrigger.classList.add('emoji-btn');
-              emojiTrigger.onclick = function () {
-                if (emojiPicker.style.display === "block") {
-                  // If picker is visible, hide it
-                  emojiPicker.style.display = "none";
-                } else {
-                  // Otherwise, show it
-                  emojiPicker.style.display = "block";
-                  emojiPicker.focus();
-                }
-              };
+            emojiTrigger.onclick = function () {
+              emojiPicker.style.display = emojiPicker.style.display === "block" ? "none" : "block";
+              if (emojiPicker.style.display === "block") {
+                emojiInput.focus();
+              }
+            };
+            document.addEventListener("click", function(event) {
+              if (!emojiPicker.contains(event.target) && event.target !== emojiTrigger) {
+                emojiPicker.style.display = "none";
+              }
+            });
 
             emojiContainer.appendChild(emojiTrigger);
 

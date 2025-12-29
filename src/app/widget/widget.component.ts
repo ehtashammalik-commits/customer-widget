@@ -38,6 +38,7 @@ import { Inject } from '@angular/core';
 import { FormMessageTypeService } from '../services/form-message-type.service';
 import { NgxSpinnerService } from "ngx-spinner";
 
+declare let EmojiPicker: any;
 interface Shift {
   id: string;
   name: string;
@@ -1608,6 +1609,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isWebRtcMax = false;
         this.changeView('chat');
         this.resizeWidget('form-view');
+        if(this.enableEmoji) {
+        setTimeout(() => {
+        // Intentionally instantiate EmojiPicker for DOM side effects
+        new EmojiPicker(); // NOSONAR
+      }, 500);
+    }
         break;
       case 'chatForm':
         if (this.getAdditionalValue("PRECHAT_FORM_DISABLED")){
