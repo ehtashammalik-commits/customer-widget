@@ -1286,18 +1286,18 @@
           <ng-container *ngIf="fontDropDown">
             <div class="font-dropdown-container">
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
-                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12' }"
-                (click)="setFontSize('12')" [ngClass]="{ btnOne: enableFontResize === true }">
+                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12', btnOne: enableFontResize === true }"
+                (click)="setFontSize('12')">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px"
-                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14' }"
-                (click)="setFontSize('14')" [ngClass]="{ btnOne: enableFontResize === true }">
+                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14', btnOne: enableFontResize === true }"
+                (click)="setFontSize('14')">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px"
-                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16' }"
-                (click)="setFontSize('16')" [ngClass]="{ btnOne: enableFontResize === true }">
+                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16', btnOne: enableFontResize === true }"
+                (click)="setFontSize('16')">
                 text_fields
               </span>
             </div>
