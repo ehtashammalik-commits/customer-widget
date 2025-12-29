@@ -2518,6 +2518,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.renderer.setProperty(messageRef, 'value', '');
       this.isComposerDisable = true;
     }
+
+    // disabling the emoji button if the composer is disabled for any reason. 
+    const emojiTrigger = document.querySelector('.emoji-btn') as HTMLElement;
+    if (emojiTrigger) {
+      emojiTrigger.style.pointerEvents = 'none';
+      emojiTrigger.style.opacity = '0.5';
+    }
   }
 
     // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
