@@ -2283,7 +2283,7 @@ mat-spinner {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2; // ✅ Make sure it's above the video element
+    z-index: 1;
 
     mat-icon.large-icon {
       font-size: 64px;
