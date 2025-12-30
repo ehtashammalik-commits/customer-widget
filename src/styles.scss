@@ -162,6 +162,10 @@ body {
     gap: 10px !important;
 }
 
+.prechat-dropdown .ngx-dropdown-container .ngx-dropdown-list-container {
+  max-height: 250px !important;
+}
+
 .prechat-dropdown .ngx-dropdown-container .ngx-dropdown-button .display-text {
     text-overflow: ellipsis !important;
     overflow: hidden !important;
