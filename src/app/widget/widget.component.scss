@@ -1503,8 +1503,8 @@ button.close-widget-wrapper {
   position: absolute;
   bottom: 10px;
   width: 100%;
-  left: 5px;
   z-index: 1;
+  justify-content: center;
 
   &.main-composer-area {
     position: fixed;
@@ -2072,18 +2072,19 @@ mat-spinner {
 
 // Call Stylings
 .widget-call-area {
-  position: absolute;
-  right: 20px;
-  width: 325px;
-  height: 513px;
+  position: relative;
+  width: 98%;
+  height: 100%;
   border-radius: 10px;
   background: rgba(12, 23, 39, 0.8);
-  top: 50px;
+  top: 55px;
+  left: 1%;
 
   .call-popup {
     position: absolute;
-    bottom: 32%;
-    left: 13%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 242px;
     height: 219px;
     border: 1px solid rgba(52, 52, 52);
@@ -2183,11 +2184,11 @@ mat-spinner {
 &.widget-audio-section {
   visibility: visible;
   display: block;
-  width: 315px;
+  width: 98%;
   position: absolute;
   top: 75px;
-  left: 5px;
-  height: 85.5%;
+  left: 1%;
+  height: calc(100% - 90px);
   border-radius: 10px;
   background: #4e4e4e;
   opacity: 0.8;
@@ -2196,10 +2197,10 @@ mat-spinner {
     position: absolute;
     width: 100%;
     top: 15%;
-    left: 36%;
+    display: flex;
+    justify-content: center;
 
     img {
-      position: absolute;
       width: 91px;
       height: 91px;
     }
@@ -2243,11 +2244,12 @@ mat-spinner {
 &.widget-video-section {
   visibility: visible;
   display: block;
-  width: 315px;
-  position: absolute;
-  top: 75px;
+  width: 98%;
+  position: relative;
+  top: 40px;
+  bottom: 0;
   left: 5px;
-  height: 85.5%;
+  height: calc(100% - 103px);
   border-radius: 10px;
   background: #4e4e4e;
 
@@ -2319,7 +2321,7 @@ mat-spinner {
   }
 
   .localVideo {
-    position: inherit;
+    position: absolute;
     height: 75px;
     top: 5px;
     right: 5px;
@@ -2359,7 +2361,6 @@ mat-spinner {
 .widget-call-controls {
   bottom: 5px;
   left: 20px;
-  position: relative;
   width: 265px;
   height: 45px;
   border-radius: 50px;
