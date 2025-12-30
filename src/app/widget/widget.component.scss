@@ -621,10 +621,10 @@ button.close-widget-wrapper {
   border-radius: 10px;
   position: absolute;
   overflow-y: scroll;
-  height: 100%;
+  height: 85%;
   // padding: 10px 5px 5px 10px;
   padding: 8px 0px 5px 10px !important;
-  max-height: 450px;
+  // max-height: 450px;
   padding-bottom: 12px;
   width: 100%;
   padding: 10px;
@@ -4039,4 +4039,3 @@ input[type='radio'] {
   color: #fff !important;
   opacity: 1;
 }
-

@@ -779,6 +779,7 @@
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                               </label>
                               <ngx-select-dropdown 
+                                class="prechat-dropdown"
                                 [formControlName]="attribute.key"
                                 [required]="attribute?.isRequired" 
                                 [config]="dropdownConfig"

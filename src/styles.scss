@@ -154,3 +154,16 @@ body {
   color: white;
   text-decoration: underline;
 }
+
+.prechat-dropdown .ngx-dropdown-container .selected-items .selected-item {
+    display: flex !important;
+    flex-direction: row-reverse !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+}
+
+.prechat-dropdown .ngx-dropdown-container .ngx-dropdown-button .display-text {
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+}
