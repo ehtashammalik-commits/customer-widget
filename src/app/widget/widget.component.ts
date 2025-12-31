@@ -2471,7 +2471,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     // 🔹 Form
     if (type === 'form_data') {
-
       const status = userReply.body.additionalDetails?.status?.toLowerCase();
       // mapping between status and button actions
       const statusToActionMap: Record<string, string> = {
@@ -2590,7 +2589,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.editMessage(cimMessage);
         }
         else {
-
         this.cimMessage.push(cimMessage);
         this.disableOldInteractiveMessages(this.cimMessage);
         this.isChatActive = true;
@@ -2656,8 +2654,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.handleClickableList(cimMessage)
         }
 
-
+        if(cimMessage.body.type.toLowerCase() != 'deliverynotification') {
+          this.disableOldInteractiveMessages(this.cimMessage);
+        }
         this.cimMessage.push(cimMessage);
+        
         this.isChatActive = true;
         this.processSeenMessages();
         this.scrollToBottom();
