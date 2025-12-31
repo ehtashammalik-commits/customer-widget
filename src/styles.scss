@@ -46,9 +46,8 @@ body {
   margin-bottom: 10px;
 }
 .error-snackbar {
-    bottom: 150px;
+    bottom: 50px;
     position: relative;
-    right: -1px;
     min-width: 319px !important;
 }
 
@@ -153,4 +152,21 @@ body {
 .widget-sub-heading a {
   color: white;
   text-decoration: underline;
+}
+
+.prechat-dropdown .ngx-dropdown-container .selected-items .selected-item {
+    display: flex !important;
+    flex-direction: row-reverse !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+}
+
+.prechat-dropdown .ngx-dropdown-container .ngx-dropdown-list-container {
+  max-height: 250px !important;
+}
+
+.prechat-dropdown .ngx-dropdown-container .ngx-dropdown-button .display-text {
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
 }

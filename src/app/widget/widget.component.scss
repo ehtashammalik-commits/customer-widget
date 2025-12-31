@@ -621,10 +621,10 @@ button.close-widget-wrapper {
   border-radius: 10px;
   position: absolute;
   overflow-y: scroll;
-  height: 100%;
+  height: calc(100% - 110px);
   // padding: 10px 5px 5px 10px;
   padding: 8px 0px 5px 10px !important;
-  max-height: 450px;
+  // max-height: 450px;
   padding-bottom: 12px;
   width: 100%;
   padding: 10px;
@@ -1096,7 +1096,7 @@ button.close-widget-wrapper {
   border-bottom: 1px solid #eff2f7;
   position: absolute;
   background-color: rgb(255, 255, 255);
-  z-index: 1;
+  z-index: 2;
   height: 36px;
   width: 100%;
   justify-content: end;
@@ -1503,8 +1503,8 @@ button.close-widget-wrapper {
   position: absolute;
   bottom: 10px;
   width: 100%;
-  left: 5px;
   z-index: 1;
+  justify-content: center;
 
   &.main-composer-area {
     position: fixed;
@@ -1525,7 +1525,7 @@ button.close-widget-wrapper {
     border-radius: 10px;
     border: none;
     height: 40px;
-    padding: 0 30px;
+    padding: 0 38px;
     outline: none;
     width: 100%;
     font-size: 13px !important;
@@ -1543,6 +1543,11 @@ button.close-widget-wrapper {
     font-size: 20px;
   }
 }
+
+.widget-chat-composer.composer-disabled {
+  padding: 0px 38px 17px 38px !important;
+}
+
 
 .error-icon {
   text-align: center;
@@ -2067,18 +2072,19 @@ mat-spinner {
 
 // Call Stylings
 .widget-call-area {
-  position: absolute;
-  right: 20px;
-  width: 325px;
-  height: 513px;
+  position: relative;
+  width: 98%;
+  height: 100%;
   border-radius: 10px;
   background: rgba(12, 23, 39, 0.8);
-  top: 50px;
+  top: 55px;
+  left: 1%;
 
   .call-popup {
     position: absolute;
-    bottom: 32%;
-    left: 13%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 242px;
     height: 219px;
     border: 1px solid rgba(52, 52, 52);
@@ -2178,11 +2184,11 @@ mat-spinner {
 &.widget-audio-section {
   visibility: visible;
   display: block;
-  width: 315px;
+  width: 98%;
   position: absolute;
   top: 75px;
-  left: 5px;
-  height: 85.5%;
+  left: 1%;
+  height: calc(100% - 90px);
   border-radius: 10px;
   background: #4e4e4e;
   opacity: 0.8;
@@ -2191,10 +2197,10 @@ mat-spinner {
     position: absolute;
     width: 100%;
     top: 15%;
-    left: 36%;
+    display: flex;
+    justify-content: center;
 
     img {
-      position: absolute;
       width: 91px;
       height: 91px;
     }
@@ -2238,11 +2244,12 @@ mat-spinner {
 &.widget-video-section {
   visibility: visible;
   display: block;
-  width: 315px;
-  position: absolute;
-  top: 75px;
+  width: 98%;
+  position: relative;
+  top: 40px;
+  bottom: 0;
   left: 5px;
-  height: 85.5%;
+  height: calc(100% - 103px);
   border-radius: 10px;
   background: #4e4e4e;
 
@@ -2276,7 +2283,7 @@ mat-spinner {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2; // ✅ Make sure it's above the video element
+    z-index: 1;
 
     mat-icon.large-icon {
       font-size: 64px;
@@ -2314,7 +2321,7 @@ mat-spinner {
   }
 
   .localVideo {
-    position: inherit;
+    position: absolute;
     height: 75px;
     top: 5px;
     right: 5px;
@@ -2354,7 +2361,6 @@ mat-spinner {
 .widget-call-controls {
   bottom: 5px;
   left: 20px;
-  position: relative;
   width: 265px;
   height: 45px;
   border-radius: 50px;
@@ -2435,6 +2441,7 @@ mat-spinner {
     padding: 4px 0px;
     margin: 0px 5px 0px 5px;
     display: block;
+    cursor: pointer;
   }
 
   .font-dropdown-icon-top {
@@ -2615,7 +2622,7 @@ mat-spinner {
 
 .survey_link {
   color: #007bff;
-  position: absolute;
+  position: relative;
   bottom: 15%;
   text-decoration: none;
 
@@ -4033,4 +4040,3 @@ input[type='radio'] {
   color: #fff !important;
   opacity: 1;
 }
-

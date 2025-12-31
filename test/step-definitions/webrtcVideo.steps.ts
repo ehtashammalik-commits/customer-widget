@@ -117,6 +117,7 @@ const createMockComponent = () => {
     mockTranslateService, // TranslateService
     mockRouter, // Router
     mockDocument, // Document,
+    undefined,
     undefined
   );
 

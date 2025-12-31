@@ -30,9 +30,9 @@
 
 .close-button {
     position: absolute;
-    top: 0px;
-    right: -35px;
-    background: white;
+    top: 3px;
+    right: 3px;
+    background-color: rgb(255 255 255 / 75%);
     border: none;
     cursor: pointer;
     padding: 8px 0;
@@ -43,16 +43,20 @@
     justify-content: center;
     transition: color 0.2s ease;
     z-index: 10000;
-    height: 30px;
-    width: 30px;
+    height: 20px;
+    width: 20px;
     border-radius: 50%;
 
   &:hover {
     color: #ff4444;
   }
 
+  &:focus {
+    outline: none
+  }
+
   .material-symbols-outlined {
-    font-size: 32px;
+    font-size: 20px;
   }
 }
 
@@ -73,14 +77,5 @@
 
   .fullscreen-image {
     max-height: 85vh;
-  }
-
-  .close-button {
-    top: -35px;
-    font-size: 28px;
-
-    .material-symbols-outlined {
-      font-size: 28px;
-    }
   }
 }

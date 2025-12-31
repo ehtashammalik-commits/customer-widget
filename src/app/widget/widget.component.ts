@@ -38,6 +38,7 @@ import { Inject } from '@angular/core';
 import { FormMessageTypeService } from '../services/form-message-type.service';
 import { NgxSpinnerService } from "ngx-spinner";
 
+declare let EmojiPicker: any;
 interface Shift {
   id: string;
   name: string;
@@ -1033,9 +1034,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (form.invalid) {
         form.markAllAsTouched(); // Mark all fields touched so errors show
         this.snackBar.open('Please fill all the required fields', 'X', {
-        duration: 2000, // 5 seconds
+        duration: 3000, // 5 seconds
         panelClass: ['error-snackbar'],
-        horizontalPosition: 'right',
+        horizontalPosition: 'center',
         verticalPosition: 'bottom',
       });
         return; // Stop submission
@@ -1608,6 +1609,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isWebRtcMax = false;
         this.changeView('chat');
         this.resizeWidget('form-view');
+        if(this.enableEmoji) {
+        setTimeout(() => {
+        // Intentionally instantiate EmojiPicker for DOM side effects
+        new EmojiPicker(); // NOSONAR
+      }, 500);
+    }
         break;
       case 'chatForm':
         if (this.getAdditionalValue("PRECHAT_FORM_DISABLED")){
@@ -2464,7 +2471,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     // 🔹 Form
     if (type === 'form_data') {
-
       const status = userReply.body.additionalDetails?.status?.toLowerCase();
       // mapping between status and button actions
       const statusToActionMap: Record<string, string> = {
@@ -2510,6 +2516,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       );
       this.renderer.setProperty(messageRef, 'value', '');
       this.isComposerDisable = true;
+    }
+
+    // disabling the emoji button if the composer is disabled for any reason. 
+    const emojiTrigger = document.querySelector('.emoji-btn') as HTMLElement;
+    if (emojiTrigger) {
+      emojiTrigger.style.pointerEvents = 'none';
+      emojiTrigger.style.opacity = '0.5';
     }
   }
 
@@ -2576,7 +2589,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.editMessage(cimMessage);
         }
         else {
-
         this.cimMessage.push(cimMessage);
         this.disableOldInteractiveMessages(this.cimMessage);
         this.isChatActive = true;
@@ -2642,8 +2654,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.handleClickableList(cimMessage)
         }
 
-
+        if(cimMessage.body.type.toLowerCase() != 'deliverynotification') {
+          this.disableOldInteractiveMessages(this.cimMessage);
+        }
         this.cimMessage.push(cimMessage);
+        
         this.isChatActive = true;
         this.processSeenMessages();
         this.scrollToBottom();
@@ -3298,8 +3313,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleFormMessageType(cimMessage: any) {
+    
     const originalMessageId = cimMessage.header.originalMessageId;
-
     const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
     if (originalMessage) {
 
@@ -5028,10 +5043,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TENEO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   async handleRefreshCasesofFormMessageType(cimMessage: any) {
-    if (cimMessage.header.originalMessageId) {
+     const status = cimMessage.body.additionalDetails?.status?.toLowerCase();
+    if (cimMessage.header.originalMessageId && status!=="unfilled") {
       const formGroup = await this.buildFormMessage(cimMessage);
-
-      const status = cimMessage.body.additionalDetails?.status?.toLowerCase();
+     
       if (status === 'filled') {
         await this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
       }

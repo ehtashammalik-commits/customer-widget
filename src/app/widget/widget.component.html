@@ -779,6 +779,7 @@
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                               </label>
                               <ngx-select-dropdown 
+                                class="prechat-dropdown"
                                 [formControlName]="attribute.key"
                                 [required]="attribute?.isRequired" 
                                 [config]="dropdownConfig"
@@ -1286,18 +1287,18 @@
           <ng-container *ngIf="fontDropDown">
             <div class="font-dropdown-container">
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
-                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12' }"
-                (click)="setFontSize('12')" [ngClass]="{ btnOne: enableFontResize === true }">
+                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12', btnOne: enableFontResize === true }"
+                (click)="setFontSize('12')">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px"
-                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14' }"
-                (click)="setFontSize('14')" [ngClass]="{ btnOne: enableFontResize === true }">
+                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14', btnOne: enableFontResize === true }"
+                (click)="setFontSize('14')">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px"
-                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16' }"
-                (click)="setFontSize('16')" [ngClass]="{ btnOne: enableFontResize === true }">
+                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16', btnOne: enableFontResize === true }"
+                (click)="setFontSize('16')">
                 text_fields
               </span>
             </div>
@@ -2277,21 +2278,22 @@
           <!-- Widget Message Composer -->
           
           <div class="widget-composer main-composer-area">
-            <div class="maxLimitError" *ngIf="text.length == messageLimit">
+            <div class="maxLimitError" *ngIf="messageElement?.nativeElement?.value?.length >= messageLimit">
             <span>Max Limit Reached</span>
             </div>
-            <textarea class="widget-chat-composer" #messageComposer [attr.data-emoji-picker]="enableEmoji" matInput
+            <textarea class="widget-chat-composer" [class.composer-disabled]="isComposerDisable" #messageComposer 
+              [attr.data-emoji-picker]="enableEmoji" matInput
               id="messageTextarea" cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
               cdkAutosizeMaxRows="4" placeholder="{{ 'composer-placeholder' | translate }}" #message
               maxlength="{{ messageLimit }}" [(ngModel)]="text" (change)="textChanged()" (focus)="onTextAreaFocus()"
               (keyup)="onKeyPress($event)" (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)"
               (keydown.enter)="onEnterKey($event)" [ngClass]="{
-                'error-border': text.length == messageLimit,
+                'error-border': messageElement?.nativeElement?.value?.length >= messageLimit,
                 'resize-left': enableEmoji === false,
                 'resize-right': enableFileTransfer === false
               }"></textarea>
             <div id="file-btn" *ngIf="
-                enableFileTransfer && text.length < 1 && imageUrls?.length == 0
+                enableFileTransfer && messageElement?.nativeElement?.value?.length < 1 && imageUrls?.length == 0
               ">
               <label for="file-upload">
                 <span class="material-symbols-outlined file-btn" matTooltip="{{ 'button.file-transfer' | translate }}"
