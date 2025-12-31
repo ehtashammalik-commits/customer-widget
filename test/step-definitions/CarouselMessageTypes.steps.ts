@@ -75,6 +75,7 @@ defineFeature(feature, (test) => {
             undefined,
             undefined,
             undefined,
+            undefined
           );
 
           component.customerData = {

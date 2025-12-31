@@ -69,6 +69,7 @@ defineFeature(feature, (test) => {
             mockTranslateService,
             undefined,
             undefined,
+            undefined,
             undefined
           );
 

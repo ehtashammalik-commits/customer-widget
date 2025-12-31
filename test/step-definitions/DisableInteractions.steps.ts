@@ -67,6 +67,7 @@ defineFeature(feature, (test) => {
       mockTranslateService, // TranslateService
       mockRouter, // Router
       mockDocument, // Document,
+      undefined,
       undefined
     );
 

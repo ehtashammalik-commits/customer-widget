@@ -1034,9 +1034,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (form.invalid) {
         form.markAllAsTouched(); // Mark all fields touched so errors show
         this.snackBar.open('Please fill all the required fields', 'X', {
-        duration: 2000, // 5 seconds
+        duration: 3000, // 5 seconds
         panelClass: ['error-snackbar'],
-        horizontalPosition: 'right',
+        horizontalPosition: 'center',
         verticalPosition: 'bottom',
       });
         return; // Stop submission
@@ -3312,8 +3312,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleFormMessageType(cimMessage: any) {
+    
     const originalMessageId = cimMessage.header.originalMessageId;
-
     const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
     if (originalMessage) {
 
@@ -5042,10 +5042,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TENEO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   async handleRefreshCasesofFormMessageType(cimMessage: any) {
-    if (cimMessage.header.originalMessageId) {
+     const status = cimMessage.body.additionalDetails?.status?.toLowerCase();
+    if (cimMessage.header.originalMessageId && status!=="unfilled") {
       const formGroup = await this.buildFormMessage(cimMessage);
-
-      const status = cimMessage.body.additionalDetails?.status?.toLowerCase();
+     
       if (status === 'filled') {
         await this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
       }
