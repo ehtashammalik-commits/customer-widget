@@ -778,12 +778,12 @@
                                   }}</span>
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                               </label>
-                              <ngx-select-dropdown 
+                              <ngx-select-dropdown
                                 class="prechat-dropdown"
                                 [formControlName]="attribute.key"
-                                [required]="attribute?.isRequired" 
+                                [required]="attribute?.isRequired"
                                 [config]="dropdownConfig"
-                                [options]="attribute.attributeOptions.attributeData[0].values | simplifyOptions" 
+                                [options]="attribute.attributeOptions.attributeData[0].values | simplifyOptions"
                                 [multiple]="false"
                                 bindLabel="label"
                                 bindValue="label">
@@ -1164,7 +1164,7 @@
 <!--            </span>-->
 <!--          </div>-->
         </div>
-        
+
         <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
 
@@ -1274,7 +1274,7 @@
               btnTwo: enableFontResize === true && enabledCallback === false,
               btnThree: enableFontResize === false && enabledCallback === true,
               btnFour: enableFontResize === true && enabledCallback === true
-            }" 
+            }"
             [matTooltip]="isMuted ? ('button.unmute' | translate) : ('button.mute' | translate)"
             [matTooltipPosition]="matToolTipPosition!">
             {{ isMuted ? 'volume_off' : 'volume_up' }}
@@ -1541,9 +1541,9 @@
                         (click)="openImageOverlay(srcURL, message.body.caption)"
                         [attr.aria-label]="'View image: ' + message.body.caption"
                         style="cursor: pointer; border: none; background: none; padding: 0;">
-                        <img class="message-image" 
-                             *ngIf="srcURL" 
-                             [src]="srcURL" 
+                        <img class="message-image"
+                             *ngIf="srcURL"
+                             [src]="srcURL"
                              alt="{{ message.body.caption }}" />
                       </button>
                       <a *ngIf="message.body.type == 'VIDEO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
@@ -1939,7 +1939,6 @@
 
 
 
-
 <!--                    carousel message-->
 
                     <div *ngIf="message.body.type === 'Carousel'" class="carousel-container-main">
@@ -2022,6 +2021,8 @@
                         {{ surveyTitle }}
                       </a>
                     </div>
+
+
                     <!--              Securelink -->
 
                     <!-- <div class="s-link quoted-message-url" (click)="isSecureLinkExpired = true">
@@ -2153,9 +2154,9 @@
                         (click)="openImageOverlay(srcURL, message.body.caption)"
                         [attr.aria-label]="'View image: ' + message.body.caption"
                         style="cursor: pointer; border: none; background: none; padding: 0;">
-                        <img class="message-image" 
-                             *ngIf="srcURL" 
-                             [src]="srcURL" 
+                        <img class="message-image"
+                             *ngIf="srcURL"
+                             [src]="srcURL"
                              alt="{{ message.body.caption }}" />
                       </button>
                       <a *ngIf="message.body.type == 'VIDEO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
@@ -2276,19 +2277,20 @@
             <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()">close</mat-icon>
           </div>
           <!-- Widget Message Composer -->
-          
-          <div class="widget-composer main-composer-area">
+
+          <div class="widget-composer main-composer-area" [ngClass]="{
+                'error-border': messageElement?.nativeElement?.value?.length >= messageLimit}">
+
             <div class="maxLimitError" *ngIf="messageElement?.nativeElement?.value?.length >= messageLimit">
             <span>Max Limit Reached</span>
             </div>
-            <textarea class="widget-chat-composer" [class.composer-disabled]="isComposerDisable" #messageComposer 
+            <textarea class="widget-chat-composer" #messageComposer
               [attr.data-emoji-picker]="enableEmoji" matInput
               id="messageTextarea" cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
               cdkAutosizeMaxRows="4" placeholder="{{ 'composer-placeholder' | translate }}" #message
               maxlength="{{ messageLimit }}" [(ngModel)]="text" (change)="textChanged()" (focus)="onTextAreaFocus()"
               (keyup)="onKeyPress($event)" (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)"
               (keydown.enter)="onEnterKey($event)" [ngClass]="{
-                'error-border': messageElement?.nativeElement?.value?.length >= messageLimit,
                 'resize-left': enableEmoji === false,
                 'resize-right': enableFileTransfer === false
               }"></textarea>
@@ -2752,7 +2754,7 @@
 
           <div class="widget-chat-header-top">
             <h5 id="title" [innerHTML]="title"></h5>
-            
+
             <div class="widget-header-icon">
   <!--            <span class="material-symbols-outlined minimize" matTooltip="{{'button.minimize' | translate}}"-->
   <!--              [matTooltipPosition]="matToolTipPosition!">-->

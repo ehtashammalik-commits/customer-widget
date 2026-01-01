@@ -133,7 +133,7 @@ $emoji-margin: 6px;
             .agent-message {
                 background-color: var(--dark-bg-secondary);
                 border: none;
-                
+
                 .message {
                   color: var(--dark-text);
                 }
@@ -167,7 +167,7 @@ $emoji-margin: 6px;
         textarea {
           background: var(--dark-bg-secondary);
           color: var(--dark-text);
-          
+
           &::placeholder {
             color: var(--dark-placeholder);
           }
@@ -391,7 +391,7 @@ button.close-widget-wrapper {
       bottom: 0;
       border-radius: 8px;
       border-bottom-right-radius: 0;
-      
+
       button {
         display: none;
       }
@@ -751,6 +751,7 @@ button.close-widget-wrapper {
   font-size: 13px !important;
   background: transparent;
   border: 1px solid #E3E3E3;
+  box-sizing: border-box;
 }
 
 .preChat-widget-form-group .widget-form-control {
@@ -766,6 +767,7 @@ button.close-widget-wrapper {
   background: transparent;
   border: 1px solid #E3E3E3;
   margin-bottom: 10px;
+  box-sizing: border-box;
 }
 
 .radio-btn {
@@ -1255,6 +1257,7 @@ button.close-widget-wrapper {
   width: auto;
   height: auto;
   display: grid;
+  margin: 0 10px;
 }
 
 .widget-chat-message-customer {
@@ -1301,6 +1304,7 @@ button.close-widget-wrapper {
       color: #000000;
       width: auto;
       //line-break: anywhere;
+      word-break: break-word;
     }
 
     .message-option {
@@ -1368,7 +1372,6 @@ button.close-widget-wrapper {
   width: auto;
   height: auto;
   margin-top: 25px;
-  margin-left: 5px;
   &.button{ //message-type button
     .agent-message{
       width: 100%;
@@ -1428,6 +1431,7 @@ button.close-widget-wrapper {
       color: #000000;
       width: auto;
       //line-break: anywhere;
+      word-break: break-word;
     }
 
     .message-option {
@@ -1509,8 +1513,13 @@ button.close-widget-wrapper {
   &.main-composer-area {
     position: fixed;
     width: calc(100% - 20px);
-  }
-  
+    left: 10px;
+    padding-left: 35px;
+    padding-right: 35px;
+    background: #eff2f7;
+    border-radius: 10px;
+    }
+
   .emoji-btn {
     position: absolute;
     bottom: 10px;
@@ -1522,17 +1531,17 @@ button.close-widget-wrapper {
 
   .widget-chat-composer {
     display: block;
-    border-radius: 10px;
     border: none;
     height: 40px;
-    padding: 0 38px;
+    padding: 8px 0;
     outline: none;
     width: 100%;
     font-size: 13px !important;
     background: #eff2f7;
     color: #3e3e3e;
     margin: 0;
-    align-content: center;
+    align-content: flex-start;
+    box-sizing: border-box;
   }
 
   .send-btn {
@@ -1542,10 +1551,6 @@ button.close-widget-wrapper {
     cursor: pointer;
     font-size: 20px;
   }
-}
-
-.widget-chat-composer.composer-disabled {
-  padding: 0px 38px 17px 38px !important;
 }
 
 
@@ -1969,9 +1974,18 @@ mat-spinner {
     }
   }
 
-  .form-group * {
+  .form-group *, .message-type-form {
     text-align: right;
+    direction: rtl;
   }
+  .form-group{
+    mat-form-field{
+      direction: initial !important;
+      }
+    label{
+      direction: rtl;
+      }
+    }
 
   .enter-chat {
     text-align: center !important;
@@ -2019,6 +2033,7 @@ mat-spinner {
   .widget-chat-header, .widget-form-header {
     flex-direction: row-reverse;
     text-align: right;
+    direction: rtl;
 
     h5{
       text-align: right;
@@ -2057,8 +2072,7 @@ mat-spinner {
     }
 
   .widget-header-icon{
-    display: flex;
-    flex-direction: row-reverse;
+    direction: rtl;
 
     .topbar-icon{
       position: relative;
@@ -2067,7 +2081,6 @@ mat-spinner {
       color: rgb(255, 255, 255) !important;
       }
     }
-
 }
 
 // Call Stylings
@@ -2406,9 +2419,12 @@ mat-spinner {
 
 .maxLimitError {
   position: absolute;
-  top: -17px;
+  top: -21px;
   font-size: 10px;
   color: red;
+  width: 100%;
+  background: #ffffff;
+  text-align: center;
 }
 
 // Loader Circle
@@ -3448,7 +3464,9 @@ mat-spinner {
     display: flex;
     flex-direction: column;
     gap: 7px;
-
+    .ngx-dropdown-container .ngx-dropdown-button{
+      min-height: 40px;
+      }
   }
 }
 
@@ -3767,8 +3785,8 @@ input[type='radio'] {
     line-height: 31px;
     &:focus {
       outline: none;
-    } 
-    
+    }
+
   }
 
   .carousel-actions a {
@@ -4040,3 +4058,8 @@ input[type='radio'] {
   color: #fff !important;
   opacity: 1;
 }
+.fields-validation-error{
+  position: absolute;
+  width: 96%;
+  top: -4px;
+  }
