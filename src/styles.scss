@@ -106,7 +106,7 @@ body {
     }
   .mat-radio-label-content{
     font-size: 14px;
-    padding-left: 5px;
+    padding-inline-start: 5px;
     }
   }
 .custom-dropdown-field{
@@ -170,3 +170,48 @@ body {
     overflow: hidden !important;
     white-space: nowrap !important;
 }
+
+.right-direction{
+  .emoji-btn, div#EmojiLink {
+    left: inherit !important;
+    right: 10px !important;
+    }
+
+  .message-inner-form .form-group.custom-datentime mat-icon{
+    left: 5px;
+    right: inherit !important;
+    }
+
+  .ngx-dropdown-container .ngx-dropdown-button{
+    text-align: right !important;
+
+    .nsdicon-angle-down {
+      right: inherit !important;
+      left: 5px;
+      float: none !important;
+      }
+    }
+  .ngx-dropdown-list-container{
+    .search-container{
+      input{
+        text-align: right !important;
+        direction: rtl !important;
+        }
+      label{
+        left: inherit !important;
+        right: 0 !important;
+        }
+      }
+    }
+  }
+
+.main-attributes {
+  .ngx-dropdown-container .ngx-dropdown-button{
+    min-height: 40px !important;
+    }
+  .available-item{
+    &:hover {
+      background: #f1f1f1;
+      }
+    }
+  }
