@@ -1037,63 +1037,51 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     let finalPayload = this.createFormDataObject();
     finalPayload.body.sections = this.creatingSectionsforSchema();
 
-    this.calculateAttributeScore(finalPayload);
-    this.calculateSectionScores(finalPayload);
-    this.calculateFormScore(finalPayload);
+    if (finalPayload.body.enableWeightage) {
+      this.calculateAttributeScore(finalPayload);
+      this.calculateSectionScores(finalPayload);
+      this.calculateFormScore(finalPayload);
+    }
     this.sdk.postFormDataAsActivity(finalPayload);
   }
-
+  
   calculateAttributeScore(formData: any) {
-    formData.body.sections.forEach((section: any) => {
-      section.attributes.forEach((attribute: any) => {
-        let selectedOption = attribute?.answer.find(
-          (option: any) => option?.isSelected === true,
-        );
+    formData.body.sections.forEach((section) => {
+      section.attributes.forEach(attribute => {
+        let selectedOption = attribute?.answer.find(option => option?.isSelected === true);
         if (selectedOption) {
-          let selectedOptionWeightage =
-            selectedOption?.additionalAttributes?.optionWeightage;
-          attribute.attributeScore = parseFloat(
-            (
-              (selectedOptionWeightage / 100) *
-              attribute?.attributeWeightage
-            ).toFixed(1),
-          );
-        } else {
-          attribute.attributeScore = 0;
+          let selectedOptionWeightage = selectedOption?.additionalAttributes?.optionWeightage;
+          attribute.attributeScore = parseFloat(((selectedOptionWeightage / 100) * attribute?.attributeWeightage).toFixed(1));
         }
-      });
+      })
     });
   }
 
   calculateSectionScores(formData: any) {
-    formData.body.sections.forEach((section: any) => {
-      let totalAttributeWeightage = 0;
-      section.attributes.forEach((attribute: any) => {
-        totalAttributeWeightage += attribute.attributeScore;
-      });
-      section.sectionScore = parseFloat(
-        ((totalAttributeWeightage / 100) * section.sectionWeightage).toFixed(1),
-      );
-    });
+    formData.body.sections.forEach(section => {
+      let totalAttributeWeightage = null;
+      section.attributes.forEach((attribute) => {
+        if (formData.body.enableWeightage && attribute.attributeScore != null) {
+          totalAttributeWeightage += attribute.attributeScore;
+        }
+      })
+      section.sectionScore = totalAttributeWeightage == null ? totalAttributeWeightage : parseFloat(((totalAttributeWeightage / 100) * section.sectionWeightage).toFixed(1));
+    })
   }
 
-  calculateFormScore(formData: any): any {
+  calculateFormScore(formData): any {
     if (!formData) return;
 
-    let totalSectionWeightages = 0;
-    formData.body.sections.forEach((section: any) => {
-      console.log(section);
-      totalSectionWeightages += section.sectionScore;
-    });
+    let totalSectionWeightages = null;
+    formData.body.sections.forEach((section) => {
+      if (formData.body.enableWeightage && section.sectionScore != null) {
+        totalSectionWeightages += section.sectionScore;
+      }
+    })
 
-    formData.body.formScore =
-      parseFloat(
-        (
-          (totalSectionWeightages / 100) *
-          formData?.body?.formWeightage
-        ).toFixed(1),
-      ) || null;
+    formData.body.formScore = !formData?.body?.enableWeightage ? null : totalSectionWeightages == null ? null : Math.round(((totalSectionWeightages / 100) * formData?.body?.formWeightage))
   }
+
   createFormDataObject() {
     return {
       header: {
@@ -1129,7 +1117,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         formTitle: this.preChatFormInfo?.formTitle,
         type: 'FORM_DATA',
         formWeightage: this.preChatFormInfo?.formWeightage,
-        formScore: '',
+        enableSections: this.preChatFormInfo?.sections?.length > 1,
+        enableWeightage: this.preChatFormInfo?.enableWeightage,
+        formScore: null,
         additionalDetail: {
           actor: {
             type: 'Customer',
@@ -1159,21 +1149,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         sectionName: section.sectionName,
         sectionWeightage: section.sectionWeightage || null,
         sectionScore: null,
-        attributes: [],
+        attributes: []
       };
 
-      const sectionIndexNumber = `section_${sectionIndex}`;
       const sectionAttributes = formValues['sections'];
-      const currentSectionAttributes = sectionAttributes[sectionIndex];
+      const currentSectionAttributes = sectionAttributes[sectionIndex]
 
       if (currentSectionAttributes) {
         section.attributes.forEach((attribute: any) => {
 
-
           const attributeData = attribute.attributeOptions?.attributeData || [];
-          const possibleValues =
-            attributeData.length > 0 ? attributeData[0].values : [];
-          const selectedValue = currentSectionAttributes[attribute.key] || null;
+          const possibleValues = attributeData.length > 0 ? attributeData[0].values : [];
+          const selectedValue = currentSectionAttributes[attribute.key];
 
           let newAttribute = {
             id: attribute._id,
@@ -1181,12 +1168,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             valueType: attribute.valueType,
             attributeWeightage: attribute.attributeWeightage || null,
             attributeScore: null,
-            attributeType: attribute.attributeType || 'OPTIONS',
-            skipType: attribute.skipType || null,
+            attributeType: attribute.attributeType || "OPTIONS",
+            skipType: null,
             attributeAttachment: attribute.attributeAttachment || "",
             isRequired: attribute.isRequired,
             answer: this.getAnswerObj(attribute, possibleValues, selectedValue, currentSectionAttributes)
           };
+          newAttribute.skipType = this.isSkiptype(newAttribute) ? 'Optional' : null
           newSection.attributes.push(newAttribute);
         });
       }
@@ -1196,7 +1184,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
  getAnswerObj(attribute: any, possibleValues: any[], selectedValue: any, currentSectionAttributes: any) {
-
     if (attribute.attributeType == 'INPUT' || attribute.attributeType == 'TEXTAREA') {
       return [selectedValue]
     }
@@ -1239,22 +1226,38 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           }
         }));
       }
-    }
-    else {
-      selectedValue = selectedValue ? (selectedValue.value ?? selectedValue) : null;
+    } else {
+      selectedValue =
+        selectedValue !== null && selectedValue !== undefined
+          ? (selectedValue.value ?? selectedValue)
+          : null;
 
       return possibleValues.map(option => ({
         label: option.label,
-        value: option.value || option.label,
-        isSelected: option.label === selectedValue || option.value === selectedValue,
+        value: this.getValue(option, attribute.valueType),
+        isSelected: this.getSelectedValue(option, selectedValue, attribute.valueType),
         additionalAttributes: {
-          optionWeightage: option.optionWeightage || null,
+          optionWeightage: option.optionWeightage,
           enableStyle: attribute.attributeOptions?.enableStyle || false,
           optionStyle: option.optionStyle || null,
 
         }
       }))
     }
+  }
+
+  getValue(option: any, valueType: string) {
+    if(valueType === "boolean"){
+      return option.label
+    }
+    return option.value ?? option.label;
+  }
+
+  getSelectedValue(option: any, selectedValue: any, valueType: string) {
+    if(valueType === "nps"){
+      return option.value === selectedValue
+    }
+    return option.label === selectedValue || option.value === selectedValue
   }
 
   getFormDataByPreChatForm(preChatFormData: any[]): any {
@@ -4328,6 +4331,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   replaceSpacesWithUnderscores(input: string): string {
     return input.replace(/\s+/g, '_');
+  }
+
+  isSkiptype(attr: any) {
+  if (attr?.attributeType?.toLowerCase() == 'input' || attr?.attributeType?.toLowerCase() == 'textarea') {
+    return attr.answer[0] ? false : true
+  }
+  else {
+    return attr.answer.every(answer => {
+      if (answer.options) {
+        return answer.options.every((opt) => !opt.isSelected);
+      } else {
+
+        return !answer.isSelected;
+      }
+    });
+   }
   }
 
 }
