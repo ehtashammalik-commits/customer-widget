@@ -142,7 +142,7 @@
               emojiTrigger.style.position = "absolute";
               emojiTrigger.style.bottom = "10px";
               emojiTrigger.style.fontSize = "20px";
-              emojiTrigger.style.left = "15px";
+              emojiTrigger.style.left = "10px";
               emojiTrigger.style.zIndex = "99";
 
 
