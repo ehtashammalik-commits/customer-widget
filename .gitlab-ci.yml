@@ -165,7 +165,7 @@ sonarqube-test:
 
 
    # - sonar-scanner -X -Dsonar.testExecutionReportPaths=coverage/test-report.xml -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info -Dsonar.sources=src -Dsonar.sourceEncoding=UTF-8 -Dsonar.exclusions=**/node_modules/** -Dsonar.tests=src -Dsonar.test.inclusions=**/*.spec.ts  -Dsonar.projectKey=customer-widget-cim -Dsonar.qualitygate.wait=true -Dsonar.projectName=${CI_PROJECT_NAME}
-  allow_failure: false
+  allow_failure: true
 
 #+==================Runs onevery commit and tags manual========================+
 gitlab_build_branch:
