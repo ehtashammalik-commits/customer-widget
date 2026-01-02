@@ -1154,7 +1154,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const formValues = this.preChatFormGroup.value;
 
     this.formData.forEach((section: any, sectionIndex: number) => {
-      let newSection: any = {
+      let newSection = {
         sectionId: section._id,
         sectionName: section.sectionName,
         sectionWeightage: section.sectionWeightage || null,
@@ -1162,17 +1162,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         attributes: [],
       };
 
+      const sectionIndexNumber = `section_${sectionIndex}`;
       const sectionAttributes = formValues['sections'];
       const currentSectionAttributes = sectionAttributes[sectionIndex];
 
       if (currentSectionAttributes) {
         section.attributes.forEach((attribute: any) => {
+
+
           const attributeData = attribute.attributeOptions?.attributeData || [];
           const possibleValues =
             attributeData.length > 0 ? attributeData[0].values : [];
           const selectedValue = currentSectionAttributes[attribute.key] || null;
 
-          let newAttribute: any = {
+          let newAttribute = {
             id: attribute._id,
             label: attribute.label,
             valueType: attribute.valueType,
@@ -1180,8 +1183,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             attributeScore: null,
             attributeType: attribute.attributeType || 'OPTIONS',
             skipType: attribute.skipType || null,
-            attributeAttachment: attribute.attributeAttachment || '',
-            answer: this.getAnswerObj(attribute, possibleValues, selectedValue),
+            attributeAttachment: attribute.attributeAttachment || "",
+            isRequired: attribute.isRequired,
+            answer: this.getAnswerObj(attribute, possibleValues, selectedValue, currentSectionAttributes)
           };
           newSection.attributes.push(newAttribute);
         });
@@ -1190,28 +1194,66 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     });
     return finalSections;
   }
-  getAnswerObj(attribute: any, possibleValues: any, selectedValue: any) {
-    if (
-      attribute.attributeType == 'INPUT' ||
-      attribute.attributeType == 'TEXTAREA'
-    ) {
-      return [selectedValue];
-    } else {
-      selectedValue = selectedValue
-        ? (selectedValue.value ?? selectedValue)
-        : null;
 
-      return possibleValues.map((option: any) => ({
+ getAnswerObj(attribute: any, possibleValues: any[], selectedValue: any, currentSectionAttributes: any) {
+
+    if (attribute.attributeType == 'INPUT' || attribute.attributeType == 'TEXTAREA') {
+      return [selectedValue]
+    }
+    else if (attribute.valueType === 'checkbox') {
+      const rawValue = currentSectionAttributes?.[attribute.key];
+
+      const enableCategory = attribute.attributeOptions?.enableCategory || false;
+      const attributeData = attribute.attributeOptions?.attributeData || [];
+
+      if (enableCategory) {
+        return attributeData.map(category => {
+          const categoryLabel = category.label;
+          const selectedValues = rawValue?.[categoryLabel] || [];
+
+          return {
+            category: categoryLabel,
+            options: category.values.map((option: any) => ({
+              label: option.label,
+              value: option.value || option.label,
+              isSelected: selectedValues.includes(option.label),
+              additionalAttributes: {
+                optionWeightage: option.optionWeightage || null,
+                enableStyle: attribute.attributeOptions?.enableStyle || false,
+                optionStyle: option.optionStyle || null
+              }
+            }))
+          };
+        });
+      } else {
+        const selectedValues = Array.isArray(rawValue) ? rawValue : [];
+
+        return possibleValues.map(option => ({
+          label: option.label,
+          value: option.value || option.label,
+          isSelected: selectedValues.includes(option.label),
+          additionalAttributes: {
+            optionWeightage: option.optionWeightage || null,
+            enableStyle: attribute.attributeOptions?.enableStyle || false,
+            optionStyle: option.optionStyle || null
+          }
+        }));
+      }
+    }
+    else {
+      selectedValue = selectedValue ? (selectedValue.value ?? selectedValue) : null;
+
+      return possibleValues.map(option => ({
         label: option.label,
-        value: option.value || option.label, // Use `value` if available, fallback to `label`
-        isSelected:
-          option.label === selectedValue || option.value === selectedValue,
+        value: option.value || option.label,
+        isSelected: option.label === selectedValue || option.value === selectedValue,
         additionalAttributes: {
           optionWeightage: option.optionWeightage || null,
           enableStyle: attribute.attributeOptions?.enableStyle || false,
           optionStyle: option.optionStyle || null,
-        },
-      }));
+
+        }
+      }))
     }
   }
 
@@ -3815,6 +3857,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
   }
 
+
   onCheckboxChange(
     event: Event,
     controlName: string,
@@ -3838,34 +3881,46 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     control.markAsTouched();
 
-    //  Get existing value and parse
-    let selectedValues = this.parseCheckboxValue(control.value);
+    let selectedValues: any;
 
-    if (isChecked) {
-      // Add value
-      if (!selectedValues[categoryLabel]) {
-        selectedValues[categoryLabel] = [];
-      }
-      if (!selectedValues[categoryLabel].includes(optionValue)) {
-        selectedValues[categoryLabel].push(optionValue);
-      }
-    } else {
-      // Remove value
-      const updated =
-        selectedValues[categoryLabel]?.filter((v) => v !== optionValue) || [];
-      if (updated.length > 0) {
-        selectedValues[categoryLabel] = updated;
+    if (hasCategory) {
+      selectedValues = typeof control.value === 'object' && !Array.isArray(control.value)
+        ? { ...control.value }
+        : {};
+
+      if (isChecked) {
+        if (!Array.isArray(selectedValues[categoryLabel])) {
+          selectedValues[categoryLabel] = [];
+        }
+        if (!selectedValues[categoryLabel].includes(optionValue)) {
+          selectedValues[categoryLabel].push(optionValue);
+        }
       } else {
-        delete selectedValues[categoryLabel];
+        selectedValues[categoryLabel] = (selectedValues[categoryLabel] || []).filter(
+          (v: string) => v !== optionValue
+        );
+        if (selectedValues[categoryLabel].length === 0) {
+          delete selectedValues[categoryLabel];
+        }
       }
+
+      const isEmpty = Object.keys(selectedValues).length === 0;
+      control.setValue(isEmpty ? '' : selectedValues, { emitEvent: true });
+
+    } else {
+      selectedValues = Array.isArray(control.value) ? [...control.value] : [];
+
+      if (isChecked) {
+        if (!selectedValues.includes(optionValue)) {
+          selectedValues.push(optionValue);
+        }
+      } else {
+        selectedValues = selectedValues.filter((v: string) => v !== optionValue);
+      }
+
+      control.setValue(selectedValues.length === 0 ? '' : selectedValues, { emitEvent: true });
     }
 
-    //  Update form control with stringified object
-    const newValue =
-      Object.keys(selectedValues).length > 0
-        ? JSON.stringify(selectedValues)
-        : '';
-    control.setValue(newValue, { emitEvent: true });
   }
   parseCheckboxValue(val: string): { [key: string]: string[] } {
     try {
@@ -3875,41 +3930,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  isChecked(
-    controlName: string,
-    sectionIndex: number,
-    optionValue: string,
-    categoryLabel: string,
-  ): boolean {
-    const controlPath = `sections.${sectionIndex}.${controlName}`;
-    const control = this.preChatFormGroup.get(controlPath);
 
-    if (!control?.value) return false;
-
-    const parts: string[] = control.value
-      .split(',')
-      .map((p: any) => p.trim())
-      .filter((p: any) => p);
-
-    let currentCategory: string | null = null;
-
-    for (const part of parts) {
-      if (part.startsWith('Category')) {
-        currentCategory = part;
-      } else if (currentCategory === categoryLabel && part === optionValue) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  booleanEmojiSet(
-    sectionIndex: number,
-    attributeIndex: number,
-    itemIndex: number,
-  ) {
-    console.log('boooean emoji set', itemIndex);
+  booleanEmojiSet(sectionIndex: number, attributeIndex: number, itemIndex: number) {
+    console.log("boooean emoji set", itemIndex);
     // Select all SVG elements within the booleanOption container
     const svgElements = document.querySelectorAll(
       `#booleanOption-${sectionIndex}-${attributeIndex} svg`,
@@ -3923,8 +3946,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (!svg.dataset.originalColors) {
         // Store original colors in data attribute if not already stored
         const originalColors = [];
-        for (const path of paths) {
-          originalColors.push(path.getAttribute('fill'));
+        for (let i = 0; i < paths.length; i++) {
+          originalColors.push(paths[i].getAttribute('fill'));
         }
         svg.dataset.originalColors = JSON.stringify(originalColors);
       }
@@ -3938,8 +3961,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       } else {
         // Change to gray for SVGs that are not clicked
         const fillColor = 'gray';
-        for (const path of paths) {
-          path.setAttribute('fill', fillColor);
+        for (let i = 0; i < paths.length; i++) {
+          paths[i].setAttribute('fill', fillColor);
         }
       }
     });
@@ -4302,4 +4325,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       console.error('Error onhandleRefreshCaseForWebRTC:', error);
     }
   }
+
+  replaceSpacesWithUnderscores(input: string): string {
+    return input.replace(/\s+/g, '_');
+  }
+
 }

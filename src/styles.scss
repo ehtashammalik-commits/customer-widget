@@ -37,6 +37,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px !important;
+  width: 100%;
 }
 
 .mat-select {
@@ -50,6 +51,45 @@ body {
     position: relative;
     right: -1px;
     min-width: 319px !important;
+}
+
+.mcqAttribute {
+  .radioGroup {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px; // spacing between radio buttons
+  }
+
+  .radioWrapper {
+    width: 100%;
+
+    mat-radio-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+
+      // Make sure the internal label content is laid out properly
+      .mat-radio-label {
+        width: 100%;
+        display: flex;
+        align-items: center;
+      }
+
+      .mat-radio-label-content {
+        flex-grow: 1;
+        overflow: hidden;
+      }
+
+      .text-wrap-fw {
+        display: inline-block;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
 }
 
 @media print {

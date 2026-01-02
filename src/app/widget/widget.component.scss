@@ -2851,6 +2851,19 @@ mat-spinner {
   justify-content: start;
 }
 
+.text-wrap-fw {
+
+  width: 100% !important;
+   white-space: nowrap !important;
+    display: flex;
+  align-items: center;
+  justify-content: start;
+  .mat-radio-label-content{
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 .tooltip-sm {
   width: 100px !important;
 }
@@ -3243,7 +3256,6 @@ input[type='radio'] {
 
 
 :host ::ng-deep .mat-radio-container {
-  height: 14px;
   width: 14px;
 }
 

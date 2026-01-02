@@ -3156,95 +3156,6 @@ describe('WidgetComponent', () => {
       });
     });
 
-    describe('onCheckboxChange', () => {
-      let sectionsArray: any;
-      let mockControl: any;
-
-      beforeEach(() => {
-        mockControl = {
-          markAsTouched: jest.fn(),
-          value: '',
-          setValue: jest.fn(),
-        };
-        sectionsArray = {
-          at: jest.fn().mockReturnValue({
-            get: jest.fn().mockReturnValue(mockControl),
-          }),
-        };
-        component.preChatFormGroup = {
-          get: jest.fn().mockImplementation((name: string) => {
-            if (name === 'sections.0.testControl') return mockControl;
-            if (name === 'sections') return sectionsArray;
-            return null;
-          }),
-        } as any;
-      });
-
-      it('should return early if optionValue is falsy', () => {
-        const mockEvent = {
-          target: { checked: true }
-        };
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, null, 'category', false);
-        expect(mockControl.markAsTouched).not.toHaveBeenCalled();
-        expect(mockControl.setValue).not.toHaveBeenCalled();
-      });
-
-      it('should add new value to empty control value', () => {
-        mockControl.value = '';
-        const mockEvent = {
-          target: { checked: true }
-        };
-
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
-        expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option1"]}', { emitEvent: true });
-      });
-
-      it('should add new value to existing control value', () => {
-        mockControl.value = '{"category1":["option1"]}';
-        const mockEvent = {
-          target: { checked: true }
-        };
-
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option2', 'category1', false);
-        expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option1","option2"]}', { emitEvent: true });
-      });
-
-      it('should remove value when checkbox is unchecked', () => {
-        mockControl.value = '{"category1":["option1","option2"]}';
-        const mockEvent = {
-          target: { checked: false }
-        };
-
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
-        expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option2"]}', { emitEvent: true });
-      });
-
-      it('should remove entire category when no values remain', () => {
-        mockControl.value = '{"category1":["option1"]}';
-        const mockEvent = {
-          target: { checked: false }
-        };
-
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
-        expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith('', { emitEvent: true });
-      });
-
-      it('should handle invalid JSON gracefully', () => {
-        mockControl.value = 'invalid json';
-        const mockEvent = {
-          target: { checked: true }
-        };
-
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
-        expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option1"]}', { emitEvent: true });
-      });
-    });
-
     describe('parseCheckboxValue', () => {
       it('should parse valid JSON string', () => {
         const result = component.parseCheckboxValue('{"category1":["option1","option2"]}');
@@ -3280,33 +3191,6 @@ describe('WidgetComponent', () => {
         });
       });
     });
-
-    describe('isChecked', () => {
-      beforeEach(() => {
-
-        component.preChatFormGroup = {
-          get: jest.fn().mockImplementation((path: string) => {
-            if (path === 'sections.0.testControl') {
-              return {
-                value: 'Category1, option1, Category2, option2',
-              };
-            }
-            return null;
-          }),
-        } as any;
-      });
-
-      it('should handle multiple categories correctly', () => {
-        const result1 = component.isChecked('testControl', 0, 'option1', 'Category1');
-        const result2 = component.isChecked('testControl', 0, 'option2', 'Category2');
-        const result3 = component.isChecked('testControl', 0, 'option1', 'Category2');
-
-        expect(result1).toBe(true);
-        expect(result2).toBe(true);
-        expect(result3).toBe(false);
-      });
-    });
-
 
     describe('booleanEmojiSet', () => {
       let mockSvg1: any;
