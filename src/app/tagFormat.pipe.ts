@@ -18,7 +18,7 @@ export class tagFormatPipe implements PipeTransform {
       return ibsFormat(
         value,
         [['em', '`'], ['b', '*'], ['i', '_'], ['strike', '~'], ['mark', '!']],
-        { detectLinks: false, target: "_blank" },
+        { detectLinks: enableDynamicLink, target: "_blank" },
         { allowXssEscaping: false }
       );
     }
@@ -38,7 +38,7 @@ export class tagFormatPipe implements PipeTransform {
     processedValue = ibsFormat(
       processedValue,
       [['em', '`'], ['b', '*'], ['i', '_'], ['strike', '~'], ['mark', '!']],
-      { detectLinks: false, target: "_blank" },
+      { detectLinks: enableDynamicLink, target: "_blank" },
       { allowXssEscaping: false }
     );
 
@@ -52,9 +52,7 @@ export class tagFormatPipe implements PipeTransform {
         { allowXssEscaping: false }
       );
       
-      const linkHtml = enableDynamicLink 
-        ? `<a href="${url}" target="_blank">${formattedLinkText}</a>`
-        : `${formattedLinkText} (${url})`;
+      const linkHtml = `<a href="${url}" target="_blank">${formattedLinkText}</a>`;
       return text.replace(placeholder, linkHtml);
     }, processedValue);
   }
