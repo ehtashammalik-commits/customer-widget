@@ -2291,9 +2291,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (cimMessage.header.originalMessageId) {
         this.applyInteractionState(cimMessage);
       }
+    } else {
+      this.handleOtherMessages(cimMessage, type, senderType, intent);
     }
 
-    this.handleOtherMessages(cimMessage, type, senderType, intent);
 
     if (cimMessage?.id) {
       this.messageMap.set(cimMessage.id, cimMessage);
