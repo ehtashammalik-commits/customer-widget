@@ -8,8 +8,8 @@ import { ConfigService } from '../services/config.service';
 })
 export class SafeAttachmentUrlPipe implements PipeTransform {
   constructor(
-    private sanitizer: DomSanitizer,
-    private appConfigService: ConfigService,
+    private readonly sanitizer: DomSanitizer,
+    private readonly appConfigService: ConfigService,
   ) {}
 
   transform(mediaUrl: string): SafeUrl | null {

@@ -8,5 +8,8 @@ import { Component, OnInit } from '@angular/core';
 export class AppComponent implements OnInit {
   constructor() {}
 
-  ngOnInit(): void {}
+  // ngOnInit lifecycle hook intentionally left empty for now
+  ngOnInit(): void {
+    console.log('AppComponent initialized');
+  }
 }

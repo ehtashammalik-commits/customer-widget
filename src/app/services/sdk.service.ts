@@ -1,8 +1,10 @@
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { ConfigService } from '../services/config.service';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, BehaviorSubject } from 'rxjs';
 
-declare var widgetConfigs: any,
+declare let widgetConfigs: any,
+  remote_stream: any,
+  local_stream: any,
   getPreChatForm: any,
   formValidation: any,
   establishConnection: any,
@@ -32,41 +34,43 @@ type formAttributeMappings = {
 @Injectable({
   providedIn: 'root',
 })
-export class SdkService implements OnInit {
+export class SdkService {
   private sdkLoaded: boolean = false;
   ConfigData: any;
   widgetIdentifier: any;
   serviceIdentifier: any;
 
-  private widgetConfigsSubject: Subject<any> = new Subject<any>();
+  private readonly widgetConfigsSubject: Subject<any> = new Subject<any>();
   public widgetConfigs$: Observable<any> =
     this.widgetConfigsSubject.asObservable();
 
-  private preChatFormSubject: Subject<any> = new Subject<any>();
+  private readonly preChatFormSubject: Subject<any> = new Subject<any>();
   public renderPreChatForm$: Observable<any> =
     this.preChatFormSubject.asObservable();
 
-  private preChatFormValidationSubject: Subject<any> = new Subject<any>();
+  private readonly preChatFormValidationSubject: Subject<any> =
+    new Subject<any>();
   public validationsSubcription: Observable<any> =
     this.preChatFormValidationSubject.asObservable();
 
-  private callbackFormSubject: Subject<any> = new Subject<any>();
+  private readonly callbackFormSubject: Subject<any> = new Subject<any>();
   public renderCallbackForm$: Observable<any> =
     this.callbackFormSubject.asObservable();
 
-  private establishConnectionSubject: Subject<any> = new Subject<any>();
+  private readonly establishConnectionSubject: Subject<any> =
+    new Subject<any>();
   public connectionResponse$: Observable<any> =
     this.establishConnectionSubject.asObservable();
 
-  private onChatResumedSubject: Subject<any> = new Subject<any>();
+  private readonly onChatResumedSubject: Subject<any> = new Subject<any>();
   public onChatResumedResponse$: Observable<any> =
     this.onChatResumedSubject.asObservable();
 
-  private onWebRtcCallSubject: Subject<any> = new Subject<any>();
+  private readonly onWebRtcCallSubject: Subject<any> = new Subject<any>();
   public onWebRtcCallResponse$: Observable<any> =
     this.onWebRtcCallSubject.asObservable();
 
-  private onCallbackRequestSubject: Subject<any> = new Subject<any>();
+  private readonly onCallbackRequestSubject: Subject<any> = new Subject<any>();
   public onCallbackRequestResponse$: Observable<any> =
     this.onCallbackRequestSubject.asObservable();
 
@@ -78,12 +82,20 @@ export class SdkService implements OnInit {
   // public setupRemoteMediaResponse$: Observable<any> =
   // this.setupRemoteMediaRequest.asObservable();
 
-  constructor(private _ConfigService: ConfigService) {
+  // ---- Add your streams here to aceess during minimize or maximize widget ----
+  private readonly localStreamSubject = new BehaviorSubject<MediaStream | null>(
+    null,
+  );
+  public localStream$ = this.localStreamSubject.asObservable();
+
+  private readonly remoteStreamSubject =
+    new BehaviorSubject<MediaStream | null>(null);
+  public remoteStreamObs$ = this.remoteStreamSubject.asObservable();
+
+  constructor(private readonly _ConfigService: ConfigService) {
     this.ConfigData = this._ConfigService.appConfig;
     this.loadSdk();
   }
-
-  ngOnInit(): void {}
 
   receiveUrlParamsValue(widgetIdentifier: any, serviceIdentifier: any) {
     this.widgetIdentifier = widgetIdentifier;
@@ -118,12 +130,12 @@ export class SdkService implements OnInit {
     const url = this.ConfigData.CCM_URL;
     const serviceIdentifier = this.serviceIdentifier;
 
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       getCalendarId(url, serviceIdentifier, (response: any) => {
-        if (response && response.calendarId) {
+        if (response?.calendarId) {
           resolve(response.calendarId);
         } else {
-          reject('Failed to fetch calendar ID.');
+          reject(new Error('Failed to fetch calendar ID.'));
         }
       });
     });
@@ -152,7 +164,7 @@ export class SdkService implements OnInit {
           if (response) {
             resolve(response);
           } else {
-            reject('Failed to fetch calendar events.');
+            reject(new Error('Failed to fetch calendar events.'));
           }
         },
       );
@@ -311,14 +323,14 @@ export class SdkService implements OnInit {
   }
 
   getCurrentDate() {
-    var currentDate = new Date();
+    let currentDate = new Date();
     // Get the current year, month, and day
-    var year = currentDate.getFullYear();
-    var month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    var day = String(currentDate.getDate()).padStart(2, '0');
+    let year = currentDate.getFullYear();
+    let month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    let day = String(currentDate.getDate()).padStart(2, '0');
 
     // Combine the year, month, and day with hyphens using template literals
-    var formattedDate = `${year}-${month}-${day}`;
+    let formattedDate = `${year}-${month}-${day}`;
     return formattedDate;
   }
 
@@ -388,6 +400,12 @@ export class SdkService implements OnInit {
         authData: callPayload.authConfigs,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
+          if (typeof local_stream !== 'undefined' && local_stream) {
+            this.setLocalStream(local_stream);
+          }
+          if (typeof remote_stream !== 'undefined' && remote_stream) {
+            this.setRemoteStream(remote_stream);
+          }
         },
       },
     };
@@ -466,6 +484,9 @@ export class SdkService implements OnInit {
           dialogId: sessionDialogId,
           clientCallbackFunction: (res: any) => {
             this.onWebRtcCallSubject.next(res);
+            if (typeof local_stream !== 'undefined' && local_stream) {
+              this.setLocalStream(local_stream);
+            }
           },
           streamStatus: streamStatus, ////on , off
           streamType: streamType, //screenshare, video
@@ -482,6 +503,14 @@ export class SdkService implements OnInit {
     getFileURL(fileURL, (res: any) => {
       callback(res);
     });
+  }
+  // ---- Methods to set streams ----
+  setLocalStream(stream: MediaStream) {
+    this.localStreamSubject.next(stream);
+  }
+
+  setRemoteStream(stream: MediaStream) {
+    this.remoteStreamSubject.next(stream);
   }
 }
 
