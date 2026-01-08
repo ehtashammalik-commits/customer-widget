@@ -118,8 +118,13 @@ window.addEventListener('message', (event) => {
     parentSection.style.boxShadow = 'none';
   }
   if (event.data.state == 'wraper-view') {
-    parentSection.style.width = '200px';
-    parentSection.style.height = '210px';
+    parentSection.style.width = '320px';
+    parentSection.style.height = '300px';
+    parentSection.style.boxShadow = 'none';
+  }
+  if (event.data.state == 'compact-wraper-view') {
+    parentSection.style.width = '180px';
+    parentSection.style.height = '250px';
     parentSection.style.boxShadow = 'none';
   }
   if (event.data.state == 'form-view') {

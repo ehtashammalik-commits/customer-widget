@@ -1621,6 +1621,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         ) {
           this.additionalPanel = false;
           this.resizeWidget('icon-view');
+        } else if (this.isCalloutViewCompact) {
+          this.additionalPanel = true;
+          this.resizeWidget('compact-wraper-view');
         } else {
           this.additionalPanel = true;
           this.resizeWidget('wraper-view');
