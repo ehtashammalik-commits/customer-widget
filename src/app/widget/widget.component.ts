@@ -572,11 +572,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           }
         });
         this.widgetLoaded = true;
-        window.parent.postMessage({
+        this.__postMessageHandlerService.sendPostMessage({
           state: "EF_WIDGET_LOADED",
-          message: "Customer Widget Loaded Successfully",
-				}, "*");
-
+          message: "Customer Widget Loaded Successfully"
+        });
       },
     );
   }
@@ -2013,7 +2012,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   resizeWidget(state: string): void {
     // send height and width of widget-form-area to parent window
-      window.parent.postMessage({ state }, '*');
+      window.parent.postMessage({ state }, this.__postMessageHandlerService.getParentOrigin());
   }
 
   eventListener(event: any) {
