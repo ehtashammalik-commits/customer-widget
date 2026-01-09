@@ -362,7 +362,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isSecureLinkExpired: boolean = false;
   IsRegisteredInFreeSwitch: boolean = false;
   currentTypeIndex = 1;
-  private messageMap: Map<string, any> = new Map();
+  private readonly messageMap: Map<string, any> = new Map();
 
   // file properties
   fileExtensons: any[] = [

@@ -3708,10 +3708,9 @@ input[type='radio'] {
   }
 
 .carousel-actions {
-  margin-top: 10px;
+  margin: 10px -15px;
   display: flex;
   gap: 6px;
-  margin: 10px -15px;
   justify-content: center;
 
   &.clickableList{
