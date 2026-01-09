@@ -111,6 +111,10 @@ describe('WidgetComponent', () => {
       mockFormMessageTypeService as any,
       mockSpinnerService as any
     );
+    // Only patch getParentOrigin if __postMessageHandlerService exists
+    if ((component as any).__postMessageHandlerService) {
+      (component as any).__postMessageHandlerService.getParentOrigin = jest.fn(() => 'http://mock-origin.com');
+    }
   });
 
   afterEach(() => {
@@ -165,6 +169,7 @@ describe('WidgetComponent', () => {
       (component as any).route = { queryParams: mockQueryParams$ };
       (component as any).__postMessageHandlerService = {
         browserInfoData$: mockBrowserInfoData$,
+        getParentOrigin: jest.fn(() => 'http://mock-origin.com'),
       };
       jest
         .spyOn(component as any, 'setFontFromLocalStorage')
@@ -359,6 +364,7 @@ describe('WidgetComponent', () => {
 
       mockPostMessageHandlerService = {
         browserInfoData$: mockBrowserInfoData$,
+        getParentOrigin: jest.fn(() => 'http://mock-origin.com'),
       };
 
       (component as any).__postMessageHandlerService = mockPostMessageHandlerService;
