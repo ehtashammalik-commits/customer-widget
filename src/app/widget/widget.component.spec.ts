@@ -4517,5 +4517,166 @@ describe('WidgetComponent', () => {
     });
   });
 
+  describe('onCheckboxChange', () => {
+    let mockControl: any;
 
+    beforeEach(() => {
+      mockControl = {
+        value: '',
+        markAsTouched: jest.fn(),
+        setValue: jest.fn(),
+      };
+
+      component.preChatFormGroup = {
+        get: jest.fn().mockReturnValue(mockControl),
+      } as any;
+    });
+
+    // Test cases with category
+    describe('with category', () => {
+      const event = {
+        target: { checked: true },
+      } as unknown as Event;
+
+      it('should add a new category and value when checkbox is checked', () => {
+        mockControl.value = {};
+        component.onCheckboxChange(
+          event,
+          'controlName',
+          0,
+          'option1',
+          'category1',
+          true,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith(
+          { category1: ['option1'] },
+          { emitEvent: true },
+        );
+      });
+
+      it('should add a value to an existing category when checkbox is checked', () => {
+        mockControl.value = { category1: ['option1'] };
+        component.onCheckboxChange(
+          event,
+          'controlName',
+          0,
+          'option2',
+          'category1',
+          true,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith(
+          { category1: ['option1', 'option2'] },
+          { emitEvent: true },
+        );
+      });
+
+      it('should remove a value from a category when checkbox is unchecked', () => {
+        const uncheckEvent = {
+          target: { checked: false },
+        } as unknown as Event;
+        mockControl.value = { category1: ['option1', 'option2'] };
+        component.onCheckboxChange(
+          uncheckEvent,
+          'controlName',
+          0,
+          'option1',
+          'category1',
+          true,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith(
+          { category1: ['option2'] },
+          { emitEvent: true },
+        );
+      });
+
+      it('should remove the category when the last value is removed', () => {
+        const uncheckEvent = {
+          target: { checked: false },
+        } as unknown as Event;
+        mockControl.value = { category1: ['option1'] };
+        component.onCheckboxChange(
+          uncheckEvent,
+          'controlName',
+          0,
+          'option1',
+          'category1',
+          true,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith('', {
+          emitEvent: true,
+        });
+      });
+    });
+
+    // Test cases without category
+    describe('without category', () => {
+      const event = {
+        target: { checked: true },
+      } as unknown as Event;
+
+      it('should add a value to the array when checkbox is checked', () => {
+        mockControl.value = [];
+        component.onCheckboxChange(
+          event,
+          'controlName',
+          0,
+          'option1',
+          '',
+          false,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith(['option1'], {
+          emitEvent: true,
+        });
+      });
+
+      it('should remove a value from the array when checkbox is unchecked', () => {
+        const uncheckEvent = {
+          target: { checked: false },
+        } as unknown as Event;
+        mockControl.value = ['option1', 'option2'];
+        component.onCheckboxChange(
+          uncheckEvent,
+          'controlName',
+          0,
+          'option1',
+          '',
+          false,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith(['option2'], {
+          emitEvent: true,
+        });
+      });
+    });
+
+    // Edge cases
+    describe('edge cases', () => {
+      it('should do nothing if optionValue is null', () => {
+        const event = {
+          target: { checked: true },
+        } as unknown as Event;
+        component.onCheckboxChange(event, 'controlName', 0, null, '', false);
+        expect(component.preChatFormGroup.get).not.toHaveBeenCalled();
+      });
+
+      it('should warn if control is not found', () => {
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        (component.preChatFormGroup.get as jest.Mock).mockReturnValue(null);
+        const event = {
+          target: { checked: true },
+        } as unknown as Event;
+        component.onCheckboxChange(
+          event,
+          'controlName',
+          0,
+          'option1',
+          '',
+          false,
+        );
+        expect(warnSpy).toHaveBeenCalledWith(
+          "Control 'sections.0.controlName' not found.",
+        );
+        warnSpy.mockRestore();
+      });
+    });
+  });
 });

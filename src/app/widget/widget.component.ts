@@ -2490,7 +2490,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       for (const file of filesAmount) {
         const reader = new FileReader();
         reader.onload = (event: any) => {
-          console.log(this.imageUrls, 'urlssssssss');
           this.imageUrls.push({
             filesPath: this.sanitizer.bypassSecurityTrustUrl(
               event.target.result,
@@ -3925,6 +3924,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
   }
+
   parseCheckboxValue(val: string): { [key: string]: string[] } {
     try {
       return val ? JSON.parse(val) : {};
@@ -3949,8 +3949,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (!svg.dataset.originalColors) {
         // Store original colors in data attribute if not already stored
         const originalColors = [];
-        for (let i = 0; i < paths.length; i++) {
-          originalColors.push(paths[i].getAttribute('fill'));
+        for (const path of paths) {
+          originalColors.push(path.getAttribute('fill'));
         }
         svg.dataset.originalColors = JSON.stringify(originalColors);
       }
@@ -3964,8 +3964,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       } else {
         // Change to gray for SVGs that are not clicked
         const fillColor = 'gray';
-        for (let i = 0; i < paths.length; i++) {
-          paths[i].setAttribute('fill', fillColor);
+        for (const path of paths) {
+          path.setAttribute('fill', fillColor);
         }
       }
     });
@@ -4335,7 +4335,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   isSkiptype(attr: any) {
   if (attr?.attributeType?.toLowerCase() == 'input' || attr?.attributeType?.toLowerCase() == 'textarea') {
-    return attr.answer[0] ? false : true
+    return !attr.answer[0];
   }
   else {
     return attr.answer.every(answer => {

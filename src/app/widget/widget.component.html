@@ -726,7 +726,11 @@
                             </ng-container>
 
                             <ng-container *ngSwitchCase="'checkbox'">
-                              <label class="inputField-label ">
+                              <label class="inputField-label "
+                                [attr.for]="'checkbox_' + attribute.key + '_' + i + '_' +
+      replaceSpacesWithUnderscores(attribute.attributeOptions.attributeData[0]?.label) + '_' +
+      replaceSpacesWithUnderscores(attribute.attributeOptions.attributeData[0]?.values[0]?.label)"
+  >
                                                                         <span class="question_label">
                                                                             {{ attribute.label }}
                                                                         </span>
@@ -1762,7 +1766,7 @@
                 <span>{{ file.fileName }}</span>
               </div>
             </div>
-            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()" class="remove-all-icon">close</mat-icon>
+            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()" (keydown.enter)="removeUploadFile()" class="remove-all-icon">close</mat-icon>
           </div>
           <!-- Widget Message Composer -->
           <div class="widget-composer main-composer-area">
