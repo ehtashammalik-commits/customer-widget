@@ -4515,6 +4515,59 @@ describe('WidgetComponent', () => {
         expect.any(Object)
       );
     });
+
+    it('should show service unavailable snackbar', () => {
+      const spy = jest.spyOn((component as any).snackBar, 'open');
+
+      const data = {
+        response: { type: 'generalError', description: 'Service Unavailable' },
+      };
+
+      (component as any).handleErrorEvent(data);
+
+      expect(spy).toHaveBeenCalledWith(
+        'The service is currently unavailable. Please check your network connection and try again.',
+        'Dismiss',
+        expect.any(Object)
+      );
+    });
+
+    it('should not show invalid code error when dialogId is present in standalone mode', () => {
+      component.standaloneWebRtc = true;
+      component.dialogId = '123';
+      const data = { response: { type: 'invalidState' } };
+
+      (component as any).handleErrorEvent(data);
+
+      expect(component.showInvalidCodeError).toBe(false);
+    });
+
+    it('should not show snackbar for busy device if dialogId is missing', () => {
+      const spy = jest.spyOn((component as any).snackBar, 'open');
+      component.dialogId = undefined;
+      const data = {
+        response: { type: 'generalError', description: 'Audio/Video Device is being used by Someother Party' },
+      };
+
+      (component as any).handleErrorEvent(data);
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('should show session offer error snackbar', () => {
+      const spy = jest.spyOn((component as any).snackBar, 'open');
+      const data = {
+        response: { type: 'generalError', description: 'Session.getOffer unknown error.' },
+      };
+
+      (component as any).handleErrorEvent(data);
+
+      expect(spy).toHaveBeenCalledWith(
+        'Please check Audio / Video permissions in your browser.',
+        'Dismiss',
+        expect.any(Object)
+      );
+    });
   });
 
   describe('onCheckboxChange', () => {

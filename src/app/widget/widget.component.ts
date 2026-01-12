@@ -3168,30 +3168,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   /** Error: big handler — map response.type + description to user-friendly message and take appropriate actions */
   private handleErrorEvent(data: any): void {
-    let errorMessage = '';
-
-    switch (data.response?.type) {
-      case 'generalError':
-        errorMessage = this.getGeneralErrorMessage(data.response?.description);
-        console.log('[Error] Call terminated:', errorMessage);
-        break;
-
-      case 'subscriptionFailed':
-        errorMessage =
-          'Certificate Issues: Please contact with your administrator';
-        console.log('[Error] Call terminated:', errorMessage);
-        break;
-
-      case 'invalidState':
-        errorMessage = 'Invalid State: Session not found';
-        console.log('[Error] Call terminated:', errorMessage);
-        break;
-
-      default:
-        console.log(`[Error] Unknown: ${data.response?.description}`);
-        errorMessage = 'An unknown error occurred.';
-        break;
-    }
+    const errorMessage = this.getErrorMessage(data);
 
     // ---------------- Snackbar #1 ----------------
     if (
@@ -3207,44 +3184,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       'Please add Camera permissions in your browser to enable video.' &&
       errorMessage != 'Audio/Video Device is being used by Someother Party'
     ) {
-      this.showAuthenticationResponseMessage = errorMessage;
-      this.activeVideoView = false;
-
-      if (this.standaloneWebRtc) {
-        if (this.dialogId === null || this.dialogId === undefined) {
-          this.showInvalidCodeError = true;
-          this.callPopUpView = false;
-          this.activeVideoView = false;
-          this.isWebRtcVideoCallActive = false;
-        }
-
-        this.showErrorSnack(this.showAuthenticationResponseMessage);
-      } else if (
-        (this.dialogId != null || this.dialogId != undefined) &&
-        errorMessage === 'Please add microphone permissions in your browser.'
-      ) {
-        this.showErrorSnack(this.showAuthenticationResponseMessage);
-
-        this.isAudioCallActive = false;
-        this.isSecureWebCall = true;
-        this.isVideoCallActive = true;
-        this.activeVideoView = true;
-        this.errorDuringWebRTCCall = false;
-
-        if (this.__appConfig.appConfig.VIDEO == false) {
-          this.isAudioCallActive = true;
-          this.activeVideoView = false;
-        }
-      } else {
-        this.showErrorSnack(this.showAuthenticationResponseMessage);
-
-        this.isAudioCallActive = false;
-        this.isSecureWebCall = false;
-        this.isVideoCallActive = false;
-        this.activeVideoView = false;
-        this.errorDuringWebRTCCall = true;
-        this.changeView('chat');
-      }
+      this.handleAuthenticationError(errorMessage);
     } else if (
       errorMessage ===
       'Please add Camera permissions in your browser to enable video.'
@@ -3252,6 +3192,75 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.showErrorSnack(errorMessage);
     }
   }
+
+  private getErrorMessage(data: any): string {
+    switch (data.response?.type) {
+      case 'generalError': {
+        const msg = this.getGeneralErrorMessage(data.response?.description);
+        console.log('[Error] Call terminated:', msg);
+        return msg;
+      }
+
+      case 'subscriptionFailed': {
+        const subMsg = 'Certificate Issues: Please contact with your administrator';
+        console.log('[Error] Call terminated:', subMsg);
+        return subMsg;
+      }
+
+      case 'invalidState': {
+        const stateMsg = 'Invalid State: Session not found';
+        console.log('[Error] Call terminated:', stateMsg);
+        return stateMsg;
+      }
+
+      default:
+        console.log(`[Error] Unknown: ${data.response?.description}`);
+        return 'An unknown error occurred.';
+    }
+  }
+
+  private handleAuthenticationError(errorMessage: string): void {
+  this.showAuthenticationResponseMessage = errorMessage;
+  this.activeVideoView = false;
+
+  if (this.standaloneWebRtc) {
+    if (this.dialogId == null) {
+      this.showInvalidCodeError = true;
+      this.callPopUpView = false;
+      this.activeVideoView = false;
+      this.isWebRtcVideoCallActive = false;
+    }
+    this.showErrorSnack(errorMessage);
+    return;
+  }
+
+  if (
+    (this.dialogId != null) &&
+    errorMessage === 'Please add microphone permissions in your browser.'
+  ) {
+    this.showErrorSnack(errorMessage);
+
+    this.isAudioCallActive = false;
+    this.isSecureWebCall = true;
+    this.isVideoCallActive = true;
+    this.activeVideoView = true;
+    this.errorDuringWebRTCCall = false;
+
+    if (!this.__appConfig.appConfig.VIDEO) {
+      this.isAudioCallActive = true;
+      this.activeVideoView = false;
+    }
+  } else {
+    this.showErrorSnack(errorMessage);
+
+    this.isAudioCallActive = false;
+    this.isSecureWebCall = false;
+    this.isVideoCallActive = false;
+    this.activeVideoView = false;
+    this.errorDuringWebRTCCall = true;
+    this.changeView('chat');
+   }
+ }
 
   private showErrorSnack(message: string): void {
     this.snackBar.open(message, 'Dismiss', {
@@ -3883,46 +3892,59 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     control.markAsTouched();
 
-    let selectedValues: any;
-
     if (hasCategory) {
-      selectedValues = typeof control.value === 'object' && !Array.isArray(control.value)
-        ? { ...control.value }
-        : {};
-
-      if (isChecked) {
-        if (!Array.isArray(selectedValues[categoryLabel])) {
-          selectedValues[categoryLabel] = [];
-        }
-        if (!selectedValues[categoryLabel].includes(optionValue)) {
-          selectedValues[categoryLabel].push(optionValue);
-        }
-      } else {
-        selectedValues[categoryLabel] = (selectedValues[categoryLabel] || []).filter(
-          (v: string) => v !== optionValue
-        );
-        if (selectedValues[categoryLabel].length === 0) {
-          delete selectedValues[categoryLabel];
-        }
-      }
-
-      const isEmpty = Object.keys(selectedValues).length === 0;
-      control.setValue(isEmpty ? '' : selectedValues, { emitEvent: true });
-
+      this.updateCategoryValues(control, categoryLabel, optionValue, isChecked);
     } else {
-      selectedValues = Array.isArray(control.value) ? [...control.value] : [];
+      this.updateNonCategoryValues(control, optionValue, isChecked);
+    }
+  }
 
-      if (isChecked) {
-        if (!selectedValues.includes(optionValue)) {
-          selectedValues.push(optionValue);
-        }
-      } else {
-        selectedValues = selectedValues.filter((v: string) => v !== optionValue);
+  // Helper for category-based checkbox values
+  private updateCategoryValues(
+    control: any,
+    categoryLabel: string,
+    optionValue: string,
+    isChecked: boolean
+  ): void {
+    const selectedValues = typeof control.value === 'object' && !Array.isArray(control.value)
+      ? { ...control.value }
+      : {};
+
+    if (isChecked) {
+      if (!Array.isArray(selectedValues[categoryLabel])) {
+        selectedValues[categoryLabel] = [];
       }
-
-      control.setValue(selectedValues.length === 0 ? '' : selectedValues, { emitEvent: true });
+      if (!selectedValues[categoryLabel].includes(optionValue)) {
+        selectedValues[categoryLabel].push(optionValue);
+      }
+    } else {
+      selectedValues[categoryLabel] = (selectedValues[categoryLabel] || []).filter(v => v !== optionValue);
+      if (selectedValues[categoryLabel].length === 0) {
+        delete selectedValues[categoryLabel];
+      }
     }
 
+    const isEmpty = Object.keys(selectedValues).length === 0;
+    control.setValue(isEmpty ? '' : selectedValues, { emitEvent: true });
+  }
+
+  // Helper for non-category checkbox values
+  private updateNonCategoryValues(
+    control: any,
+    optionValue: string,
+    isChecked: boolean
+  ): void {
+    let selectedValues = Array.isArray(control.value) ? [...control.value] : [];
+
+    if (isChecked) {
+      if (!selectedValues.includes(optionValue)) {
+        selectedValues.push(optionValue);
+      }
+    } else {
+      selectedValues = selectedValues.filter(v => v !== optionValue);
+    }
+
+    control.setValue(selectedValues.length === 0 ? '' : selectedValues, { emitEvent: true });
   }
 
   parseCheckboxValue(val: string): { [key: string]: string[] } {
