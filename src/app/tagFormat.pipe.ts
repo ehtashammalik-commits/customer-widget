@@ -12,7 +12,7 @@ export class tagFormatPipe implements PipeTransform {
     value = value.replace(/&amp;#039;/g, "'").replace(/&amp;quot;/g, '\"');
 
     // Quick check if there are any links to process
-    const linkRegex = /\(([^,]+),\s*(https?:\/\/[^\)]+)\)/g;
+    const linkRegex = /\[([^\]]+)\]\s*\((https?:\/\/[^\)]+)\)/g;
     if (!linkRegex.test(value)) {
       // No links found, just apply formatting and return
       return ibsFormat(
@@ -26,7 +26,7 @@ export class tagFormatPipe implements PipeTransform {
     // Reset regex for actual processing
     linkRegex.lastIndex = 0;
 
-    // Extract (text,url) patterns and replace with placeholders
+    // Extract [text] (url) patterns and replace with placeholders
     const linkData: { text: string; url: string; placeholder: string }[] = [];
     let processedValue = value.replace(linkRegex, (match, text, url, offset, string) => {
       const placeholder = `URL-PLACEHOLDER-${linkData.length}`;
