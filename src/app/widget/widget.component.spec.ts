@@ -1991,23 +1991,393 @@ describe('WidgetComponent', () => {
       expect(component.getTodayEvent).not.toHaveBeenCalled();
     });
 
-    it('should handle errors gracefully', async () => {
-      const consoleSpy = jest
-        .spyOn(console, 'log')
-        .mockImplementation(() => { });
-      (component.sdk.fetchBusinessCalendarId as jest.Mock).mockRejectedValue(
-        'API error',
-      );
+        it('should handle errors gracefully', async () => {
 
-      await component.getCalendarEvents();
+          const consoleSpy = jest
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Business Calendar Api Response:',
-        'API error',
-      );
-      consoleSpy.mockRestore();
-    });
-  });
+            .spyOn(console, 'log')
+
+            .mockImplementation(() => { });
+
+          (component.sdk.fetchBusinessCalendarId as jest.Mock).mockRejectedValue(
+
+            'API error',
+
+          );
+
+          await component.getCalendarEvents();
+
+    
+
+          expect(consoleSpy).toHaveBeenCalledWith(
+
+            'Business Calendar Api Response:',
+
+            'API error',
+
+          );
+
+          consoleSpy.mockRestore();
+
+        });
+
+      });
+
+    
+
+      describe('Scoring Functions', () => {
+
+        let formData: any;
+
+    
+
+        beforeEach(() => {
+
+          formData = {
+
+            body: {
+
+              enableWeightage: true,
+
+              formWeightage: 50,
+
+              formScore: null,
+
+              sections: [
+
+                {
+
+                  sectionId: 's1',
+
+                  sectionName: 'Section 1',
+
+                  sectionWeightage: 40,
+
+                  sectionScore: null,
+
+                  attributes: [
+
+                    {
+
+                      id: 'a1',
+
+                      label: 'Attribute 1',
+
+                      attributeWeightage: 30,
+
+                      attributeScore: null,
+
+                      answer: [
+
+                        { label: 'Option 1', isSelected: true, additionalAttributes: { optionWeightage: 50 } },
+
+                        { label: 'Option 2', isSelected: false, additionalAttributes: { optionWeightage: 100 } }
+
+                      ]
+
+                    },
+
+                    {
+
+                      id: 'a2',
+
+                      label: 'Attribute 2',
+
+                      attributeWeightage: 70,
+
+                      attributeScore: null,
+
+                      answer: [
+
+                        { label: 'Option A', isSelected: false, additionalAttributes: { optionWeightage: 20 } },
+
+                        { label: 'Option B', isSelected: true, additionalAttributes: { optionWeightage: 80 } }
+
+                      ]
+
+                    }
+
+                  ]
+
+                },
+
+                {
+
+                  sectionId: 's2',
+
+                  sectionName: 'Section 2',
+
+                  sectionWeightage: 60,
+
+                  sectionScore: null,
+
+                  attributes: [
+
+                    {
+
+                      id: 'a3',
+
+                      label: 'Attribute 3',
+
+                      attributeWeightage: 100,
+
+                      attributeScore: null,
+
+                      answer: [
+
+                        { label: 'Op X', isSelected: true, additionalAttributes: { optionWeightage: 90 } }
+
+                      ]
+
+                    }
+
+                  ]
+
+                }
+
+              ]
+
+            }
+
+          };
+
+        });
+
+    
+
+        describe('calculateAttributeScore', () => {
+
+          it('should calculate attributeScore for selected options', () => {
+
+            component.calculateAttributeScore(formData);
+
+            // (50 / 100) * 30 = 15
+
+            expect(formData.body.sections[0].attributes[0].attributeScore).toBe(15);
+
+            // (80 / 100) * 70 = 56
+
+            expect(formData.body.sections[0].attributes[1].attributeScore).toBe(56);
+
+            // (90 / 100) * 100 = 90
+
+            expect(formData.body.sections[1].attributes[0].attributeScore).toBe(90);
+
+          });
+
+    
+
+          it('should not calculate attributeScore if no option is selected', () => {
+
+            formData.body.sections[0].attributes[0].answer.forEach((a:any) => a.isSelected = false);
+
+            component.calculateAttributeScore(formData);
+
+            expect(formData.body.sections[0].attributes[0].attributeScore).toBeNull();
+
+          });
+
+    
+
+          it('should handle null optionWeightage', () => {
+
+    
+
+                  formData.body.sections[0].attributes[0].answer[0].additionalAttributes.optionWeightage = null;
+
+    
+
+                  component.calculateAttributeScore(formData);
+
+    
+
+                  // (null / 100) * 30 -> 0 -> toFixed(1) -> "0.0" -> parseFloat -> 0
+
+    
+
+                  expect(formData.body.sections[0].attributes[0].attributeScore).toBe(0);
+
+    
+
+                });
+
+    
+
+          it('should handle null attributeWeightage', () => {
+
+            formData.body.sections[0].attributes[0].attributeWeightage = null;
+
+            component.calculateAttributeScore(formData);
+
+            // (50 / 100) * null -> 0 -> toFixed(1) -> "0.0" -> parseFloat -> 0
+
+            expect(formData.body.sections[0].attributes[0].attributeScore).toBe(0);
+
+          });
+
+        });
+
+    
+
+        describe('calculateSectionScores', () => {
+
+          beforeEach(() => {
+
+            // Pre-calculate attribute scores for testing this function
+
+            formData.body.sections[0].attributes[0].attributeScore = 15;
+
+            formData.body.sections[0].attributes[1].attributeScore = 56;
+
+            formData.body.sections[1].attributes[0].attributeScore = 90;
+
+          });
+
+    
+
+          it('should calculate sectionScore based on attributeScores', () => {
+
+            component.calculateSectionScores(formData);
+
+            // total attribute score = 15 + 56 = 71
+
+            // (71 / 100) * 40 = 28.4
+
+            expect(formData.body.sections[0].sectionScore).toBe(28.4);
+
+            // total attribute score = 90
+
+            // (90 / 100) * 60 = 54
+
+            expect(formData.body.sections[1].sectionScore).toBe(54);
+
+          });
+
+    
+
+          it('should set sectionScore to null if weightage is disabled', () => {
+
+            formData.body.enableWeightage = false;
+
+            component.calculateSectionScores(formData);
+
+            expect(formData.body.sections[0].sectionScore).toBeNull();
+
+            expect(formData.body.sections[1].sectionScore).toBeNull();
+
+          });
+
+    
+
+          it('should ignore null attributeScores', () => {
+
+            formData.body.sections[0].attributes[0].attributeScore = null;
+
+            component.calculateSectionScores(formData);
+
+            // total attribute score = 56
+
+            // (56 / 100) * 40 = 22.4
+
+            expect(formData.body.sections[0].sectionScore).toBe(22.4);
+
+          });
+
+    
+
+          it('should set sectionScore to null if all attributeScores are null', () => {
+
+            formData.body.sections[0].attributes.forEach((a:any) => a.attributeScore = null);
+
+            component.calculateSectionScores(formData);
+
+            expect(formData.body.sections[0].sectionScore).toBeNull();
+
+          });
+
+        });
+
+    
+
+        describe('calculateFormScore', () => {
+
+          beforeEach(() => {
+
+            // Pre-calculate section scores
+
+            formData.body.sections[0].sectionScore = 28.4;
+
+            formData.body.sections[1].sectionScore = 54;
+
+          });
+
+    
+
+          it('should calculate formScore based on sectionScores', () => {
+
+            component.calculateFormScore(formData);
+
+            // total section score = 28.4 + 54 = 82.4
+
+            // (82.4 / 100) * 50 = 41.2 -> Math.round -> 41
+
+            expect(formData.body.formScore).toBe(41);
+
+          });
+
+    
+
+          it('should return undefined if formData is not provided', () => {
+
+            expect(component.calculateFormScore(undefined)).toBeUndefined();
+
+            expect(component.calculateFormScore(null)).toBeUndefined();
+
+          });
+
+    
+
+          it('should set formScore to null if weightage is disabled', () => {
+
+            formData.body.enableWeightage = false;
+
+            component.calculateFormScore(formData);
+
+            expect(formData.body.formScore).toBeNull();
+
+          });
+
+    
+
+          it('should ignore null sectionScores', () => {
+
+            formData.body.sections[0].sectionScore = null;
+
+            component.calculateFormScore(formData);
+
+            // total section score = 54
+
+            // (54 / 100) * 50 = 27 -> Math.round -> 27
+
+            expect(formData.body.formScore).toBe(27);
+
+          });
+
+    
+
+          it('should set formScore to null if all sectionScores are null', () => {
+
+            formData.body.sections.forEach((s:any) => s.sectionScore = null);
+
+            component.calculateFormScore(formData);
+
+            expect(formData.body.formScore).toBeNull();
+
+          });
+
+        });
+
+      });
 
   describe('WidgetComponent - getTodayEvent', () => {
     it('should resolve with empty array and set daySummary null if no BUSINESS_HOURS shifts today', async () => {

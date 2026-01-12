@@ -1079,7 +1079,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     })
 
-    formData.body.formScore = !formData?.body?.enableWeightage ? null : totalSectionWeightages == null ? null : Math.round(((totalSectionWeightages / 100) * formData?.body?.formWeightage))
+    if (!formData?.body?.enableWeightage || totalSectionWeightages == null) {
+      formData.body.formScore = null;
+    } else {
+      formData.body.formScore = Math.round(
+        (totalSectionWeightages / 100) * formData?.body?.formWeightage
+      );
+    }
   }
 
   createFormDataObject() {
