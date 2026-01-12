@@ -3241,7 +3241,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   if (
-    (this.dialogId != null) &&
+    (this.dialogId != null || this.dialogId != undefined) &&
     errorMessage === 'Please add microphone permissions in your browser.'
   ) {
     this.showErrorSnack(errorMessage);
