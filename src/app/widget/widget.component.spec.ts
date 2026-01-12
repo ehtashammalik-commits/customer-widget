@@ -5102,4 +5102,459 @@ describe('WidgetComponent', () => {
       });
     });
   });
+
+  // ---------- getValue Tests ----------
+  describe('getValue', () => {
+    it('should return option.label when valueType is "boolean"', () => {
+      const option = { label: 'Yes', value: true };
+      const result = component.getValue(option, 'boolean');
+      expect(result).toBe('Yes');
+    });
+
+    it('should return option.value when valueType is not "boolean"', () => {
+      const option = { label: 'Option 1', value: 'val1' };
+      const result = component.getValue(option, 'string');
+      expect(result).toBe('val1');
+    });
+
+    it('should return option.label when valueType is not "boolean" and option.value is undefined', () => {
+      const option = { label: 'Option 1' };
+      const result = component.getValue(option, 'string');
+      expect(result).toBe('Option 1');
+    });
+
+    it('should return option.value for "nps" valueType', () => {
+      const option = { label: '5', value: 5 };
+      const result = component.getValue(option, 'nps');
+      expect(result).toBe(5);
+    });
+
+    it('should return option.label as fallback when value is null/undefined for various types', () => {
+      const option = { label: 'Fallback Label', value: null };
+      const result = component.getValue(option, 'text');
+      expect(result).toBe('Fallback Label');
+    });
+  });
+
+  // ---------- getSelectedValue Tests ----------
+  describe('getSelectedValue', () => {
+    it('should return true when valueType is "nps" and option.value equals selectedValue', () => {
+      const option = { label: '5', value: 5 };
+      const result = component.getSelectedValue(option, 5, 'nps');
+      expect(result).toBe(true);
+    });
+
+    it('should return false when valueType is "nps" and option.value does not equal selectedValue', () => {
+      const option = { label: '5', value: 5 };
+      const result = component.getSelectedValue(option, 3, 'nps');
+      expect(result).toBe(false);
+    });
+
+    it('should return true when option.label equals selectedValue for non-nps types', () => {
+      const option = { label: 'Option 1', value: 'val1' };
+      const result = component.getSelectedValue(option, 'Option 1', 'string');
+      expect(result).toBe(true);
+    });
+
+    it('should return true when option.value equals selectedValue for non-nps types', () => {
+      const option = { label: 'Option 1', value: 'val1' };
+      const result = component.getSelectedValue(option, 'val1', 'string');
+      expect(result).toBe(true);
+    });
+
+    it('should return false when neither label nor value matches for non-nps types', () => {
+      const option = { label: 'Option 1', value: 'val1' };
+      const result = component.getSelectedValue(option, 'nomatch', 'string');
+      expect(result).toBe(false);
+    });
+
+    it('should return true when option.label equals selectedValue for "boolean" type', () => {
+      const option = { label: 'Yes', value: true };
+      const result = component.getSelectedValue(option, 'Yes', 'boolean');
+      expect(result).toBe(true);
+    });
+
+    it('should handle selectedValue as null or undefined for non-nps types', () => {
+      const option = { label: 'Option 1', value: 'val1' };
+      const result = component.getSelectedValue(option, null, 'string');
+      expect(result).toBe(false);
+    });
+  });
+
+  // ---------- getAnswerObj Tests ----------
+  describe('getAnswerObj', () => {
+    describe('INPUT type attributes', () => {
+      it('should return array with selectedValue for INPUT type', () => {
+        const attribute = { attributeType: 'INPUT' };
+        const selectedValue = 'test input';
+        const result = component.getAnswerObj(attribute, [], selectedValue, {});
+        expect(result).toEqual(['test input']);
+      });
+
+      it('should return array with null for INPUT type with null selectedValue', () => {
+        const attribute = { attributeType: 'INPUT' };
+        const result = component.getAnswerObj(attribute, [], null, {});
+        expect(result).toEqual([null]);
+      });
+    });
+
+    describe('TEXTAREA type attributes', () => {
+      it('should return array with selectedValue for TEXTAREA type', () => {
+        const attribute = { attributeType: 'TEXTAREA' };
+        const selectedValue = 'test textarea content';
+        const result = component.getAnswerObj(attribute, [], selectedValue, {});
+        expect(result).toEqual(['test textarea content']);
+      });
+    });
+
+    describe('checkbox type attributes without categories', () => {
+      it('should map possibleValues correctly when valueType is checkbox without categories', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'checkbox',
+          key: 'testKey',
+          attributeOptions: { enableCategory: false, enableStyle: true }
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1', optionWeightage: 10, optionStyle: 'style1' },
+          { label: 'Option 2', value: 'opt2', optionWeightage: 20 }
+        ];
+        const currentSectionAttributes = { testKey: ['Option 1'] };
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, currentSectionAttributes);
+
+        expect(result).toEqual([
+          {
+            label: 'Option 1',
+            value: 'opt1',
+            isSelected: true,
+            additionalAttributes: {
+              optionWeightage: 10,
+              enableStyle: true,
+              optionStyle: 'style1'
+            }
+          },
+          {
+            label: 'Option 2',
+            value: 'opt2',
+            isSelected: false,
+            additionalAttributes: {
+              optionWeightage: 20,
+              enableStyle: true,
+              optionStyle: null
+            }
+          }
+        ]);
+      });
+
+      it('should return empty array when rawValue is not set for checkbox without categories', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'checkbox',
+          key: 'testKey',
+          attributeOptions: { enableCategory: false, enableStyle: false }
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' },
+          { label: 'Option 2', value: 'opt2' }
+        ];
+        const currentSectionAttributes = {};
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, currentSectionAttributes);
+
+        expect(result).toEqual([
+          {
+            label: 'Option 1',
+            value: 'opt1',
+            isSelected: false,
+            additionalAttributes: {
+              optionWeightage: null,
+              enableStyle: false,
+              optionStyle: null
+            }
+          },
+          {
+            label: 'Option 2',
+            value: 'opt2',
+            isSelected: false,
+            additionalAttributes: {
+              optionWeightage: null,
+              enableStyle: false,
+              optionStyle: null
+            }
+          }
+        ]);
+      });
+    });
+
+    describe('checkbox type attributes with categories', () => {
+      it('should map categories correctly when enableCategory is true', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'checkbox',
+          key: 'testKey',
+          attributeOptions: {
+            enableCategory: true,
+            enableStyle: false,
+            attributeData: [
+              {
+                label: 'Category 1',
+                values: [
+                  { label: 'Opt1', value: 'val1', optionWeightage: 5 },
+                  { label: 'Opt2', value: 'val2' }
+                ]
+              },
+              {
+                label: 'Category 2',
+                values: [
+                  { label: 'Opt3', value: 'val3' }
+                ]
+              }
+            ]
+          }
+        };
+        const currentSectionAttributes = {
+          testKey: {
+            'Category 1': ['Opt1'],
+            'Category 2': []
+          }
+        };
+
+        const result = component.getAnswerObj(attribute, [], null, currentSectionAttributes);
+
+        expect(result).toHaveLength(2);
+        expect(result[0].category).toBe('Category 1');
+        expect(result[0].options).toHaveLength(2);
+        expect(result[0].options[0]).toEqual({
+          label: 'Opt1',
+          value: 'val1',
+          isSelected: true,
+          additionalAttributes: {
+            optionWeightage: 5,
+            enableStyle: false,
+            optionStyle: null
+          }
+        });
+        expect(result[0].options[1]).toEqual({
+          label: 'Opt2',
+          value: 'val2',
+          isSelected: false,
+          additionalAttributes: {
+            optionWeightage: null,
+            enableStyle: false,
+            optionStyle: null
+          }
+        });
+        expect(result[1].category).toBe('Category 2');
+      });
+
+      it('should handle missing rawValue for categories', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'checkbox',
+          key: 'testKey',
+          attributeOptions: {
+            enableCategory: true,
+            enableStyle: false,
+            attributeData: [
+              {
+                label: 'Category 1',
+                values: [
+                  { label: 'Opt1', value: 'val1' }
+                ]
+              }
+            ]
+          }
+        };
+        const currentSectionAttributes = {};
+
+        const result = component.getAnswerObj(attribute, [], null, currentSectionAttributes);
+
+        expect(result[0].options[0].isSelected).toBe(false);
+      });
+
+      it('should handle null attributeData gracefully', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'checkbox',
+          key: 'testKey',
+          attributeOptions: {
+            enableCategory: true,
+            attributeData: []
+          }
+        };
+
+        const result = component.getAnswerObj(attribute, [], null, {});
+        expect(result).toEqual([]);
+      });
+    });
+
+    describe('other valueType attributes (radio, dropdown, etc)', () => {
+      it('should map possibleValues when selectedValue is provided', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'radio',
+          attributeOptions: { enableStyle: true }
+        };
+        const possibleValues = [
+          { label: 'Radio 1', value: 'radio1', optionWeightage: 15, optionStyle: 'style1' },
+          { label: 'Radio 2', value: 'radio2', optionWeightage: 25 }
+        ];
+        const selectedValue = 'radio1';
+
+        const result = component.getAnswerObj(attribute, possibleValues, selectedValue, {});
+
+        expect(result).toHaveLength(2);
+        expect(result[0]).toEqual({
+          label: 'Radio 1',
+          value: 'radio1',
+          isSelected: true,
+          additionalAttributes: {
+            optionWeightage: 15,
+            enableStyle: true,
+            optionStyle: 'style1'
+          }
+        });
+        expect(result[1]).toEqual({
+          label: 'Radio 2',
+          value: 'radio2',
+          isSelected: false,
+          additionalAttributes: {
+            optionWeightage: 25,
+            enableStyle: true,
+            optionStyle: null
+          }
+        });
+      });
+
+      it('should handle selectedValue as object with value property', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'dropdown',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' },
+          { label: 'Option 2', value: 'opt2' }
+        ];
+        const selectedValue = { value: 'opt2', extra: 'data' };
+
+        const result = component.getAnswerObj(attribute, possibleValues, selectedValue, {});
+
+        expect(result[0].isSelected).toBe(false);
+        expect(result[1].isSelected).toBe(true);
+      });
+
+      it('should handle selectedValue as null', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'dropdown',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' },
+          { label: 'Option 2', value: 'opt2' }
+        ];
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+
+        expect(result[0].isSelected).toBe(false);
+        expect(result[1].isSelected).toBe(false);
+      });
+
+      it('should handle selectedValue as undefined', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'dropdown',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' }
+        ];
+
+        const result = component.getAnswerObj(attribute, possibleValues, undefined, {});
+
+        expect(result[0].isSelected).toBe(false);
+      });
+
+      it('should use getValue for getting option values', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'boolean',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: 'True Option', value: true },
+          { label: 'False Option', value: false }
+        ];
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+
+        expect(result[0].value).toBe('True Option');
+        expect(result[1].value).toBe('False Option');
+      });
+
+      it('should use getSelectedValue for determining selection', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'nps',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: '1', value: 1 },
+          { label: '5', value: 5 },
+          { label: '10', value: 10 }
+        ];
+        const selectedValue = 5;
+
+        const result = component.getAnswerObj(attribute, possibleValues, selectedValue, {});
+
+        expect(result[0].isSelected).toBe(false);
+        expect(result[1].isSelected).toBe(true);
+        expect(result[2].isSelected).toBe(false);
+      });
+
+      it('should handle missing optionStyle gracefully', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'radio',
+          attributeOptions: { enableStyle: true }
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' }
+        ];
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+
+        expect(result[0].additionalAttributes.optionStyle).toBe(null);
+      });
+
+      it('should default enableStyle to false when not provided', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'radio',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' }
+        ];
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+
+        expect(result[0].additionalAttributes.enableStyle).toBe(false);
+      });
+
+      it('should handle empty possibleValues array', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'radio',
+          attributeOptions: {}
+        };
+
+        const result = component.getAnswerObj(attribute, [], null, {});
+
+        expect(result).toEqual([]);
+      });
+    });
+  });
 });
