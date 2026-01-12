@@ -1991,23 +1991,393 @@ describe('WidgetComponent', () => {
       expect(component.getTodayEvent).not.toHaveBeenCalled();
     });
 
-    it('should handle errors gracefully', async () => {
-      const consoleSpy = jest
-        .spyOn(console, 'log')
-        .mockImplementation(() => { });
-      (component.sdk.fetchBusinessCalendarId as jest.Mock).mockRejectedValue(
-        'API error',
-      );
+        it('should handle errors gracefully', async () => {
 
-      await component.getCalendarEvents();
+          const consoleSpy = jest
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Business Calendar Api Response:',
-        'API error',
-      );
-      consoleSpy.mockRestore();
-    });
-  });
+            .spyOn(console, 'log')
+
+            .mockImplementation(() => { });
+
+          (component.sdk.fetchBusinessCalendarId as jest.Mock).mockRejectedValue(
+
+            'API error',
+
+          );
+
+          await component.getCalendarEvents();
+
+    
+
+          expect(consoleSpy).toHaveBeenCalledWith(
+
+            'Business Calendar Api Response:',
+
+            'API error',
+
+          );
+
+          consoleSpy.mockRestore();
+
+        });
+
+      });
+
+    
+
+      describe('Scoring Functions', () => {
+
+        let formData: any;
+
+    
+
+        beforeEach(() => {
+
+          formData = {
+
+            body: {
+
+              enableWeightage: true,
+
+              formWeightage: 50,
+
+              formScore: null,
+
+              sections: [
+
+                {
+
+                  sectionId: 's1',
+
+                  sectionName: 'Section 1',
+
+                  sectionWeightage: 40,
+
+                  sectionScore: null,
+
+                  attributes: [
+
+                    {
+
+                      id: 'a1',
+
+                      label: 'Attribute 1',
+
+                      attributeWeightage: 30,
+
+                      attributeScore: null,
+
+                      answer: [
+
+                        { label: 'Option 1', isSelected: true, additionalAttributes: { optionWeightage: 50 } },
+
+                        { label: 'Option 2', isSelected: false, additionalAttributes: { optionWeightage: 100 } }
+
+                      ]
+
+                    },
+
+                    {
+
+                      id: 'a2',
+
+                      label: 'Attribute 2',
+
+                      attributeWeightage: 70,
+
+                      attributeScore: null,
+
+                      answer: [
+
+                        { label: 'Option A', isSelected: false, additionalAttributes: { optionWeightage: 20 } },
+
+                        { label: 'Option B', isSelected: true, additionalAttributes: { optionWeightage: 80 } }
+
+                      ]
+
+                    }
+
+                  ]
+
+                },
+
+                {
+
+                  sectionId: 's2',
+
+                  sectionName: 'Section 2',
+
+                  sectionWeightage: 60,
+
+                  sectionScore: null,
+
+                  attributes: [
+
+                    {
+
+                      id: 'a3',
+
+                      label: 'Attribute 3',
+
+                      attributeWeightage: 100,
+
+                      attributeScore: null,
+
+                      answer: [
+
+                        { label: 'Op X', isSelected: true, additionalAttributes: { optionWeightage: 90 } }
+
+                      ]
+
+                    }
+
+                  ]
+
+                }
+
+              ]
+
+            }
+
+          };
+
+        });
+
+    
+
+        describe('calculateAttributeScore', () => {
+
+          it('should calculate attributeScore for selected options', () => {
+
+            component.calculateAttributeScore(formData);
+
+            // (50 / 100) * 30 = 15
+
+            expect(formData.body.sections[0].attributes[0].attributeScore).toBe(15);
+
+            // (80 / 100) * 70 = 56
+
+            expect(formData.body.sections[0].attributes[1].attributeScore).toBe(56);
+
+            // (90 / 100) * 100 = 90
+
+            expect(formData.body.sections[1].attributes[0].attributeScore).toBe(90);
+
+          });
+
+    
+
+          it('should not calculate attributeScore if no option is selected', () => {
+
+            formData.body.sections[0].attributes[0].answer.forEach((a:any) => a.isSelected = false);
+
+            component.calculateAttributeScore(formData);
+
+            expect(formData.body.sections[0].attributes[0].attributeScore).toBeNull();
+
+          });
+
+    
+
+          it('should handle null optionWeightage', () => {
+
+    
+
+                  formData.body.sections[0].attributes[0].answer[0].additionalAttributes.optionWeightage = null;
+
+    
+
+                  component.calculateAttributeScore(formData);
+
+    
+
+                  // (null / 100) * 30 -> 0 -> toFixed(1) -> "0.0" -> parseFloat -> 0
+
+    
+
+                  expect(formData.body.sections[0].attributes[0].attributeScore).toBe(0);
+
+    
+
+                });
+
+    
+
+          it('should handle null attributeWeightage', () => {
+
+            formData.body.sections[0].attributes[0].attributeWeightage = null;
+
+            component.calculateAttributeScore(formData);
+
+            // (50 / 100) * null -> 0 -> toFixed(1) -> "0.0" -> parseFloat -> 0
+
+            expect(formData.body.sections[0].attributes[0].attributeScore).toBe(0);
+
+          });
+
+        });
+
+    
+
+        describe('calculateSectionScores', () => {
+
+          beforeEach(() => {
+
+            // Pre-calculate attribute scores for testing this function
+
+            formData.body.sections[0].attributes[0].attributeScore = 15;
+
+            formData.body.sections[0].attributes[1].attributeScore = 56;
+
+            formData.body.sections[1].attributes[0].attributeScore = 90;
+
+          });
+
+    
+
+          it('should calculate sectionScore based on attributeScores', () => {
+
+            component.calculateSectionScores(formData);
+
+            // total attribute score = 15 + 56 = 71
+
+            // (71 / 100) * 40 = 28.4
+
+            expect(formData.body.sections[0].sectionScore).toBe(28.4);
+
+            // total attribute score = 90
+
+            // (90 / 100) * 60 = 54
+
+            expect(formData.body.sections[1].sectionScore).toBe(54);
+
+          });
+
+    
+
+          it('should set sectionScore to null if weightage is disabled', () => {
+
+            formData.body.enableWeightage = false;
+
+            component.calculateSectionScores(formData);
+
+            expect(formData.body.sections[0].sectionScore).toBeNull();
+
+            expect(formData.body.sections[1].sectionScore).toBeNull();
+
+          });
+
+    
+
+          it('should ignore null attributeScores', () => {
+
+            formData.body.sections[0].attributes[0].attributeScore = null;
+
+            component.calculateSectionScores(formData);
+
+            // total attribute score = 56
+
+            // (56 / 100) * 40 = 22.4
+
+            expect(formData.body.sections[0].sectionScore).toBe(22.4);
+
+          });
+
+    
+
+          it('should set sectionScore to null if all attributeScores are null', () => {
+
+            formData.body.sections[0].attributes.forEach((a:any) => a.attributeScore = null);
+
+            component.calculateSectionScores(formData);
+
+            expect(formData.body.sections[0].sectionScore).toBeNull();
+
+          });
+
+        });
+
+    
+
+        describe('calculateFormScore', () => {
+
+          beforeEach(() => {
+
+            // Pre-calculate section scores
+
+            formData.body.sections[0].sectionScore = 28.4;
+
+            formData.body.sections[1].sectionScore = 54;
+
+          });
+
+    
+
+          it('should calculate formScore based on sectionScores', () => {
+
+            component.calculateFormScore(formData);
+
+            // total section score = 28.4 + 54 = 82.4
+
+            // (82.4 / 100) * 50 = 41.2 -> Math.round -> 41
+
+            expect(formData.body.formScore).toBe(41);
+
+          });
+
+    
+
+          it('should return undefined if formData is not provided', () => {
+
+            expect(component.calculateFormScore(undefined)).toBeUndefined();
+
+            expect(component.calculateFormScore(null)).toBeUndefined();
+
+          });
+
+    
+
+          it('should set formScore to null if weightage is disabled', () => {
+
+            formData.body.enableWeightage = false;
+
+            component.calculateFormScore(formData);
+
+            expect(formData.body.formScore).toBeNull();
+
+          });
+
+    
+
+          it('should ignore null sectionScores', () => {
+
+            formData.body.sections[0].sectionScore = null;
+
+            component.calculateFormScore(formData);
+
+            // total section score = 54
+
+            // (54 / 100) * 50 = 27 -> Math.round -> 27
+
+            expect(formData.body.formScore).toBe(27);
+
+          });
+
+    
+
+          it('should set formScore to null if all sectionScores are null', () => {
+
+            formData.body.sections.forEach((s:any) => s.sectionScore = null);
+
+            component.calculateFormScore(formData);
+
+            expect(formData.body.formScore).toBeNull();
+
+          });
+
+        });
+
+      });
 
   describe('WidgetComponent - getTodayEvent', () => {
     it('should resolve with empty array and set daySummary null if no BUSINESS_HOURS shifts today', async () => {
@@ -3156,95 +3526,6 @@ describe('WidgetComponent', () => {
       });
     });
 
-    describe('onCheckboxChange', () => {
-      let sectionsArray: any;
-      let mockControl: any;
-
-      beforeEach(() => {
-        mockControl = {
-          markAsTouched: jest.fn(),
-          value: '',
-          setValue: jest.fn(),
-        };
-        sectionsArray = {
-          at: jest.fn().mockReturnValue({
-            get: jest.fn().mockReturnValue(mockControl),
-          }),
-        };
-        component.preChatFormGroup = {
-          get: jest.fn().mockImplementation((name: string) => {
-            if (name === 'sections.0.testControl') return mockControl;
-            if (name === 'sections') return sectionsArray;
-            return null;
-          }),
-        } as any;
-      });
-
-      it('should return early if optionValue is falsy', () => {
-        const mockEvent = {
-          target: { checked: true }
-        };
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, null, 'category', false);
-        expect(mockControl.markAsTouched).not.toHaveBeenCalled();
-        expect(mockControl.setValue).not.toHaveBeenCalled();
-      });
-
-      it('should add new value to empty control value', () => {
-        mockControl.value = '';
-        const mockEvent = {
-          target: { checked: true }
-        };
-
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
-        expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option1"]}', { emitEvent: true });
-      });
-
-      it('should add new value to existing control value', () => {
-        mockControl.value = '{"category1":["option1"]}';
-        const mockEvent = {
-          target: { checked: true }
-        };
-
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option2', 'category1', false);
-        expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option1","option2"]}', { emitEvent: true });
-      });
-
-      it('should remove value when checkbox is unchecked', () => {
-        mockControl.value = '{"category1":["option1","option2"]}';
-        const mockEvent = {
-          target: { checked: false }
-        };
-
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
-        expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option2"]}', { emitEvent: true });
-      });
-
-      it('should remove entire category when no values remain', () => {
-        mockControl.value = '{"category1":["option1"]}';
-        const mockEvent = {
-          target: { checked: false }
-        };
-
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
-        expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith('', { emitEvent: true });
-      });
-
-      it('should handle invalid JSON gracefully', () => {
-        mockControl.value = 'invalid json';
-        const mockEvent = {
-          target: { checked: true }
-        };
-
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
-        expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith('{"category1":["option1"]}', { emitEvent: true });
-      });
-    });
-
     describe('parseCheckboxValue', () => {
       it('should parse valid JSON string', () => {
         const result = component.parseCheckboxValue('{"category1":["option1","option2"]}');
@@ -3280,33 +3561,6 @@ describe('WidgetComponent', () => {
         });
       });
     });
-
-    describe('isChecked', () => {
-      beforeEach(() => {
-
-        component.preChatFormGroup = {
-          get: jest.fn().mockImplementation((path: string) => {
-            if (path === 'sections.0.testControl') {
-              return {
-                value: 'Category1, option1, Category2, option2',
-              };
-            }
-            return null;
-          }),
-        } as any;
-      });
-
-      it('should handle multiple categories correctly', () => {
-        const result1 = component.isChecked('testControl', 0, 'option1', 'Category1');
-        const result2 = component.isChecked('testControl', 0, 'option2', 'Category2');
-        const result3 = component.isChecked('testControl', 0, 'option1', 'Category2');
-
-        expect(result1).toBe(true);
-        expect(result2).toBe(true);
-        expect(result3).toBe(false);
-      });
-    });
-
 
     describe('booleanEmojiSet', () => {
       let mockSvg1: any;
@@ -4631,7 +4885,676 @@ describe('WidgetComponent', () => {
         expect.any(Object)
       );
     });
+
+    it('should show service unavailable snackbar', () => {
+      const spy = jest.spyOn((component as any).snackBar, 'open');
+
+      const data = {
+        response: { type: 'generalError', description: 'Service Unavailable' },
+      };
+
+      (component as any).handleErrorEvent(data);
+
+      expect(spy).toHaveBeenCalledWith(
+        'The service is currently unavailable. Please check your network connection and try again.',
+        'Dismiss',
+        expect.any(Object)
+      );
+    });
+
+    it('should not show invalid code error when dialogId is present in standalone mode', () => {
+      component.standaloneWebRtc = true;
+      component.dialogId = '123';
+      const data = { response: { type: 'invalidState' } };
+
+      (component as any).handleErrorEvent(data);
+
+      expect(component.showInvalidCodeError).toBe(false);
+    });
+
+    it('should not show snackbar for busy device if dialogId is missing', () => {
+      const spy = jest.spyOn((component as any).snackBar, 'open');
+      component.dialogId = undefined;
+      const data = {
+        response: { type: 'generalError', description: 'Audio/Video Device is being used by Someother Party' },
+      };
+
+      (component as any).handleErrorEvent(data);
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('should show session offer error snackbar', () => {
+      const spy = jest.spyOn((component as any).snackBar, 'open');
+      const data = {
+        response: { type: 'generalError', description: 'Session.getOffer unknown error.' },
+      };
+
+      (component as any).handleErrorEvent(data);
+
+      expect(spy).toHaveBeenCalledWith(
+        'Please check Audio / Video permissions in your browser.',
+        'Dismiss',
+        expect.any(Object)
+      );
+    });
   });
 
+  describe('onCheckboxChange', () => {
+    let mockControl: any;
 
+    beforeEach(() => {
+      mockControl = {
+        value: '',
+        markAsTouched: jest.fn(),
+        setValue: jest.fn(),
+      };
+
+      component.preChatFormGroup = {
+        get: jest.fn().mockReturnValue(mockControl),
+      } as any;
+    });
+
+    // Test cases with category
+    describe('with category', () => {
+      const event = {
+        target: { checked: true },
+      } as unknown as Event;
+
+      it('should add a new category and value when checkbox is checked', () => {
+        mockControl.value = {};
+        component.onCheckboxChange(
+          event,
+          'controlName',
+          0,
+          'option1',
+          'category1',
+          true,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith(
+          { category1: ['option1'] },
+          { emitEvent: true },
+        );
+      });
+
+      it('should add a value to an existing category when checkbox is checked', () => {
+        mockControl.value = { category1: ['option1'] };
+        component.onCheckboxChange(
+          event,
+          'controlName',
+          0,
+          'option2',
+          'category1',
+          true,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith(
+          { category1: ['option1', 'option2'] },
+          { emitEvent: true },
+        );
+      });
+
+      it('should remove a value from a category when checkbox is unchecked', () => {
+        const uncheckEvent = {
+          target: { checked: false },
+        } as unknown as Event;
+        mockControl.value = { category1: ['option1', 'option2'] };
+        component.onCheckboxChange(
+          uncheckEvent,
+          'controlName',
+          0,
+          'option1',
+          'category1',
+          true,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith(
+          { category1: ['option2'] },
+          { emitEvent: true },
+        );
+      });
+
+      it('should remove the category when the last value is removed', () => {
+        const uncheckEvent = {
+          target: { checked: false },
+        } as unknown as Event;
+        mockControl.value = { category1: ['option1'] };
+        component.onCheckboxChange(
+          uncheckEvent,
+          'controlName',
+          0,
+          'option1',
+          'category1',
+          true,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith('', {
+          emitEvent: true,
+        });
+      });
+    });
+
+    // Test cases without category
+    describe('without category', () => {
+      const event = {
+        target: { checked: true },
+      } as unknown as Event;
+
+      it('should add a value to the array when checkbox is checked', () => {
+        mockControl.value = [];
+        component.onCheckboxChange(
+          event,
+          'controlName',
+          0,
+          'option1',
+          '',
+          false,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith(['option1'], {
+          emitEvent: true,
+        });
+      });
+
+      it('should remove a value from the array when checkbox is unchecked', () => {
+        const uncheckEvent = {
+          target: { checked: false },
+        } as unknown as Event;
+        mockControl.value = ['option1', 'option2'];
+        component.onCheckboxChange(
+          uncheckEvent,
+          'controlName',
+          0,
+          'option1',
+          '',
+          false,
+        );
+        expect(mockControl.setValue).toHaveBeenCalledWith(['option2'], {
+          emitEvent: true,
+        });
+      });
+    });
+
+    // Edge cases
+    describe('edge cases', () => {
+      it('should do nothing if optionValue is null', () => {
+        const event = {
+          target: { checked: true },
+        } as unknown as Event;
+        component.onCheckboxChange(event, 'controlName', 0, null, '', false);
+        expect(component.preChatFormGroup.get).not.toHaveBeenCalled();
+      });
+
+      it('should warn if control is not found', () => {
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        (component.preChatFormGroup.get as jest.Mock).mockReturnValue(null);
+        const event = {
+          target: { checked: true },
+        } as unknown as Event;
+        component.onCheckboxChange(
+          event,
+          'controlName',
+          0,
+          'option1',
+          '',
+          false,
+        );
+        expect(warnSpy).toHaveBeenCalledWith(
+          "Control 'sections.0.controlName' not found.",
+        );
+        warnSpy.mockRestore();
+      });
+    });
+  });
+
+  // ---------- getValue Tests ----------
+  describe('getValue', () => {
+    it('should return option.label when valueType is "boolean"', () => {
+      const option = { label: 'Yes', value: true };
+      const result = component.getValue(option, 'boolean');
+      expect(result).toBe('Yes');
+    });
+
+    it('should return option.value when valueType is not "boolean"', () => {
+      const option = { label: 'Option 1', value: 'val1' };
+      const result = component.getValue(option, 'string');
+      expect(result).toBe('val1');
+    });
+
+    it('should return option.label when valueType is not "boolean" and option.value is undefined', () => {
+      const option = { label: 'Option 1' };
+      const result = component.getValue(option, 'string');
+      expect(result).toBe('Option 1');
+    });
+
+    it('should return option.value for "nps" valueType', () => {
+      const option = { label: '5', value: 5 };
+      const result = component.getValue(option, 'nps');
+      expect(result).toBe(5);
+    });
+
+    it('should return option.label as fallback when value is null/undefined for various types', () => {
+      const option = { label: 'Fallback Label', value: null };
+      const result = component.getValue(option, 'text');
+      expect(result).toBe('Fallback Label');
+    });
+  });
+
+  // ---------- getSelectedValue Tests ----------
+  describe('getSelectedValue', () => {
+    it('should return true when valueType is "nps" and option.value equals selectedValue', () => {
+      const option = { label: '5', value: 5 };
+      const result = component.getSelectedValue(option, 5, 'nps');
+      expect(result).toBe(true);
+    });
+
+    it('should return false when valueType is "nps" and option.value does not equal selectedValue', () => {
+      const option = { label: '5', value: 5 };
+      const result = component.getSelectedValue(option, 3, 'nps');
+      expect(result).toBe(false);
+    });
+
+    it('should return true when option.label equals selectedValue for non-nps types', () => {
+      const option = { label: 'Option 1', value: 'val1' };
+      const result = component.getSelectedValue(option, 'Option 1', 'string');
+      expect(result).toBe(true);
+    });
+
+    it('should return true when option.value equals selectedValue for non-nps types', () => {
+      const option = { label: 'Option 1', value: 'val1' };
+      const result = component.getSelectedValue(option, 'val1', 'string');
+      expect(result).toBe(true);
+    });
+
+    it('should return false when neither label nor value matches for non-nps types', () => {
+      const option = { label: 'Option 1', value: 'val1' };
+      const result = component.getSelectedValue(option, 'nomatch', 'string');
+      expect(result).toBe(false);
+    });
+
+    it('should return true when option.label equals selectedValue for "boolean" type', () => {
+      const option = { label: 'Yes', value: true };
+      const result = component.getSelectedValue(option, 'Yes', 'boolean');
+      expect(result).toBe(true);
+    });
+
+    it('should handle selectedValue as null or undefined for non-nps types', () => {
+      const option = { label: 'Option 1', value: 'val1' };
+      const result = component.getSelectedValue(option, null, 'string');
+      expect(result).toBe(false);
+    });
+  });
+
+  // ---------- getAnswerObj Tests ----------
+  describe('getAnswerObj', () => {
+    describe('INPUT type attributes', () => {
+      it('should return array with selectedValue for INPUT type', () => {
+        const attribute = { attributeType: 'INPUT' };
+        const selectedValue = 'test input';
+        const result = component.getAnswerObj(attribute, [], selectedValue, {});
+        expect(result).toEqual(['test input']);
+      });
+
+      it('should return array with null for INPUT type with null selectedValue', () => {
+        const attribute = { attributeType: 'INPUT' };
+        const result = component.getAnswerObj(attribute, [], null, {});
+        expect(result).toEqual([null]);
+      });
+    });
+
+    describe('TEXTAREA type attributes', () => {
+      it('should return array with selectedValue for TEXTAREA type', () => {
+        const attribute = { attributeType: 'TEXTAREA' };
+        const selectedValue = 'test textarea content';
+        const result = component.getAnswerObj(attribute, [], selectedValue, {});
+        expect(result).toEqual(['test textarea content']);
+      });
+    });
+
+    describe('checkbox type attributes without categories', () => {
+      it('should map possibleValues correctly when valueType is checkbox without categories', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'checkbox',
+          key: 'testKey',
+          attributeOptions: { enableCategory: false, enableStyle: true }
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1', optionWeightage: 10, optionStyle: 'style1' },
+          { label: 'Option 2', value: 'opt2', optionWeightage: 20 }
+        ];
+        const currentSectionAttributes = { testKey: ['Option 1'] };
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, currentSectionAttributes);
+
+        expect(result).toEqual([
+          {
+            label: 'Option 1',
+            value: 'opt1',
+            isSelected: true,
+            additionalAttributes: {
+              optionWeightage: 10,
+              enableStyle: true,
+              optionStyle: 'style1'
+            }
+          },
+          {
+            label: 'Option 2',
+            value: 'opt2',
+            isSelected: false,
+            additionalAttributes: {
+              optionWeightage: 20,
+              enableStyle: true,
+              optionStyle: null
+            }
+          }
+        ]);
+      });
+
+      it('should return empty array when rawValue is not set for checkbox without categories', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'checkbox',
+          key: 'testKey',
+          attributeOptions: { enableCategory: false, enableStyle: false }
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' },
+          { label: 'Option 2', value: 'opt2' }
+        ];
+        const currentSectionAttributes = {};
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, currentSectionAttributes);
+
+        expect(result).toEqual([
+          {
+            label: 'Option 1',
+            value: 'opt1',
+            isSelected: false,
+            additionalAttributes: {
+              optionWeightage: null,
+              enableStyle: false,
+              optionStyle: null
+            }
+          },
+          {
+            label: 'Option 2',
+            value: 'opt2',
+            isSelected: false,
+            additionalAttributes: {
+              optionWeightage: null,
+              enableStyle: false,
+              optionStyle: null
+            }
+          }
+        ]);
+      });
+    });
+
+    describe('checkbox type attributes with categories', () => {
+      it('should map categories correctly when enableCategory is true', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'checkbox',
+          key: 'testKey',
+          attributeOptions: {
+            enableCategory: true,
+            enableStyle: false,
+            attributeData: [
+              {
+                label: 'Category 1',
+                values: [
+                  { label: 'Opt1', value: 'val1', optionWeightage: 5 },
+                  { label: 'Opt2', value: 'val2' }
+                ]
+              },
+              {
+                label: 'Category 2',
+                values: [
+                  { label: 'Opt3', value: 'val3' }
+                ]
+              }
+            ]
+          }
+        };
+        const currentSectionAttributes = {
+          testKey: {
+            'Category 1': ['Opt1'],
+            'Category 2': []
+          }
+        };
+
+        const result = component.getAnswerObj(attribute, [], null, currentSectionAttributes);
+
+        expect(result).toHaveLength(2);
+        expect(result[0].category).toBe('Category 1');
+        expect(result[0].options).toHaveLength(2);
+        expect(result[0].options[0]).toEqual({
+          label: 'Opt1',
+          value: 'val1',
+          isSelected: true,
+          additionalAttributes: {
+            optionWeightage: 5,
+            enableStyle: false,
+            optionStyle: null
+          }
+        });
+        expect(result[0].options[1]).toEqual({
+          label: 'Opt2',
+          value: 'val2',
+          isSelected: false,
+          additionalAttributes: {
+            optionWeightage: null,
+            enableStyle: false,
+            optionStyle: null
+          }
+        });
+        expect(result[1].category).toBe('Category 2');
+      });
+
+      it('should handle missing rawValue for categories', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'checkbox',
+          key: 'testKey',
+          attributeOptions: {
+            enableCategory: true,
+            enableStyle: false,
+            attributeData: [
+              {
+                label: 'Category 1',
+                values: [
+                  { label: 'Opt1', value: 'val1' }
+                ]
+              }
+            ]
+          }
+        };
+        const currentSectionAttributes = {};
+
+        const result = component.getAnswerObj(attribute, [], null, currentSectionAttributes);
+
+        expect(result[0].options[0].isSelected).toBe(false);
+      });
+
+      it('should handle null attributeData gracefully', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'checkbox',
+          key: 'testKey',
+          attributeOptions: {
+            enableCategory: true,
+            attributeData: []
+          }
+        };
+
+        const result = component.getAnswerObj(attribute, [], null, {});
+        expect(result).toEqual([]);
+      });
+    });
+
+    describe('other valueType attributes (radio, dropdown, etc)', () => {
+      it('should map possibleValues when selectedValue is provided', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'radio',
+          attributeOptions: { enableStyle: true }
+        };
+        const possibleValues = [
+          { label: 'Radio 1', value: 'radio1', optionWeightage: 15, optionStyle: 'style1' },
+          { label: 'Radio 2', value: 'radio2', optionWeightage: 25 }
+        ];
+        const selectedValue = 'radio1';
+
+        const result = component.getAnswerObj(attribute, possibleValues, selectedValue, {});
+
+        expect(result).toHaveLength(2);
+        expect(result[0]).toEqual({
+          label: 'Radio 1',
+          value: 'radio1',
+          isSelected: true,
+          additionalAttributes: {
+            optionWeightage: 15,
+            enableStyle: true,
+            optionStyle: 'style1'
+          }
+        });
+        expect(result[1]).toEqual({
+          label: 'Radio 2',
+          value: 'radio2',
+          isSelected: false,
+          additionalAttributes: {
+            optionWeightage: 25,
+            enableStyle: true,
+            optionStyle: null
+          }
+        });
+      });
+
+      it('should handle selectedValue as object with value property', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'dropdown',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' },
+          { label: 'Option 2', value: 'opt2' }
+        ];
+        const selectedValue = { value: 'opt2', extra: 'data' };
+
+        const result = component.getAnswerObj(attribute, possibleValues, selectedValue, {});
+
+        expect(result[0].isSelected).toBe(false);
+        expect(result[1].isSelected).toBe(true);
+      });
+
+      it('should handle selectedValue as null', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'dropdown',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' },
+          { label: 'Option 2', value: 'opt2' }
+        ];
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+
+        expect(result[0].isSelected).toBe(false);
+        expect(result[1].isSelected).toBe(false);
+      });
+
+      it('should handle selectedValue as undefined', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'dropdown',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' }
+        ];
+
+        const result = component.getAnswerObj(attribute, possibleValues, undefined, {});
+
+        expect(result[0].isSelected).toBe(false);
+      });
+
+      it('should use getValue for getting option values', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'boolean',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: 'True Option', value: true },
+          { label: 'False Option', value: false }
+        ];
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+
+        expect(result[0].value).toBe('True Option');
+        expect(result[1].value).toBe('False Option');
+      });
+
+      it('should use getSelectedValue for determining selection', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'nps',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: '1', value: 1 },
+          { label: '5', value: 5 },
+          { label: '10', value: 10 }
+        ];
+        const selectedValue = 5;
+
+        const result = component.getAnswerObj(attribute, possibleValues, selectedValue, {});
+
+        expect(result[0].isSelected).toBe(false);
+        expect(result[1].isSelected).toBe(true);
+        expect(result[2].isSelected).toBe(false);
+      });
+
+      it('should handle missing optionStyle gracefully', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'radio',
+          attributeOptions: { enableStyle: true }
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' }
+        ];
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+
+        expect(result[0].additionalAttributes.optionStyle).toBe(null);
+      });
+
+      it('should default enableStyle to false when not provided', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'radio',
+          attributeOptions: {}
+        };
+        const possibleValues = [
+          { label: 'Option 1', value: 'opt1' }
+        ];
+
+        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+
+        expect(result[0].additionalAttributes.enableStyle).toBe(false);
+      });
+
+      it('should handle empty possibleValues array', () => {
+        const attribute = {
+          attributeType: 'OPTIONS',
+          valueType: 'radio',
+          attributeOptions: {}
+        };
+
+        const result = component.getAnswerObj(attribute, [], null, {});
+
+        expect(result).toEqual([]);
+      });
+    });
+  });
 });

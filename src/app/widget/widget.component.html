@@ -695,7 +695,7 @@
                                     *ngFor="let option of attribute.attributeOptions.attributeData[0].values; let optionIndex = index">
                                     <div class="radioWrapper">
                                       <mat-radio-button [disableRipple]="true" [value]="option.label">
-                                        {{ option.label }}
+                                      <span isEllipsisActive  class="text-wrap-fw">{{ option.label }}</span>
                                       </mat-radio-button>
 
                                     </div>
@@ -726,42 +726,57 @@
                             </ng-container>
 
                             <ng-container *ngSwitchCase="'checkbox'">
-                              <label class="questionLabel">
+                              <label class="inputField-label "
+                                [attr.for]="'checkbox_' + attribute.key + '_' + i + '_' +
+      replaceSpacesWithUnderscores(attribute.attributeOptions.attributeData[0]?.label) + '_' +
+      replaceSpacesWithUnderscores(attribute.attributeOptions.attributeData[0]?.values[0]?.label)"
+  >
+                                                                        <span class="question_label">
+                                                                            {{ attribute.label }}
+                                                                        </span>
+                                                                        <span *ngIf="attribute?.isRequired"
+                                                                            class="widget-required">*</span>
+                                                                    </label>
+                                                                    <div class="checkbox-container">
+                                                                        <div class="checkbox-box">
+                                                                            <div *ngFor="
+                                                                            let category of attribute.attributeOptions.attributeData;
+                                                                            let categoryIndex = index
+                                                                          " class="category-group">
+                                                                                <h3 *ngIf="attribute.attributeOptions.enableCategory"
+                                                                                    class="category-label">
+                                                                                    {{ category.label }}
+                                                                                </h3>
 
-                                <span class="attributeName" id="{{ attribute.key }}">{{
-                                  attribute.label
-                                  }}</span>
-                                <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
-                              </label>
-                              <div class="checkbox-container">
-                                <div class="checkbox-box">
-                                  <div
-                                    *ngFor="let category of attribute.attributeOptions.attributeData; let categoryIndex = index"
-                                    class="category-group">
-
-                                    <!-- Category Label (Only shown if categories are enabled) -->
-                                    <h3 *ngIf="attribute.attributeOptions.enableCategory" class="category-label">
-                                      {{ category.label }}
-                                    </h3>
-
-
-                                    <div class="option_field" [attr.data-required]="attribute.isRequired">
-                                      <label *ngFor="let option of category.values; let optionIndex = index"
-                                        class="checkbox-label">
-                                        <input type="checkbox" class="input-checkbox"
-                                          [checked]="isChecked(attribute.key, i, option.value, category.label)"
-                                          (change)="onCheckboxChange( $event,attribute.key,i, option.label,category.label,attribute.attributeOptions.enableCategory)" />
-                                        <span>{{ option.label }}</span>
-                                      </label>
-                                    </div>
-
-                                  </div>
-                                </div>
-                              </div>
+                                                                                <div class="option_field"
+                                                                                    [attr.data-required]="attribute.isRequired">
+                                                                                    <label
+                                                                                        *ngFor="let option of category.values; let optionIndex = index"
+                                                                                        class="checkbox-label">
+                                                                                        <input type="checkbox"
+                                                                                            class="input-checkbox"
+                                                                                            [id]="'checkbox_' + attribute.key + '_' + i + '_' + replaceSpacesWithUnderscores(category.label) + '_' + replaceSpacesWithUnderscores(option.label)"
+                                                                                            
+                                                                                            (change)="
+                                                                                  onCheckboxChange(
+                                                                                    $event,
+                                                                                    attribute.key,
+                                                                                    i,
+                                                                                    option.label,
+                                                                                    category.label,
+                                                                                    attribute.attributeOptions.enableCategory
+                                                                                  )
+                                                                                " />
+                                                                                        <span class="optionLabel">{{
+                                                                                            option.label }}</span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                               <div>
                               </div>
                             </ng-container>
-
                             <ng-container *ngSwitchCase="'boolean'">
                               <label class=" questionLabel">
 
@@ -1751,7 +1766,7 @@
                 <span>{{ file.fileName }}</span>
               </div>
             </div>
-            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()" class="remove-all-icon">close</mat-icon>
+            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()" (keydown.enter)="removeUploadFile()" class="remove-all-icon">close</mat-icon>
           </div>
           <!-- Widget Message Composer -->
           <div class="widget-composer main-composer-area">

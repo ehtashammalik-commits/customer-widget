@@ -442,9 +442,7 @@ button.close-widget-wrapper {
   overflow-y: scroll;
   height: 100%;
 
-  padding: 8px 0px 5px 10px !important;
   max-height: 450px;
-  padding-bottom: 12px;
   width: 100%;
   padding: 10px;
 }
@@ -2851,6 +2849,19 @@ mat-spinner {
   justify-content: start;
 }
 
+.text-wrap-fw {
+
+  width: 100% !important;
+   white-space: nowrap !important;
+    display: flex;
+  align-items: center;
+  justify-content: start;
+  .mat-radio-label-content{
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 .tooltip-sm {
   width: 100px !important;
 }
@@ -3243,7 +3254,6 @@ input[type='radio'] {
 
 
 :host ::ng-deep .mat-radio-container {
-  height: 14px;
   width: 14px;
 }
 
