@@ -81,7 +81,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private onChatResumedSubject: Subscription = new Subscription();
   private onWebRtcCallSubject: Subscription = new Subscription();
   private onCallbackRequestSubject: Subscription = new Subscription();
-  private onLanguageChangeSubscription: Subscription = new Subscription();
+  private readonly onLanguageChangeSubscription: Subscription = new Subscription();
   @ViewChild('autosize')
   autosize!: CdkTextareaAutosize;
   @ViewChild('myFileInput')
@@ -262,7 +262,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     file: 'File',
   };
 
-  private formStateMap = new Map<string, { values: any; status: string; schema: any }>();
+  private readonly formStateMap = new Map<string, { values: any; status: string; schema: any }>();
 
 
   // Widget Configuration
@@ -730,12 +730,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         break;
         
       case 'update_input_params':
-        let inputParams = event.data?.inputParams;
         // verify input params is not null or empty
-        if (inputParams != null && Object.keys(inputParams).length > 0) {
+        if (event.data?.inputParams != null && Object.keys(event.data?.inputParams).length > 0) {
           let storedInputParams = this.getAdditionalValue('INPUT_PARAMS') || {};
-          Object.keys(inputParams).forEach(element => {
-            storedInputParams[element] = inputParams[element];
+          Object.keys(event.data?.inputParams).forEach(element => {
+            storedInputParams[element] = event.data?.inputParams[element];
           });
           this.setAdditionalValue('INPUT_PARAMS', storedInputParams);
           console.log('Updated INPUT_PARAMS:', this.getAdditionalValue('INPUT_PARAMS'));
@@ -743,15 +742,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         break;
 
       case 'update_theme':
-        let themeColor = event.data?.value.toLowerCase();
-        console.log('Updating theme color to:', themeColor);
-        this.appliedColorTheme = themeColor;
+        console.log('Updating theme color to:', event.data?.value.toLowerCase());
+        this.appliedColorTheme = event.data?.value.toLowerCase();
         break;
 
       case 'set_ava_client_id':
-        let avaClientId = event.data?.value.toLowerCase();
-        console.log('Setting AVA Client ID to:', avaClientId);
-        this.avaClientId = avaClientId;
+        console.log('Setting AVA Client ID to:', event.data?.value.toLowerCase());
+        this.avaClientId = event.data?.value.toLowerCase();
         break;
     }
     
@@ -948,8 +945,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         // 🔑 Compute default value only for formMessageType
       const defaultValue =
         formType === 'formMessageType' ? this.formMessageTypeService.getDefaultValue(attribute) : '';
-        // console.log('Adding control:', attribute.key, 'with validators:', validators);
-
       sectionGroup.addControl(attribute.key, this.fb.control(defaultValue, validators));
       });
       console.log('section', section);
@@ -1197,7 +1192,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.setUserData(eventPayload.data, 'startChat');
       }
     } catch (error) {
-      
+      console.error('Error while submitting the form:', error);
     }
   }
 
@@ -1485,7 +1480,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const currentSectionAttributes = sectionAttributes[sectionIndex]
       if (currentSectionAttributes) {
         section.attributes.forEach((attribute: any) => {
-          // console.log("ATTRIBUte", attribute);
 
           const attributeData = attribute.attributeOptions?.attributeData || [];
           const possibleValues = attributeData.length > 0 ? attributeData[0].values : [];
@@ -1612,46 +1606,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     console.log('Change Screen:', screen);
     switch (screen) {
       case 'widget':
-        this.stopEndViewTimer();
-        if (
-          this.storageService.getItem('wrapper-hide', this.storageType) ===
-            'true' ||
-          this.getAdditionalValue('HIDE_CALLOUT_PANEL')
-        ) {
-          this.additionalPanel = false;
-          this.resizeWidget('icon-view');
-        } else if (this.isCalloutViewCompact) {
-          this.additionalPanel = true;
-          this.resizeWidget('compact-wraper-view');
-        } else {
-          this.additionalPanel = true;
-          this.resizeWidget('wraper-view');
-        }
-        if (this.standaloneWebRtc) {
-          this.authenticateSecureLinkKey(false);
-        }
-        this.preChatFormScreen = false;
-        this.callbackFormScreen = false;
-        this.webRtcVideoCallScreen = false;
-        this.callbackResponseScreen = false;
-        this.widgetChatScreen = false;
-        this.chatError = false;
-        this.chatEndScreen = false;
-        this.isChatMax = false;
-        this.isCallbackMax = false;
-        this.isWebRtcMax = false;
-        this.fileName = '';
-        if(this.getAdditionalValue('HIDE_WIDGET_ICON')){
-          this.isIconWidget = false;
-        } else{
-          this.isIconWidget = true;
-        }
-        if (this.isChatActive) {
-          this.__postMessageHandlerService.sendPostMessage({
-            type: "EF_WIDGET_STATE_CHANGED",
-            state: "CHAT_MINIMIZED"
-          });
-        }
+        this.handleWidgetScreenChange();
         break;
       case 'chat':
         this.additionalPanel = false;
@@ -1769,6 +1724,49 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         break;
     }
     this.cdRef.detectChanges();
+  }
+
+  handleWidgetScreenChange() {
+    this.stopEndViewTimer();
+    if (
+      this.storageService.getItem('wrapper-hide', this.storageType) ===
+        'true' ||
+      this.getAdditionalValue('HIDE_CALLOUT_PANEL')
+    ) {
+      this.additionalPanel = false;
+      this.resizeWidget('icon-view');
+    } else if (this.isCalloutViewCompact) {
+      this.additionalPanel = true;
+      this.resizeWidget('compact-wraper-view');
+    } else {
+      this.additionalPanel = true;
+      this.resizeWidget('wraper-view');
+    }
+    if (this.standaloneWebRtc) {
+      this.authenticateSecureLinkKey(false);
+    }
+    this.preChatFormScreen = false;
+    this.callbackFormScreen = false;
+    this.webRtcVideoCallScreen = false;
+    this.callbackResponseScreen = false;
+    this.widgetChatScreen = false;
+    this.chatError = false;
+    this.chatEndScreen = false;
+    this.isChatMax = false;
+    this.isCallbackMax = false;
+    this.isWebRtcMax = false;
+    this.fileName = '';
+    if(this.getAdditionalValue('HIDE_WIDGET_ICON')){
+      this.isIconWidget = false;
+    } else{
+      this.isIconWidget = true;
+    }
+    if (this.isChatActive) {
+      this.__postMessageHandlerService.sendPostMessage({
+        type: "EF_WIDGET_STATE_CHANGED",
+        state: "CHAT_MINIMIZED"
+      });
+    }
   }
 
   // Image Overlay Methods
@@ -2114,7 +2112,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.customerData.channelCustomerIdentifier,
         );
       } else {
-        if (event.data && event.data.auth) {
+        if (event.data?.auth) {
           this.sdk.onChatResumed(
             event.data.auth.serviceIdentifier,
             event.data.auth.channelCustomerIdentifier,
@@ -2259,10 +2257,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (this.isPlainMessage(type, senderType)) {
       this.handlePlainMessage(cimMessage, intent, senderType);
       return;
+    } else if (cimMessage.header.sender.type.toLowerCase() === 'customer') {
+      this.handleCustomerCimMessage(cimMessage);
+    } else {
+      this.handleOtherMessages(cimMessage, type, senderType, intent);
     }
-    else if (cimMessage.header.sender.type.toLowerCase() === 'customer') {
 
-      this.disableOldInteractiveMessages(this.cimMessage);
+    if (cimMessage?.id) {
+      this.messageMap.set(cimMessage.id, cimMessage);
+    }
+  }
+
+  handleCustomerCimMessage(cimMessage: any) {
+    this.disableOldInteractiveMessages(this.cimMessage);
       if (
         cimMessage.header.originalMessageId &&
         cimMessage.header.intent &&
@@ -2270,19 +2277,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         cimMessage.header.additionalData?.carousalCardId
       ) {
         this.handleCarousalQuotedMessage(cimMessage);
-      }
-
-
-      else if(cimMessage.header.originalMessageId &&
+      } else if(cimMessage.header.originalMessageId &&
         cimMessage.header.intent && cimMessage.header.intent.toLowerCase() !== 'update') {
           this.handleClickableList(cimMessage);
-      }
-
-      else if(cimMessage.body.type.toLowerCase() === 'form_data') {
+      } else if(cimMessage.body.type.toLowerCase() === 'form_data') {
         this.handleFormMessageType(cimMessage);
-      }
-
-      else {
+      } else {
        this.cimMessage.push(cimMessage);
        this.browserNotificationService.notify(cimMessage);
        this.scrollToBottom();
@@ -2293,14 +2293,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (cimMessage.header.originalMessageId) {
         this.applyInteractionState(cimMessage);
       }
-    } else {
-      this.handleOtherMessages(cimMessage, type, senderType, intent);
-    }
-
-
-    if (cimMessage?.id) {
-      this.messageMap.set(cimMessage.id, cimMessage);
-    }
   }
 
   private isDeliveryNotification(type: string, senderType: string): boolean {
@@ -2982,7 +2974,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
       
       // Extract and merge additionalButtonDetails parameters into entities
-      if (additionalButtonDetails && additionalButtonDetails.parameters) {
+      if (additionalButtonDetails?.parameters) {
         try {
           let buttonParameters: any = {};
           
@@ -3066,8 +3058,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     } else if(messageType === 'form_data'){
       const formData = formMessageTypeData;
       console.log('Form Data:', formData);
-        header.originalMessageId = originalMessageId ? originalMessageId : null;
-        header.intent = intent ? intent : null;
+        header.originalMessageId = originalMessageId || null;
+        header.intent = intent || null;
         body.type = 'FORM_DATA';
         body.markdownText = '';
         body.sections = formMessageTypeData?.body?.sections || [];
@@ -4004,7 +3996,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.activeVideoView = true;
         this.errorDuringWebRTCCall = false;
 
-        if (this.__appConfig.appConfig.VIDEO == false) {
+        if (!this.__appConfig.appConfig.VIDEO) {
           this.isAudioCallActive = true;
           this.activeVideoView = false;
         }
@@ -5149,7 +5141,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       const formGroup = await this.buildFormMessage(cimMessage);
      
       if (status === 'filled') {
-        await this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
+        this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
       }
 
       this.handleFormMessageType(cimMessage);
@@ -5240,9 +5232,11 @@ async handleActionButtonClick(button: any, message: any): Promise<void> {
   const messageId = message.id;
   const formGroup = this.formGroupsMap[messageId];
 
-  if (!formGroup) return;
+  if (!formGroup) {
+    return;
+  } 
 
-   if (button.action === 'reset') {
+  if (button.action === 'reset') {
     const formGroup = this.formGroupsMap[message.id];
     if (formGroup) {
       // Get schema of attributes again
@@ -5262,8 +5256,6 @@ async handleActionButtonClick(button: any, message: any): Promise<void> {
     }
     return;
   }
-
-
 
   if (button.action === 'cancel') {
     const finalPayload = this.createFormDataObject();
@@ -5379,7 +5371,7 @@ replaceSpacesWithUnderscores(input: string): string {
     if (link) {
       const linkUrl = link.href;
       const chatContainer = document.getElementsByClassName('widget-chat-content')[0];
-      if (chatContainer && chatContainer.contains(link)) {
+      if (chatContainer?.contains(link)) {
         console.log('Link detected:', linkUrl);
         this.__postMessageHandlerService.sendLinkClickedPostMessage(linkUrl);
       }
