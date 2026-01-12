@@ -3230,7 +3230,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   this.activeVideoView = false;
 
   if (this.standaloneWebRtc) {
-    if (this.dialogId == null) {
+    if (this.dialogId === null || this.dialogId === undefined) {
       this.showInvalidCodeError = true;
       this.callPopUpView = false;
       this.activeVideoView = false;
