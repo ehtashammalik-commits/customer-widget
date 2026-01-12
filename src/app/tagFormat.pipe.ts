@@ -17,7 +17,7 @@ export class tagFormatPipe implements PipeTransform {
       // No links found, just apply formatting and return
       return ibsFormat(
         value,
-        [['em', '`'], ['b', '*'], ['i', '_'], ['strike', '~'], ['mark', '!']],
+        [['em', '`'], ['b', '*'], ['i', '_'], ['strike', '~']],
         { detectLinks: enableDynamicLink, target: "_blank" },
         { allowXssEscaping: false }
       );
@@ -37,7 +37,7 @@ export class tagFormatPipe implements PipeTransform {
     // Apply text formatting to content with placeholders
     processedValue = ibsFormat(
       processedValue,
-      [['em', '`'], ['b', '*'], ['i', '_'], ['strike', '~'], ['mark', '!']],
+      [['em', '`'], ['b', '*'], ['i', '_'], ['strike', '~']],
       { detectLinks: enableDynamicLink, target: "_blank" },
       { allowXssEscaping: false }
     );
@@ -47,7 +47,7 @@ export class tagFormatPipe implements PipeTransform {
       // Apply formatting to the link text
       const formattedLinkText = ibsFormat(
         linkText,
-        [['em', '`'], ['b', '*'], ['i', '_'], ['strike', '~'], ['mark', '!']],
+        [['em', '`'], ['b', '*'], ['i', '_'], ['strike', '~']],
         { detectLinks: false, target: "_blank" },
         { allowXssEscaping: false }
       );
