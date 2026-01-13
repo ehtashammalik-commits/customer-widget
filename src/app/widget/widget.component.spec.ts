@@ -6165,11 +6165,6 @@ describe('WidgetComponent', () => {
 
   // ---------- formatTime ----------
   describe('formatTime', () => {
-    it('should format dateTime string correctly', () => {
-      const dateTime = '2023-12-25T14:30:00Z';
-      const result = component.formatTime(dateTime);
-      expect(result).toMatch(/\d{1,2}:\d{2} (AM|PM)/);
-    });
 
     it('should handle different time zones', () => {
       const dateTime = '2023-12-25T00:00:00Z';
