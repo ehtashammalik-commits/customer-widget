@@ -50,6 +50,7 @@ export class TranscriptComponent implements OnInit {
           trustedOrigins.push(new URL(window.opener.location.href).origin);
         } catch (e) {
           // Cross-origin opener, can't access location
+          console.error('Error accessing opener location:', e);
         }
       }
 
@@ -58,7 +59,7 @@ export class TranscriptComponent implements OnInit {
         return;
       }
 
-      if (event.data && event.data.type === 'JWT_TOKEN') {
+      if (event.data?.type === 'JWT_TOKEN') {
         this.receivedToken = event.data.token;
         console.log('JWT token received via postMessage');
       }
@@ -97,7 +98,6 @@ export class TranscriptComponent implements OnInit {
       this.storageService.setItem('jwt_token', jwtToken);
       await this.loadChatData(req);
       this.ngxLoader.stop();
-      // this.printChatTranscript();
 
       // Prepare icon URLs
       let originURL = '';

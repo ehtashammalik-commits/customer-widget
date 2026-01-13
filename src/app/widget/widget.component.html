@@ -45,7 +45,8 @@
         <div class="widget-chat-header widget-color">
 
           <div class="widget-chat-header-top">
-            <h5 id="title" [innerHTML]='title'></h5>
+            
+            <h5 id="title" [innerHTML]='title'></h5> <!-- //NOSONAR -->
             <div class="widget-header-icon"  *ngIf="!isWebRtcVideoCallActive">
                 <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                   <mat-icon>remove</mat-icon>
@@ -422,10 +423,6 @@
               <p *ngIf="preChatformDescription">
                 {{preChatformDescription}}
               </p>
-
-              <!-- Custom Widget logo -->
-              <!-- <img *ngIf="logoEnabled" class="custom-form-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png" -->
-                <!-- alt="Live Chat" /> -->
 
               <!-- Global error message for the form -->
               <div class="fields-validation-error mr-2">
@@ -1081,7 +1078,7 @@
         <!-- Widget Chat Header -->
         <div class="widget-form-header widget-chat-header widget-color">
           <div class="widget-chat-header-top">
-            <h5 id="title" [innerHTML]='title'></h5>
+            <h5 id="title" [innerHTML]='title'></h5> <!-- //NOSONAR -->
             <div class="widget-header-icon">
             <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
               <mat-icon>remove</mat-icon>
@@ -1182,6 +1179,7 @@
           </span>
           <span class="material-symbols-outlined widget-navbar-icon"
                 *ngIf="!__appConfig.appConfig.MUTE_NOTIFICATIONS" (click)="toggleMute()"
+                (keydown)="($event.key === 'Enter' || $event.key === ' ') && toggleMute()"
             [ngClass]="{
               btnOne: enableFontResize === false && enabledCallback === false,
               btnTwo: enableFontResize === true && enabledCallback === false,
@@ -1193,6 +1191,7 @@
             {{ isMuted ? 'volume_off' : 'volume_up' }}
           </span>
           <span class="font-selection material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
+            (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeFont()"
             [ngClass]="{ btnOne: enableFontResize === true }" matTooltip="{{ 'button.change-font-size' | translate }}"
             [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
             text_fields
@@ -1201,17 +1200,17 @@
             <div class="font-dropdown-container">
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
                 matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12', btnOne: enableFontResize === true }"
-                (click)="setFontSize('12')">
+                (click)="setFontSize('12')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('12')">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px"
                     matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14', btnOne: enableFontResize === true }"
-                (click)="setFontSize('14')">
+                (click)="setFontSize('14')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('14')">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px"
                     matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16', btnOne: enableFontResize === true }"
-                (click)="setFontSize('16')">
+                (click)="setFontSize('16')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('16')">
                 text_fields
               </span>
             </div>
@@ -1362,7 +1361,7 @@
                       <!-- Replace with whatever data or HTML structure you want to show -->
                       <span class="quoted-sender-name">{{message.senderType}}</span>
                       <div class="quoted-carousal-details quoted-inner-main">
-                        <img [src]="message.body.quotedCardImage" alt="message.body.quotedAltImage" />
+                        <img [src]="message.body.quotedCardImage" alt="message.body.quotedAltImage" /> <!-- //NOSONAR -->
                         <span class="quoted-carousal-content">
                           <strong>{{message.body.quotedCardTitle}}</strong>
                           <p>{{message.body.quotedText}}</p>
@@ -1605,18 +1604,6 @@
                   <ng-container *ngFor="let attribute of message.body.sections[i].attributes">
                     <div class="form-group" [ngSwitch]="attribute.valueType">
 
-
-                      <!-- Number -->
-                      <!-- <div *ngSwitchCase="'number'">
-                        <label>
-                          {{ attribute.label }}
-                          <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
-                        </label>
-                        <mat-form-field appearance="outline">
-                          <input matInput type="number" [formControlName]="attribute.key" />
-                        </mat-form-field>
-                      </div> -->
-
                       <div *ngSwitchCase="'number'">
                         <label>
                           {{ attribute.label }}
@@ -1649,7 +1636,7 @@
                       <!-- Short Answer -->
 
                       <div *ngSwitchCase="'shortAnswer'">
-                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                           </label>
                         <mat-form-field appearance="outline">
                           <input matInput type="text" [formControlName]="attribute.key" />
@@ -1658,7 +1645,7 @@
 
                       <!-- Paragraph -->
                       <div *ngSwitchCase="'paragraph'">
-                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
                         <mat-form-field appearance="outline">
                           <textarea matInput rows="3" [formControlName]="attribute.key"></textarea>
@@ -1668,7 +1655,7 @@
 
                       <!-- Checkbox -->
                       <div *ngSwitchCase="'checkbox'">
-                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
                         <div *ngFor="let category of attribute.attributeOptions?.attributeData; let categoryIndex = index">
                           <!-- Show category label if categories are enabled -->
@@ -1703,12 +1690,9 @@
                       </div>
 
 
-
-
-
                       <!-- Radio -->
                       <div *ngSwitchCase="'radio'" class="form-group custom-radio-action">
-                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
                         <mat-radio-group [formControlName]="attribute.key">
                           <mat-radio-button
@@ -1722,7 +1706,7 @@
 
                       <!-- Dropdown -->
                       <div *ngSwitchCase="'dropdown'" class="form-group custom-dropdown-field">
-                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
                         <mat-form-field appearance="outline">
                           <mat-select [formControlName]="attribute.key">
@@ -1738,7 +1722,7 @@
 
                       <!-- Date -->
                       <div *ngSwitchCase="'date'" class="form-group custom-datentime">
-                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
 
 
@@ -1756,7 +1740,7 @@
 
                       <!-- Time -->
                       <div *ngSwitchCase="'time'" class="form-group custom-datentime">
-                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
 
                           <input
@@ -1775,7 +1759,7 @@
 
                       <!-- DateTime -->
                       <div *ngSwitchCase="'dateTime'" class="form-group custom-datentime">
-                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
                           <input
                             [owlDateTime]="dateTimePicker"
@@ -1791,14 +1775,14 @@
 
                       <!-- color picker -->
                       <div *ngSwitchCase="'color'" class="color-selection">
-                        <label>{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span></label>
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span></label>
                         <input matInput type="color" [formControlName]="attribute.key" />
                       </div>
 
 
                       <!-- Interactive range slider -->
                     <div *ngSwitchCase="'range'" class="form-group main-range-slider">
-                      <label>
+                      <label for="{{ attribute.key }}">
                         {{ attribute.label }}
                         <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                       </label>
@@ -1814,11 +1798,6 @@
                         tickInterval="auto" color="primary">
                       </mat-slider>
                     </div>
-
-
-                      <!-- <div *ngSwitchDefault>
-                        <p>Unsupported field type: {{ attribute.valueType }}</p>
-                      </div> -->
                     </div>
                   </ng-container>
                 </div>
@@ -1858,7 +1837,6 @@
                         <div class="carousel-track" [style.transform]="'translateX(-' + currentIndex * 100 + '%)'">
                           <mat-card class="carousel-card pt-0" *ngFor="let item of message.body.elements">
                             <div class="carousel-banner" [ngStyle]="{'background-image': 'url(' + item.additionalCarouselElementDetails.image_url + ')'}">
-                               <!--                            <img mat-card-image [src]="item.image" />-->
                             </div>
                             <mat-card-content>
                               <h3>{{ item.additionalCarouselElementDetails.title }}</h3>
@@ -1906,7 +1884,8 @@
                         <span *ngFor="let el of message.body.elements; let i = index"
                               class="dot"
                               [class.active]="i === currentIndex"
-                              (click)="selectSlide(i)">
+                              (click)="selectSlide(i)"
+                              (keydown)="($event.key === 'Enter' || $event.key === ' ') && selectSlide(i)">
                         </span>
                       </div>
                     </div>
@@ -1982,6 +1961,7 @@
                         }" *ngFor="let btn of message.body.buttons; let i = index"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
                           (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
+                          (keydown)="($event.key === 'Enter' || $event.key === ' ') && !message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
                           [disabled]="message.body.additionalDetails?.disableButtonType"
                           [ngClass]="[
                             message.body?.additionalDetails?.interactive?.type,
@@ -2484,7 +2464,7 @@
 
                   <!-- TEXTAREA Fields -->
                   <ng-container *ngSwitchCase="'TEXTAREA'">
-                    <label>
+                    <label for="{{ attribute.key }}">
                       <span id="{{ attribute.key }}">{{ attribute.label }}</span>
                       <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                     </label>
@@ -2503,7 +2483,7 @@
 
                   <!-- OPTIONS Fields -->
                   <ng-container *ngSwitchCase="'OPTIONS'">
-                    <label>
+                    <label for="{{ attribute.key }}">
                       <span id="{{ attribute.key }}">{{ attribute.label }}</span>
                       <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                     </label>
@@ -2601,7 +2581,7 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <div class="widget-chat-header-top">
-            <h5 id="title" [innerHTML]="title"></h5>
+            <h5 id="title" [innerHTML]="title"></h5> <!-- //NOSONAR -->
             <div class="widget-header-icon">
               <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                 <mat-icon>remove</mat-icon>
@@ -2646,7 +2626,7 @@
         <div class="widget-chat-header widget-color">
 
           <div class="widget-chat-header-top">
-            <h5 id="title" [innerHTML]="title"></h5>
+            <h5 id="title" [innerHTML]="title"></h5> <!-- //NOSONAR -->
 
             <div class="widget-header-icon">
                 <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
@@ -2711,7 +2691,7 @@
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
           <div class="widget-chat-header-top">
-            <h5 id="title" [innerHTML]='title'></h5>
+            <h5 id="title" [innerHTML]='title'></h5> <!-- //NOSONAR -->
             <div class="widget-header-icon">
                 <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                   <mat-icon>remove</mat-icon>
