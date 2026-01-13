@@ -1096,20 +1096,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       finalPayload.body.formId = '';
       finalPayload.body.formTitle= message.body.formTitle || '';
 
-      this.constructCimMessage(
-          'FORM_DATA',
-          null,
-          null,
-          finalPayload.id,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          finalPayload,
-          'filled'
-        );
+      this.constructCimMessage('FORM_DATA', {
+        text: null,
+        intent: null,
+        originalMessageId: finalPayload.id,
+        fileMimeType: null,
+        fileName: null,
+        fileSize: null,
+        additionalText: null,
+        fileType: null,
+        carousalCardId: null,
+        formMessageTypeData: finalPayload,
+        status: 'filled'
+      });
   }
 
 
@@ -2605,8 +2604,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
 
     // disabling the emoji button if the composer is disabled for any reason. 
-    const emojiTrigger = document.querySelector('.emoji-btn') as HTMLElement;
-    if (emojiTrigger) {
+    const emojiTrigger = document.querySelector('.emoji-btn');
+    if (emojiTrigger instanceof HTMLElement) {
       emojiTrigger.style.pointerEvents = 'none';
       emojiTrigger.style.opacity = '0.5';
     }
@@ -2633,61 +2632,73 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.cimMessage = [];
     this.clearMessageData();
     cimMessages.forEach((cimMessage) => {
-      const type = cimMessage.body.type?.toLowerCase();
-      const senderType = cimMessage.header.sender?.type?.toLowerCase();
-      const intent = cimMessage.header.intent?.toLowerCase();
-
-      if (cimMessage.body.type?.toLowerCase() === 'form_data') {
-        this.handleRefreshCasesofFormMessageType(cimMessage);
-      }
-
-      if (this.isPlainMessage(type, senderType)) {
-        this.extractSurveyFromPlainMessage(cimMessage);
-        if (senderType === 'agent') {
-          this.setAgentName(cimMessage);
-        }
-        if (intent === 'update') {
-          this.editMessage(cimMessage);
-        }
-        this.cimMessage.push(cimMessage);
-        this.disableOldInteractiveMessages(this.cimMessage);
-        this.isChatActive = true;
-        this.processSeenMessages();
-        this.scrollToBottom();
-      } else {
-        this.clearTypingIndicatorIfNeeded(type, senderType, cimMessage);
-
-        if (type === 'notification' && senderType === 'agent') {
-          this.enrichNotificationWithNames(cimMessage);
-        }
-        if (senderType === 'agent') {
-          this.enrichNotificationWithNames(cimMessage);
-        }
-
-        if (intent === 'update') {
-          this.editMessage(cimMessage);
-        }
-
-        if(cimMessage.header.additionalData?.carousalCardId) {
-
-          this.handleCarousalQuotedMessage(cimMessage);
-        }
-
-        if(cimMessage.header.originalMessageId && cimMessage.header.intent && !cimMessage.header.additionalData?.carousalCardId) {
-          this.handleClickableList(cimMessage)
-        }
-
-        if(cimMessage.body.type.toLowerCase() != 'deliverynotification') {
-          this.disableOldInteractiveMessages(this.cimMessage);
-        }
-        this.cimMessage.push(cimMessage);
-        
-        this.isChatActive = true;
-        this.processSeenMessages();
-        this.scrollToBottom();
-      }
+      this.processResumedMessage(cimMessage);
     });
   }
+
+  private processResumedMessage(cimMessage: any) {
+    const type = cimMessage.body.type?.toLowerCase();
+    const senderType = cimMessage.header.sender?.type?.toLowerCase();
+    const intent = cimMessage.header.intent?.toLowerCase();
+
+    if (cimMessage.body.type?.toLowerCase() === 'form_data') {
+      this.handleRefreshCasesofFormMessageType(cimMessage);
+    }
+
+    if (this.isPlainMessage(type, senderType)) {
+      this.processPlainMessage(cimMessage, senderType, intent);
+    } else {
+      this.processNonPlainMessage(cimMessage, type, senderType, intent);
+    }
+  }
+
+  private processPlainMessage(cimMessage: any, senderType: string, intent: string) {
+    this.extractSurveyFromPlainMessage(cimMessage);
+    if (senderType === 'agent') {
+      this.setAgentName(cimMessage);
+    }
+    if (intent === 'update') {
+      this.editMessage(cimMessage);
+    }
+    this.cimMessage.push(cimMessage);
+    this.disableOldInteractiveMessages(this.cimMessage);
+    this.isChatActive = true;
+    this.processSeenMessages();
+    this.scrollToBottom();
+  }
+
+  private processNonPlainMessage(cimMessage: any, type: string, senderType: string, intent: string) {
+    this.clearTypingIndicatorIfNeeded(type, senderType, cimMessage);
+
+    if (type === 'notification' && senderType === 'agent') {
+      this.enrichNotificationWithNames(cimMessage);
+    }
+    if (senderType === 'agent') {
+      this.enrichNotificationWithNames(cimMessage);
+    }
+
+    if (intent === 'update') {
+      this.editMessage(cimMessage);
+    }
+
+    if(cimMessage.header.additionalData?.carousalCardId) {
+      this.handleCarousalQuotedMessage(cimMessage);
+    }
+
+    if(cimMessage.header.originalMessageId && cimMessage.header.intent && !cimMessage.header.additionalData?.carousalCardId) {
+      this.handleClickableList(cimMessage)
+    }
+
+    if(cimMessage.body.type.toLowerCase() != 'deliverynotification') {
+      this.disableOldInteractiveMessages(this.cimMessage);
+    }
+    this.cimMessage.push(cimMessage);
+    
+    this.isChatActive = true;
+    this.processSeenMessages();
+    this.scrollToBottom();
+  }
+  
   getAgentDisplayName(user: any): string {
     if (user) {
       const { firstName, lastName } = user;
@@ -2883,11 +2894,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     } else if (replyInputValue.trim() !== '') {
       console.log('Customer message: ', replyInputValue.trim());
 
-      this.constructCimMessage('PLAIN',
-        replyInputValue.trim(),
-        null,
-        null,
-      );
+      this.constructCimMessage('PLAIN', {
+        text: replyInputValue.trim(),
+        intent: null,
+        originalMessageId: null
+      });
 
       this.clearMessageData();
     }
@@ -2917,19 +2928,37 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   constructCimMessage(
     msgType: string,
-    text?: string,
-    intent?: null | string,
-    originalMessageId?: null | string,
-    fileMimeType?: string,
-    fileName?: string,
-    fileSize?: number,
-    additionalText?: string,
-    fileType?: string,
-    carousalCardId?: null | string,
-    formMessageTypeData?: any,
-    status?: 'filled' | 'cancelled',
-    additionalButtonDetails?: any,
+    options: {
+      text?: string,
+      intent?: null | string,
+      originalMessageId?: null | string,
+      fileMimeType?: string,
+      fileName?: string,
+      fileSize?: number,
+      additionalText?: string,
+      fileType?: string,
+      carousalCardId?: null | string,
+      formMessageTypeData?: any,
+      status?: 'filled' | 'cancelled',
+      additionalButtonDetails?: any,
+    }
   ) {
+
+    const {
+      text,
+      intent,
+      originalMessageId,
+      fileMimeType,
+      fileName,
+      fileSize,
+      additionalText,
+      fileType,
+      carousalCardId,
+      formMessageTypeData,
+      status,
+      additionalButtonDetails
+    } = options
+    
     let header = {
       originalMessageId: null as null | string,
       intent: null as null | string,
@@ -3215,16 +3244,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               }
             }
 
-            this.constructCimMessage(res.type.split('/')[0], 
-              '',
-              null,
-              null,
-              res.type,
-              res.name,
-              res.size,
-              additionalText,
-              res.name.split('.').pop(),
-            );
+            this.constructCimMessage(res.type.split('/')[0], {
+              text: '',
+              intent: null,
+              originalMessageId: null,
+              fileMimeType: res.type,
+              fileName: res.name,
+              fileSize: res.size,
+              additionalText: additionalText,
+              fileType: res.name.split('.').pop()
+            });
           });
         } else {
           this.snackBar.open(files[i].name + ' unsupported type', 'X', {
@@ -3260,38 +3289,28 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   ) {
     console.log('Button data is ', data);
     if (data.title.trim() !== '') {
-      this.constructCimMessage(
-        'PLAIN',
-        data.title.trim(),
-        data.payload,
-        originalMessageId,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        data.additionalButtonDetails
-      );
+      this.constructCimMessage('PLAIN', {
+        text: data.title.trim(),
+        intent: data.payload,
+        originalMessageId: originalMessageId,
+        additionalButtonDetails: data.additionalButtonDetails
+      });
     }
   }
 
   sendCarousalMessage(data: any, originalMessageId : string, carousalCardId? : null | string) {
     if (data.title.trim() !== '') {
-      this.constructCimMessage(
-        'PLAIN',
-        data.title.trim(),
-        data.payload,
-        originalMessageId,
-        null,
-        null,
-        null,
-        null,
-        null,
-        carousalCardId
-      );
+      this.constructCimMessage('PLAIN', {
+        text: data.title.trim(),
+        intent: data.payload,
+        originalMessageId: originalMessageId,
+        fileMimeType: null,
+        fileName: null,
+        fileSize: null,
+        additionalText: null,
+        fileType: null,
+        carousalCardId: carousalCardId
+      });
     }
   }
 
@@ -5264,20 +5283,19 @@ async handleActionButtonClick(button: any, message: any): Promise<void> {
     finalPayload.id = messageId;
     finalPayload.body.formTitle = message.body.formTitle || '';
 
-    this.constructCimMessage(
-      'FORM_DATA',
-      null,
-      null,
-      finalPayload.id,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      finalPayload,
-      'cancelled',   // status
-    );
+    this.constructCimMessage('FORM_DATA', {
+      text: null,
+      intent: null,
+      originalMessageId: finalPayload.id,
+      fileMimeType: null,
+      fileName: null,
+      fileSize: null,
+      additionalText: null,
+      fileType: null,
+      carousalCardId: null,
+      formMessageTypeData: finalPayload,
+      status: 'cancelled'
+    });
   }
 }
 

@@ -2192,7 +2192,7 @@ describe('WidgetComponent', () => {
       const payloadText = 'test message';
       component.customerData = { id: 'cust1' } as any;
 
-      component.constructCimMessage('PLAIN', payloadText);
+      component.constructCimMessage('PLAIN', { text: payloadText });
 
       expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
       const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
@@ -2204,17 +2204,16 @@ describe('WidgetComponent', () => {
       const fileName = 'doc.pdf';
       component.customerData = { id: 'cust1' } as any;
 
-      component.constructCimMessage(
-        'application',
-        '', // text
-        null, // intent
-        null, // originalMessageId
-        'application/pdf', // fileMimeType
-        fileName, // fileName
-        1234, // fileSize
-        'extra text', // additionalText
-        'file' // fileType
-      );
+      component.constructCimMessage('application', {
+        text: '',
+        intent: null,
+        originalMessageId: null,
+        fileMimeType: 'application/pdf',
+        fileName: fileName,
+        fileSize: 1234,
+        additionalText: 'extra text',
+        fileType: 'file'
+      });
 
       expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
       const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
@@ -2226,17 +2225,16 @@ describe('WidgetComponent', () => {
       const fileName = 'img.png';
       component.customerData = { id: 'cust1' } as any;
 
-      component.constructCimMessage(
-        'image',
-        '', // text
-        null, // intent
-        null, // originalMessageId
-        'image/png', // fileMimeType
-        fileName, // fileName
-        456, // fileSize
-        'caption text', // additionalText
-        'image' // fileType
-      );
+      component.constructCimMessage('image', {
+        text: '',
+        intent: null,
+        originalMessageId: null,
+        fileMimeType: 'image/png',
+        fileName: fileName,
+        fileSize: 456,
+        additionalText: 'caption text',
+        fileType: 'image'
+      });
 
       expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
       const payload = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
@@ -2245,7 +2243,7 @@ describe('WidgetComponent', () => {
     });
 
     it('should handle unknown message type', () => {
-      component.constructCimMessage('unknown');
+      component.constructCimMessage('unknown', {});
 
       expect(mockMatSnackBar.open).toHaveBeenCalledWith(
         'unable to process the file',
@@ -2551,7 +2549,11 @@ describe('WidgetComponent', () => {
       });
 
       it('should send plain text message correctly', () => {
-        component.constructCimMessage('PLAIN', 'Hello world', null, null);
+        component.constructCimMessage('PLAIN', {
+          text: 'Hello world',
+          intent: null,
+          originalMessageId: null
+        });
 
         expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
         const args = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
@@ -2561,17 +2563,16 @@ describe('WidgetComponent', () => {
       });
 
       it('should send media message correctly', () => {
-        component.constructCimMessage(
-          'image',
-          '',
-          null,
-          null,
-          'image/png',
-          'test.png',
-          1024,
-          'Image caption',
-          'image'
-        );
+        component.constructCimMessage('image', {
+          text: '',
+          intent: null,
+          originalMessageId: null,
+          fileMimeType: 'image/png',
+          fileName: 'test.png',
+          fileSize: 1024,
+          additionalText: 'Image caption',
+          fileType: 'image'
+        });
 
         expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
         const args = (mockSdkService.sendChatMessage as any).mock.calls[0][0];
