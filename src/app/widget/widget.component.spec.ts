@@ -2184,7 +2184,8 @@ describe('WidgetComponent', () => {
 
       component.onSendMessage('hello world');
 
-      expect(component.constructCimMessage).toHaveBeenCalledWith('PLAIN', 'hello world', null, null);
+      expect(component.constructCimMessage).toHaveBeenCalledWith('PLAIN', 
+        {text: 'hello world', intent: null, originalMessageId: null});
       expect(component.clearMessageData).toHaveBeenCalled();
     });
 
