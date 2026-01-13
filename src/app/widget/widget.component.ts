@@ -4677,7 +4677,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     ): void {
     if (!optionValue) return;
 
-    const formGroup =this.formGroupsMap?.[messageId] || this.preChatFormGroup;
+    const formGroup = this.formGroupsMap?.[messageId] || this.preChatFormGroup;
     const checkbox = event.target as HTMLInputElement;
     const isChecked = checkbox.checked;
 
@@ -4690,46 +4690,87 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     control.markAsTouched();
 
-    let selectedValues: any;
-
     if (hasCategory) {
-      selectedValues = typeof control.value === 'object' && !Array.isArray(control.value)
-        ? { ...control.value }
-        : {};
-
-      if (isChecked) {
-        if (!Array.isArray(selectedValues[categoryLabel])) {
-          selectedValues[categoryLabel] = [];
-        }
-        if (!selectedValues[categoryLabel].includes(optionValue)) {
-          selectedValues[categoryLabel].push(optionValue);
-        }
-      } else {
-        selectedValues[categoryLabel] = (selectedValues[categoryLabel] || []).filter(
-          (v: string) => v !== optionValue
-        );
-        if (selectedValues[categoryLabel].length === 0) {
-          delete selectedValues[categoryLabel];
-        }
-      }
-
-      const isEmpty = Object.keys(selectedValues).length === 0;
-      control.setValue(isEmpty ? '' : selectedValues, { emitEvent: true });
-
+      this.handleCategoryCheckboxChange(control, optionValue, categoryLabel, isChecked);
     } else {
-      selectedValues = Array.isArray(control.value) ? [...control.value] : [];
+      this.handleSimpleCheckboxChange(control, optionValue, isChecked);
+    }
+  }
 
-      if (isChecked) {
-        if (!selectedValues.includes(optionValue)) {
-          selectedValues.push(optionValue);
-        }
-      } else {
-        selectedValues = selectedValues.filter((v: string) => v !== optionValue);
-      }
+  private handleCategoryCheckboxChange(
+    control: any,
+    optionValue: string,
+    categoryLabel: string,
+    isChecked: boolean
+  ): void {
+    const selectedValues = this.getCategorySelectedValues(control.value);
 
-      control.setValue(selectedValues.length === 0 ? '' : selectedValues, { emitEvent: true });
+    if (isChecked) {
+      this.addToCategory(selectedValues, categoryLabel, optionValue);
+    } else {
+      this.removeFromCategory(selectedValues, categoryLabel, optionValue);
     }
 
+    const isEmpty = Object.keys(selectedValues).length === 0;
+    control.setValue(isEmpty ? '' : selectedValues, { emitEvent: true });
+  }
+
+  private getCategorySelectedValues(currentValue: any): { [key: string]: string[] } {
+    return typeof currentValue === 'object' && !Array.isArray(currentValue)
+      ? { ...currentValue }
+      : {};
+  }
+
+  private addToCategory(
+    selectedValues: { [key: string]: string[] },
+    categoryLabel: string,
+    optionValue: string
+  ): void {
+    if (!Array.isArray(selectedValues[categoryLabel])) {
+      selectedValues[categoryLabel] = [];
+    }
+    if (!selectedValues[categoryLabel].includes(optionValue)) {
+      selectedValues[categoryLabel].push(optionValue);
+    }
+  }
+
+  private removeFromCategory(
+    selectedValues: { [key: string]: string[] },
+    categoryLabel: string,
+    optionValue: string
+  ): void {
+    selectedValues[categoryLabel] = (selectedValues[categoryLabel] || []).filter(
+      (v: string) => v !== optionValue
+    );
+    if (selectedValues[categoryLabel].length === 0) {
+      delete selectedValues[categoryLabel];
+    }
+  }
+
+  private handleSimpleCheckboxChange(
+    control: any,
+    optionValue: string,
+    isChecked: boolean
+  ): void {
+    let selectedValues = Array.isArray(control.value) ? [...control.value] : [];
+
+    if (isChecked) {
+      this.addToSimpleArray(selectedValues, optionValue);
+    } else {
+      selectedValues = this.removeFromSimpleArray(selectedValues, optionValue);
+    }
+
+    control.setValue(selectedValues.length === 0 ? '' : selectedValues, { emitEvent: true });
+  }
+
+  private addToSimpleArray(selectedValues: string[], optionValue: string): void {
+    if (!selectedValues.includes(optionValue)) {
+      selectedValues.push(optionValue);
+    }
+  }
+
+  private removeFromSimpleArray(selectedValues: string[], optionValue: string): string[] {
+    return selectedValues.filter((v: string) => v !== optionValue);
   }
 
 
