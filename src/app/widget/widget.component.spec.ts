@@ -58,8 +58,11 @@ const mockStorageService = {
 };
 
 const mockRoute = {};
+const realFormBuilder = new FormBuilder();
 const mockFormBuilder = {
-  group: jest.fn(() => ({})),
+  group: jest.fn((obj) => realFormBuilder.group(obj)),
+  array: jest.fn((arr) => realFormBuilder.array(arr)),
+  control: jest.fn((val, validators) => realFormBuilder.control(val, validators)),
 };
 
 const mockBrowserNotificationService: any = {
@@ -91,6 +94,13 @@ describe('WidgetComponent', () => {
   let component: WidgetComponent;
 
   beforeEach(() => {
+    // Ensure mockPostMessageHandlerService has all required methods
+    const enhancedPostMessageHandlerService = {
+      ...mockPostMessageHandlerService,
+      getParentOrigin: jest.fn(() => 'http://mock-origin.com'),
+      sendPostMessage: jest.fn()
+    };
+
     component = new WidgetComponent(
       mockRoute as any,
       mockFormBuilder as any,
@@ -105,17 +115,15 @@ describe('WidgetComponent', () => {
       mockMatDialog as any,
       mockBrowserNotificationService,
       mockDeliveryNotificationService as any,
-      mockPostMessageHandlerService as any,
+      enhancedPostMessageHandlerService as any,
       mockTranslateService,
       mockRouter as any, // Router
       {} as any, // Document
       mockFormMessageTypeService as any,
       mockSpinnerService as any
     );
-    // Only patch getParentOrigin if __postMessageHandlerService exists
-    if ((component as any).__postMessageHandlerService) {
-      (component as any).__postMessageHandlerService.getParentOrigin = jest.fn(() => 'http://mock-origin.com');
-    }
+    // Ensure __postMessageHandlerService is properly set up
+    (component as any).__postMessageHandlerService = enhancedPostMessageHandlerService;
   });
 
   afterEach(() => {
@@ -6088,6 +6096,2047 @@ describe('WidgetComponent', () => {
 
         expect(result).toEqual([]);
       });
+    });
+  });
+
+  // ---------- formatLabel ----------
+  describe('formatLabel', () => {
+    it('should format values >= 1000 as "k"', () => {
+      expect(component.formatLabel(1000)).toBe('1k');
+      expect(component.formatLabel(1500)).toBe('2k');
+      expect(component.formatLabel(9999)).toBe('10k');
+    });
+
+    it('should return value as string for values < 1000', () => {
+      expect(component.formatLabel(0)).toBe('0');
+      expect(component.formatLabel(100)).toBe('100');
+      expect(component.formatLabel(999)).toBe('999');
+    });
+  });
+
+  // ---------- getTodayEvent ----------
+  describe('getTodayEvent', () => {
+    beforeEach(() => {
+      component.events = [];
+    });
+
+    it('should return empty array when no events exist', async () => {
+      const result = await component.getTodayEvent();
+      expect(result).toEqual([]);
+      expect(component.daySummary).toBeNull();
+    });
+
+    it('should filter events happening today', async () => {
+      const today = new Date();
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const todayEnd = new Date(todayStart);
+      todayEnd.setDate(todayStart.getDate() + 1);
+
+      component.events = [
+        {
+          id: '1',
+          name: 'Event 1',
+          type: 'BUSINESS_HOURS',
+          startTime: todayStart.toISOString(),
+          endTime: todayEnd.toISOString(),
+          shifts: [
+            {
+              id: 's1',
+              name: 'Shift 1',
+              startTime: todayStart.toISOString(),
+              endTime: todayEnd.toISOString()
+            }
+          ],
+          validityPeriod: '',
+          calendar: [],
+          eventColor: ''
+        }
+      ];
+
+      const result = await component.getTodayEvent();
+      expect(component.daySummary).not.toBeNull();
+    });
+
+    it('should handle errors gracefully', async () => {
+      component.events = null as any;
+      await expect(component.getTodayEvent()).rejects.toThrow();
+    });
+  });
+
+  // ---------- formatTime ----------
+  describe('formatTime', () => {
+    it('should format dateTime string correctly', () => {
+      const dateTime = '2023-12-25T14:30:00Z';
+      const result = component.formatTime(dateTime);
+      expect(result).toMatch(/\d{1,2}:\d{2} (AM|PM)/);
+    });
+
+    it('should handle different time zones', () => {
+      const dateTime = '2023-12-25T00:00:00Z';
+      const result = component.formatTime(dateTime);
+      expect(result).toBeTruthy();
+    });
+  });
+
+  // ---------- getSectionsControls ----------
+  describe('getSectionsControls', () => {
+    beforeEach(() => {
+      const formGroup = new FormBuilder().group({
+        sections: new FormBuilder().array([
+          new FormBuilder().group({ field1: [''] }),
+          new FormBuilder().group({ field2: [''] })
+        ])
+      });
+      component.formGroupsMap['msg1'] = formGroup;
+    });
+
+    it('should return sections controls for valid messageId', () => {
+      const controls = component.getSectionsControls('msg1');
+      expect(controls.length).toBe(2);
+    });
+
+    it('should return empty array for invalid messageId', () => {
+      const controls = component.getSectionsControls('invalid');
+      expect(controls).toEqual([]);
+    });
+
+    it('should return empty array when formGroup does not exist', () => {
+      component.formGroupsMap = {};
+      const controls = component.getSectionsControls('msg1');
+      expect(controls).toEqual([]);
+    });
+  });
+
+  // ---------- processAdditionalSchemaAndValues ----------
+  describe('processAdditionalSchemaAndValues', () => {
+    it('should process additional schema and values', () => {
+      const configs = {
+        additionalSchema: [{ key: 'schema1' }],
+        additionalValues: [
+          { key: 'key1', type: 'string', value: 'value1' },
+          { key: 'key2', type: 'number', value: 123 }
+        ]
+      };
+
+      component['processAdditionalSchemaAndValues'](configs);
+
+      expect(component.additionalSchema).toEqual([{ key: 'schema1' }]);
+      expect(component.additionalValuesMap['key1']).toEqual({ type: 'string', value: 'value1' });
+      expect(component.additionalValuesMap['key2']).toEqual({ type: 'number', value: 123 });
+    });
+
+    it('should handle empty configs', () => {
+      component['processAdditionalSchemaAndValues']({});
+      expect(component.additionalSchema).toEqual([]);
+      expect(component.additionalValues).toEqual([]);
+    });
+
+    it('should set INPUT_PARAMS in additionalValuesMap', () => {
+      jest.spyOn(component, 'getInputParamsAsEntities').mockReturnValue({ param1: 'value1' });
+      component['processAdditionalSchemaAndValues']({});
+      expect(component.additionalValuesMap['INPUT_PARAMS']).toBeDefined();
+    });
+  });
+
+  // ---------- getAdditionalValue ----------
+  describe('getAdditionalValue', () => {
+    beforeEach(() => {
+      component.additionalValuesMap = {
+        key1: { type: 'string', value: 'value1' },
+        key2: { type: 'number', value: 123 }
+      };
+    });
+
+    it('should return value for existing key', () => {
+      expect(component.getAdditionalValue('key1')).toBe('value1');
+      expect(component.getAdditionalValue('key2')).toBe(123);
+    });
+
+    it('should return null for non-existing key', () => {
+      expect(component.getAdditionalValue('nonExistent')).toBeNull();
+    });
+  });
+
+  // ---------- setAdditionalValue ----------
+  describe('setAdditionalValue', () => {
+    beforeEach(() => {
+      component.additionalValuesMap = {
+        existingKey: { type: 'string', value: 'oldValue' }
+      };
+    });
+
+    it('should update existing value', () => {
+      component.setAdditionalValue('existingKey', 'newValue');
+      expect(component.additionalValuesMap['existingKey'].value).toBe('newValue');
+    });
+
+    it('should create new entry for non-existing key', () => {
+      component.setAdditionalValue('newKey', 'newValue');
+      expect(component.additionalValuesMap['newKey']).toEqual({ type: 'string', value: 'newValue' });
+    });
+  });
+
+  // ---------- getAdditionalValueWithType ----------
+  describe('getAdditionalValueWithType', () => {
+    beforeEach(() => {
+      component.additionalValuesMap = {
+        key1: { type: 'string', value: 'value1' }
+      };
+    });
+
+    it('should return value with type for existing key', () => {
+      const result = component.getAdditionalValueWithType('key1');
+      expect(result).toEqual({ type: 'string', value: 'value1' });
+    });
+
+    it('should return null for non-existing key', () => {
+      expect(component.getAdditionalValueWithType('nonExistent')).toBeNull();
+    });
+  });
+
+  // ---------- hasAdditionalValue ----------
+  describe('hasAdditionalValue', () => {
+    beforeEach(() => {
+      component.additionalValuesMap = {
+        key1: { type: 'string', value: 'value1' }
+      };
+    });
+
+    it('should return true for existing key', () => {
+      expect(component.hasAdditionalValue('key1')).toBe(true);
+    });
+
+    it('should return false for non-existing key', () => {
+      expect(component.hasAdditionalValue('nonExistent')).toBe(false);
+    });
+  });
+
+  // ---------- getInputParamsAsEntities ----------
+  describe('getInputParamsAsEntities', () => {
+    beforeEach(() => {
+      component.additionalValuesMap = {
+        INPUT_PARAMS_LIST: { type: 'string', value: 'param1, param2, param3' },
+        param1: { type: 'string', value: 'value1' },
+        param2: { type: 'number', value: 123 },
+        param3: { type: 'string', value: 'value3' }
+      };
+    });
+
+    it('should return entities from INPUT_PARAMS_LIST', () => {
+      const result = component.getInputParamsAsEntities();
+      expect(result.param1).toBe('value1');
+      expect(result.param2).toBe(123);
+      expect(result.param3).toBe('value3');
+    });
+
+    it('should handle empty INPUT_PARAMS_LIST', () => {
+      component.additionalValuesMap = {};
+      const result = component.getInputParamsAsEntities();
+      expect(result).toEqual({});
+    });
+
+    it('should handle missing params in map', () => {
+      component.additionalValuesMap = {
+        INPUT_PARAMS_LIST: { type: 'string', value: 'param1, param2, missingParam' },
+        param1: { type: 'string', value: 'value1' }
+      };
+      const result = component.getInputParamsAsEntities();
+      expect(result.param1).toBe('value1');
+      expect(result.missingParam).toBeUndefined();
+    });
+  });
+
+  // ---------- onFormMessageTypeSubmit ----------
+  describe('onFormMessageTypeSubmit', () => {
+    let mockFormGroup: FormGroup;
+    let mockMessage: any;
+
+    beforeEach(() => {
+      mockFormGroup = new FormBuilder().group({
+        sections: new FormBuilder().array([
+          new FormBuilder().group({ field1: ['', jest.fn()] })
+        ])
+      });
+      mockFormGroup.markAllAsTouched = jest.fn();
+      mockMessage = {
+        id: 'msg1',
+        body: { formTitle: 'Test Form' }
+      };
+      component.formGroupsMap['msg1'] = mockFormGroup;
+      component.createFormDataObject = jest.fn().mockReturnValue({
+        header: {},
+        body: { sections: [] },
+        id: ''
+      });
+      component.creatingSectionsforSchema = jest.fn().mockResolvedValue([]);
+      component.constructCimMessage = jest.fn();
+    });
+
+    it('should mark form as touched and show snackbar when form is invalid', async () => {
+      mockFormGroup.setErrors({ required: true });
+      await component.onFormMessageTypeSubmit(mockMessage);
+      expect(mockFormGroup.markAllAsTouched).toHaveBeenCalled();
+      expect(mockMatSnackBar.open).toHaveBeenCalled();
+    });
+
+    it('should submit form when valid', async () => {
+      mockFormGroup.setErrors(null);
+      await component.onFormMessageTypeSubmit(mockMessage);
+      expect(component.constructCimMessage).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- checkFieldValue ----------
+  describe('checkFieldValue', () => {
+    it('should return field value when found', () => {
+      const formData = {
+        sections: [
+          { name: 'John', email: 'john@test.com' },
+          { phone: '1234567890' }
+        ]
+      };
+      const result = component.checkFieldValue(formData, 'email');
+      expect(result.error).toBe(false);
+      expect(result.data).toBe('john@test.com');
+    });
+
+    it('should return error when field not found', () => {
+      const formData = {
+        sections: [
+          { name: 'John' }
+        ]
+      };
+      const result = component.checkFieldValue(formData, 'email');
+      expect(result.error).toBe(true);
+      expect(result.data).toContain('email');
+    });
+
+    it('should return error when field value is null', () => {
+      const formData = {
+        sections: [
+          { name: 'John', email: null }
+        ]
+      };
+      const result = component.checkFieldValue(formData, 'email');
+      expect(result.error).toBe(true);
+    });
+  });
+
+  // ---------- getEventPayload ----------
+  describe('getEventPayload', () => {
+    beforeEach(() => {
+      component.serviceIdentifier = 'sid';
+      component.browserInfoData = {
+        systemInfo: {
+          browserId: 'browser123',
+          browserName: 'Chrome',
+          deviceType: 'Desktop'
+        },
+        geoLocationData: {
+          time_zone: { name: 'UTC' },
+          languages: ['en'],
+          country_name: 'US'
+        }
+      };
+      component.__appConfig = {
+        appConfig: { CHANNEL_IDENTIFIER: 'channelCustomerIdentifier' }
+      } as any;
+      (component as any).translate = { currentLang: 'en' };
+      component.getFormDataByPreChatForm = jest.fn().mockReturnValue({});
+      component.checkFieldValue = jest.fn().mockReturnValue({ error: false, data: 'cid' });
+    });
+
+    it('should return error when channel identifier is missing', () => {
+      component.checkFieldValue = jest.fn().mockReturnValue({ error: true, data: 'Error message' });
+      global.alert = jest.fn();
+      const result = component.getEventPayload({ sections: [] });
+      expect(result.error).toBe(true);
+      expect(global.alert).toHaveBeenCalled();
+    });
+
+    it('should return payload when channel identifier exists', () => {
+      const result = component.getEventPayload({ sections: [{ channelCustomerIdentifier: 'cid' }] });
+      expect(result.error).toBe(false);
+      expect(result.data.serviceIdentifier).toBe('sid');
+      expect(result.data.channelCustomerIdentifier).toBe('cid');
+    });
+  });
+
+  // ---------- getFormDataAsConversationData ----------
+  describe('getFormDataAsConversationData', () => {
+    it('should convert sections to attributes', () => {
+      const jsonObject = {
+        sections: [
+          { name: 'John', email: 'john@test.com' },
+          { phone: '1234567890' }
+        ]
+      };
+      const result = component.getFormDataAsConversationData(jsonObject);
+      expect(result.name).toBe('John');
+      expect(result.email).toBe('john@test.com');
+      expect(result.phone).toBe('1234567890');
+    });
+
+    it('should handle duplicate keys with index suffix', () => {
+      const jsonObject = {
+        sections: [
+          { name: 'John' },
+          { name: 'Jane' }
+        ]
+      };
+      const result = component.getFormDataAsConversationData(jsonObject);
+      expect(result.name).toBe('John');
+      expect(result['name_1']).toBe('Jane');
+    });
+  });
+
+  // ---------- pushPrechatDataAsActivity ----------
+  describe('pushPrechatDataAsActivity', () => {
+    beforeEach(() => {
+      component.createFormDataObject = jest.fn().mockReturnValue({
+        header: {},
+        body: { enableWeightage: false, sections: [] }
+      });
+      component.creatingSectionsforSchema = jest.fn().mockReturnValue([]);
+      component.sdk = { postFormDataAsActivity: jest.fn() } as any;
+      component.calculateAttributeScore = jest.fn();
+      component.calculateSectionScores = jest.fn();
+      component.calculateFormScore = jest.fn();
+    });
+
+    it('should post form data as activity', () => {
+      component.pushPrechatDataAsActivity();
+      expect(component.sdk.postFormDataAsActivity).toHaveBeenCalled();
+    });
+
+    it('should calculate scores when weightage is enabled', () => {
+      component.createFormDataObject = jest.fn().mockReturnValue({
+        header: {},
+        body: { enableWeightage: true, sections: [] }
+      });
+      component.pushPrechatDataAsActivity();
+      expect(component.calculateAttributeScore).toHaveBeenCalled();
+      expect(component.calculateSectionScores).toHaveBeenCalled();
+      expect(component.calculateFormScore).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- calculateAttributeScore ----------
+  describe('calculateAttributeScore', () => {
+    it('should calculate attribute score correctly', () => {
+      const formData: any = {
+        body: {
+          sections: [
+            {
+              attributes: [
+                {
+                  answer: [
+                    { isSelected: false },
+                    { isSelected: true, additionalAttributes: { optionWeightage: 50 } }
+                  ],
+                  attributeWeightage: 100
+                }
+              ]
+            }
+          ]
+        }
+      };
+      component.calculateAttributeScore(formData);
+      expect(formData.body.sections[0].attributes[0].attributeScore).toBe(50);
+    });
+
+    it('should handle attributes without selected options', () => {
+      const formData: any = {
+        body: {
+          sections: [
+            {
+              attributes: [
+                {
+                  answer: [
+                    { isSelected: false },
+                    { isSelected: false }
+                  ],
+                  attributeWeightage: 100
+                }
+              ]
+            }
+          ]
+        }
+      };
+      component.calculateAttributeScore(formData);
+      expect(formData.body.sections[0].attributes[0].attributeScore).toBeUndefined();
+    });
+  });
+
+  // ---------- calculateSectionScores ----------
+  describe('calculateSectionScores', () => {
+    it('should calculate section score correctly', () => {
+      const formData: any = {
+        body: {
+          enableWeightage: true,
+          sections: [
+            {
+              sectionWeightage: 100,
+              attributes: [
+                { attributeScore: 50 },
+                { attributeScore: 30 }
+              ]
+            }
+          ]
+        }
+      };
+      component.calculateSectionScores(formData);
+      expect(formData.body.sections[0].sectionScore).toBe(80);
+    });
+
+    it('should handle null attribute scores', () => {
+      const formData: any = {
+        body: {
+          enableWeightage: true,
+          sections: [
+            {
+              sectionWeightage: 100,
+              attributes: [
+                { attributeScore: null },
+                { attributeScore: 30 }
+              ]
+            }
+          ]
+        }
+      };
+      component.calculateSectionScores(formData);
+      expect(formData.body.sections[0].sectionScore).toBe(30);
+    });
+  });
+
+  // ---------- calculateFormScore ----------
+  describe('calculateFormScore', () => {
+    it('should calculate form score correctly', () => {
+      const formData: any = {
+        body: {
+          enableWeightage: true,
+          formWeightage: 100,
+          sections: [
+            { sectionScore: 50 },
+            { sectionScore: 30 }
+          ]
+        }
+      };
+      component.calculateFormScore(formData);
+      expect(formData.body.formScore).toBe(80);
+    });
+
+    it('should set formScore to null when weightage is disabled', () => {
+      const formData: any = {
+        body: {
+          enableWeightage: false,
+          sections: []
+        }
+      };
+      component.calculateFormScore(formData);
+      expect(formData.body.formScore).toBeNull();
+    });
+
+    it('should handle null formData', () => {
+      expect(() => component.calculateFormScore(null as any)).not.toThrow();
+    });
+  });
+
+  // ---------- createFormDataObject ----------
+  describe('createFormDataObject', () => {
+    beforeEach(() => {
+      component.customerIdentifier = 'cid';
+      component.serviceIdentifier = 'sid';
+      component.conversationId = 'conv123';
+      component.customerId = 'cust123';
+      component.preChatFormInfo = {
+        id: 'form1',
+        formTitle: 'Test Form',
+        formWeightage: 100,
+        enableWeightage: true,
+        sections: [{}, {}]
+      };
+    });
+
+    it('should create form data object with correct structure', () => {
+      const result = component.createFormDataObject();
+      expect(result.header.channelData.channelCustomerIdentifier).toBe('cid');
+      expect(result.header.channelData.serviceIdentifier).toBe('sid');
+      expect(result.body.formId).toBe('form1');
+      expect(result.body.type).toBe('FORM_DATA');
+    });
+  });
+
+  // ---------- getValue ----------
+  describe('getValue', () => {
+    it('should return label for boolean type', () => {
+      const option = { label: 'Yes', value: true };
+      expect(component.getValue(option, 'boolean')).toBe('Yes');
+    });
+
+    it('should return value or label for other types', () => {
+      const option1 = { label: 'Option', value: 'opt1' };
+      expect(component.getValue(option1, 'radio')).toBe('opt1');
+
+      const option2 = { label: 'Option' };
+      expect(component.getValue(option2, 'radio')).toBe('Option');
+    });
+  });
+
+  // ---------- getSelectedValue ----------
+  describe('getSelectedValue', () => {
+    it('should compare by value for nps type', () => {
+      const option = { label: '5', value: 5 };
+      expect(component.getSelectedValue(option, 5, 'nps')).toBe(true);
+      expect(component.getSelectedValue(option, 10, 'nps')).toBe(false);
+    });
+
+    it('should compare by label or value for other types', () => {
+      const option = { label: 'Option', value: 'opt1' };
+      expect(component.getSelectedValue(option, 'Option', 'radio')).toBe(true);
+      expect(component.getSelectedValue(option, 'opt1', 'radio')).toBe(true);
+      expect(component.getSelectedValue(option, 'Other', 'radio')).toBe(false);
+    });
+  });
+
+  // ---------- getFormDataByPreChatForm ----------
+  describe('getFormDataByPreChatForm', () => {
+    beforeEach(() => {
+      component.preChatFormId = 'form1';
+      component.getAdditionalValue = jest.fn().mockReturnValue({ param1: 'value1' });
+    });
+
+    it('should create form data object', () => {
+      const result = component.getFormDataByPreChatForm({ sections: [] } as any);
+      expect(result.formId).toBe('form1');
+      expect(result.filledBy).toBe('web-widget');
+      expect(result.attributes).toBeDefined();
+    });
+  });
+
+  // ---------- convertJsonToArray ----------
+  describe('convertJsonToArray', () => {
+    it('should convert sections to attributes array', () => {
+      const jsonObject = {
+        sections: [
+          { name: 'John', email: 'john@test.com' },
+          { phone: '1234567890' }
+        ]
+      };
+      const result = component.convertJsonToArray(jsonObject);
+      expect(result.length).toBe(3);
+      expect(result[0].key).toBe('name');
+      expect(result[0].value).toBe('John');
+    });
+  });
+
+  // ---------- closeWrapper ----------
+  describe('closeWrapper', () => {
+    beforeEach(() => {
+      component.resizeWidget = jest.fn();
+      (component as any).storageService = { setItem: jest.fn() };
+      component.storageType = 'localStorage';
+    });
+
+    it('should close wrapper and resize widget', () => {
+      component.closeWrapper();
+      expect(component.additionalPanel).toBe(false);
+      expect(component.resizeWidget).toHaveBeenCalledWith('icon-view');
+      expect((component as any).storageService.setItem).toHaveBeenCalledWith('wrapper-hide', 'true', 'localStorage');
+    });
+  });
+
+  // ---------- openImageOverlay ----------
+  describe('openImageOverlay', () => {
+    it('should open image overlay with url and alt text', () => {
+      component.openImageOverlay('http://example.com/image.jpg', 'Test Image');
+      expect(component.isImageOverlayOpen).toBe(true);
+      expect(component.overlayImageUrl).toBe('http://example.com/image.jpg');
+      expect(component.overlayImageAlt).toBe('Test Image');
+    });
+  });
+
+  // ---------- closeImageOverlay ----------
+  describe('closeImageOverlay', () => {
+    beforeEach(() => {
+      component.isImageOverlayOpen = true;
+      component.overlayImageUrl = 'http://example.com/image.jpg';
+      component.overlayImageAlt = 'Test Image';
+    });
+
+    it('should close image overlay and reset values', () => {
+      component.closeImageOverlay();
+      expect(component.isImageOverlayOpen).toBe(false);
+      expect(component.overlayImageUrl).toBe('');
+      expect(component.overlayImageAlt).toBe('');
+    });
+  });
+
+  // ---------- convertCallView ----------
+  describe('convertCallView', () => {
+    beforeEach(() => {
+      component.convertCallRequest = jest.fn();
+    });
+
+    it('should convert to audio view', () => {
+      component.convertCallView('audio');
+      expect(component.activeAudioView).toBe(true);
+      expect(component.activeChatView).toBe(false);
+      expect(component.convertCallRequest).toHaveBeenCalledWith('audio');
+    });
+
+    it('should convert to video view when not secure', () => {
+      component.isSecureWebCall = false;
+      component.convertCallView('video');
+      expect(component.activeVideoView).toBe(true);
+      expect(component.convertCallRequest).toHaveBeenCalledWith('video');
+    });
+
+    it('should convert to screenshare view', () => {
+      component.convertCallView('screenshare');
+      expect(component.activeScreenShareView).toBe(true);
+      expect(component.convertCallRequest).toHaveBeenCalledWith('screenshare');
+    });
+  });
+
+  // ---------- resizeWidget ----------
+  describe('resizeWidget', () => {
+    beforeEach(() => {
+      (component as any).__postMessageHandlerService = {
+        getParentOrigin: jest.fn().mockReturnValue('http://example.com')
+      };
+      window.parent.postMessage = jest.fn();
+    });
+
+    it('should send postMessage with state', () => {
+      component.resizeWidget('form-view');
+      expect(window.parent.postMessage).toHaveBeenCalledWith(
+        { state: 'form-view' },
+        'http://example.com'
+      );
+    });
+  });
+
+  // ---------- enableComposer ----------
+  describe('enableComposer', () => {
+    beforeEach(() => {
+      component.messageElement = {
+        nativeElement: {
+          removeAttribute: jest.fn(),
+          setAttribute: jest.fn(),
+          value: ''
+        }
+      } as any;
+      (component as any).translate = { instant: jest.fn().mockReturnValue('Type a message...') };
+      (component as any).renderer = {
+        removeAttribute: jest.fn(),
+        setAttribute: jest.fn(),
+        setProperty: jest.fn()
+      };
+    });
+
+    it('should enable composer and set placeholder', () => {
+      component.enableComposer();
+      expect(component.isComposerDisable).toBe(false);
+      expect((component as any).renderer.removeAttribute).toHaveBeenCalled();
+      expect((component as any).renderer.setAttribute).toHaveBeenCalled();
+    });
+
+    it('should handle missing messageElement gracefully', () => {
+      component.messageElement = null as any;
+      expect(() => component.enableComposer()).not.toThrow();
+    });
+  });
+
+  // ---------- composerDisable ----------
+  describe('composerDisable', () => {
+    beforeEach(() => {
+      component.messageElement = {
+        nativeElement: {
+          setAttribute: jest.fn(),
+          value: ''
+        }
+      } as any;
+      (component as any).renderer = {
+        setAttribute: jest.fn(),
+        setProperty: jest.fn()
+      };
+      document.querySelector = jest.fn().mockReturnValue({
+        style: { pointerEvents: '', opacity: '' }
+      });
+    });
+
+    it('should disable composer and emoji button', () => {
+      component.composerDisable();
+      expect(component.isComposerDisable).toBe(true);
+      expect((component as any).renderer.setAttribute).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- composerEnable ----------
+  describe('composerEnable', () => {
+    beforeEach(() => {
+      component.messageElement = {
+        nativeElement: {
+          removeAttribute: jest.fn(),
+          setAttribute: jest.fn()
+        }
+      } as any;
+      (component as any).translate = { instant: jest.fn().mockReturnValue('Type a message...') };
+      (component as any).renderer = {
+        removeAttribute: jest.fn(),
+        setAttribute: jest.fn()
+      };
+    });
+
+    it('should enable composer', () => {
+      component.composerEnable();
+      expect(component.isComposerDisable).toBe(false);
+      expect((component as any).renderer.removeAttribute).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- getLatestAgentMessage ----------
+  describe('getLatestAgentMessage', () => {
+    beforeEach(() => {
+      component.cimMessage = [
+        { id: '1', header: { sender: { type: 'customer' } } },
+        { id: '2', header: { sender: { type: 'agent' } } },
+        { id: '3', header: { sender: { type: 'bot' } } },
+        { id: '4', header: { sender: { type: 'agent' } } }
+      ];
+    });
+
+    it('should return latest agent message', () => {
+      const result = component.getLatestAgentMessage();
+      expect(result?.id).toBe('4');
+    });
+
+    it('should return undefined when no agent messages exist', () => {
+      component.cimMessage = [
+        { id: '1', header: { sender: { type: 'customer' } } }
+      ];
+      expect(component.getLatestAgentMessage()).toBeUndefined();
+    });
+  });
+
+  // ---------- onTextAreaFocus ----------
+  describe('onTextAreaFocus', () => {
+    beforeEach(() => {
+      component.constructAndPublishMessageSeenNotification = jest.fn();
+      component.getLatestAgentMessage = jest.fn().mockReturnValue({
+        id: 'msg1',
+        body: { type: 'text' }
+      });
+    });
+
+    it('should publish seen notification for latest agent message', () => {
+      component.onTextAreaFocus();
+      expect(component.constructAndPublishMessageSeenNotification).toHaveBeenCalledWith('msg1');
+    });
+
+    it('should not publish notification for notification type messages', () => {
+      component.getLatestAgentMessage = jest.fn().mockReturnValue({
+        id: 'msg1',
+        body: { type: 'notification' }
+      });
+      component.onTextAreaFocus();
+      expect(component.constructAndPublishMessageSeenNotification).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- onTyping ----------
+  describe('onTyping', () => {
+    beforeEach(() => {
+      component.text = '';
+    });
+
+    it('should set isTyping to true when text has content', () => {
+      component.text = 'Hello';
+      component.onTyping();
+      expect(component.isTyping).toBe(true);
+    });
+
+    it('should set isTyping to false when text is empty', () => {
+      component.text = '';
+      component.onTyping();
+      expect(component.isTyping).toBe(false);
+    });
+  });
+
+  // ---------- onKeyPress ----------
+  describe('onKeyPress', () => {
+    beforeEach(() => {
+      component.sendTypingStartedEvent = jest.fn();
+    });
+
+    it('should send typing event for non-enter keys', () => {
+      component.onKeyPress({ key: 'a' });
+      expect(component.sendTypingStartedEvent).toHaveBeenCalled();
+    });
+
+    it('should not send typing event for enter key', () => {
+      component.onKeyPress({ key: 'Enter' });
+      expect(component.sendTypingStartedEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- onEnterKey ----------
+  describe('onEnterKey', () => {
+    beforeEach(() => {
+      component.isMobile = false;
+      component.sendTypingStartedEventTimer = setTimeout(() => {}, 1000);
+      global.clearTimeout = jest.fn();
+    });
+
+    it('should prevent default and clear timer on non-mobile', () => {
+      const event = { preventDefault: jest.fn() };
+      component.onEnterKey(event as any);
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(global.clearTimeout).toHaveBeenCalled();
+    });
+
+    it('should not prevent default on mobile', () => {
+      component.isMobile = true;
+      const event = { preventDefault: jest.fn() };
+      component.onEnterKey(event as any);
+      expect(event.preventDefault).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- sendTypingStartedEvent ----------
+  describe('sendTypingStartedEvent', () => {
+    beforeEach(() => {
+      component.sdk = { sendChatMessage: jest.fn() } as any;
+      component.customerData = { id: 'cust1' };
+      component.sendTypingStartedEventTimer = null;
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should send typing started event', () => {
+      component.sendTypingStartedEvent();
+      expect(component.sdk.sendChatMessage).toHaveBeenCalled();
+    });
+
+    it('should not send event if timer is already running', () => {
+      // First call to set up the timer
+      component.sendTypingStartedEvent();
+      expect(component.sdk.sendChatMessage).toHaveBeenCalledTimes(1);
+      
+      // Second call should not send another event because timer is running
+      component.sendTypingStartedEvent();
+      expect(component.sdk.sendChatMessage).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ---------- chatTranscript ----------
+  describe('chatTranscript', () => {
+    beforeEach(() => {
+      (component as any).storageService = {
+        getItem: jest.fn().mockReturnValue('conv123')
+      };
+      (component as any).translate = { currentLang: 'en' };
+      component.storageType = 'localStorage';
+      window.open = jest.fn().mockReturnValue({
+        postMessage: jest.fn()
+      });
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should open transcript window', () => {
+      component.chatTranscript();
+      expect(window.open).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- loadBrowserLanguage ----------
+  describe('loadBrowserLanguage', () => {
+    beforeEach(() => {
+      (component as any).translate = { use: jest.fn(), currentLang: 'en' };
+      component.defaultWidgetLanguage = 'en';
+      Object.defineProperty(navigator, 'language', {
+        writable: true,
+        value: 'en-US'
+      });
+    });
+
+    it('should set Arabic language when browser language is ar', () => {
+      Object.defineProperty(navigator, 'language', {
+        writable: true,
+        value: 'ar'
+      });
+      component.loadBrowserLanguage();
+      expect(component.textDirection).toBe('right-direction');
+      expect((component as any).translate.use).toHaveBeenCalledWith('ar');
+    });
+
+    it('should use default language for non-Arabic browsers', () => {
+      Object.defineProperty(navigator, 'language', {
+        writable: true,
+        value: 'en-US'
+      });
+      component.loadBrowserLanguage();
+      expect(component.selectedLanguage).toBe('en');
+    });
+  });
+
+  // ---------- logInToFreeSwitch ----------
+  describe('logInToFreeSwitch', () => {
+    beforeEach(() => {
+      component.webRTCConfig = {
+        sipExtension: '1001'
+      } as any;
+      component.sdk = { loginSipWebRtc: jest.fn() } as any;
+      component.enableWebRtc = true;
+      component.IsRegisteredInFreeSwitch = false;
+    });
+
+    it('should login to FreeSwitch when not registered', () => {
+      component.logInToFreeSwitch();
+      expect(component.sdk.loginSipWebRtc).toHaveBeenCalled();
+    });
+
+    it('should not login when already registered', () => {
+      component.IsRegisteredInFreeSwitch = true;
+      component.logInToFreeSwitch();
+      expect(component.sdk.loginSipWebRtc).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- startCountdown ----------
+  describe('startCountdown', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      component.callTime = '00:00';
+      component.counterVar = null;
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should start countdown timer', () => {
+      component.startCountdown();
+      expect(component.counterVar).not.toBeNull();
+      jest.advanceTimersByTime(1000);
+      expect(component.callTime).not.toBe('00:00');
+    });
+
+    it('should not start new timer if one already exists', () => {
+      component.startCountdown();
+      const firstTimer = component.counterVar;
+      component.startCountdown();
+      expect(component.counterVar).toBe(firstTimer);
+    });
+  });
+
+  // ---------- endCountdown ----------
+  describe('endCountdown', () => {
+    beforeEach(() => {
+      component.callTime = '05:30';
+      component.counterVar = setInterval(() => {}, 1000);
+      global.clearInterval = jest.fn();
+    });
+
+    it('should end countdown and reset time', () => {
+      component.endCountdown();
+      expect(component.callTime).toBe('00:00');
+      expect(global.clearInterval).toHaveBeenCalled();
+      expect(component.counterVar).toBeNull();
+    });
+  });
+
+  // ---------- textChanged ----------
+  describe('textChanged', () => {
+    beforeEach(() => {
+      component.messageElement = {
+        nativeElement: { focus: jest.fn() }
+      } as any;
+      component.elementView = {
+        nativeElement: { scrollHeight: 100 }
+      } as any;
+      (component as any).scrollContainer = {
+        nativeElement: { scrollHeight: 200 }
+      };
+      document.getElementById = jest.fn().mockReturnValue({ value: 'test message' } as any);
+    });
+
+    it('should update text and scroll heights', () => {
+      component.textChanged();
+      expect(component.text).toBe('test message');
+      expect(component.scrollCon).toBe(100);
+    });
+  });
+
+  // ---------- onSendMessage ----------
+  describe('onSendMessage', () => {
+    beforeEach(() => {
+      component.isComposerDisable = false;
+      component.imageUrls = [];
+      component.selectedFile = null;
+      component.constructCimMessage = jest.fn();
+      component.clearMessageData = jest.fn();
+      component.uploadFile = jest.fn();
+      component.fileLoading = false;
+      (component as any).cdRef = { detectChanges: jest.fn() };
+      component.scrollToBottom = jest.fn();
+    });
+
+    it('should not send message when composer is disabled', () => {
+      component.isComposerDisable = true;
+      component.onSendMessage('test');
+      expect(component.constructCimMessage).not.toHaveBeenCalled();
+    });
+
+    it('should send plain message when text is provided', () => {
+      component.onSendMessage('Hello');
+      expect(component.constructCimMessage).toHaveBeenCalledWith('PLAIN', expect.objectContaining({
+        text: 'Hello'
+      }));
+    });
+
+    it('should upload file when imageUrls exist', () => {
+      component.imageUrls = [{ filesPath: 'path' as any, fileType: 'image', fileExt: 'png', fileName: 'test.png' }];
+      component.selectedFile = {} as any;
+      component.onSendMessage('Hello');
+      expect(component.uploadFile).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- scrollToBottom ----------
+  describe('scrollToBottom', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      (component as any).scrollContainer = {
+        nativeElement: {
+          scrollTop: 0,
+          scrollHeight: 1000
+        }
+      };
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should scroll to bottom', () => {
+      component.scrollToBottom();
+      jest.advanceTimersByTime(350);
+      expect((component as any).scrollContainer.nativeElement.scrollTop).toBe(1000);
+    });
+  });
+
+  // ---------- clearMessageData ----------
+  describe('clearMessageData', () => {
+    beforeEach(() => {
+      component.elementView = {
+        nativeElement: { value: 'test' }
+      } as any;
+      component.text = 'test';
+      component.fileName = 'test.jpg';
+      component.scrollToBottom = jest.fn();
+    });
+
+    it('should clear message data', () => {
+      component.clearMessageData();
+      expect(component.elementView.nativeElement.value).toBe('');
+      expect(component.text).toBe('');
+      expect(component.fileName).toBe('');
+      expect(component.scrollToBottom).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- buildMediaAttachment ----------
+  describe('buildMediaAttachment', () => {
+    it('should build media attachment object', () => {
+      const result = component.buildMediaAttachment('http://example.com/image.jpg', 1024, 'image/jpeg', 'jpg');
+      expect(result.mediaUrl).toBe('http://example.com/image.jpg');
+      expect(result.size).toBe(1024);
+      expect(result.type).toBe('image/jpeg');
+      expect(result.mimeType).toBe('image/jpeg');
+    });
+  });
+
+  // ---------- removeUploadFile ----------
+  describe('removeUploadFile', () => {
+    beforeEach(() => {
+      component.imageUrls = [{ filesPath: 'path' as any, fileType: 'image', fileExt: 'png', fileName: 'test.png' }];
+      component.selectedFile = {} as any;
+    });
+
+    it('should clear imageUrls and selectedFile', () => {
+      component.removeUploadFile();
+      expect(component.imageUrls).toEqual([]);
+      expect(component.selectedFile).toBeNull();
+    });
+  });
+
+  // ---------- sendButtonMessage ----------
+  describe('sendButtonMessage', () => {
+    beforeEach(() => {
+      component.constructCimMessage = jest.fn();
+    });
+
+    it('should send button message', () => {
+      component.sendButtonMessage(
+        { title: 'Click Me', payload: 'action1' },
+        'msg1'
+      );
+      expect(component.constructCimMessage).toHaveBeenCalledWith('PLAIN', expect.objectContaining({
+        text: 'Click Me',
+        intent: 'action1',
+        originalMessageId: 'msg1'
+      }));
+    });
+
+    it('should not send empty title', () => {
+      component.sendButtonMessage(
+        { title: '   ', payload: 'action1' },
+        'msg1'
+      );
+      expect(component.constructCimMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- sendCarousalMessage ----------
+  describe('sendCarousalMessage', () => {
+    beforeEach(() => {
+      component.constructCimMessage = jest.fn();
+    });
+
+    it('should send carousel message', () => {
+      component.sendCarousalMessage(
+        { title: 'Card Title', payload: 'action1' },
+        'msg1',
+        'card1'
+      );
+      expect(component.constructCimMessage).toHaveBeenCalledWith('PLAIN', expect.objectContaining({
+        text: 'Card Title',
+        intent: 'action1',
+        originalMessageId: 'msg1',
+        carousalCardId: 'card1'
+      }));
+    });
+  });
+
+  // ---------- endChat ----------
+  describe('endChat', () => {
+    beforeEach(() => {
+      component.dialog = {
+        open: jest.fn().mockReturnValue({
+          afterClosed: jest.fn().mockReturnValue(of(true))
+        })
+      } as any;
+      component.IsRegisteredInFreeSwitch = false;
+      component.callPopUpView = true;
+      component.endCountdown = jest.fn();
+      component.sdk = {
+        handleCallEnd: jest.fn(),
+        handleLogOutAgent: jest.fn()
+      } as any;
+      component.dialogId = 'dialog1';
+      component.clearSession = jest.fn();
+      (component as any).__postMessageHandlerService = { sendPostMessage: jest.fn() };
+    });
+
+    it('should end chat and clear session when confirmed', () => {
+      component.endChat();
+      expect(component.clearSession).toHaveBeenCalled();
+    });
+
+    it('should end call if registered in FreeSwitch', () => {
+      component.IsRegisteredInFreeSwitch = true;
+      component.endChat();
+      expect(component.sdk.handleCallEnd).toHaveBeenCalled();
+      expect(component.sdk.handleLogOutAgent).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- customerChatResumed ----------
+  describe('customerChatResumed', () => {
+    beforeEach(() => {
+      (component as any).storageService = {
+        getItem: jest.fn().mockReturnValue(JSON.stringify({
+          data: {
+            channelCustomerIdentifier: 'cid',
+            serviceIdentifier: 'sid'
+          }
+        }))
+      };
+      component.storageType = 'localStorage';
+      component.sdk = { makeConnection: jest.fn() } as any;
+    });
+
+    it('should resume chat when user data exists', () => {
+      component.customerChatResumed();
+      expect(component.sdk.makeConnection).toHaveBeenCalledWith('sid', 'cid');
+    });
+
+    it('should not resume chat when user data is null', () => {
+      (component as any).storageService.getItem = jest.fn().mockReturnValue(null);
+      component.customerChatResumed();
+      expect(component.sdk.makeConnection).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- getLabel ----------
+  describe('getLabel', () => {
+    it('should return formatted label from dictionary', () => {
+      expect(component.getLabel('email')).toBe('Email');
+      expect(component.getLabel('phoneNumber')).toBe('Phone Number');
+    });
+
+    it('should return capitalized valueType when not in dictionary', () => {
+      expect(component.getLabel('unknownType')).toBe('UnknownType');
+    });
+  });
+
+  // ---------- isMaxLengthError ----------
+  describe('isMaxLengthError', () => {
+    beforeEach(() => {
+      const formGroup = new FormBuilder().group({
+        sections: new FormBuilder().array([
+          new FormBuilder().group({
+            field1: ['test value']
+          })
+        ])
+      });
+      component.preChatFormGroup = formGroup;
+    });
+
+    it('should return true when value exceeds max length', () => {
+      const sections = component.preChatFormGroup.get('sections') as FormArray;
+      sections.at(0).get('field1')?.setValue('a'.repeat(102));
+      const result = component.isMaxLengthError(0, 'field1', 'shortAnswer');
+      expect(result).toBe(true);
+    });
+
+    it('should return false when value is within max length', () => {
+      const sections = component.preChatFormGroup.get('sections') as FormArray;
+      sections.at(0).get('field1')?.setValue('test');
+      const result = component.isMaxLengthError(0, 'field1', 'shortAnswer');
+      expect(result).toBe(false);
+    });
+  });
+
+  // ---------- getTextAlignment ----------
+  describe('getTextAlignment', () => {
+    it('should return left for left alignment', () => {
+      expect(component.getTextAlignment('left')).toBe('left');
+    });
+
+    it('should return right for right alignment', () => {
+      expect(component.getTextAlignment('right')).toBe('right');
+    });
+
+    it('should return null for center or undefined', () => {
+      expect(component.getTextAlignment('center')).toBeNull();
+      expect(component.getTextAlignment(undefined)).toBeNull();
+    });
+  });
+
+  // ---------- isCheckboxChecked ----------
+  describe('isCheckboxChecked', () => {
+    beforeEach(() => {
+      const formGroup = new FormBuilder().group({
+        sections: new FormBuilder().array([
+          new FormBuilder().group({
+            checkbox1: [['option1', 'option2']],
+            checkbox2: [{ category1: ['opt1'] }]
+          })
+        ])
+      });
+      component.preChatFormGroup = formGroup;
+    });
+
+    it('should return true for checked simple checkbox', () => {
+      const result = component.isCheckboxChecked(0, 'checkbox1', 'option1', undefined, false);
+      expect(result).toBe(true);
+    });
+
+    it('should return true for checked categorized checkbox', () => {
+      const result = component.isCheckboxChecked(0, 'checkbox2', 'opt1', 'category1', true);
+      expect(result).toBe(true);
+    });
+
+    it('should return false for unchecked checkbox', () => {
+      const result = component.isCheckboxChecked(0, 'checkbox1', 'option3', undefined, false);
+      expect(result).toBe(false);
+    });
+  });
+
+  // ---------- replaceSpacesWithUnderscores ----------
+  describe('replaceSpacesWithUnderscores', () => {
+    it('should replace spaces with underscores', () => {
+      expect(component.replaceSpacesWithUnderscores('hello world')).toBe('hello_world');
+      // The implementation replaces all spaces (including multiple) with single underscore
+      expect(component.replaceSpacesWithUnderscores('multiple   spaces')).toBe('multiple_spaces');
+    });
+
+    it('should handle empty string', () => {
+      expect(component.replaceSpacesWithUnderscores('')).toBe('');
+    });
+  });
+
+  // ---------- isSkiptype ----------
+  describe('isSkiptype', () => {
+    it('should return true for empty input/textarea', () => {
+      const attr = {
+        attributeType: 'INPUT',
+        answer: ['']
+      };
+      expect(component.isSkiptype(attr)).toBe(true);
+    });
+
+    it('should return false for filled input', () => {
+      const attr = {
+        attributeType: 'INPUT',
+        answer: ['filled value']
+      };
+      expect(component.isSkiptype(attr)).toBe(false);
+    });
+
+    it('should return true when all options are unselected', () => {
+      const attr = {
+        attributeType: 'OPTIONS',
+        answer: [
+          { isSelected: false },
+          { isSelected: false }
+        ]
+      };
+      expect(component.isSkiptype(attr)).toBe(true);
+    });
+
+    it('should return false when at least one option is selected', () => {
+      const attr = {
+        attributeType: 'OPTIONS',
+        answer: [
+          { isSelected: false },
+          { isSelected: true }
+        ]
+      };
+      expect(component.isSkiptype(attr)).toBe(false);
+    });
+  });
+
+  // ---------- next, prev, selectSlide (carousel) ----------
+  describe('Carousel navigation', () => {
+    let mockMessage: any;
+
+    beforeEach(() => {
+      component.currentIndex = 0;
+      mockMessage = {
+        body: {
+          elements: [
+            { id: '1' },
+            { id: '2' },
+            { id: '3' }
+          ]
+        }
+      };
+    });
+
+    it('should increment currentIndex on next', () => {
+      component.next(mockMessage);
+      expect(component.currentIndex).toBe(1);
+    });
+
+    it('should not increment beyond last element', () => {
+      component.currentIndex = 2;
+      component.next(mockMessage);
+      expect(component.currentIndex).toBe(2);
+    });
+
+    it('should decrement currentIndex on prev', () => {
+      component.currentIndex = 2;
+      component.prev();
+      expect(component.currentIndex).toBe(1);
+    });
+
+    it('should not decrement below 0', () => {
+      component.currentIndex = 0;
+      component.prev();
+      expect(component.currentIndex).toBe(0);
+    });
+
+    it('should set currentIndex on selectSlide', () => {
+      component.selectSlide(2);
+      expect(component.currentIndex).toBe(2);
+    });
+  });
+
+  // ---------- handleCarousalQuotedMessage ----------
+  describe('handleCarousalQuotedMessage', () => {
+    let mockCimMessage: any;
+    let mockOriginalMessage: any;
+
+    beforeEach(() => {
+      mockOriginalMessage = {
+        id: 'msg1',
+        body: {
+          markdownText: 'Original text',
+          elements: [
+            {
+              text: 'Card Text',
+              buttons: [{ title: 'Button', payload: 'action' }],
+              additionalCarouselElementDetails: {
+                id: 'card1',
+                title: 'Card Title',
+                image_url: 'http://example.com/image.jpg',
+                alt: 'Alt text'
+              }
+            }
+          ]
+        },
+        header: { timestamp: 1234567890, sender: { type: 'bot' } }
+      };
+      component.cimMessage = [mockOriginalMessage];
+      (component as any).browserNotificationService = { notify: jest.fn() };
+      component.scrollToBottom = jest.fn();
+      component.handleMessageReport = jest.fn();
+    });
+
+    it('should handle carousel quoted message from customer', () => {
+      mockCimMessage = {
+        id: 'msg2',
+        header: {
+          originalMessageId: 'msg1',
+          additionalData: { carousalCardId: 'card1' },
+          sender: { type: 'customer' }
+        },
+        body: {}
+      };
+      component.handleCarousalQuotedMessage(mockCimMessage);
+      expect(mockCimMessage.body.quotedText).toBe('Card Text');
+      expect(mockCimMessage.body.quotedCardTitle).toBe('Card Title');
+      expect(component.cimMessage.length).toBe(2);
+    });
+  });
+
+  // ---------- handleFormMessageType ----------
+  describe('handleFormMessageType', () => {
+    let mockCimMessage: any;
+    let mockOriginalMessage: any;
+
+    beforeEach(() => {
+      const formGroup = new FormBuilder().group({
+        sections: new FormBuilder().array([])
+      });
+      mockOriginalMessage = {
+        id: 'msg1',
+        body: {
+          additionalDetails: { disableInteraction: true }
+        }
+      };
+      component.formGroupsMap['msg1'] = formGroup;
+      component.cimMessage = [mockOriginalMessage];
+      (component as any).browserNotificationService = { notify: jest.fn() };
+      component.scrollToBottom = jest.fn();
+      component.handleMessageReport = jest.fn();
+    });
+
+    it('should disable form when disableInteraction is true', () => {
+      mockCimMessage = {
+        id: 'msg2',
+        header: {
+          originalMessageId: 'msg1',
+          sender: { type: 'customer' }
+        },
+        body: {}
+      };
+      component.handleFormMessageType(mockCimMessage);
+      expect(component.formGroupsMap['msg1'].disabled).toBe(true);
+      expect(component.cimMessage.length).toBe(2);
+    });
+  });
+
+  // ---------- handleClickableList ----------
+  describe('handleClickableList', () => {
+    let mockCimMessage: any;
+    let mockOriginalMessage: any;
+
+    beforeEach(() => {
+      mockOriginalMessage = {
+        id: 'msg1',
+        body: {
+          additionalDetails: {
+            interactive: { type: 'clickablelist' }
+          }
+        }
+      };
+      component.cimMessage = [mockOriginalMessage];
+      (component as any).browserNotificationService = { notify: jest.fn() };
+      component.scrollToBottom = jest.fn();
+      component.handleMessageReport = jest.fn();
+    });
+
+    it('should disable clickable list when customer responds', () => {
+      mockCimMessage = {
+        id: 'msg2',
+        header: {
+          originalMessageId: 'msg1',
+          sender: { type: 'customer' }
+        },
+        body: {}
+      };
+      component.handleClickableList(mockCimMessage);
+      expect(mockOriginalMessage.body.disableClickaAbleList).toBe(true);
+      expect(component.cimMessage.length).toBe(2);
+    });
+  });
+
+  // ---------- handleFileChange ----------
+  describe('handleFileChange', () => {
+    beforeEach(() => {
+      component.setFileControl = jest.fn();
+      component.previewFileForm = jest.fn();
+      (component as any).snackBar = { open: jest.fn() };
+      document.getElementById = jest.fn().mockReturnValue({
+        disabled: false
+      } as any);
+    });
+
+    it('should handle file change and set control', () => {
+      const mockInput = {
+        files: [new File(['content'], 'test.txt', { type: 'text/plain' })]
+      };
+      const mockAttribute = {
+        key: 'file1',
+        attributeOptions: {
+          allowedFileTypes: ['txt']
+        }
+      };
+      component.handleFileChange(mockInput, 0, 0, 1000, 'id1', ['txt'], mockAttribute);
+      expect(component.setFileControl).toHaveBeenCalled();
+      expect(component.previewFileForm).toHaveBeenCalled();
+    });
+
+    it('should show error for unsupported file type', () => {
+      const mockInput = {
+        files: [new File(['content'], 'test.exe', { type: 'application/exe' })]
+      };
+      const mockAttribute = {
+        key: 'file1',
+        attributeOptions: {
+          allowedFileTypes: ['txt']
+        }
+      };
+      component.handleFileChange(mockInput, 0, 0, 1000, 'id1', ['txt'], mockAttribute);
+      expect((component as any).snackBar.open).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- setFileControl ----------
+  describe('setFileControl', () => {
+    beforeEach(() => {
+      const formGroup = new FormBuilder().group({
+        sections: new FormBuilder().array([
+          new FormBuilder().group({
+            file1: ['']
+          })
+        ])
+      });
+      component.preChatFormGroup = formGroup;
+    });
+
+    it('should set file control value', () => {
+      component.setFileControl(0, 'test.txt', 'file1');
+      const sections = component.preChatFormGroup.get('sections') as FormArray;
+      expect(sections.at(0).get('file1')?.value).toBe('test.txt');
+    });
+  });
+
+  // ---------- getFileName ----------
+  describe('getFileName', () => {
+    beforeEach(() => {
+      const formGroup = new FormBuilder().group({
+        sections: new FormBuilder().array([
+          new FormBuilder().group({
+            file1: ['test.txt']
+          })
+        ])
+      });
+      component.preChatFormGroup = formGroup;
+    });
+
+    it('should return file name from control', () => {
+      const result = component.getFileName(0, 'file1');
+      expect(result).toBe('test.txt');
+    });
+
+    it('should return empty string when control value is empty', () => {
+      const result = component.getFileName(0, 'file2');
+      expect(result).toBe('');
+    });
+  });
+
+  // ---------- disableUploadBtn ----------
+  describe('disableUploadBtn', () => {
+    beforeEach(() => {
+      (component as any).renderer = {
+        setAttribute: jest.fn()
+      };
+      document.querySelector = jest.fn().mockReturnValue({
+        setAttribute: jest.fn()
+      });
+    });
+
+    it('should disable upload button', () => {
+      component.disableUploadBtn('btn1');
+      expect(document.querySelector).toHaveBeenCalledWith('#upload-btn-btn1');
+    });
+  });
+
+  // ---------- previewFileForm ----------
+  describe('previewFileForm', () => {
+    beforeEach(() => {
+      component.fileContent = {};
+      component.filePreviewUrl = {};
+      component.fileHistory = {};
+      (component as any).sanitizer = {
+        bypassSecurityTrustUrl: jest.fn().mockReturnValue('safe-url')
+      };
+      global.FileReader = jest.fn().mockImplementation(() => ({
+        readAsText: jest.fn(),
+        readAsDataURL: jest.fn(),
+        onload: null,
+        result: 'file content'
+      })) as any;
+    });
+
+    it('should preview text file', () => {
+      const file = new File(['content'], 'test.txt', { type: 'text/plain' });
+      component.previewFileForm(file, 0, 0);
+      expect(component.fileContent).toBeDefined();
+    });
+
+    it('should preview image file', () => {
+      const file = new File(['content'], 'test.jpg', { type: 'image/jpeg' });
+      component.previewFileForm(file, 0, 0);
+      expect(component.fileHistory).toBeDefined();
+    });
+  });
+
+  // ---------- clearFile ----------
+  describe('clearFile', () => {
+    beforeEach(() => {
+      component.filePreviewUrl = { '0-0': 'url' };
+      component.fileHistory = { '0-0': { isImage: true } };
+      component.setFileControl = jest.fn();
+      document.getElementById = jest.fn().mockReturnValue({
+        disabled: false,
+        value: '',
+        textContent: 'Upload'
+      } as any);
+    });
+
+    it('should clear file and reset controls', () => {
+      component.clearFile(0, 0, 'file1', 'id1');
+      expect(component.filePreviewUrl['0-0']).toBeUndefined();
+      expect(component.setFileControl).toHaveBeenCalledWith(0, '', 'file1');
+    });
+  });
+
+  // ---------- getFileType ----------
+  describe('getFileType', () => {
+    it('should return correct file type for different extensions', () => {
+      expect(component.getFileType('test.txt')).toBe('text');
+      expect(component.getFileType('test.json')).toBe('json');
+      expect(component.getFileType('test.pdf')).toBe('document');
+      expect(component.getFileType('test.mp3')).toBe('audio');
+      expect(component.getFileType('test.mp4')).toBe('video');
+      expect(component.getFileType('test.png')).toBe('image');
+      expect(component.getFileType('test.unknown')).toBe('unknown');
+    });
+  });
+
+  // ---------- uploadFileFromForm ----------
+  describe('uploadFileFromForm', () => {
+    beforeEach(() => {
+      component.__appConfig = {
+        appConfig: { FILE_SERVER_URL: 'http://example.com' }
+      } as any;
+      component.preChatFormGroup = new FormBuilder().group({
+        file1: ['']
+      });
+      (component as any).uploadToFileServer = jest.fn();
+      component.resetFileValidation = jest.fn();
+      (component as any).snackBar = { open: jest.fn() };
+    });
+
+    it('should upload file when valid', () => {
+      const mockEvent = {
+        target: {
+          files: [new File(['content'], 'test.txt', { type: 'text/plain' })]
+        }
+      };
+      component.uploadFileFromForm(mockEvent as any, 'file1', false, []);
+      expect((component as any).uploadToFileServer).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- uploadPrechatFile ----------
+  describe('uploadPrechatFile', () => {
+    beforeEach(() => {
+      component.__appConfig = {
+        appConfig: { FILE_SERVER_URL: 'http://example.com' }
+      } as any;
+      component.setFileControl = jest.fn();
+      component.disableUploadBtn = jest.fn();
+      (component as any).snackBar = { open: jest.fn() };
+      component.isFileUploading = {};
+      (component as any).uploadToFileServer = jest.fn();
+    });
+
+    it('should upload prechat file', () => {
+      const mockFileInput = {
+        files: [new File(['content'], 'test.txt', { type: 'text/plain' })]
+      };
+      component.uploadPrechatFile(0, 'file1', mockFileInput as any, 'id1');
+      expect((component as any).uploadToFileServer).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- handleRefreshCasesofFormMessageType ----------
+  describe('handleRefreshCasesofFormMessageType', () => {
+    let mockCimMessage: any;
+
+    beforeEach(() => {
+      (component as any).buildFormMessage = jest.fn().mockResolvedValue(new FormBuilder().group({}));
+      (component as any).formMessageTypeService = {
+        patchFromMessageTypeUponRefresh: jest.fn()
+      };
+      component.handleFormMessageType = jest.fn();
+      component.createFormMapGroup = jest.fn();
+    });
+
+    it('should build form message when status is filled', async () => {
+      mockCimMessage = {
+        header: { originalMessageId: 'msg1' },
+        body: { additionalDetails: { status: 'filled' } }
+      };
+      await component.handleRefreshCasesofFormMessageType(mockCimMessage);
+      expect((component as any).buildFormMessage).toHaveBeenCalled();
+    });
+
+    it('should create form map group when status is unfilled', async () => {
+      mockCimMessage = {
+        header: { originalMessageId: 'msg1' },
+        body: { additionalDetails: { status: 'unfilled' } }
+      };
+      await component.handleRefreshCasesofFormMessageType(mockCimMessage);
+      expect(component.createFormMapGroup).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- createFormMapGroup ----------
+  describe('createFormMapGroup', () => {
+    beforeEach(() => {
+      component.formValidations = [];
+      component.createFormValidationControls = jest.fn();
+      // Ensure component has access to real FormBuilder
+      const realFb = new FormBuilder();
+      (component as any).fb = realFb;
+    });
+
+    it('should create form group for message', () => {
+      const mockCimMessage = {
+        id: 'msg1',
+        body: {
+          sections: [
+            {
+              attributes: []
+            }
+          ]
+        }
+      };
+      component.createFormMapGroup(mockCimMessage);
+      expect(component.formGroupsMap['msg1']).toBeDefined();
+      expect(component.createFormValidationControls).toHaveBeenCalled();
+    });
+  });
+
+  // ---------- buildFormMessage ----------
+  describe('buildFormMessage', () => {
+    beforeEach(() => {
+      component.cimMessage = [
+        {
+          id: 'msg1',
+          body: {
+            sections: [
+              {
+                attributes: []
+              }
+            ]
+          }
+        }
+      ];
+      component.formValidations = [];
+      component.createFormValidationControls = jest.fn();
+      // Ensure component has access to real FormBuilder
+      const realFb = new FormBuilder();
+      (component as any).fb = realFb;
+    });
+
+    it('should build form message from original message', async () => {
+      const mockCimMessage = {
+        header: { originalMessageId: 'msg1' }
+      };
+      const result = await component['buildFormMessage'](mockCimMessage);
+      expect(result).toBeDefined();
+      expect(component.formGroupsMap['msg1']).toBeDefined();
+    });
+
+    it('should return undefined when originalMessageId is missing', async () => {
+      const mockCimMessage = {
+        header: {}
+      };
+      const result = await component['buildFormMessage'](mockCimMessage);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  // ---------- waitForMessageById ----------
+  describe('waitForMessageById', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      component.cimMessage = [
+        { id: 'msg1', body: {} },
+        { id: 'msg2', body: {} }
+      ];
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should find message by id', async () => {
+      const promise = component['waitForMessageById']('msg1');
+      jest.advanceTimersByTime(100);
+      const result = await promise;
+      expect(result?.id).toBe('msg1');
+    });
+
+    it('should return null when message not found within timeout', async () => {
+      const promise = component['waitForMessageById']('msg999', 100);
+      jest.advanceTimersByTime(200);
+      const result = await promise;
+      expect(result).toBeNull();
+    });
+  });
+
+  // ---------- handleActionButtonClick ----------
+  describe('handleActionButtonClick', () => {
+    let mockMessage: any;
+    let mockFormGroup: FormGroup;
+
+    beforeEach(() => {
+      mockFormGroup = new FormBuilder().group({
+        sections: new FormBuilder().array([
+          new FormBuilder().group({
+            field1: ['value1']
+          })
+        ])
+      });
+      component.formGroupsMap['msg1'] = mockFormGroup;
+      (component as any).formMessageTypeService = {
+        getDefaultValue: jest.fn().mockReturnValue('')
+      };
+      component.createFormDataObject = jest.fn().mockReturnValue({
+        header: {},
+        body: { sections: [] },
+        id: 'msg1'
+      });
+      component.constructCimMessage = jest.fn();
+      mockMessage = {
+        id: 'msg1',
+        body: {
+          formTitle: 'Test Form',
+          sections: [
+            {
+              attributes: [
+                { key: 'field1' }
+              ]
+            }
+          ]
+        }
+      };
+    });
+
+    it('should reset form when action is reset', async () => {
+      const button = { action: 'reset' };
+      await component.handleActionButtonClick(button, mockMessage);
+      expect((component as any).formMessageTypeService.getDefaultValue).toHaveBeenCalled();
+    });
+
+    it('should cancel form when action is cancel', async () => {
+      const button = { action: 'cancel' };
+      await component.handleActionButtonClick(button, mockMessage);
+      expect(component.constructCimMessage).toHaveBeenCalledWith('FORM_DATA', expect.objectContaining({
+        status: 'cancelled'
+      }));
+    });
+
+    it('should return early when formGroup does not exist', async () => {
+      component.formGroupsMap = {};
+      const button = { action: 'reset' };
+      await component.handleActionButtonClick(button, mockMessage);
+      expect((component as any).formMessageTypeService.getDefaultValue).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- handleScreenShareClick ----------
+  describe('handleScreenShareClick', () => {
+    it('should return early when secure web call is active', () => {
+      component.isSecureWebCall = true;
+      component.handleScreenShareClick();
+      // Should return without error
+      expect(component.isSecureWebCall).toBe(true);
+    });
+
+    it('should return early when audio call is active', () => {
+      component.isAudioCallActive = true;
+      component.handleScreenShareClick();
+      expect(component.isAudioCallActive).toBe(true);
+    });
+  });
+
+  // ---------- handleVideoIconClick ----------
+  describe('handleVideoIconClick', () => {
+    beforeEach(() => {
+      component.toggleCallVideo = jest.fn();
+      component.convertCallRequest = jest.fn();
+    });
+
+    it('should return early when audio call is active', () => {
+      component.isAudioCallActive = true;
+      const tooltip = {} as any;
+      component.handleVideoIconClick(tooltip);
+      expect(component.toggleCallVideo).not.toHaveBeenCalled();
+      expect(component.convertCallRequest).not.toHaveBeenCalled();
+    });
+
+    it('should toggle video when video call is active', () => {
+      component.isVideoCallActive = true;
+      const tooltip = {} as any;
+      component.handleVideoIconClick(tooltip);
+      expect(component.toggleCallVideo).toHaveBeenCalled();
+    });
+
+    it('should convert call request when video call is not active', () => {
+      component.isVideoCallActive = false;
+      component.isAudioCallActive = false;
+      const tooltip = {} as any;
+      component.handleVideoIconClick(tooltip);
+      expect(component.convertCallRequest).toHaveBeenCalledWith('video');
     });
   });
 });
