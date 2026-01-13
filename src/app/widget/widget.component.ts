@@ -1452,7 +1452,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (messageType === "formMessageType" && this.formMessageTypeData && this.isChatActive) {
       formData = this.formMessageTypeData || [];
       formValues = messageTypeFormValues;
-    } else if( this.preChatFormInfo && !this.isChatActive) {
+      // removed the !this.isChatActive condition to allow form submission
+    } else if( this.preChatFormInfo) {
       formData = this.formData;
       formValues = this.preChatFormGroup.value;
     }
@@ -2180,7 +2181,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.getFormDataAsConversationData(this.preChatFormData),
     );
     this.pushPrechatDataAsActivity();
-
   }
 
   private handleSocketDisconnected(event: any, messageType: string) {
