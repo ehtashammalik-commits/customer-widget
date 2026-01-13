@@ -3991,8 +3991,30 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   /** Error: big handler — map response.type + description to user-friendly message and take appropriate actions */
   private handleErrorEvent(data: any): void {
     const errorMessage = this.getErrorMessage(data);
-    this.handleErrorSnackbars(errorMessage);
+
+    // ---------------- Snackbar #1 ----------------
+    if (
+      errorMessage === 'Audio/Video Device is being used by Someother Party' &&
+      this.dialogId != undefined
+    ) {
+      this.showErrorSnack(errorMessage);
+    }
+
+    // ---------------- Snackbar #2 / 3 / 4 ----------------
+    if (
+      errorMessage !=
+      'Please add Camera permissions in your browser to enable video.' &&
+      errorMessage != 'Audio/Video Device is being used by Someother Party'
+    ) {
+      this.handleAuthenticationError(errorMessage);
+    } else if (
+      errorMessage ===
+      'Please add Camera permissions in your browser to enable video.'
+    ) {
+      this.showErrorSnack(errorMessage);
+    }
   }
+
 
   private getErrorMessage(data: any): string {
     switch (data.response?.type) {
@@ -4018,81 +4040,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         console.log(`[Error] Unknown: ${data.response?.description}`);
         return 'An unknown error occurred.';
     }
-  }
-
-  private handleErrorSnackbars(errorMessage: string): void {
-    if (this.isDeviceInUseError(errorMessage)) {
-      this.showErrorSnack(errorMessage);
-      return;
-    }
-
-    if (this.isCameraPermissionError(errorMessage)) {
-      this.showErrorSnack(errorMessage);
-      return;
-    }
-
-    this.handleGeneralErrorSnackbar(errorMessage);
-  }
-
-  private isDeviceInUseError(errorMessage: string): boolean {
-    return errorMessage === 'Audio/Video Device is being used by Someother Party' &&
-           this.dialogId != undefined;
-  }
-
-  private isCameraPermissionError(errorMessage: string): boolean {
-    return errorMessage === 'Please add Camera permissions in your browser to enable video.';
-  }
-
-  private handleGeneralErrorSnackbar(errorMessage: string): void {
-    this.showAuthenticationResponseMessage = errorMessage;
-    this.activeVideoView = false;
-
-    if (this.standaloneWebRtc) {
-      this.handleStandaloneWebRtcError();
-    } else if (this.isMicrophonePermissionError(errorMessage)) {
-      this.handleMicrophonePermissionError();
-    } else {
-      this.handleDefaultError();
-    }
-  }
-
-  private handleStandaloneWebRtcError(): void {
-    if (this.dialogId === null || this.dialogId === undefined) {
-      this.showInvalidCodeError = true;
-      this.callPopUpView = false;
-      this.activeVideoView = false;
-      this.isWebRtcVideoCallActive = false;
-    }
-    this.showErrorSnack(this.showAuthenticationResponseMessage);
-  }
-
-  private isMicrophonePermissionError(errorMessage: string): boolean {
-    return (this.dialogId != null || this.dialogId != undefined) &&
-           errorMessage === 'Please add microphone permissions in your browser.';
-  }
-
-  private handleMicrophonePermissionError(): void {
-    this.showErrorSnack(this.showAuthenticationResponseMessage);
-    this.isAudioCallActive = false;
-    this.isSecureWebCall = true;
-    this.isVideoCallActive = true;
-    this.activeVideoView = true;
-    this.errorDuringWebRTCCall = false;
-
-    if (!this.__appConfig.appConfig.VIDEO) {
-      this.isAudioCallActive = true;
-      this.activeVideoView = false;
-    }
-  }
-
-  private handleDefaultError(): void {
-    this.showErrorSnack(this.showAuthenticationResponseMessage);
-    this.isAudioCallActive = false;
-    this.isSecureWebCall = false;
-    this.isVideoCallActive = false;
-    this.activeVideoView = false;
-    this.errorDuringWebRTCCall = true;
-    this.changeView('chat');
   }
 
   private handleAuthenticationError(errorMessage: string): void {
@@ -4767,6 +4714,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const control = formGroup.get(controlPath);
 
     if (!control) {
+      console.warn(`Control '${controlPath}' not found.`);
       return;
     }
 
