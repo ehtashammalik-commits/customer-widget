@@ -2929,37 +2929,42 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   constructCimMessage(
     msgType: string,
     options: {
-      text?: string,
-      intent?: null | string,
-      originalMessageId?: null | string,
-      fileMimeType?: string,
-      fileName?: string,
-      fileSize?: number,
-      additionalText?: string,
-      fileType?: string,
-      carousalCardId?: null | string,
-      formMessageTypeData?: any,
-      status?: 'filled' | 'cancelled',
-      additionalButtonDetails?: any,
+      text?: string;
+      intent?: null | string;
+      originalMessageId?: null | string;
+      fileMimeType?: string;
+      fileName?: string;
+      fileSize?: number;
+      additionalText?: string;
+      fileType?: string;
+      carousalCardId?: null | string;
+      formMessageTypeData?: any;
+      status?: 'filled' | 'cancelled';
+      additionalButtonDetails?: any;
     }
   ) {
+    const messageType = msgType.toLowerCase();
 
-    const {
-      text,
-      intent,
-      originalMessageId,
-      fileMimeType,
-      fileName,
-      fileSize,
-      additionalText,
-      fileType,
-      carousalCardId,
-      formMessageTypeData,
-      status,
-      additionalButtonDetails
-    } = options
-    
-    let header = {
+    if (messageType === 'plain') {
+      this.sendPlainMessage(msgType, options);
+      return;
+    }
+
+    if (this.isMediaMessageType(messageType)) {
+      this.sendMediaMessage(msgType, messageType, options);
+      return;
+    }
+
+    if (messageType === 'form_data') {
+      this.sendFormDataMessage(msgType, options);
+      return;
+    }
+
+    this.handleUnsupportedMessage();
+  }
+
+  private buildBaseHeader() {
+    return {
       originalMessageId: null as null | string,
       intent: null as null | string,
       entities: this.getAdditionalValue('INPUT_PARAMS'),
@@ -2971,149 +2976,173 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         additionalDetail: null,
       },
     };
+  }
 
-    let body: {
-      markdownText: string;
-      type: string;
-      caption?: string;
-      additionalDetails?: any;
-      attachment?: any;
-      sections?:any;
-    } = {
-      markdownText: '',
-      type: '',
+  private sendPlainMessage(
+    msgType: string,
+    {
+      text,
+      intent,
+      originalMessageId,
+      carousalCardId,
+      additionalButtonDetails,
+    }: any,
+  ): void {
+    const header = this.buildBaseHeader();
+    const body = { markdownText: '', type: 'PLAIN' };
+
+    const transformedIntent = this.transformPayload(intent);
+    header.originalMessageId = originalMessageId ?? null;
+    header.intent = transformedIntent.intent || null;
+
+    if (transformedIntent.entities) {
+      header.entities = transformedIntent.entities;
+    }
+
+    header.entities = this.mergeButtonParameters(
+      header.entities,
+      additionalButtonDetails,
+    );
+
+    header.additionalData = {
+      carousalCardId:
+        typeof carousalCardId === 'string' && carousalCardId.trim() !== ''
+          ? carousalCardId
+          : null,
     };
 
-    const messageTypesFormediaURLs = [
-      'application',
-      'text',
-      'image',
-      'video',
-      'audio',
-    ];
+    body.markdownText = text?.trim() || '';
 
-    const messageType = msgType.toLowerCase();
+    this.sdk.sendChatMessage({
+      type: msgType,
+      header,
+      body,
+      customer: this.customerData,
+    });
 
-    if (messageType === 'plain') {
-      let transformedIntent = this.transformPayload(intent);
-      header.originalMessageId = originalMessageId ?? null;
-      header.intent = transformedIntent.intent || null;
-      if (transformedIntent.entities) {
-        header.entities = transformedIntent.entities;
+    this.resetMessageState();
+  }
+
+  private mergeButtonParameters(entities: any, additionalButtonDetails: any) {
+    if (!additionalButtonDetails?.parameters) return entities;
+
+    try {
+      let buttonParameters: any = {};
+
+      if (typeof additionalButtonDetails.parameters === 'string') {
+        buttonParameters = JSON.parse(additionalButtonDetails.parameters);
+      } else if (typeof additionalButtonDetails.parameters === 'object') {
+        buttonParameters = additionalButtonDetails.parameters;
       }
-      
-      // Extract and merge additionalButtonDetails parameters into entities
-      if (additionalButtonDetails?.parameters) {
-        try {
-          let buttonParameters: any = {};
-          
-          // Parse the parameters if it's a string
-          if (typeof additionalButtonDetails.parameters === 'string') {
-            buttonParameters = JSON.parse(additionalButtonDetails.parameters);
-          } else if (typeof additionalButtonDetails.parameters === 'object') {
-            buttonParameters = additionalButtonDetails.parameters;
-          }
-          
-          // Merge with existing entities
-          if (header.entities && typeof header.entities === 'object') {
-            header.entities = { ...header.entities, ...buttonParameters };
-          } else {
-            header.entities = buttonParameters;
-          }
-          
-          console.log('Merged button parameters into entities:', header.entities);
-        } catch (error) {
-          console.error('Error parsing additionalButtonDetails parameters:', error);
-        }
+
+      if (entities && typeof entities === 'object') {
+        return { ...entities, ...buttonParameters };
       }
-      
-      header.additionalData = {
-        carousalCardId:
-          typeof carousalCardId === 'string' && carousalCardId.trim() !== ''
-            ? carousalCardId
-            : null,
-      };
-      body.type = 'PLAIN';
-      body.markdownText = text?.trim() || '';
-
-      this.sdk.sendChatMessage({
-        type: msgType,
-        header,
-        body,
-        customer: this.customerData,
-      });
-
-      this.clearMessageData();
-      this.fileLoading = false;
-      this.imageUrls = [];
-      this.selectedFile = null as any;
-    } else if (messageTypesFormediaURLs.includes(messageType)) {
-      const imageUrl =
-        this.__appConfig.appConfig.FILE_SERVER_URL +
-        '/api/downloadFileStream?filename=' +
-        fileName;
-
-      body.attachment = this.buildMediaAttachment(
-        imageUrl,
-        fileSize || 0,
-        fileMimeType || '',
-        fileType || '',
-      );
-
-      if (messageType === 'application' || messageType === 'text') {
-        body.type = 'FILE';
-        body.markdownText = additionalText || '';
-        body.caption = '';
-        body.additionalDetails = { fileName };
-      } else {
-        body.type = messageType.toUpperCase();
-        body.markdownText = additionalText || '';
-        body.caption = fileName;
-        body.additionalDetails = {};
-      }
-      // });
-      const msgPayload = {
-        type: msgType,
-        header: header,
-        body: body,
-        customer: this.customerData,
-      };
-      this.sdk.sendChatMessage(msgPayload);
-      this.clearMessageData();
-      this.fileLoading = false;
-      this.imageUrls = [];
-      this.selectedFile = null as any;
-
-    } else if(messageType === 'form_data'){
-      const formData = formMessageTypeData;
-      console.log('Form Data:', formData);
-        header.originalMessageId = originalMessageId || null;
-        header.intent = intent || null;
-        body.type = 'FORM_DATA';
-        body.markdownText = '';
-        body.sections = formMessageTypeData?.body?.sections || [];
-        body.additionalDetails = formMessageTypeData?.body?.additionalDetails || {};
-        if (status) {
-          body.additionalDetails.status = status;
-        }
-        body.additionalDetails.status = status;
-        const msgPayload = {
-          type: msgType,
-          header: header,
-          body: body,
-          customer: this.customerData,
-        };
-
-
-        console.log('Form Data Message Payload:', msgPayload);
-        this.sdk.sendChatMessage(msgPayload);
-        this.clearMessageData();
+      return buttonParameters;
+    } catch (error) {
+      console.error('Error parsing additionalButtonDetails parameters:', error);
+      return entities;
     }
-    else {
-      console.log('Unable to process the file');
-      this.snackBar.open('unable to process the file', 'X');
-      return;
+  }
+
+  private isMediaMessageType(messageType: string): boolean {
+    return ['application', 'text', 'image', 'video', 'audio'].includes(
+      messageType,
+    );
+  }
+
+  private sendMediaMessage(
+    msgType: string,
+    messageType: string,
+    {
+      fileMimeType,
+      fileName,
+      fileSize,
+      additionalText,
+      fileType,
+    }: any,
+  ): void {
+    const header = this.buildBaseHeader();
+    const body: any = { markdownText: '', type: '' };
+
+    const imageUrl =
+      this.__appConfig.appConfig.FILE_SERVER_URL +
+      '/api/downloadFileStream?filename=' +
+      fileName;
+
+    body.attachment = this.buildMediaAttachment(
+      imageUrl,
+      fileSize || 0,
+      fileMimeType || '',
+      fileType || '',
+    );
+
+    if (messageType === 'application' || messageType === 'text') {
+      body.type = 'FILE';
+      body.markdownText = additionalText || '';
+      body.caption = '';
+      body.additionalDetails = { fileName };
+    } else {
+      body.type = messageType.toUpperCase();
+      body.markdownText = additionalText || '';
+      body.caption = fileName;
+      body.additionalDetails = {};
     }
+
+    this.sdk.sendChatMessage({
+      type: msgType,
+      header,
+      body,
+      customer: this.customerData,
+    });
+
+    this.resetMessageState();
+  }
+
+  private sendFormDataMessage(
+    msgType: string,
+    {
+      formMessageTypeData,
+      originalMessageId,
+      intent,
+      status,
+    }: any,
+  ): void {
+    const header = this.buildBaseHeader();
+    const body: any = { markdownText: '', type: 'FORM_DATA' };
+
+    header.originalMessageId = originalMessageId || null;
+    header.intent = intent || null;
+
+    body.sections = formMessageTypeData?.body?.sections || [];
+    body.additionalDetails =
+      formMessageTypeData?.body?.additionalDetails || {};
+    if (status) {
+      body.additionalDetails.status = status;
+    }
+
+    const msgPayload = {
+      type: msgType,
+      header: header,
+      body: body,
+      customer: this.customerData,
+    };
+
+    console.log('Form Data Message Payload:', msgPayload);
+    this.sdk.sendChatMessage(msgPayload);
+    this.clearMessageData();
+  }
+
+  private handleUnsupportedMessage(): void {
+    console.log('Unable to process the file');
+    this.snackBar.open('unable to process the file', 'X');
+  }
+
+  private resetMessageState(): void {
+    this.clearMessageData();
+    this.fileLoading = false;
+    this.imageUrls = [];
+    this.selectedFile = null as any;
   }
 
   buildMediaAttachment(
