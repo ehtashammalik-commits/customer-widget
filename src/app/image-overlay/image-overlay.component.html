@@ -1,8 +1,7 @@
-<div class="image-overlay" 
+<dialog class="image-overlay" 
      *ngIf="isOpen" 
      (click)="onBackdropClick($event)"
      (keydown.escape)="close()"
-     role="dialog"
      aria-modal="true"
      [attr.aria-label]="'Image viewer'">
   <div class="image-overlay-content">
@@ -11,4 +10,4 @@
     </button>
     <img [src]="imageUrl" [alt]="altText" class="fullscreen-image">
   </div>
-</div>
+</dialog>

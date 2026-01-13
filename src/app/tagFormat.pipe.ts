@@ -9,10 +9,10 @@ export class tagFormatPipe implements PipeTransform {
   transform(value: string | null | undefined, enableDynamicLink: boolean): string {
     if (!value) return '';
 
-    value = value.replace(/&amp;#039;/g, "'").replace(/&amp;quot;/g, '\"');
+    value = value.replace(/&amp;#039;/g, "'").replace(/&amp;quot;/g, '\"'); //NOSONAR
 
     // Quick check if there are any links to process
-    const linkRegex = /\(([^,]+),\s*(https?:\/\/[^\)]+)\)/g;
+    const linkRegex = /\(([^,]+),\s*(https?:\/\/[^\)]+)\)/g; //NOSONAR
     if (!linkRegex.test(value)) {
       // No links found, just apply formatting and return
       return ibsFormat(

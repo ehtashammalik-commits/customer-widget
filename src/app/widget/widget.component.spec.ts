@@ -1,4 +1,5 @@
 import { BehaviorSubject, Subject, of } from 'rxjs';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { SdkService } from '../services/sdk.service';
 import { WidgetComponent } from './widget.component';
 
@@ -298,6 +299,45 @@ describe('WidgetComponent', () => {
       );
     });
 
+    describe('subscribeToChatResume', () => {
+      let chatResumeSubject: Subject<any>;
+
+      beforeEach(() => {
+        chatResumeSubject = new Subject<any>();
+        (component.sdk as any).onChatResumedResponse$ = chatResumeSubject;
+        (component as any).subscribeToChatResume();
+      });
+
+      it('should change screen to chat and handle resumed messages when chat is available with history', () => {
+        const history = [{ id: 'm1' }];
+
+        chatResumeSubject.next({ isChatAvailable: true, data: history });
+
+        expect(component.changeScreen).toHaveBeenCalledWith('chat');
+        expect(component.handleResumedMessages).toHaveBeenCalledWith(history);
+        expect(component.clearSession).not.toHaveBeenCalled();
+        expect(component.scrollToBottom).toHaveBeenCalled();
+      });
+
+      it('should clear session when chat is available but has no history', () => {
+        chatResumeSubject.next({ isChatAvailable: true, data: [] });
+
+        expect(component.changeScreen).toHaveBeenCalledWith('chat');
+        expect(component.handleResumedMessages).not.toHaveBeenCalled();
+        expect(component.clearSession).toHaveBeenCalled();
+        expect(component.scrollToBottom).toHaveBeenCalled();
+      });
+
+      it('should clear session when chat is not available', () => {
+        chatResumeSubject.next({ isChatAvailable: false, data: [] });
+
+        expect(component.changeScreen).not.toHaveBeenCalled();
+        expect(component.handleResumedMessages).not.toHaveBeenCalled();
+        expect(component.clearSession).toHaveBeenCalled();
+        expect(component.scrollToBottom).toHaveBeenCalled();
+      });
+    });
+
     // You can add more tests for subscriptions and side effects as needed
   });
 
@@ -467,6 +507,200 @@ describe('WidgetComponent', () => {
       component['subscribeToConnectionResponse']();
 
       expect(component.eventListener).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- subscribeToCallbackRequest ----------
+  describe('subscribeToCallbackRequest', () => {
+    let mockOnCallbackRequestResponse$: any;
+    let mockSdk: any;
+
+    beforeEach(() => {
+      mockOnCallbackRequestResponse$ = {
+        subscribe: jest.fn(),
+      };
+
+      mockSdk = {
+        onCallbackRequestResponse$: mockOnCallbackRequestResponse$,
+      };
+
+      component.sdk = mockSdk;
+      component.changeView = jest.fn();
+      component.changeScreen = jest.fn();
+      component.callbackLoader = true;
+      component.callbackResponseStatus = '';
+      component.isChatActive = false;
+    });
+
+    it('should subscribe to onCallbackRequestResponse$ observable', () => {
+      const mockData = {
+        status: {
+          name: 'SUCCESS',
+        },
+      };
+
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
+        callback(mockData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToCallbackRequest']();
+
+      expect(mockOnCallbackRequestResponse$.subscribe).toHaveBeenCalled();
+    });
+
+    it('should set callbackResponseStatus to lowercase status name when status.name exists', () => {
+      const mockData = {
+        status: {
+          name: 'SUCCESS',
+        },
+      };
+
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
+        callback(mockData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToCallbackRequest']();
+
+      expect(component.callbackResponseStatus).toBe('success');
+    });
+
+    it('should set callbackResponseStatus to error when status.name does not exist', () => {
+      const mockData = {
+        status: {},
+      };
+
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
+        callback(mockData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      component['subscribeToCallbackRequest']();
+
+      expect(component.callbackResponseStatus).toBe('error');
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Something Went Wrong Please check logs');
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should set callbackResponseStatus to error when status is missing', () => {
+      const mockData = {};
+
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
+        callback(mockData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      component['subscribeToCallbackRequest']();
+
+      expect(component.callbackResponseStatus).toBe('error');
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Something Went Wrong Please check logs');
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should set callbackLoader to false', () => {
+      const mockData = {
+        status: {
+          name: 'PENDING',
+        },
+      };
+
+      component.callbackLoader = true;
+
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
+        callback(mockData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToCallbackRequest']();
+
+      expect(component.callbackLoader).toBe(false);
+    });
+
+    it('should call changeView when isChatActive is true', () => {
+      const mockData = {
+        status: {
+          name: 'SUCCESS',
+        },
+      };
+
+      component.isChatActive = true;
+      component.changeView = jest.fn();
+
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
+        callback(mockData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToCallbackRequest']();
+
+      expect(component.changeView).toHaveBeenCalledWith('callbackResponse');
+      expect(component.changeScreen).not.toHaveBeenCalled();
+    });
+
+    it('should call changeScreen when isChatActive is false', () => {
+      const mockData = {
+        status: {
+          name: 'SUCCESS',
+        },
+      };
+
+      component.isChatActive = false;
+      component.changeScreen = jest.fn();
+
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
+        callback(mockData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToCallbackRequest']();
+
+      expect(component.changeScreen).toHaveBeenCalledWith('callbackResponse');
+      expect(component.changeView).not.toHaveBeenCalled();
+    });
+
+    it('should log callback request response events', () => {
+      const mockData = {
+        status: {
+          name: 'SUCCESS',
+        },
+      };
+
+      const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
+        callback(mockData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToCallbackRequest']();
+
+      expect(consoleLogSpy).toHaveBeenCalledWith('callback request response events => ', mockData);
+
+      consoleLogSpy.mockRestore();
+    });
+
+    it('should handle status name with mixed case and convert to lowercase', () => {
+      const mockData = {
+        status: {
+          name: 'In_Progress',
+        },
+      };
+
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
+        callback(mockData);
+        return { unsubscribe: jest.fn() };
+      });
+
+      component['subscribeToCallbackRequest']();
+
+      expect(component.callbackResponseStatus).toBe('in_progress');
     });
   });
 
@@ -1026,6 +1260,159 @@ describe('WidgetComponent', () => {
       const result4 = component['extractMinMaxLength'](regexWithoutLength);
       expect(result4.minLength).toBeNull();
       expect(result4.maxLength).toBeNull();
+    });
+  });
+
+  describe('createFormValidationControls', () => {
+    beforeEach(() => {
+      // Use real FormBuilder for these tests
+      (component as any).fb = new FormBuilder();
+    });
+
+    it('should create controls with required and length validators for preChatForm', () => {
+      const formSchema = [
+        {
+          attributes: [
+            {
+              key: 'name',
+              valueType: 'shortanswer',
+              isRequired: true,
+            },
+          ],
+        },
+      ];
+
+      const formValidation = [
+        {
+          type: 'shortanswer',
+          regex: '.{5,10}',
+        },
+      ];
+
+      component.preChatFormGroup = new FormGroup({});
+
+      component.createFormValidationControls(
+        formSchema as any[],
+        formValidation as any[],
+        'preChatForm',
+      );
+
+      const sections = component.preChatFormGroup.get('sections') as unknown as FormArray;
+      expect(sections).toBeTruthy();
+      expect(sections.length).toBe(1);
+
+      const sectionGroup = sections.at(0) as FormGroup;
+      const control = sectionGroup.get('name');
+      expect(control).toBeTruthy();
+
+      // default value for preChatForm should be empty string
+      expect(control?.value).toBe('');
+
+      // Required validator
+      control?.setValue('');
+      expect(control?.valid).toBe(false);
+
+      // Too short (min length 5)
+      control?.setValue('abcd');
+      expect(control?.valid).toBe(false);
+
+      // Within range 5-10
+      control?.setValue('abcde');
+      expect(control?.valid).toBe(true);
+
+      // Too long (>10)
+      control?.setValue('abcdefghijk');
+      expect(control?.valid).toBe(false);
+    });
+
+    it('should use formMessageTypeService default value and attach validators for formMessageType', () => {
+      const formSchema = [
+        {
+          attributes: [
+            {
+              key: 'code',
+              valueType: 'alphanumeric',
+              isRequired: false,
+            },
+          ],
+        },
+      ];
+
+      const formValidation = [
+        {
+          type: 'alphanumeric',
+          regex: '^[a-zA-Z0-9]{3,6}$',
+        },
+      ];
+
+      const targetFormGroup = new FormGroup({});
+      const defaultValue = 'ABC1';
+
+      (mockFormMessageTypeService.getDefaultValue as jest.Mock).mockReturnValue(
+        defaultValue,
+      );
+
+      component.createFormValidationControls(
+        formSchema as any[],
+        formValidation as any[],
+        'formMessageType',
+        targetFormGroup,
+      );
+
+      const sections = targetFormGroup.get('sections') as unknown as FormArray;
+      expect(sections).toBeTruthy();
+      expect(sections.length).toBe(1);
+
+      const sectionGroup = sections.at(0) as FormGroup;
+      const control = sectionGroup.get('code');
+      expect(control).toBeTruthy();
+
+      // Default value from service
+      expect(control?.value).toBe(defaultValue);
+      expect(mockFormMessageTypeService.getDefaultValue).toHaveBeenCalledWith(
+        formSchema[0].attributes[0],
+      );
+
+      // Value not matching regex should be invalid
+      control?.setValue('AB');
+      expect(control?.valid).toBe(false);
+
+      // Value matching regex should be valid
+      control?.setValue('AB123');
+      expect(control?.valid).toBe(true);
+    });
+
+    it('should not fail when there is no matching validation rule', () => {
+      const formSchema = [
+        {
+          attributes: [
+            {
+              key: 'note',
+              valueType: 'unknownType',
+              isRequired: false,
+            },
+          ],
+        },
+      ];
+
+      const formValidation: any[] = [];
+
+      component.preChatFormGroup = new FormGroup({});
+
+      expect(() =>
+        component.createFormValidationControls(
+          formSchema as any[],
+          formValidation,
+          'preChatForm',
+        ),
+      ).not.toThrow();
+
+      const sections = component.preChatFormGroup.get('sections') as unknown as FormArray;
+      expect(sections).toBeTruthy();
+      expect(sections.length).toBe(1);
+      const sectionGroup = sections.at(0) as FormGroup;
+      const control = sectionGroup.get('note');
+      expect(control).toBeTruthy();
     });
   });
 

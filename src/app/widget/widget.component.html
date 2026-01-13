@@ -1605,7 +1605,7 @@
                     <div class="form-group" [ngSwitch]="attribute.valueType">
 
                       <div *ngSwitchCase="'number'">
-                        <label>
+                        <label for="{{ attribute.key }}">
                           {{ attribute.label }}
                           <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
@@ -1624,7 +1624,7 @@
 
                       <!-- Email -->
                       <div *ngSwitchCase="'email'">
-                        <label>
+                        <label for="{{ attribute.key }}">
                           {{ attribute.label }}
                           <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                         </label>
