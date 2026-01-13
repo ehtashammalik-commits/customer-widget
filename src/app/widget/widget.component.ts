@@ -3952,89 +3952,109 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   /** Error: big handler — map response.type + description to user-friendly message and take appropriate actions */
   private handleErrorEvent(data: any): void {
-    let errorMessage = '';
+    const errorMessage = this.getErrorMessage(data);
+    this.handleErrorSnackbars(errorMessage);
+  }
 
+  private getErrorMessage(data: any): string {
     switch (data.response?.type) {
-      case 'generalError':
-        errorMessage = this.getGeneralErrorMessage(data.response?.description);
-        console.log('[Error] Call terminated:', errorMessage);
-        break;
+      case 'generalError': {
+        const message = this.getGeneralErrorMessage(data.response?.description);
+        console.log('[Error] Call terminated:', message);
+        return message;
+      }
 
-      case 'subscriptionFailed':
-        errorMessage =
-          'Certificate Issues: Please contact with your administrator';
-        console.log('[Error] Call terminated:', errorMessage);
-        break;
+      case 'subscriptionFailed': {
+        const subMessage = 'Certificate Issues: Please contact with your administrator';
+        console.log('[Error] Call terminated:', subMessage);
+        return subMessage;
+      }
 
-      case 'invalidState':
-        errorMessage = 'Invalid State: Session not found';
-        console.log('[Error] Call terminated:', errorMessage);
-        break;
+      case 'invalidState': {
+        const invalidMessage = 'Invalid State: Session not found';
+        console.log('[Error] Call terminated:', invalidMessage);
+        return invalidMessage;
+      }
 
       default:
         console.log(`[Error] Unknown: ${data.response?.description}`);
-        errorMessage = 'An unknown error occurred.';
-        break;
+        return 'An unknown error occurred.';
     }
+  }
 
-    // ---------------- Snackbar #1 ----------------
-    if (
-      errorMessage === 'Audio/Video Device is being used by Someother Party' &&
-      this.dialogId != undefined
-    ) {
+  private handleErrorSnackbars(errorMessage: string): void {
+    if (this.isDeviceInUseError(errorMessage)) {
       this.showErrorSnack(errorMessage);
+      return;
     }
 
-    // ---------------- Snackbar #2 / 3 / 4 ----------------
-    if (
-      errorMessage !=
-      'Please add Camera permissions in your browser to enable video.' &&
-      errorMessage != 'Audio/Video Device is being used by Someother Party'
-    ) {
-      this.showAuthenticationResponseMessage = errorMessage;
+    if (this.isCameraPermissionError(errorMessage)) {
+      this.showErrorSnack(errorMessage);
+      return;
+    }
+
+    this.handleGeneralErrorSnackbar(errorMessage);
+  }
+
+  private isDeviceInUseError(errorMessage: string): boolean {
+    return errorMessage === 'Audio/Video Device is being used by Someother Party' &&
+           this.dialogId != undefined;
+  }
+
+  private isCameraPermissionError(errorMessage: string): boolean {
+    return errorMessage === 'Please add Camera permissions in your browser to enable video.';
+  }
+
+  private handleGeneralErrorSnackbar(errorMessage: string): void {
+    this.showAuthenticationResponseMessage = errorMessage;
+    this.activeVideoView = false;
+
+    if (this.standaloneWebRtc) {
+      this.handleStandaloneWebRtcError();
+    } else if (this.isMicrophonePermissionError(errorMessage)) {
+      this.handleMicrophonePermissionError();
+    } else {
+      this.handleDefaultError();
+    }
+  }
+
+  private handleStandaloneWebRtcError(): void {
+    if (this.dialogId === null || this.dialogId === undefined) {
+      this.showInvalidCodeError = true;
+      this.callPopUpView = false;
       this.activeVideoView = false;
-
-      if (this.standaloneWebRtc) {
-        if (this.dialogId === null || this.dialogId === undefined) {
-          this.showInvalidCodeError = true;
-          this.callPopUpView = false;
-          this.activeVideoView = false;
-          this.isWebRtcVideoCallActive = false;
-        }
-
-        this.showErrorSnack(this.showAuthenticationResponseMessage);
-      } else if (
-        (this.dialogId != null || this.dialogId != undefined) &&
-        errorMessage === 'Please add microphone permissions in your browser.'
-      ) {
-        this.showErrorSnack(this.showAuthenticationResponseMessage);
-
-        this.isAudioCallActive = false;
-        this.isSecureWebCall = true;
-        this.isVideoCallActive = true;
-        this.activeVideoView = true;
-        this.errorDuringWebRTCCall = false;
-
-        if (!this.__appConfig.appConfig.VIDEO) {
-          this.isAudioCallActive = true;
-          this.activeVideoView = false;
-        }
-      } else {
-        this.showErrorSnack(this.showAuthenticationResponseMessage);
-
-        this.isAudioCallActive = false;
-        this.isSecureWebCall = false;
-        this.isVideoCallActive = false;
-        this.activeVideoView = false;
-        this.errorDuringWebRTCCall = true;
-        this.changeView('chat');
-      }
-    } else if (
-      errorMessage ===
-      'Please add Camera permissions in your browser to enable video.'
-    ) {
-      this.showErrorSnack(errorMessage);
+      this.isWebRtcVideoCallActive = false;
     }
+    this.showErrorSnack(this.showAuthenticationResponseMessage);
+  }
+
+  private isMicrophonePermissionError(errorMessage: string): boolean {
+    return (this.dialogId != null || this.dialogId != undefined) &&
+           errorMessage === 'Please add microphone permissions in your browser.';
+  }
+
+  private handleMicrophonePermissionError(): void {
+    this.showErrorSnack(this.showAuthenticationResponseMessage);
+    this.isAudioCallActive = false;
+    this.isSecureWebCall = true;
+    this.isVideoCallActive = true;
+    this.activeVideoView = true;
+    this.errorDuringWebRTCCall = false;
+
+    if (!this.__appConfig.appConfig.VIDEO) {
+      this.isAudioCallActive = true;
+      this.activeVideoView = false;
+    }
+  }
+
+  private handleDefaultError(): void {
+    this.showErrorSnack(this.showAuthenticationResponseMessage);
+    this.isAudioCallActive = false;
+    this.isSecureWebCall = false;
+    this.isVideoCallActive = false;
+    this.activeVideoView = false;
+    this.errorDuringWebRTCCall = true;
+    this.changeView('chat');
   }
 
   private showErrorSnack(message: string): void {
