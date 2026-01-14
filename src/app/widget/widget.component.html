@@ -728,12 +728,12 @@
                             </ng-container>
 
                             <ng-container *ngSwitchCase="'checkbox'">
-                              <label class="inputField-label "
+                              <label class="inputField-label questionLabel"
                                 [attr.for]="'checkbox_' + attribute.key + '_' + i + '_' +
       replaceSpacesWithUnderscores(attribute.attributeOptions.attributeData[0]?.label) + '_' +
       replaceSpacesWithUnderscores(attribute.attributeOptions.attributeData[0]?.values[0]?.label)"
   >
-                                      <span class="question_label">
+                                      <span class="attributeName">
                                           {{ attribute.label }}
                                       </span>
                                       <span *ngIf="attribute?.isRequired"
