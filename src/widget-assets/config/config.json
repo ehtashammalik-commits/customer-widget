@@ -9,12 +9,12 @@
   "BUSINESSCALENDAR_URL": "https://efcx-dev2.expertflow.com/business-calendar",
   "CX_ACTIVITY": "https://efcx-dev2.expertflow.com/conversation-manager/activities",
   "CHANNEL_IDENTIFIER": "phone",
-  "ENABLE_LOGO": false,
-  "ADDITIONAL_PANEL": true,
+  "ENABLE_LOGO": true,
   "VIDEO": true,
   "USERNAME_ENABLED": false,
   "MUTE_NOTIFICATIONS": false,
   "IS_DIRECT_WEBRTC_CALL_ENABLED": true,
   "ENABLE_TRANSCRIPT_NOTIFICATIONS": true,
-  "AUTO_RESUME_ON_NEW_TAB": true
+  "AUTO_RESUME_ON_NEW_TAB": true,
+  "WIDGET_END_VIEW_TIMEOUT_SECONDS": 10
 }

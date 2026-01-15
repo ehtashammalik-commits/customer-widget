@@ -1,4 +1,4 @@
-const { customerWidgetUrl, serviceIdentifier, widgetIdentifier, Source } = __cim;
+const { customerWidgetUrl, serviceIdentifier, widgetIdentifier, Source, widgetWidth, widgetHeight, widgetBottomMargin, widgetBottomRightMargin } = __cim;
 const priorityCookies = ['mtc_id', '_ga']; // Add any other cookies you want to prioritize
 var currentWindowWidth = window.innerWidth;
 window.dataLayer = window.dataLayer || [];
@@ -36,21 +36,21 @@ if (Source == 'UApp') {
   params.append('msisdn', __cim.msisdn);
 }
 
-const URL = `${customerWidgetUrl}/#/widget?${params.toString()}`;
+const EF_WIDGET_URL = `${customerWidgetUrl}/#/widget?${params.toString()}`;
 var parentSection = document.createElement('div');
 parentSection.setAttribute('id', 'init_widget_main');
 parentSection.style.border = '0';
 parentSection.style.float = 'right';
 parentSection.style.position = 'fixed';
-parentSection.style.bottom = '0';
-parentSection.style.right = '0';
+parentSection.style.bottom = widgetBottomMargin || '10px';
+parentSection.style.right = widgetBottomRightMargin || '15px';
+parentSection.style.maxHeight = `calc(100% - ${parentSection.style.bottom})`;
+parentSection.style.maxWidth = `calc(100% - ${parentSection.style.right})`;
 // parentSection.style.width = '355px';
 // parentSection.style.height = '665px';
 parentSection.style.width = '100px';
 parentSection.style.height = '80px';
 parentSection.style.background = 'transparent';
-parentSection.style.maxWidth = '100%';
-parentSection.style.maxHeight = 'calc(100% - 0px)';
 parentSection.style.minHeight = '0px';
 parentSection.style.minWidth = '0px';
 parentSection.style.zIndex = '9999';
@@ -59,7 +59,7 @@ var chatIframe = document.createElement('iframe');
 chatIframe.setAttribute('id', 'init_widget');
 chatIframe.setAttribute('width', '100%');
 chatIframe.setAttribute('height', '100%');
-chatIframe.setAttribute('src', URL);
+chatIframe.setAttribute('src', EF_WIDGET_URL);
 chatIframe.setAttribute('allow', 'camera *;microphone *;autoplay *');
 chatIframe.setAttribute('allowusermedia', 'camera *;microphone *');
 chatIframe.style.border = '0';
@@ -115,10 +115,17 @@ window.addEventListener('message', (event) => {
   if (event.data.state == 'icon-view') {
     parentSection.style.width = '100px';
     parentSection.style.height = '80px';
+    parentSection.style.boxShadow = 'none';
   }
   if (event.data.state == 'wraper-view') {
-    parentSection.style.width = '312px';
-    parentSection.style.height = '290px';
+    parentSection.style.width = '320px';
+    parentSection.style.height = '300px';
+    parentSection.style.boxShadow = 'none';
+  }
+  if (event.data.state == 'compact-wraper-view') {
+    parentSection.style.width = '180px';
+    parentSection.style.height = '250px';
+    parentSection.style.boxShadow = 'none';
   }
   if (event.data.state == 'form-view') {
     if (Source == 'UApp') {
@@ -126,9 +133,9 @@ window.addEventListener('message', (event) => {
       parentSection.style.height = '100%';
     }
     else {
-      parentSection.style.width = (currentWindowWidth > 440) ? '360px' : 'calc(100% - 5vw)';
-      parentSection.style.height = '665px';
+      parentSection.style.width = (currentWindowWidth > 440) ? widgetWidth || '360px' : 'calc(100% - 5vw)';
+      parentSection.style.height = widgetHeight || '620px';
+      parentSection.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
     }
-
   }
 }, false);

@@ -31,6 +31,7 @@
               "src/widget-assets"
             ],
             "styles": [
+              "node_modules/ngx-spinner/animations/ball-spin.css",
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.scss"
             ],

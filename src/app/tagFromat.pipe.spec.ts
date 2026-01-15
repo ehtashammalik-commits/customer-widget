@@ -28,7 +28,7 @@ describe('tagFormatPipe', () => {
         ['mark', '!'],
       ],
       { detectLinks: true, target: '_blank' },
-      { allowXssEscaping: true },
+      { allowXssEscaping: false },
     );
     expect(result).toBe('formatted:Hello *world*:true');
   });
@@ -45,7 +45,7 @@ describe('tagFormatPipe', () => {
         ['mark', '!'],
       ],
       { detectLinks: false, target: '_blank' },
-      { allowXssEscaping: true },
+      { allowXssEscaping: false },
     );
     expect(result).toBe('formatted:Test _italic_:false');
   });

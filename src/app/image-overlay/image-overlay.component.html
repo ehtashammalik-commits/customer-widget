@@ -1,0 +1,13 @@
+<dialog class="image-overlay" 
+     *ngIf="isOpen" 
+     (click)="onBackdropClick($event)"
+     (keydown.escape)="close()"
+     aria-modal="true"
+     [attr.aria-label]="'Image viewer'">
+  <div class="image-overlay-content">
+    <button class="close-button" (click)="close()" aria-label="Close image viewer">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <img [src]="imageUrl" [alt]="altText" class="fullscreen-image">
+  </div>
+</dialog>

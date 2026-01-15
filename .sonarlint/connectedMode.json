@@ -1,0 +1,4 @@
+{
+    "sonarQubeUri": "http://sonarqube.expertflow.com:9000",
+    "projectKey": "customer-widget"
+}
