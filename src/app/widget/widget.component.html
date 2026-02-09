@@ -638,7 +638,8 @@
                           <ng-container *ngIf="attribute.valueType === 'dateTime'">
 
                             <div class="dateTime">
-                              <span class="dateTime-icon" (click)="dateTimeInput.showPicker()">
+                              <span class="dateTime-icon keyEv" (click)="dateTimeInput.showPicker()"
+                                (keydown)="($event.key === 'Enter' || $event.key === ' ') && dateTimeInput.showPicker()">
                                 <img src="widget-assets/images/date_time_icon.svg" alt="dateTime-icon">
                               </span>
                               <input #dateTimeInput id="dateTime" matInput type="datetime-local"
@@ -650,7 +651,8 @@
                           <ng-container *ngIf="attribute.valueType === 'time'">
 
                             <div class="dateTime">
-                              <span class="dateTime-icon" (click)="timeInput.showPicker()">
+                              <span class="dateTime-icon keyEv" (click)="timeInput.showPicker()"
+                                (keydown)="($event.key === 'Enter' || $event.key === ' ') && timeInput.showPicker()">
                                 <mat-icon>access_time</mat-icon>
                               </span>
                               <input #timeInput id="time" matInput type="time" [formControlName]="attribute.key"
@@ -790,9 +792,10 @@
                               <div class="options-container option_field" [id]="'booleanOption-' + i + '-' + j"
                                 [attr.data-required]="attribute.isRequired">
                                 <ng-container *ngIf="attribute.attributeOptions.enableStyle; else simpleBoolean">
-                                  <label class="radio-label"
+                                  <label class="radio-label keyEv"
                                     *ngFor="let option of attribute.attributeOptions.attributeData[0].values; let index = index"
-                                    (click)="booleanEmojiSet(i, j, index)">
+                                    (click)="booleanEmojiSet(i, j, index)"
+                                    (keydown)="($event.key === 'Enter' || $event.key === ' ') && booleanEmojiSet(i, j, index)">
                                     <input class="radio-icon" type="radio" [formControlName]="attribute.key"
                                       [name]="attribute.key" [value]="option.value" hidden>
 
@@ -838,8 +841,9 @@
 
                                     <ng-container
                                       *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type == 'star'; else normalImage">
-                                      <div #starOption
+                                      <div #starOption class="keyEv"
                                         (click)="selected5starOption(attribute.key, i, j, index, attribute.attributeOptions.attributeData[0].values[0].optionStyle.type, option.label)"
+                                        (keydown)="($event.key === 'Enter' || $event.key === ' ') && selected5starOption(attribute.key, i, j, index, attribute.attributeOptions.attributeData[0].values[0].optionStyle.type, option.label)"
                                         [innerHtml]="option.optionStyle.media | svgFormat:'imageSvg':'32px':'32px':('option-' + i + '-' + j + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type):'#E6E6E6' | async">
                                       </div>
                                     </ng-container>
@@ -878,8 +882,9 @@
                                         <input type="radio" [name]="attribute.key" [value]="option.value"
                                           style="display: none;">
 
-                                        <div
+                                        <div class="keyEv"
                                           (click)="changeScaleStyle(attribute.key,i, j, index, attribute.attributeOptions.attributeData[0].values[0].optionStyle.type,option.label)"
+                                          (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeScaleStyle(attribute.key,i, j, index, attribute.attributeOptions.attributeData[0].values[0].optionStyle.type,option.label)"
                                           [innerHtml]="(option.optionStyle.media | svgFormat:'imageSvg': '32px' : '32px' : ('npsOption-' + i + '-' + j + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type) : 'gray':index+1) | async">
                                         </div>
                                         <div
@@ -910,9 +915,10 @@
                                     class="bar-area bar-rating-item">
                                     <input type="radio" [formControlName]="attribute.key" [name]="attribute.key"
                                       [value]="option.value" hidden>
-                                    <button type="button" class="bar-button"
+                                    <button type="button" class="bar-button keyEv"
                                       [style.backgroundColor]="option.optionStyle.color"
-                                      (click)="ChangeBarColor(attribute.key,i,j, index, attribute._id,option.label )"></button>
+                                      (click)="ChangeBarColor(attribute.key,i,j, index, attribute._id,option.label )"
+                                      (keydown)="($event.key === 'Enter' || $event.key === ' ') && ChangeBarColor(attribute.key,i,j, index, attribute._id,option.label )"></button>
                                     <div class="arrow bar-icon-hide" [attr.data-bar-index]="index" [id]="'arrow-' + j">
                                       <div class="line"></div>
                                       <div class="point "></div>
@@ -1126,11 +1132,12 @@
             }" matTooltip="Video Call" [matTooltipPosition]="matToolTipPosition!">
             videocam
           </span>
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="
+          <span class="widget-navbar-icon material-symbols-outlined keyEv" (click)="
               activeScreenShareView || activeAudioView || activeVideoView
                 ? convertCallView('audio')
                 : changeView('audio')
             "
+            (keydown)="($event.key === 'Enter' || $event.key === ' ') && (activeScreenShareView || activeAudioView || activeVideoView ? convertCallView('audio') : changeView('audio'))"
             *ngIf="enableWebRtc && !__appConfig.appConfig.VIDEO && __appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED"
             [ngClass]="{
               btnTwo: enabledCallback === false && enableFontResize === false,
@@ -2159,7 +2166,7 @@
                 <span>{{ file.fileName }}</span>
               </div>
             </div>
-            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()" (keydown.enter)="removeUploadFile()" class="remove-all-icon">close</mat-icon>
+            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()" (keydown.enter)="removeUploadFile()" (keydown.space)="removeUploadFile()" class="remove-all-icon keyEv">close</mat-icon>
           </div>
           <!-- Widget Message Composer -->
 
@@ -2562,8 +2569,9 @@
                 }}"></p>
             </div>
 
-            <div class="widget-response-button">
+            <div class="widget-response-button keyEv">
               <input class="widget-response-trigger call-btn" (click)="changeView('chat')"
+                (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeView('chat')"
                 value="Return to conversation" />
             </div>
           </div>
@@ -2607,9 +2615,10 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger"
+            <input id="formTrigger" type="submit" class="widget-error-trigger keyEv"
               value="{{ 'button.download-transcript' | translate }}"
-              *ngIf="enableDownloadTranscript && !standaloneWebRtc" (click)="chatTranscript()" />
+              *ngIf="enableDownloadTranscript && !standaloneWebRtc" (click)="chatTranscript()"
+              (keydown)="($event.key === 'Enter' || $event.key === ' ') && chatTranscript()" />
           </div>
         </div>
       </div>
@@ -2673,9 +2682,10 @@
           </div>
         </div>
         <div class="widget-composer">
-          <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="Start a conversation"
-              (click)="changeScreen('chatForm')" />
+          <div class="widget-error-button keyEv">
+            <input type="submit" class="widget-error-trigger call-btn" value="Start a conversation"
+              (click)="changeScreen('chatForm')"
+              (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeScreen('chatForm')" />
           </div>
         </div>
       </div>
@@ -2717,10 +2727,10 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn"
+            <input type="submit" class="widget-error-trigger call-btn"
               value="{{ 'button.call-on-my-number' | translate }}" *ngIf="enableWebRtc" />
 
-            <input id="formTrigger" typCall pope="submit" class="widget-error-trigger"
+            <input type="submit" class="widget-error-trigger"
               value="{{ 'button.send-me-transcript' | translate }}" *ngIf="enableDownloadTranscript" />
           </div>
         </div>
@@ -2742,11 +2752,11 @@
         <div class="agent-detail">
           <p class="name">{{ agentName }}</p>
         </div>
-        <div class="end-call-btn" [class.disabled]="!dialogId" (click)="callEnd()" (keydown)="($event.key === 'Enter' || $event.key === ' ') && callEnd()">
+        <button class="end-call-btn" [class.disabled]="!dialogId" [disabled]="!dialogId" (click)="callEnd()" (keydown)="($event.key === 'Enter' || $event.key === ' ') && callEnd()" aria-label="End call">
           <div class="end-call-btn-sm">
             <span class="material-symbols-outlined"> call_end </span>
           </div>
-        </div>
+        </button>
       </div>
     </div>
   </ng-container>
