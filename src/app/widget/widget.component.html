@@ -199,9 +199,9 @@
                 ">
                 <!-- INPUT Fields -->
                 <ng-container *ngSwitchCase="'INPUT'">
-                  <label>
+                  <label [attr.for]="attribute.key">
                     <ng-container *ngIf="attribute.valueType === 'file'">
-                      <span id="{{ attribute.key }}">{{
+                      <span>{{
                         attribute.label
                         }}</span>
                       <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -214,7 +214,7 @@
                       </span>
                     </ng-container>
                     <ng-container *ngIf="attribute?.valueType !== 'file'">
-                      <span id="{{ attribute.key }}">{{
+                      <span>{{
                         attribute.label
                         }}</span>
                       <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -331,8 +331,8 @@
 
                 <!-- TEXTAREA Fields -->
                 <ng-container *ngSwitchCase="'TEXTAREA'">
-                  <label>
-                    <span id="{{ attribute.key }}">{{ attribute.label }}</span>
+                  <label [attr.for]="attribute.key">
+                    <span>{{ attribute.label }}</span>
                     <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                   </label>
                   <textarea matInput id="{{ attribute.key }}" [formControlName]="attribute.key"
@@ -350,8 +350,8 @@
 
                 <!-- OPTIONS Fields -->
                 <ng-container *ngSwitchCase="'OPTIONS'">
-                  <label>
-                    <span id="{{ attribute.key }}">{{ attribute.label }}</span>
+                  <label [attr.for]="attribute.key">
+                    <span>{{ attribute.label }}</span>
                     <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                   </label>
                   <div *ngFor="
@@ -453,10 +453,10 @@
                   ">
                         <!-- INPUT Fields -->
                         <ng-container *ngSwitchCase="'INPUT'">
-                          <label class="questionLabel">
+                          <label class="questionLabel" [attr.for]="attribute.key">
                             <ng-container *ngIf="attribute.valueType === 'file'">
 
-                              <span class="attributeName filetypeAttribute" id="{{ attribute.key }}">
+                              <span class="attributeName filetypeAttribute">
                                 <span>
                                   {{ attribute.label }}
                                 </span>
@@ -467,7 +467,7 @@
                             </ng-container>
                             <ng-container *ngIf="attribute?.valueType !== 'file'">
 
-                              <span class="attributeName" id="{{ attribute.key }}">{{
+                              <span class="attributeName">{{
                                 attribute.label
                                 }}</span>
                               <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -663,9 +663,9 @@
                         </ng-container>
                         <!-- TEXTAREA Fields -->
                         <ng-container *ngSwitchCase="'TEXTAREA'">
-                          <label class="questionLabel">
+                          <label class="questionLabel" [attr.for]="attribute.key">
 
-                            <span class="attributeName" id="{{ attribute.key }}">{{
+                            <span class="attributeName">{{
                               attribute.label
                               }}</span>
                             <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -686,9 +686,9 @@
                         <ng-container *ngSwitchCase="'OPTIONS'">
                           <ng-container [ngSwitch]="attribute.valueType">
                             <ng-container *ngSwitchCase="'mcq'">
-                              <label class="questionLabel">
+                                <label class="questionLabel" [attr.for]="attribute.key">
 
-                                <span class="attributeName" id="{{ attribute.key }}">{{
+                            <span class="attributeName">{{
                                   attribute.label
                                   }}</span>
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -709,9 +709,9 @@
                             </ng-container>
                             <!-- DROPDOWN Question ValueType -->
                             <ng-container *ngSwitchCase="'dropdown'">
-                              <label class="questionLabel">
+                              <label class="questionLabel" [attr.for]="attribute.key">
 
-                                <span class="attributeName" id="{{ attribute.key }}">{{
+                                <span class="attributeName">{{
                                   attribute.label
                                   }}</span>
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -782,9 +782,9 @@
                               </div>
                             </ng-container>
                             <ng-container *ngSwitchCase="'boolean'">
-                              <label class=" questionLabel">
+                              <label class="questionLabel" [attr.for]="attribute.key">
 
-                                <span class="attributeName" id="{{ attribute.key }}">{{
+                                <span class="attributeName" >{{
                                   attribute.label
                                   }}</span>
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -823,9 +823,9 @@
                             <ng-container *ngSwitchCase="'5-star-rating'">
                               <ng-container
                                 *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type=='star' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'filled' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'outlined'">
-                                <label class="questionLabel">
+                                <label class="questionLabel" [attr.for]="attribute.key">
 
-                                  <span class="attributeName" id="{{ attribute.key }}">{{
+                                  <span class="attributeName">{{
                                     attribute.label
                                     }}</span>
                                   <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -866,9 +866,9 @@
 
                               <ng-container
                                 *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type == 'scale'">
-                                <label class="questionLabel">
+                                <label class="questionLabel" [attr.for]="attribute.key">
 
-                                  <span class="attributeName" id="{{ attribute.key }}">{{
+                                  <span class="attributeName">{{
                                     attribute.label
                                     }}</span>
                                   <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -902,9 +902,9 @@
                                 *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type == 'bar'"
                                 class="rating-container  option_field for-linearscale-only ratingbar-attribute"
                                 id="optionBar" [attr.data-required]="attribute.isRequired">
-                                <label class="questionLabel">
+                                <label class="questionLabel" [attr.for]="attribute.key">
 
-                                  <span class="attributeName" id="{{ attribute.key }}">{{
+                                  <span class="attributeName">{{
                                     attribute.label
                                     }}</span>
                                   <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -932,9 +932,9 @@
                               <ng-container
                                 *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type == 'checkbox'">
 
-                                <label class="questionLabel">
+                                <label class="questionLabel" [attr.for]="attribute.key">
 
-                                  <span class="attributeName" id="{{ attribute.key }}">{{
+                                  <span class="attributeName">{{
                                     attribute.label
                                     }}</span>
                                   <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -956,9 +956,9 @@
                               </ng-container>
                             </ng-container>
                             <ng-container *ngSwitchCase="'nps'">
-                              <label class="questionLabel">
+                              <label class="questionLabel" [attr.for]="attribute.key">
 
-                                <span class="attributeName" id="{{ attribute.key }}">{{
+                                <span class="attributeName">{{
                                   attribute.label
                                   }}</span>
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -2338,9 +2338,9 @@
                 ">
                   <!-- INPUT Fields -->
                   <ng-container *ngSwitchCase="'INPUT'">
-                    <label>
+                    <label [attr.for]="attribute.key">
                       <ng-container *ngIf="attribute.valueType === 'file'">
-                        <span id="{{ attribute.key }}">{{
+                        <span>{{
                           attribute.label
                           }}</span>
                         <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -2353,7 +2353,7 @@
                         </span>
                       </ng-container>
                       <ng-container *ngIf="attribute?.valueType !== 'file'">
-                        <span id="{{ attribute.key }}">{{
+                        <span>{{
                           attribute.label
                           }}</span>
                         <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
