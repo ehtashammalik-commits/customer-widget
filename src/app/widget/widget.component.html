@@ -2338,7 +2338,7 @@
                 ">
                   <!-- INPUT Fields -->
                   <ng-container *ngSwitchCase="'INPUT'">
-                    <label>
+                    <label for="{{ attribute.key }}">
                       <ng-container *ngIf="attribute.valueType === 'file'">
                         <span id="{{ attribute.key }}">{{
                           attribute.label

@@ -2061,7 +2061,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
 
           case 'CONNECT_ERROR':
-            this.changeScreen('error');
             this.handleReconnectsAttempts(this.reconnectAttemptsConfig.currentAttempt + 1);
             console.log('event response:', event.data);
             break;
