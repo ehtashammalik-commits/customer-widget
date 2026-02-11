@@ -2210,8 +2210,15 @@
               'widget-audio-section': activeAudioView,
               'widget-video-section': activeVideoView || activeScreenShareView
             }">
-
+          
+        <div class="sub-call-participants">
+      <span [ngStyle]="{ 'background-color': disableCam ? 'black' : 'transparent'}" [matTooltip]="disableCam ? ('error.camera-access-denied' | translate) : ''" [matTooltipPosition]="this.positionOptions[2]">
+         <mat-icon *ngIf="disableCam" class="camera-mode">videocam_off</mat-icon>
             <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
+      </span>
+
+    </div>
+
 
 
             <!-- test  div start -->
@@ -2236,7 +2243,7 @@
               <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon" />
             </div>
 
-            <div class="localVideoView" *ngIf="activeVideoView">
+            <div class="localVideoView" *ngIf="activeVideoView && !disableCam">
               <span class="material-symbols-outlined localVideoIcon" [ngClass]="{ iconHide: isVideoHide }"
                 [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="toggleCallVideo(null)" (keydown)="($event.key === 'Enter' || $event.key === ' ') && toggleCallVideo(null)">
               </span>
