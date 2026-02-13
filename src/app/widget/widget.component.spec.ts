@@ -1085,8 +1085,8 @@ describe('WidgetComponent', () => {
       }
     });
 
-    it('should handle SOCKET_REPLACED', () => {
-      component.eventListener({ id: 1, type: 'SOCKET_REPLACED', data: {} });
+    it('should handle SESSION_REPLACED', () => {
+      component.eventListener({ id: 1, type: 'SESSION_REPLACED', data: {} });
       expect(component.cimMessage).toEqual([]);
       expect(mockClearMessageData).toHaveBeenCalled();
       expect(component.isChatActive).toBe(false);
