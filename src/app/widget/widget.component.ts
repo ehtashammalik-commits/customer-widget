@@ -2056,7 +2056,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.handleSocketDisconnected(event, messageType);
             break;
 
-          case 'SOCKET_REPLACED':
+          case 'SESSION_REPLACED':
             this.handleSocketReplaced(event);
             break;
 
