@@ -163,6 +163,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isVideoCallActive = false;
   // If this flag is 'true' than that's mean ScreenShare Call is Active (In Side Chat Screen)
   isScreenShareActive = false;
+  fontSizes = [
+  { value: '12', tooltip: '12px', iconClass: 'font-dropdown-icon-top' },
+  { value: '14', tooltip: '14px', iconClass: 'font-dropdown-icon-middle' },
+  { value: '16', tooltip: '16px', iconClass: 'font-dropdown-icon-bottom' }
+];
 
 
   // Teneo
@@ -4273,7 +4278,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   setFontSize(e: any) {
     console.log('Set fontsize', e);
     try {
-      this.storageService.setItem('fontSize', e, this.storageType);
+      this.storageService.setItem('fontSize', String(e), this.storageType);
       this.changeFont();
       this.setFontFromLocalStorage();
     } catch (error) {
@@ -4283,10 +4288,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   setFontFromLocalStorage() {
     try {
-      if (this.storageService.getItem('fontSize', this.storageType) !== null) {
-        this.fontSize.setValue(
-          this.storageService.getItem('fontSize', this.storageType),
-        );
+      const storedFontSize = this.storageService.getItem('fontSize', this.storageType);
+      if (storedFontSize !== null) {
+        this.fontSize.setValue(String(storedFontSize));
       }
     } catch (error) {
       console.error('Error setting font from local storage:', error);

@@ -1,3 +1,26 @@
+<!-- Reusable Header Template -->
+<ng-template #widgetHeader let-showCalendar="showCalendar">
+  <div class="widget-chat-header widget-color single-header" [ngClass]="{'exist-calendar': showCalendar && daySummary}">
+    <div class="widget-chat-header-top">
+      <h5 id="title" [innerHTML]='title'></h5>
+      <div class="widget-header-icon" *ngIf="!isWebRtcVideoCallActive">
+        <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')" 
+          aria-label="minimize conversation" matTooltipPosition="above" 
+          matTooltip="{{'button.minimize' | translate}}">
+          <mat-icon>remove</mat-icon>
+        </button>
+         <button *ngIf="widgetChatScreen" matMiniFab  (click)="endChat()"  aria-label="close conversation" matTooltipPosition="above"  matTooltip="{{ 'button.end-conversation' | translate }}">
+              <mat-icon>close</mat-icon>
+            </button>
+      </div>
+    </div>
+    <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
+    <p *ngIf="showCalendar && daySummary">
+      Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay | date: 'shortTime' }}
+    </p>
+  </div>
+</ng-template>
+
 <div class="top-wrapper" *ngIf="widgetLoaded" [ngClass]="{
     'right-direction': selectedLanguage == 'ar',
     'mobile-view': isMobile,
@@ -42,21 +65,11 @@
     <div class="widget-form-area">
       <div class="widget-form">
         <!-- Widget Chat Header -->
-        <div class="widget-chat-header widget-color">
-
-          <div class="widget-chat-header-top">
-            
-            <h5 id="title" [innerHTML]='title'></h5> <!-- //NOSONAR -->
-            <div class="widget-header-icon"  *ngIf="!isWebRtcVideoCallActive">
-                <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                  <mat-icon>remove</mat-icon>
-                </button>
-            </div>
-          </div>
-          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
+        <div class="widget-form-header">
+          <ng-container *ngTemplateOutlet="widgetHeader; context: {showCalendar: false}"></ng-container>
         </div>
         <!-- Widget Chat Control Toolbar -->
-        <div class="widget-chat-navbar">
+        <div class="widget-chat-navbar hello">
           <span class="material-symbols-outlined widget-navbar-icon btnOne"
             *ngIf="enableWebRtc && isWebRtcVideoCallActive" [ngClass]="{
               'focus-icon': isWebRtcVideoCallActive === true,
@@ -164,16 +177,8 @@
   <ng-container *ngIf="callbackFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-chat-header widget-color">
-          <div class="widget-chat-header-top">
-            <h5 id="headerHeading">{{ title }}</h5>
-            <div class="widget-header-icon">
-              <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
-            </div>
-          </div>
-          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
+        <div class="widget-form-header">
+          <ng-container *ngTemplateOutlet="widgetHeader; context: {showCalendar: false}"></ng-container>
         </div>
         <div class="widget-form-content">
           <h4 class="callback-title">{{ 'callback.request' | translate }}</h4>
@@ -401,24 +406,12 @@
   <ng-container *ngIf="preChatFormScreen">
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-form-header widget-chat-header widget-color" [ngClass]="{'exist-calendar':daySummary}"
-          >
-          <div class="widget-chat-header-top">
-            <h5 id="title" [innerHTML]='title'>
-              <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
-              | date: 'shortTime' }}</p>
-            </h5>
-            <div class="widget-header-icon">
-              <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
-            </div>
-          </div>
-          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
+        <div class="widget-form-header">
+          <ng-container *ngTemplateOutlet="widgetHeader; context: {showCalendar: true}"></ng-container>
         </div>
 
         <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
-          <div class="formContent">
+          <div class="formContent position-relative">
             <div class="widget-form-content preChatFormArea" formArrayName="sections">
               <p *ngIf="preChatformDescription">
                 {{preChatformDescription}}
@@ -586,17 +579,13 @@
                                       <span class="tooltip">
                                         {{
                                         !attribute.fileData.restrictFile
-                                        ? 'All supported file types
-                                        allowed'
+                                        ? 'All supported file types allowed'
                                         :
                                         attribute.fileData.fileExtension.length
                                         > 0
                                         ?
-                                        attribute.fileData.fileExtension.join(',
-                                        ')
-                                        : 'All supported file types
-                                        allowed'
-                                        }}
+                                        attribute.fileData.fileExtension.join(',')
+                                        : 'All supported file types allowed' }}
                                       </span>
                                     </span>
                                   </label>
@@ -784,7 +773,7 @@
                             <ng-container *ngSwitchCase="'boolean'">
                               <label class="questionLabel" [attr.for]="attribute.key">
 
-                                <span class="attributeName" >{{
+                                <span class="attributeName">{{
                                   attribute.label
                                   }}</span>
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
@@ -1076,101 +1065,63 @@
   <!------------------------>
   <!-- /Active Chat HTML/ -->
   <!------------------------>
+
   <ng-container *ngIf="widgetChatScreen">
     <!-- Active chat screen -->
     <div class="widget-form-area">
       <ngx-spinner type="ball-spin" size = "default" [fullScreen] = "false"></ngx-spinner>
       <div class="widget-form">
-        <!-- Widget Chat Header -->
-        <div class="widget-form-header widget-chat-header widget-color">
-          <div class="widget-chat-header-top">
-            <h5 id="title" [innerHTML]='title'></h5> <!-- //NOSONAR -->
-            <div class="widget-header-icon">
-            <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-              <mat-icon>remove</mat-icon>
-            </button>
-            <button matMiniFab *ngIf="!isExitIconDisable" (click)="endChat()"  aria-label="close conversation" matTooltipPosition="above"  matTooltip="{{ 'button.end-conversation' | translate }}">
-              <mat-icon>close</mat-icon>
-            </button>
-
-            </div>
-          </div>
-          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
-        </div>
-
-        <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
+        <div class="widget-form-header">
+          <ng-container *ngTemplateOutlet="widgetHeader; context: {showCalendar: false}"></ng-container>
+        </div>        <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
-
-
-          <span class="widget-navbar-icon material-symbols-outlined"
-            matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
-              btnTwo: enableFontResize === true,
-              btnOne: enableFontResize === false,
+          
+          <button class="widget-navbar-action" matMiniFab (click)="changeView('callback')"  *ngIf="enabledCallback"
+            [matTooltipPosition]="matToolTipPosition!"  matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
               'focus-icon':
                 isChatActive === true && activeCallbackView === true,
               'away-chat-icon':
                 isChatActive === true && activeCallbackView === false
-            }" (click)="changeView('callback')"
-            (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeView('callback')" *ngIf="enabledCallback"
-            [matTooltipPosition]="matToolTipPosition!">
+            }">
+          <mat-icon class="widget-navbar-icon material-symbols-outlined">
             perm_phone_msg
-          </span>
+          </mat-icon>
+        </button>
 
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="
+          <button matMiniFab class="widget-navbar-action" (click)="
               activeScreenShareView || activeAudioView || activeVideoView
                 ? convertCallView('video')
                 : changeView('video')
-            " (keydown)="($event.key === 'Enter' || $event.key === ' ') && (activeScreenShareView || activeAudioView || activeVideoView ? convertCallView('video')
- : changeView('video'))
-  " *ngIf=" (__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED || isVideoCallActive === true) && enableWebRtc && __appConfig.appConfig.VIDEO"
+            "  *ngIf=" (__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED || isVideoCallActive === true) && enableWebRtc && __appConfig.appConfig.VIDEO"
             [ngClass]="{
-              btnOne: enabledCallback === false && enableFontResize === false,
-              btnThree: enabledCallback === true && enableFontResize === true,
-              btnTwo: enabledCallback === false || enableFontResize === false,
+            
               'focus-icon': isVideoCallActive === true && activeVideoView === true,
               'away-call-icon': isVideoCallActive === true && activeVideoView === false
             }" matTooltip="Video Call" [matTooltipPosition]="matToolTipPosition!">
-            videocam
-          </span>
-          <span class="widget-navbar-icon material-symbols-outlined keyEv" (click)="
+            <mat-icon class="widget-navbar-icon material-symbols-outlined">videocam
+            </mat-icon></button>
+
+          <button matMiniFab class="widget-navbar-action" (click)="
               activeScreenShareView || activeAudioView || activeVideoView
                 ? convertCallView('audio')
                 : changeView('audio')
             "
-            (keydown)="($event.key === 'Enter' || $event.key === ' ') && (activeScreenShareView || activeAudioView || activeVideoView ? convertCallView('audio') : changeView('audio'))"
             *ngIf="enableWebRtc && !__appConfig.appConfig.VIDEO && __appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED"
             [ngClass]="{
-              btnTwo: enabledCallback === false && enableFontResize === false,
-              btnFour: enabledCallback === true && enableFontResize === true,
-              btnThree: enabledCallback === false || enableFontResize === false,
+             
               'focus-icon':
                 isAudioCallActive === true && activeAudioView === true,
               'away-call-icon':
                 isAudioCallActive === true && activeAudioView === false
             }" matTooltip="Audio Call" [matTooltipPosition]="matToolTipPosition!" [ngStyle]="{
               right: !__appConfig.appConfig.VIDEO ? '37px' : '104px'
-            }">
-            call
-          </span>
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')"  (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeView('chat')" [ngClass]="{
-              btnOne:
-                enabledCallback === false &&
-                enableFontResize === false &&
-                enableWebRtc === false,
-              btnTwo:
-                enabledCallback === false &&
-                enableFontResize === true &&
-                enableWebRtc === false,
-              btnFive:
-                enabledCallback === true &&
-                enableFontResize === true &&
-                enableWebRtc === true,
-              btnThree:
-                (enabledCallback === true && enableFontResize === true) ||
-                enableWebRtc === true,
-              btnFour:
-                (enabledCallback === true || enableFontResize === true) &&
-                enableWebRtc === true,
+            }"> <mat-icon class="widget-navbar-icon material-symbols-outlined keyEv">
+            call</mat-icon>
+            </button>
+
+          <button matMiniFab class="widget-navbar-action"  (click)="changeView('chat')"
+          [ngClass]="{
+             
               'focus-icon': isChatActive === true && activeChatView === true,
               'away-chat-icon':
                 isChatActive === true && activeChatView === false
@@ -1182,44 +1133,34 @@
                   ? '66px'
                   : '36px'
             }">
-            forum
-          </span>
-          <span class="material-symbols-outlined widget-navbar-icon"
+            <mat-icon class="widget-navbar-icon material-symbols-outlined keyEv">forum</mat-icon>
+          </button>
+
+          <button matMiniFab class="widget-navbar-action"
                 *ngIf="!__appConfig.appConfig.MUTE_NOTIFICATIONS" (click)="toggleMute()"
-                (keydown)="($event.key === 'Enter' || $event.key === ' ') && toggleMute()"
-            [ngClass]="{
-              btnOne: enableFontResize === false && enabledCallback === false,
-              btnTwo: enableFontResize === true && enabledCallback === false,
-              btnThree: enableFontResize === false && enabledCallback === true,
-              btnFour: enableFontResize === true && enabledCallback === true
-            }"
             [matTooltip]="isMuted ? ('button.unmute' | translate) : ('button.mute' | translate)"
             [matTooltipPosition]="matToolTipPosition!">
-            {{ isMuted ? 'volume_off' : 'volume_up' }}
-          </span>
-          <span class="font-selection material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
-            (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeFont()"
-            [ngClass]="{ btnOne: enableFontResize === true }" matTooltip="{{ 'button.change-font-size' | translate }}"
+
+             <mat-icon class="widget-navbar-icon material-symbols-outlined keyEv">{{ isMuted ? 'volume_off' : 'volume_up' }}</mat-icon>
+          </button>
+
+
+           <button matMiniFab class="widget-navbar-action font-selection" (click)="changeFont()"
+            
+             matTooltip="{{ 'button.change-font-size' | translate }}"
             [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
-            text_fields
-          </span>
+            <mat-icon  class=" material-symbols-outlined widget-navbar-icon">text_fields</mat-icon>
+        </button>
+
           <ng-container *ngIf="fontDropDown">
             <div class="font-dropdown-container">
-              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
-                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12', btnOne: enableFontResize === true }"
-                (click)="setFontSize('12')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('12')">
+            <button *ngFor="let font of fontSizes" matMiniFab class="widget-navbar-action {{font.iconClass}}" [matTooltip]="font.tooltip"
+              matTooltipPosition="left" [ngClass]="{ active: fontSize.value === font.value}" (click)="setFontSize(font.value)">
+          
+              <mat-icon class="material-symbols-outlined font-dropdown-icon">
                 text_fields
-              </span>
-              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px"
-                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14', btnOne: enableFontResize === true }"
-                (click)="setFontSize('14')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('14')">
-                text_fields
-              </span>
-              <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px"
-                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16', btnOne: enableFontResize === true }"
-                (click)="setFontSize('16')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('16')">
-                text_fields
-              </span>
+              </mat-icon>
+            </button>
             </div>
           </ng-container>
         </div>
@@ -1379,15 +1320,7 @@
                     </div>
                     <span class="message msg-1" *ngIf="message.body.type == 'PLAIN'" innerHTML="{{
                         (message.body.markdownText | tagFormat:enableDynamicLink)
-                      }}" [ngStyle]="{
-                        'font-size': fontSize.value + 'px',
-                        'line-height':
-                          fontSize.value == '14'
-                            ? '20px'
-                            : fontSize.value == '16'
-                            ? '24px'
-                            : '18px'
-                      }">
+                      }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                     </span>
                     <!-- Message Type Contact -->
                     <div *ngFor="let contact of message.body.contacts">
@@ -1395,15 +1328,7 @@
                         <span class="message" innerHTML="{{
                           (contact.name.formattedName
                                 | tagFormat:enableDynamicLink)
-                          }}" [ngStyle]="{
-                            'font-size': fontSize.value + 'px',
-                            'line-height':
-                              fontSize.value == '14'
-                                ? '20px'
-                                : fontSize.value == '16'
-                                ? '24px'
-                                : '18px'
-                          }">
+                          }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                         </span>
                         <a href="https://api.whatsapp.com/send?phone={{
                             contact.phones[0].phone
@@ -1417,15 +1342,7 @@
                       <span class="message" innerHTML="{{
                         (message.body.additionalDetails.name
                               | tagFormat:enableDynamicLink)
-                        }}" [ngStyle]="{
-                          'font-size': fontSize.value + 'px',
-                          'line-height':
-                            fontSize.value == '14'
-                              ? '20px'
-                              : fontSize.value == '16'
-                              ? '24px'
-                              : '18px'
-                        }">
+                        }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                       </span>
                       <a href="http://maps.google.com/?q={{
                           message.body.location.latitude
@@ -1443,15 +1360,7 @@
                       " class="file-message">
                       <span class="message" innerHTML="{{
                         (message.body.markdownText | tagFormat:enableDynamicLink)
-                        }}" [ngStyle]="{
-                          'font-size': fontSize.value + 'px',
-                          'line-height':
-                            fontSize.value == '14'
-                              ? '20px'
-                              : fontSize.value == '16'
-                              ? '24px'
-                              : '18px'
-                        }">
+                        }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                       </span>
                       <button *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
                         class="message-image-container"
@@ -1486,15 +1395,7 @@
                         <span class="file-name" innerHTML="{{
                           (message.body.additionalDetails.fileName
                                 | tagFormat:enableDynamicLink)
-                          }}" [ngStyle]="{
-                            'font-size': fontSize.value + 'px',
-                            'line-height':
-                              fontSize.value == '14'
-                                ? '20px'
-                                : fontSize.value == '16'
-                                ? '24px'
-                                : '18px'
-                          }"></span>
+                          }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}"></span>
                         <img class="file-type-message" src="widget-assets/images/file-type.svg"
                           alt="{{ message.body.additionalDetails.fileName }}" />
                         <span class="file-ext-main">
@@ -1558,15 +1459,7 @@
 
                     <span class="message" *ngIf="message.body.type == 'PLAIN'" innerHTML="{{
                       (message.body.markdownText | tagFormat:enableDynamicLink)
-                      }}" [ngStyle]="{
-                        'font-size': fontSize.value + 'px',
-                        'line-height':
-                          fontSize.value == '14'
-                            ? '20px'
-                            : fontSize.value == '16'
-                            ? '24px'
-                            : '18px'
-                      }">
+                      }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                     </span>
 
 
@@ -1906,15 +1799,7 @@
                       <span *ngIf="message.body?.subType == 'SURVEY'"
                         class="material-symbols-outlined surveyicon">description</span>
                       <a class="survey_link" target="_blank" *ngIf="message.body?.subType == 'SURVEY'"
-                        href="{{ message.body.surveyLink }}" [ngStyle]="{
-                          'font-size': fontSize.value + 'px',
-                          'line-height':
-                            fontSize.value == '14'
-                              ? '20px'
-                              : fontSize.value == '16'
-                              ? '24px'
-                              : '18px'
-                        }">
+                        href="{{ message.body.surveyLink }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                         {{ surveyTitle }}
                       </a>
                     </div>
@@ -1932,40 +1817,16 @@
                         (message.body.additionalDetails.interactive.header
                                 .text
                               | tagFormat:enableDynamicLink)
-                        }}" [ngStyle]="{
-                          'font-size': fontSize.value + 'px',
-                          'line-height':
-                            fontSize.value == '14'
-                              ? '20px'
-                              : fontSize.value == '16'
-                              ? '24px'
-                              : '18px'
-                        }">
+                        }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                       </span>
                       <span class="message" innerHTML="{{
                         (message.body.additionalDetails.interactive.body
                                 .text
                               | tagFormat:enableDynamicLink)
-                        }}" [ngStyle]="{
-                          'font-size': fontSize.value + 'px',
-                          'line-height':
-                            fontSize.value == '14'
-                              ? '20px'
-                              : fontSize.value == '16'
-                              ? '24px'
-                              : '18px'
-                        }">
+                        }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                       </span>
                       <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
-                        <mat-chip [ngStyle]="{
-                          'font-size': fontSize.value + 'px',
-                          'line-height':
-                            fontSize.value == '14'
-                              ? '20px'
-                              : fontSize.value == '16'
-                              ? '24px'
-                              : '18px'
-                        }" *ngFor="let btn of message.body.buttons; let i = index"
+                        <mat-chip [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}" *ngFor="let btn of message.body.buttons; let i = index"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
                           (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
                           (keydown)="($event.key === 'Enter' || $event.key === ' ') && !message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
@@ -1984,15 +1845,7 @@
                         <span class="message" innerHTML="{{
                           (contact.name.formattedName
                                 | tagFormat:enableDynamicLink)
-                          }}" [ngStyle]="{
-                            'font-size': fontSize.value + 'px',
-                            'line-height':
-                              fontSize.value == '14'
-                                ? '20px'
-                                : fontSize.value == '16'
-                                ? '24px'
-                                : '18px'
-                          }">
+                          }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                         </span>
                         <a href="https://api.whatsapp.com/send?phone={{
                             contact.phones[0].phone
@@ -2006,15 +1859,7 @@
                       <span class="message" innerHTML="{{
                         (message.body.additionalDetails.name
                               | tagFormat:enableDynamicLink)
-                        }}" [ngStyle]="{
-                          'font-size': fontSize.value + 'px',
-                          'line-height':
-                            fontSize.value == '14'
-                              ? '20px'
-                              : fontSize.value == '16'
-                              ? '24px'
-                              : '18px'
-                        }">
+                        }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                       </span>
                       <a href="http://maps.google.com/?q={{
                           message.body.location.latitude
@@ -2032,15 +1877,7 @@
                       " class="file-message">
                       <span class="message" innerHTML="{{
                         (message.body.markdownText | tagFormat:enableDynamicLink)
-                        }}" [ngStyle]="{
-                          'font-size': fontSize.value + 'px',
-                          'line-height':
-                            fontSize.value == '14'
-                              ? '20px'
-                              : fontSize.value == '16'
-                              ? '24px'
-                              : '18px'
-                        }">
+                        }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                       </span>
                       <button *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
                         class="message-image-container"
@@ -2090,15 +1927,7 @@
                         <span class="file-name" innerHTML="{{
                           (message.body.additionalDetails.fileName
                                 | tagFormat:enableDynamicLink)
-                          }}" [ngStyle]="{
-                            'font-size': fontSize.value + 'px',
-                            'line-height':
-                              fontSize.value == '14'
-                                ? '20px'
-                                : fontSize.value == '16'
-                                ? '24px'
-                                : '18px'
-                          }"></span>
+                          }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}"></span>
                         <img class="file-type-message" src="widget-assets/images/file-type.svg"
                           alt="{{ message.body.additionalDetails.fileName }}" />
                         <span class="file-ext-main">{{
@@ -2587,16 +2416,8 @@
     <!-- Error screen -->
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-chat-header widget-color">
-          <div class="widget-chat-header-top">
-            <h5 id="title" [innerHTML]="title"></h5> <!-- //NOSONAR -->
-            <div class="widget-header-icon">
-              <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
-            </div>
-          </div>
-          <p class="widget-sub-heading" [innerHTML]="subtitle"></p>
+        <div class="widget-form-header">
+          <ng-container *ngTemplateOutlet="widgetHeader; context: {showCalendar: false}"></ng-container>
         </div>
         <div class="widget-error-content">
           <div class="error-icon">
@@ -2632,19 +2453,8 @@
     <!-- Error screen -->
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-chat-header widget-color">
-
-          <div class="widget-chat-header-top">
-            <h5 id="title" [innerHTML]="title"></h5> <!-- //NOSONAR -->
-
-            <div class="widget-header-icon">
-                <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                  <mat-icon>remove</mat-icon>
-                </button>
-            </div>
-          </div>
-          <p class="widget-sub-heading" [innerHTML]="subtitle"></p>
-
+        <div class="widget-form-header">
+          <ng-container *ngTemplateOutlet="widgetHeader; context: {showCalendar: false}"></ng-container>
         </div>
         <div class="widget-error-content">
           <div class="error-icon">
@@ -2699,17 +2509,10 @@
     <!-- Error screen -->
     <div class="widget-form-area">
       <div class="widget-form">
-        <div class="widget-chat-header widget-color">
-          <div class="widget-chat-header-top">
-            <h5 id="title" [innerHTML]='title'></h5> <!-- //NOSONAR -->
-            <div class="widget-header-icon">
-                <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                  <mat-icon>remove</mat-icon>
-                </button>
-            </div>
-          </div>
-          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
+        <div class="widget-form-header">
+          <ng-container *ngTemplateOutlet="widgetHeader; context: {showCalendar: false}"></ng-container>
         </div>
+       
         <div class="widget-error-content">
           <div class="error-icon">
             <span class="material-symbols-outlined error-emoji">
@@ -2766,71 +2569,71 @@
   <!---------------------->
   <ng-container *ngIf="isIconWidget">
     <!-- Callback Icon -->
-    <div class="widget-icon widget-icon-callback" *ngIf="standaloneCallback && enabledCallback && !standaloneWebRtc">
-      <div class="widget-icon-content" *ngIf="isCallbackMax">
-        <button id="chatIconBtn" title="Callback Widget" class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="changeScreen('widget')">
-          <span class="chat-icon material-symbols-outlined"> close </span>
-        </button>
+    <div class="widget-icon widget-icon-chat changed 1">
+
+<div class="widget-icon-content changed 2" *ngIf="standaloneCallback && enabledCallback && !standaloneWebRtc">
+  <button
+    id="chatIconBtn"
+    [title]="isCallbackMax ? 'Callback Widget' : 'Callback'"
+    class="widget-bar-trigger widget-chat-trigger widget-color"
+    (click)="changeScreen(isCallbackMax ? 'widget' : 'callbackForm')"
+  >
+    <span class="chat-icon material-symbols-outlined">
+      {{ isCallbackMax ? 'close' : 'perm_phone_msg' }}
+    </span>
+  </button>
+</div>
+
+<!-- standAloneWebRtc -->
+ <div class="widget-icon-content" *ngIf="standaloneWebRtc">
+<button id="chatIconBtn" class="widget-bar-trigger widget-chat-trigger widget-color"
+  [title]="isWebRtcMax && !isWebRtcVideoCallActive
+      ? 'Callback Widget'
+      : 'Video Call'
+  "
+  (click)="changeScreen(isWebRtcMax && !isWebRtcVideoCallActive? 'widget': (chatEndScreen ? 'widget' : 'webRtcScreen')) ">
+  <span
+    class="chat-icon material-symbols-outlined"
+    *ngIf="!logoEnabled">
+    {{
+      isWebRtcMax && !isWebRtcVideoCallActive
+        ? 'close'
+        : 'video_call'
+    }}
+  </span>
+
+  <!-- Custom Widget logo -->
+  <img
+    *ngIf="logoEnabled"
+    class="custom-logo"
+    src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
+    alt="{{ 'button.live-chat' | translate }}"
+  />
+</button>
       </div>
 
-      <div class="widget-icon-content" *ngIf="!isCallbackMax">
-        <button id="chatIconBtn" title="Callback" class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="changeScreen('callbackForm')">
-          <span class="chat-icon material-symbols-outlined">
-            perm_phone_msg
-          </span>
-        </button>
-      </div>
-    </div>
+   <!-- Chat Widget Icon -->
 
-    <div class="widget-icon widget-icon-chat" *ngIf="standaloneWebRtc">
-      <div class="widget-icon-content" *ngIf="isWebRtcMax && !isWebRtcVideoCallActive">
-        <button id="chatIconBtn" title="Callback Widget" class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="changeScreen('widget')">
-          <span class="chat-icon material-symbols-outlined" *ngIf="!logoEnabled">
-            close
-          </span>
-          <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
-            alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
-        </button>
-      </div>
+      <div class="widget-icon-content" *ngIf="!standaloneWebRtc" >
+        <button title="{{ 'button.live-chat' | translate }}"
+  class="widget-bar-trigger widget-chat-trigger widget-color"
+  (click)="changeScreen(isChatMax? 'widget': (isChatActive ? 'chat' : 'chatForm'))"
+>
+  <span
+    class="chat-icon material-symbols-outlined"
+    *ngIf="!logoEnabled">
+    {{ isChatMax ? 'close' : 'sms' }}
+  </span>
 
-      <div class="widget-icon-content" *ngIf="!isWebRtcMax || isWebRtcVideoCallActive">
-        <button id="chatIconBtn" title="Video Call" class="widget-bar-trigger widget-chat-trigger widget-color" (click)="
-            changeScreen(chatEndScreen == true ? 'widget' : 'webRtcScreen')
-          ">
-          <span class="chat-icon material-symbols-outlined" *ngIf="!logoEnabled">
-            video_call
-          </span>
-          <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
-            alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
-        </button>
-      </div>
-    </div>
+  <!-- Custom Widget logo (only when not max) -->
+  <img
+    *ngIf="!isChatMax && logoEnabled"
+    class="custom-logo"
+    src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
+    alt="{{ 'button.live-chat' | translate }}"
+  />
+</button>
 
-    <!-- Chat Widget Icon -->
-    <div class="widget-icon widget-icon-chat" *ngIf="!standaloneWebRtc">
-      <div class="widget-icon-content" *ngIf="isChatMax">
-        <button id="chatIconBtn" title="{{ 'button.live-chat' | translate }}"
-          class="widget-bar-trigger widget-chat-trigger widget-color" (click)="changeScreen('widget')">
-          <span class="chat-icon material-symbols-outlined"> close </span>
-        </button>
-      </div>
-
-      <div class="widget-icon-content" *ngIf="!isChatMax">
-        <button id="chatIconBtn" title="{{ 'button.live-chat' | translate }}"
-          class="widget-bar-trigger widget-chat-trigger widget-color"
-          (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
-          <span class="chat-icon material-symbols-outlined" *ngIf="!logoEnabled">
-            sms
-          </span>
-          <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
-            alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
-        </button>
       </div>
     </div>
 
