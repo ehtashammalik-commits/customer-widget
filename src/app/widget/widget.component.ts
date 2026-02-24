@@ -88,6 +88,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // @ViewChild('localVideo') myVideoLocal!: ElementRef;
   @ViewChild('remoteVideo', { static: false }) remoteVideo!: ElementRef;
   @ViewChild('localVideo', { static: false }) localVideo!: ElementRef;
+  @ViewChild('topWrapper') topWrapper!: ElementRef;
+  @ViewChild('widgetWrapper') widgetWrapper!: ElementRef;
+  @ViewChild('widgetIcon') widgetIcon!: ElementRef;
 
   scrollTop = 0;
   fontSize = new FormControl('12');
@@ -537,10 +540,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.sdk.renderPreChatForm(this.preChatFormId);
         });
         this.widgetLoaded = true;
-        window.parent.postMessage({
-          state: "EF_WIDGET_LOADED",
-          message: "Customer Widget Loaded Successfully",
-				}, "*");
+        setTimeout(() => {
+          window.parent.postMessage({
+            state: "EF_WIDGET_LOADED",
+            message: "Customer Widget Loaded Successfully",
+            ...this.getDimensions()
+          }, "*");
+        }, 0);
 
       },
     );
@@ -1998,7 +2004,40 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   resizeWidget(state: string): void {
     // send height and width of widget-form-area to parent window
-      window.parent.postMessage({ state }, '*');
+    setTimeout(() => {
+      window.parent.postMessage({ state, ...this.getDimensions(state) }, '*');
+    }, 0);
+  }
+
+  getDimensions(state?: string) {
+    if (state === 'icon-view') {
+      const element = this.widgetIcon?.nativeElement;
+      return {
+        height: element?.offsetHeight + 5,
+        width: element?.offsetWidth + 5
+      };
+    } else if (state === 'wraper-view') {
+      if (this.isCalloutViewCompact) {
+        const wrapperHeight = this.widgetWrapper?.nativeElement?.offsetHeight || 0;
+        const iconHeight = this.widgetIcon?.nativeElement?.offsetHeight || 0;
+        return {
+          height: wrapperHeight + iconHeight + 50,
+          width: this.widgetWrapper?.nativeElement?.offsetWidth + 20
+        };
+      } else {
+        const wrapperHeight = this.widgetWrapper?.nativeElement?.offsetHeight || 0;
+        const iconHeight = this.widgetIcon?.nativeElement?.offsetHeight || 0;
+        return {
+          height: wrapperHeight + iconHeight + 5,
+          width: this.widgetWrapper?.nativeElement?.offsetWidth + 15
+        };
+      }
+    } else {
+      return {
+        height: null,
+        width: null
+      };
+    }
   }
 
   eventListener(event: any) {

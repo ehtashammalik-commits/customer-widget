@@ -1,4 +1,4 @@
-<div class="top-wrapper" *ngIf="widgetLoaded" [ngClass]="{
+<div #topWrapper class="top-wrapper" *ngIf="widgetLoaded" [ngClass]="{
     'right-direction': selectedLanguage == 'ar',
     'mobile-view': isMobile,
     'dark-theme': appliedColorTheme == 'dark'
@@ -9,7 +9,7 @@
   <!-- /Addition Panel HTML/ -->
   <!--------------------------->
   <ng-container *ngIf="additionalPanel && !standaloneWebRtc && !isChatActive">
-    <div class="widget-wrapper" [ngClass]="{'compact-widget': isCalloutViewCompact}">
+    <div #widgetWrapper class="widget-wrapper" [ngClass]="{'compact-widget': isCalloutViewCompact}">
       <div class="wrapper-inner">
 
         <div class="widget-wrapper-header widget-color">
@@ -2909,7 +2909,7 @@
       </div>
     </div>
 
-    <div class="widget-icon widget-icon-chat" *ngIf="standaloneWebRtc">
+    <div #widgetIcon class="widget-icon widget-icon-chat" *ngIf="standaloneWebRtc">
       <div class="widget-icon-content" *ngIf="isWebRtcMax && !isWebRtcVideoCallActive">
         <button id="chatIconBtn" title="Callback Widget" class="widget-bar-trigger widget-chat-trigger widget-color"
           (click)="changeScreen('widget')">
@@ -2937,7 +2937,7 @@
     </div>
 
     <!-- Chat Widget Icon -->
-    <div class="widget-icon widget-icon-chat" *ngIf="!standaloneWebRtc">
+    <div #widgetIcon class="widget-icon widget-icon-chat" *ngIf="!standaloneWebRtc">
       <div class="widget-icon-content" *ngIf="isChatMax">
         <button id="chatIconBtn" title="{{ 'button.live-chat' | translate }}"
           class="widget-bar-trigger widget-chat-trigger widget-color" (click)="changeScreen('widget')">
