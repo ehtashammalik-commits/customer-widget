@@ -2284,7 +2284,7 @@
             <div class="maxLimitError" *ngIf="messageElement?.nativeElement?.value?.length >= messageLimit">
             <span>Max Limit Reached</span>
             </div>
-            <textarea class="widget-chat-composer" #messageComposer
+            <textarea class="widget-chat-composer" #messageComposer style="font-size: 16px !important"
               [attr.data-emoji-picker]="enableEmoji" matInput
               id="messageTextarea" cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
               cdkAutosizeMaxRows="4" placeholder="{{ 'composer-placeholder' | translate }}" #message
