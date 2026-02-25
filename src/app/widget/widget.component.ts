@@ -401,6 +401,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     currentAttempt: 0,
     maxAttempts: 5,
   }
+  // Guards against duplicate makeConnection retries when the server forcibly
+  // disconnects the old socket while a new chat start is in progress.
+  private isReconnectingForNewChat: boolean = false;
   private endViewTimerSubscription: Subscription | null = null;
   
   constructor(
@@ -600,15 +603,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       (data: { isChatAvailable: boolean; data: any[] }) => {
 
         if (data.isChatAvailable == true) {
-          this.changeScreen('chat');
           console.log('on Chat Resumed Response:', data.data);
           if (data.data && data.data.length > 0) {
+            this.changeScreen('chat');
             this.handleResumedMessages(data.data);
           } else {
+            // Session exists but has no messages — treat as stale/not found
+            console.log('Session found but no messages, treating as new session');
             this.clearSession();
+            if (this.getAdditionalValue('AUTO_MAXIMIZE_WIDGET') === true) {
+              console.log('AUTO_MAXIMIZE_WIDGET enabled — navigating to chatForm');
+              this.changeScreen('chatForm');
+            }
           }
         } else if (data.isChatAvailable == false) {
+          console.log('Session not found — clearing session');
           this.clearSession();
+          if (this.getAdditionalValue('AUTO_MAXIMIZE_WIDGET') === true) {
+            console.log('AUTO_MAXIMIZE_WIDGET enabled — navigating to chatForm');
+            this.changeScreen('chatForm');
+          }
         }
         this.scrollToBottom();
       },
@@ -1623,6 +1637,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
         break;
       case 'chatForm':
+        this.stopEndViewTimer();
         if (this.getAdditionalValue("PRECHAT_FORM_DISABLED")){
           this.changeScreen('chat');
           this.initializeChatWithRandomIdentifier();
@@ -2080,6 +2095,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
                   this.chatPayLoad,
                 );
               console.log('New Chat Start Request Sent');
+              // Only show chat screen immediately on new chat start.
+              // Resume path: defer to onChatResumedSubject to avoid a stale chat flash.
+              this.changeScreen('chat');
+              this.enableComposer();
             } else if (this.eventTriggerType === '') {
               console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
               if (this.customerData) {
@@ -2094,14 +2113,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
                     event.data.auth.channelCustomerIdentifier,
                   );
                 }
-                  console.log(
+                console.log(
                   '[SOCKET_CONNECTED] ==> Chat Resume event response:',
                   this.customerData,
                 );
               }
+              // Do NOT changeScreen here — onChatResumedSubject will handle it.
             }
-            this.changeScreen('chat');
-            this.enableComposer();
             break;
           
           case 'CONVERSATION_RESUMED':
@@ -2128,6 +2146,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.isChatActive = true;
             this.isComposerDisable = false;
             this.preChatFormLoader = false;
+            // Chat fully started — reset eventTriggerType so future
+            // SOCKET_DISCONNECTED events are handled normally (e.g. reconnect/end).
+            this.eventTriggerType = '';
             this.conversationId = event.data.header.conversationId;
             this.customerId = event.data.header.customer._id;
             this.storageService.setItem(
@@ -2140,8 +2161,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               this.getFormDataAsConversationData(this.preChatFormData),
             );
             this.pushPrechatDataAsActivity();
-
-            // this.composerDisable()
             break;
           case 'MESSAGE_RECEIVED':
             console.log('event response:', event.data);
@@ -2152,12 +2171,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             console.log('event response:', event.data);
             // this.isChatActive = false;
             this.composerDisable();
-            this.eventTriggerType = '';
-            if (messageType !== 'survey') {
-              if (event.data.includes('server')) {
-                this.changeScreen('end');
+            if (this.eventTriggerType === 'startChat') {
+              // We are in the middle of starting a new chat.
+              // The old resume socket was server-disconnected before the new socket
+              // could establish. Socket.io will NOT auto-reconnect after 'io server
+              // disconnect', so we manually retry makeConnection with the new user data.
+              if (this.customerData && !this.isReconnectingForNewChat) {
+                this.isReconnectingForNewChat = true;
+                console.log('[SOCKET_DISCONNECTED] New chat pending — retrying connection for new chat');
+                setTimeout(() => {
+                  this.isReconnectingForNewChat = false;
+                  this.sdk.makeConnection(
+                    this.customerData.serviceIdentifier,
+                    this.customerData.channelCustomerIdentifier,
+                  );
+                }, 500);
               } else {
-                this.handleReconnectsAttempts(this.reconnectAttemptsConfig.currentAttempt + 1);
+                console.log('[SOCKET_DISCONNECTED] Reconnect already in progress, skipping duplicate retry');
+              }
+            } else {
+              this.eventTriggerType = '';
+              if (messageType !== 'survey') {
+                if (event.data.includes('server')) {
+                  this.changeScreen('end');
+                } else {
+                  this.handleReconnectsAttempts(this.reconnectAttemptsConfig.currentAttempt + 1);
+                }
               }
             }
             break;
@@ -3427,12 +3466,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.channelCustomerIdentifier,
         parsedUserData.data.serviceIdentifier,
       );
+      // Ensure eventTriggerType is '' (resume path) so SOCKET_CONNECTED
+      // triggers onChatResumed() and not a new chat request.
+      this.eventTriggerType = '';
       this.sdk.makeConnection(
         parsedUserData.data.serviceIdentifier,
         parsedUserData.data.channelCustomerIdentifier,
       );
-    // } else {
-    //     this.changeScreen('widget');
     }
   }
 
