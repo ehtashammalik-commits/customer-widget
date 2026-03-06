@@ -2073,7 +2073,9 @@
                               : fontSize.value == '16'
                               ? '24px'
                               : '18px'
-                        }" *ngFor="let btn of message.body.buttons; let i = index"
+                        }"
+                          [style.border-radius]="message.body.additionalDetails?.cornerShape | cornerShape"
+                          *ngFor="let btn of message.body.buttons; let i = index"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
                           (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
                           [disabled]="message.body.additionalDetails?.disableButtonType"

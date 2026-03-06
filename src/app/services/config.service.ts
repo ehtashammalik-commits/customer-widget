@@ -24,7 +24,7 @@ export class ConfigService {
     this.appConfig = await lastValueFrom(appConfig$);
 
     //#####################################################################################################################
-    const currentFQDN = window.location.hostname;
+    const currentFQDN = "https://rm-01.expertflow.com";
     // const currentFQDN = "projectdev.expertflow.com"
     console.log("Current FQDN:", currentFQDN);
 
