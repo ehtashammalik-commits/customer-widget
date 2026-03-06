@@ -1829,7 +1829,7 @@
                         <mat-chip [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}" *ngFor="let btn of message.body.buttons; let i = index"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
                           (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
-                          (keydown)="($event.key === 'Enter' || $event.key === ' ') && !message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
+                          (keydown.enter)="($event.key === 'Enter' || $event.key === ' ') && !message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
                           [disabled]="message.body.additionalDetails?.disableButtonType"
                           [ngClass]="[
                             message.body?.additionalDetails?.interactive?.type,
