@@ -2086,7 +2086,7 @@
 
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div *ngIf="!__appConfig.appConfig.VIDEO" class="control-btn" [ngClass]="{
+                <button mat-icon-button *ngIf="!__appConfig.appConfig.VIDEO" class="control-btn" [ngClass]="{
                     'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
 
                     'focus-icon-video ': isScreenShareActive === true
@@ -2098,9 +2098,9 @@
                     (click)="handleScreenShareClick()" (keydown)="($event.key === 'Enter' || $event.key === ' ') && handleScreenShareClick()">
                     present_to_all
                   </span>
-                </div>
+                </button>
 
-                <div class="control-btn" [ngClass]="{'disabled': disableCam,
+                <button mat-icon-button class="control-btn" [ngClass]="{'disabled': disableCam,
                     'end-call': isVideoHide,
                     'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
                     'focus-icon-video ': isVideoCallActive === true
@@ -2115,30 +2115,30 @@
                 }" [attr.aria-disabled]="isAudioCallActive" #camTooltip="matTooltip">
                   </span>
                   <span *ngIf="disableCam" class="error-badge">!</span>
-                </div>
-                <div [class.disabled]="disableMic" class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
+                </button>
+                <button mat-icon-button [class.disabled]="disableMic" class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallMute ? 'mic_off' : 'mic'"
                     (click)="toggleCallMic(micTooltip);" (keydown.enter)="toggleCallMic(micTooltip)"
                     (keydown.space)="toggleCallMic(micTooltip)" #micTooltip="matTooltip">
                   </span>
                   <span *ngIf="disableMic" class="error-badge">!</span>
-                </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }">
+                </button>
+                <button mat-icon-button class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }"> 
                   <span class="material-symbols-outlined" [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
                     (click)="toggleCallHold(tooltip2);" (keydown.enter)="toggleCallHold(tooltip2)"
                     (keydown.space)="toggleCallHold(tooltip2)" #tooltip2="matTooltip">
                   </span>
-                </div>
-                <div class="control-btn disable-icon-callControl">
+                </button>
+                <button mat-icon-button class="control-btn disable-icon-callControl">
                   <span matTooltip="More Options" [matTooltipPosition]="this.positionOptions[2]"
                     class="material-symbols-outlined"> more_horiz </span>
-                </div>
-                <div matTooltip="End Call" [matTooltipPosition]="this.positionOptions[2]" class="control-btn end-call"
+                </button>
+                <button mat-icon-button matTooltip="End Call" [matTooltipPosition]="this.positionOptions[2]" class="control-btn end-call"
                   (click)="callEnd()" (keydown)="($event.key === 'Enter' || $event.key === ' ') && callEnd()">
                   <span class="material-symbols-outlined"> call_end </span>
-                </div>
+              </button>
               </div>
             </div>
           </div>

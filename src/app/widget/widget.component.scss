@@ -2137,7 +2137,7 @@ mat-spinner {
 &.widget-video-section {
   visibility: visible;
   display: block;
-  width: 98%;
+  width: calc(100% - 10px);
   position: relative;
   top: 40px;
   bottom: 0;
@@ -2263,7 +2263,11 @@ mat-spinner {
     border-radius: 50%;
     background: #000000;
     cursor: pointer;
-
+    display: inline-flex;
+    line-height: 1;
+    &:focus{
+      outline: none;
+    }
     span.material-symbols-outlined {
       font-size: 20px;
       position: relative;
