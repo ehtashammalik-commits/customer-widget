@@ -33,7 +33,10 @@
                 }}</span>
             </p>
             <ul class="structured-actions">
-              <li *ngFor="let btn of message.body.buttons">{{ btn.title }}</li>
+              <li *ngFor="let btn of message.body.buttons"
+                  [style.border-radius]="message.body.additionalDetails?.cornerShape | cornerShape">
+                  {{ btn.title }}
+              </li>
             </ul>
             <span class="message-stamp">
               <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
