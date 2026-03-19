@@ -2171,6 +2171,12 @@ mat-spinner {
   border-radius: 10px;
   background: #4e4e4e;
 
+  .remoteVideo {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 8px;
+  }
+
 
   .video-container {
   position: relative;
@@ -2180,8 +2186,8 @@ mat-spinner {
   //background-color: #000; // fallback color when cam is off
 
   .remoteVideo {
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
     border-radius: 8px;
   }
 
