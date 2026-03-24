@@ -4106,6 +4106,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         return 'Please add Camera permissions in your browser to enable video.';
       case 'Audio/Video Device is being used by Someother Party':
         return 'Audio/Video Device is being used by Someother Party';
+      case 'Invalid Credentials. Please provide valid credentials.':
+        return 'Authentication failed. Please verify your SIP credentials and try again.'
       default:
         return 'An unknown general error occurred.';
     }
