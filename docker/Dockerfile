@@ -1,5 +1,5 @@
 #FROM gitlab.expertflow.com:9242/general/nginx:1.23.1-alpine-3.16-mcb-154
-FROM gitlab.expertflow.com:9242/general/nginx:1.19.5-alpine-3.12-rbi-256
+FROM nginx:stable-alpine
 WORKDIR /usr/share/nginx/html
 
 COPY dist/ .
