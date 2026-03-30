@@ -4,8 +4,8 @@
     <div class="widget-chat-header-top">
       <h5 id="title" [innerHTML]='title'></h5>
       <div class="widget-header-icon" *ngIf="!isWebRtcVideoCallActive">
-        <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')" 
-          aria-label="minimize conversation" matTooltipPosition="above" 
+        <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"
+          aria-label="minimize conversation" matTooltipPosition="above"
           matTooltip="{{'button.minimize' | translate}}">
           <mat-icon>remove</mat-icon>
         </button>
@@ -749,7 +749,7 @@
                                                       <input type="checkbox"
                                                           class="input-checkbox"
                                                           [id]="'checkbox_' + attribute.key + '_' + i + '_' + replaceSpacesWithUnderscores(category.label) + '_' + replaceSpacesWithUnderscores(option.label)"
-                                                          
+
                                                           (change)="
                                                 onCheckboxChange(
                                                   $event,
@@ -1075,7 +1075,7 @@
           <ng-container *ngTemplateOutlet="widgetHeader; context: {showCalendar: false}"></ng-container>
         </div>        <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
-          
+
           <button class="widget-navbar-action" matMiniFab (click)="changeView('callback')"  *ngIf="enabledCallback"
             [matTooltipPosition]="matToolTipPosition!"  matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
               'focus-icon':
@@ -1094,7 +1094,7 @@
                 : changeView('video')
             "  *ngIf=" (__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED || isVideoCallActive === true) && enableWebRtc && __appConfig.appConfig.VIDEO"
             [ngClass]="{
-            
+
               'focus-icon': isVideoCallActive === true && activeVideoView === true,
               'away-call-icon': isVideoCallActive === true && activeVideoView === false
             }" matTooltip="Video Call" [matTooltipPosition]="matToolTipPosition!">
@@ -1108,7 +1108,7 @@
             "
             *ngIf="enableWebRtc && !__appConfig.appConfig.VIDEO && __appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED"
             [ngClass]="{
-             
+
               'focus-icon':
                 isAudioCallActive === true && activeAudioView === true,
               'away-call-icon':
@@ -1121,7 +1121,7 @@
 
           <button matMiniFab class="widget-navbar-action"  (click)="changeView('chat')"
           [ngClass]="{
-             
+
               'focus-icon': isChatActive === true && activeChatView === true,
               'away-chat-icon':
                 isChatActive === true && activeChatView === false
@@ -1146,7 +1146,7 @@
 
 
            <button matMiniFab class="widget-navbar-action font-selection" (click)="changeFont()"
-            
+
              matTooltip="{{ 'button.change-font-size' | translate }}"
             [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
             <mat-icon  class=" material-symbols-outlined widget-navbar-icon">text_fields</mat-icon>
@@ -1156,7 +1156,7 @@
             <div class="font-dropdown-container">
             <button *ngFor="let font of fontSizes" matMiniFab class="widget-navbar-action {{font.iconClass}}" [matTooltip]="font.tooltip"
               matTooltipPosition="left" [ngClass]="{ active: fontSize.value === font.value}" (click)="setFontSize(font.value)">
-          
+
               <mat-icon class="material-symbols-outlined font-dropdown-icon">
                 text_fields
               </mat-icon>
@@ -2047,7 +2047,14 @@
               'widget-video-section': activeVideoView || activeScreenShareView
             }">
 
+        <div class="sub-call-participants">
+      <span [ngStyle]="{ 'background-color': disableCam ? 'black' : 'transparent'}" [matTooltip]="disableCam ? ('error.camera-access-denied' | translate) : ''" [matTooltipPosition]="this.positionOptions[2]">
+         <mat-icon *ngIf="disableCam" class="camera-mode">videocam_off</mat-icon>
             <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
+      </span>
+
+    </div>
+
 
 
             <!-- test  div start -->
@@ -2072,7 +2079,7 @@
               <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon" />
             </div>
 
-            <div class="localVideoView" *ngIf="activeVideoView">
+            <div class="localVideoView" *ngIf="activeVideoView && !disableCam">
               <span class="material-symbols-outlined localVideoIcon" [ngClass]="{ iconHide: isVideoHide }"
                 [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="toggleCallVideo(null)" (keydown)="($event.key === 'Enter' || $event.key === ' ') && toggleCallVideo(null)">
               </span>
@@ -2124,7 +2131,7 @@
                   </span>
                   <span *ngIf="disableMic" class="error-badge">!</span>
                 </button>
-                <button mat-icon-button class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }"> 
+                <button mat-icon-button class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
                     (click)="toggleCallHold(tooltip2);" (keydown.enter)="toggleCallHold(tooltip2)"
@@ -2512,7 +2519,7 @@
         <div class="widget-form-header">
           <ng-container *ngTemplateOutlet="widgetHeader; context: {showCalendar: false}"></ng-container>
         </div>
-       
+
         <div class="widget-error-content">
           <div class="error-icon">
             <span class="material-symbols-outlined error-emoji">
