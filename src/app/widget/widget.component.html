@@ -2270,7 +2270,7 @@
                     'focus-icon-video ': isVideoCallActive === true
                   }">
                   <span class="material-symbols-outlined"
-                    [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
+                    [matTooltip]="disableCam ? ('notification.camera-permission-denied' | translate) : (isVideoHide ? 'Turn on camera' : 'Turn off camera')"
                     [matTooltipPosition]="this.positionOptions[2]"
                     [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="handleVideoIconClick(camTooltip)"
                     (keydown)="($event.key === 'Enter' || $event.key === ' ') && handleVideoIconClick(camTooltip)"
@@ -2281,7 +2281,8 @@
                   <span *ngIf="disableCam" class="error-badge">!</span>
                 </div>
                 <div [class.disabled]="disableMic" class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
-                  <span class="material-symbols-outlined" [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
+                  <span class="material-symbols-outlined" 
+                    [matTooltip]="disableMic ? ('notification.microphone-permission-denied' | translate) : (isCallMute ? 'Unmute' : 'Mute')"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallMute ? 'mic_off' : 'mic'"
                     (click)="toggleCallMic(micTooltip);" (keydown.enter)="toggleCallMic(micTooltip)"
                     (keydown.space)="toggleCallMic(micTooltip)" #micTooltip="matTooltip">
