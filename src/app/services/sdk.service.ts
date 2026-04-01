@@ -420,6 +420,9 @@ export class SdkService {
         dialogId: sessionDialogId,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
+           this.localStreamSubject.next(null);
+          this.remoteStreamSubject.next(null);
+
         },
       },
     };

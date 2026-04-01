@@ -101,6 +101,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   localStream!: MediaStream | null;
   remoteStream!: MediaStream | null;
+  
+  private localStreamSubscription: Subscription | null = null;
+  private remoteStreamSubscription: Subscription | null = null;
+
 
   scrollTop = 0;
   fontSize = new FormControl('12');
@@ -179,6 +183,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   isVideoHide = false;
   isCallOnHold = false;
   remoteStreamStatus = false;
+  private remoteCameraOffTimer: any;
   //varibales for MAX MIN length of the attributes (short Answer)
   short_ans_maxLength: number = 0;
   short_ans_minLength: number = 0;
@@ -701,6 +706,33 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     window.addEventListener('message', this.receiveMessage.bind(this), false);
 
   }
+   private subscribeToStreams(): void {
+    if (!this.sdk) return;
+
+    this.localStreamSubscription?.unsubscribe();
+    this.remoteStreamSubscription?.unsubscribe();
+
+    // Subscribe to local stream updates
+    if (this.sdk.localStream$) {
+      this.localStreamSubscription = this.sdk.localStream$.subscribe((stream) => {
+        this.localStream = stream;
+        if (this.localVideoRef?.nativeElement) {
+          this.localVideoRef.nativeElement.srcObject = stream;
+        }
+      });
+    }
+
+    // Subscribe to remote stream updates
+    if (this.sdk.remoteStreamObs$) {
+      this.remoteStreamSubscription = this.sdk.remoteStreamObs$.subscribe((stream) => {
+        this.remoteStream = stream;
+        if (this.remoteVideoRef?.nativeElement) {
+          this.remoteVideoRef.nativeElement.srcObject = stream;
+        }
+      });
+    }
+  }
+
 
   initPrechatform() {
     this.preChatFormGroup = this.fb.group({
@@ -1861,6 +1893,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleAudioView() {
+     this.subscribeToStreams();
     if (this.isAudioCallActive) {
       this.setView({ audio: true });
     } else {
@@ -1871,19 +1904,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private handleVideoView() {
     // Subscribe to local stream updates
-    this.sdk.localStream$.subscribe((stream) => {
-      this.localStream = stream;
-      if (this.localVideoRef?.nativeElement) {
-        this.localVideoRef.nativeElement.srcObject = stream;
-      }
-    });
-    // Subscribe to remote stream updates
-    this.sdk.remoteStreamObs$.subscribe((stream) => {
-      this.remoteStream = stream;
-      if (this.remoteVideoRef?.nativeElement) {
-        this.remoteVideoRef.nativeElement.srcObject = stream;
-      }
-    });
+     this.subscribeToStreams();
 
     if (this.isVideoCallActive) {
       this.setView({ video: true });
@@ -1896,6 +1917,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleScreenShareView() {
+    this.subscribeToStreams();
     if (this.isSecureWebCall) {
       console.warn('WebRTC Call Is GOING ON');
       return;
@@ -1909,6 +1931,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleStandaloneVideoView() {
+     this.subscribeToStreams();
     if (this.showInvalidCodeError) {
       console.warn('Error : Some Issues in initiating Stand alone Call');
       return;
@@ -1920,6 +1943,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleSecureWebVideoCallView() {
+    this.subscribeToStreams();
     if (this.isSecureWebCall) {
       this.setView({ video: true });
     } else {
@@ -3668,9 +3692,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (callType === 'video' || callType === 'audio') {
       this.isVideoHide = false;
       this.isCallMute = false;
+      this.isCallOnHold = false;
+      this.disableCam = false;
+      this.disableMic = false;
+
     }
 
     this.callText = callType;
+    if (this.remoteCameraOffTimer) clearTimeout(this.remoteCameraOffTimer);
+    this.remoteStreamStatus = false;
+
 
     if (this.standaloneWebRtc) {
       this.handleStandaloneWebRtcCall(callType);
@@ -3753,7 +3784,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   handleVideoIconClick(tooltip: MatTooltip) {
     // Do not proceed if audio call is active
-    if (this.isAudioCallActive) {
+       if (this.disableCam || this.isAudioCallActive) {
       return;
     }
 
@@ -3910,14 +3941,21 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       data.dialog?.streamStatus === 'off'
     ) {
       console.log('Remote Camera Off');
-      setTimeout(() => {
+    if (this.remoteCameraOffTimer) clearTimeout(this.remoteCameraOffTimer);
+      this.remoteCameraOffTimer = setTimeout(() => {
         this.remoteStreamStatus = true;
       }, 2000);
+
     } else if (
       data.dialog?.eventRequest === 'remote' &&
       data.dialog?.streamStatus === 'on'
     ) {
       console.log('Remote Camera On');
+       if (this.remoteCameraOffTimer) {
+        clearTimeout(this.remoteCameraOffTimer);
+        this.remoteCameraOffTimer = null;
+      }
+
       this.remoteStreamStatus = false;
     }
   }
@@ -4191,6 +4229,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.isAudioCallActive = false;
     this.isVideoCallActive = false;
     this.isScreenShareActive = false;
+     this.disableCam = false;
+    this.disableMic = false;
+    this.isCallOnHold = false;
+    if (this.remoteCameraOffTimer) clearTimeout(this.remoteCameraOffTimer);
+    this.remoteStreamStatus = false;
+    this.localStream = null;
+    this.remoteStream = null;
+
     this.endCountdown();
 
     if (this.IsRegisteredInFreeSwitch) {
