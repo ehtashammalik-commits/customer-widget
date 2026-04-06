@@ -48,8 +48,10 @@ body {
 }
 .error-snackbar {
     bottom: 50px;
-    position: relative;
+    // position: relative;
     min-width: 319px !important;
+    position: fixed;
+    right: 0;
 }
 
 .mcqAttribute {
