@@ -3680,7 +3680,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               type: 'JWT_TOKEN',
               token: jwtToken,
             },
-            window.location.origin,
+            globalThis.location.origin,
           );
           console.log('JWT token sent via postMessage');
         } catch (error) {
