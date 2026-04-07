@@ -253,6 +253,7 @@
           </div>
         </div>
 
+
         <div *ngSwitchCase="'PLAIN'" class="chat-message agent-message"
           [ngClass]="{'message-blurred': message.isBlurred}">
           <div class="profile-pic">
@@ -753,7 +754,7 @@
     <ng-container *ngIf="enableTranscriptNotifications && message?.body?.notificationType === 'AGENT_SUBSCRIBED'">
       <div class="line-info agent-typing">
         <span>
-          {{ getAgentDisplayName(message.body.notificationData.data.agentParticipant.participant.keycloakUser) }}
+         {{ getAgentDisplayName(message.body.notificationData.data.agentParticipant.participant.keycloakUser) }}
           {{ 'agent-notifications.joined' | translate }}
           | {{ message.header.timestamp | formatTime }}
         </span>

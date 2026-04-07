@@ -92,9 +92,9 @@ export class TranscriptComponent implements OnInit {
 
       this.ngxLoader.start();
       // Wait briefly for postMessage token, then fallback to storage
-      await new Promise(resolve => setTimeout(resolve, 1000)); 
-      const jwtToken = this.receivedToken || 
-                       this.storageService.getItem('jwt_token') || '';
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const jwtToken =
+        this.receivedToken || this.storageService.getItem('jwt_token') || '';
       this.storageService.setItem('jwt_token', jwtToken);
       await this.loadChatData(req);
       this.ngxLoader.stop();
