@@ -37,8 +37,7 @@ describe('SanitizeHtmlPipe', () => {
 
   it('should escape single quotes as &#039;', () => {
     const input = `<span data-val='x'>O'Reilly</span>`;
-    const expectedEscaped =
-      `&lt;span data-val=&#039;x&#039;&gt;O&#039;Reilly&lt;/span&gt;`;
+    const expectedEscaped = `&lt;span data-val=&#039;x&#039;&gt;O&#039;Reilly&lt;/span&gt;`;
 
     const result = pipe.transform(input);
 

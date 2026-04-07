@@ -12,12 +12,19 @@ let socket = {};
 
 function authorizedFetch(url, options = {}) {
   const token = localStorage.getItem('jwt_token');
+
+  const headers = {
+    ...(options.headers || {}),
+  };
+
+  // Only add Authorization if token exists
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   return fetch(url, {
     ...options,
-    headers: {
-      ...(options.headers || {}),
-      'Authorization': `Bearer ${token}`,
-    },
+    headers,
   });
 }
 
@@ -4574,3 +4581,10 @@ const createMediaPermissionStatusUpdateEvent = (dialogId, mediaType, status, err
   };
 }
 
+function getLocalStream(){
+  return local_stream;
+}
+
+function getRemoteStream(){
+  return remote_stream;
+}

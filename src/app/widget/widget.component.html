@@ -1,14 +1,15 @@
-<div class="top-wrapper" [ngClass]="{
+<div class="top-wrapper" *ngIf="widgetLoaded" [ngClass]="{
     'right-direction': selectedLanguage == 'ar',
-    'mobile-view': isMobile
+    'mobile-view': isMobile,
+    'dark-theme': appliedColorTheme == 'dark'
   }">
   <mat-spinner [diameter]="50" color="primary" *ngIf="preChatFormLoader"></mat-spinner>
 
   <!--------------------------->
   <!-- /Addition Panel HTML/ -->
   <!--------------------------->
-  <ng-container *ngIf="additionalPanel && !standaloneWebRtc">
-    <div class="widget-wrapper">
+  <ng-container *ngIf="additionalPanel && !standaloneWebRtc && !isChatActive">
+    <div class="widget-wrapper" [ngClass]="{'compact-widget': isCalloutViewCompact}">
       <div class="wrapper-inner">
 
         <div class="widget-wrapper-header widget-color">
@@ -25,7 +26,7 @@
           </div>
         </div>
         <div class="widget-wrapper-content">
-          <p>{{ 'tagline' | translate }}.</p>
+          <p>{{ getAdditionalValue('CALLOUT_MESSAGE') || ('tagline' | translate) }}.</p>
           <button class="widget-color" (click)="changeScreen(isChatActive == true ? 'chat' : 'chatForm')">
             {{ 'button.connect-with-us' | translate }}
           </button>
@@ -42,13 +43,17 @@
       <div class="widget-form">
         <!-- Widget Chat Header -->
         <div class="widget-chat-header widget-color">
-          <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon"  *ngIf="!isWebRtcVideoCallActive">
+
+          <div class="widget-chat-header-top">
             
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
+            <h5 id="title" [innerHTML]='title'></h5> <!-- //NOSONAR -->
+            <div class="widget-header-icon"  *ngIf="!isWebRtcVideoCallActive">
+                <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                  <mat-icon>remove</mat-icon>
+                </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
         </div>
         <!-- Widget Chat Control Toolbar -->
         <div class="widget-chat-navbar">
@@ -91,7 +96,7 @@
             <video #remoteVideo id="remoteVideo" autoplay="autoplay" class="remoteVideo">
               {{ 'error.html5-not-supported' | translate }}
             </video>
-            
+
             <video autoplay="autoplay" class="localVideo" id="localVideo"
               innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}">
               {{ 'error.html5-not-supported' | translate }}
@@ -109,31 +114,39 @@
                     present_to_all
                   </span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isVideoHide === true }">
+                <div class="control-btn" [ngClass]="{ 'disabled': disableCam ,'end-call': isVideoHide === true }">
                   <span class="material-symbols-outlined"
-                    [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
+                    [matTooltip]="disableCam ? 'Camera is disabled due to permissions issue' : (isVideoHide ? 'Turn on camera' : 'Turn off camera')"
                     [matTooltipPosition]="this.positionOptions[2]"
                     innerHTML="{{ isVideoHide ? 'videocam_off' : 'videocam' }}" (click)="toggleCallVideo(tooltip1);"
+                    (keydown)="($event.key === 'Enter' || $event.key === ' ') && toggleCallVideo(tooltip1)"
                     #tooltip1="matTooltip">
                   </span>
+                  <span *ngIf="disableCam" class="error-badge">!</span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isCallMute === true }">
-                  <span class="material-symbols-outlined" [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
+                <div [class.disabled]="disableMic" class="control-btn" [ngClass]="{ 'end-call': isCallMute === true }">
+                  <span class="material-symbols-outlined"
+                    [matTooltip]="disableMic ? 'Microphone is disabled due to permissions/device issue'  : (isCallMute ? 'Unmute' : 'Mute')"
                     [matTooltipPosition]="this.positionOptions[2]" innerHTML="{{ isCallMute ? 'mic_off' : 'mic' }}"
-                    (click)="toggleCallMic(tooltip)" #tooltip="matTooltip">
+                    (click)="toggleCallMic(tooltip)" (keydown.enter)="toggleCallMic(tooltip)"
+                    (keydown.space)="toggleCallMic(tooltip)" #tooltip="matTooltip">
                   </span>
+                  <span *ngIf="disableMic" class="error-badge">!</span>
                 </div>
                 <div class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
-                    (click)="toggleCallHold(tooltip6)" #tooltip6="matTooltip">
+                    (click)="toggleCallHold(tooltip6)"
+                    (keydown)="($event.key === 'Enter' || $event.key === ' ') && toggleCallHold(tooltip6)"
+                    #tooltip6="matTooltip">
                   </span>
                 </div>
                 <div class="control-btn disable-icon-callControl">
                   <span matTooltip="More Options" [matTooltipPosition]="this.positionOptions[2]"
                     class="material-symbols-outlined"> more_horiz </span>
                 </div>
-                <div class="control-btn end-call" (click)="callEnd()">
+                <div class="control-btn end-call" (click)="callEnd()"
+                  (keydown)="($event.key === 'Enter' || $event.key === ' ') && callEnd()">
                   <span matTooltip="End Call" [matTooltipPosition]="this.positionOptions[2]"
                     class="material-symbols-outlined"> call_end </span>
                 </div>
@@ -152,12 +165,15 @@
     <div class="widget-form-area">
       <div class="widget-form">
         <div class="widget-form-header widget-chat-header widget-color">
-          <h5 id="headerHeading">{{ title }}</h5>
-          <div class="widget-header-icon">
-            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-              <mat-icon>remove</mat-icon>
-            </button>
+          <div class="widget-chat-header-top">
+            <h5 id="headerHeading">{{ title }}</h5>
+            <div class="widget-header-icon">
+              <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
         </div>
         <div class="widget-form-content">
           <h4 class="callback-title">{{ 'callback.request' | translate }}</h4>
@@ -165,7 +181,7 @@
           <form [formGroup]="callbackFormGroup" (ngSubmit)="onCallbackFormSubmit()">
             <mat-spinner [diameter]="50" color="primary" *ngIf="callbackLoader"></mat-spinner>
             <!-- Custom Widget logo -->
-            <img class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg"
+            <img class="custom-form-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
               alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
             <!-- Global error message for the form -->
             <div class="fields-validation-error mr-2">
@@ -387,18 +403,18 @@
       <div class="widget-form">
         <div class="widget-form-header widget-chat-header widget-color" [ngClass]="{'exist-calendar':daySummary}"
           >
-          <h5 id="headerHeading">{{ title }}
-            <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
+          <div class="widget-chat-header-top">
+            <h5 id="title" [innerHTML]='title'>
+              <p *ngIf="daySummary">Available Time: {{ daySummary.startOfDay | date: 'shortTime' }} - {{ daySummary.endOfDay
               | date: 'shortTime' }}</p>
-          </h5>
-
-
-
-          <div class="widget-header-icon">
-            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-              <mat-icon>remove</mat-icon>
-            </button>
+            </h5>
+            <div class="widget-header-icon">
+              <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                <mat-icon>remove</mat-icon>
+              </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
         </div>
 
         <form [formGroup]="preChatFormGroup" (ngSubmit)="onFormSubmit()">
@@ -407,10 +423,6 @@
               <p *ngIf="preChatformDescription">
                 {{preChatformDescription}}
               </p>
-
-              <!-- Custom Widget logo -->
-              <img *ngIf="logoEnabled" class="custom-form-logo" src="../../widget-assets/images/custom-logo.svg"
-                alt="Live Chat" />
 
               <!-- Global error message for the form -->
               <div class="fields-validation-error mr-2">
@@ -443,7 +455,7 @@
                         <ng-container *ngSwitchCase="'INPUT'">
                           <label class="questionLabel">
                             <ng-container *ngIf="attribute.valueType === 'file'">
-                              
+
                               <span class="attributeName filetypeAttribute" id="{{ attribute.key }}">
                                 <span>
                                   {{ attribute.label }}
@@ -454,7 +466,7 @@
 
                             </ng-container>
                             <ng-container *ngIf="attribute?.valueType !== 'file'">
-    
+
                               <span class="attributeName" id="{{ attribute.key }}">{{
                                 attribute.label
                                 }}</span>
@@ -609,9 +621,10 @@
 
                           <!-- Date Input -->
                           <ng-container *ngIf="attribute.valueType === 'date'">
-                            
+
                             <div class="dateTime">
-                              <span class="dateTime-icon" (click)="dateInput.showPicker()">
+                              <span class="dateTime-icon" (click)="dateInput.showPicker()"
+                                (keydown)="($event.key === 'Enter' || $event.key === ' ') && dateInput.showPicker()">
                                 <mat-icon>date_range</mat-icon>
                               </span>
                               <input #dateInput id="date" matInput type="date" [formControlName]="attribute.key"
@@ -619,11 +632,11 @@
                             </div>
 
 
-                           
+
                           </ng-container>
                           <!-- DateTime Input -->
                           <ng-container *ngIf="attribute.valueType === 'dateTime'">
-                            
+
                             <div class="dateTime">
                               <span class="dateTime-icon" (click)="dateTimeInput.showPicker()">
                                 <img src="widget-assets/images/date_time_icon.svg" alt="dateTime-icon">
@@ -635,7 +648,7 @@
 
                           </ng-container>
                           <ng-container *ngIf="attribute.valueType === 'time'">
-                            
+
                             <div class="dateTime">
                               <span class="dateTime-icon" (click)="timeInput.showPicker()">
                                 <mat-icon>access_time</mat-icon>
@@ -649,7 +662,7 @@
                         <!-- TEXTAREA Fields -->
                         <ng-container *ngSwitchCase="'TEXTAREA'">
                           <label class="questionLabel">
-                           
+
                             <span class="attributeName" id="{{ attribute.key }}">{{
                               attribute.label
                               }}</span>
@@ -667,11 +680,12 @@
   : 'none'
   }"></textarea>
                         </ng-container>
+                        <!-- OPTIONS Fields -->
                         <ng-container *ngSwitchCase="'OPTIONS'">
                           <ng-container [ngSwitch]="attribute.valueType">
                             <ng-container *ngSwitchCase="'mcq'">
                               <label class="questionLabel">
-                               
+
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -683,7 +697,7 @@
                                     *ngFor="let option of attribute.attributeOptions.attributeData[0].values; let optionIndex = index">
                                     <div class="radioWrapper">
                                       <mat-radio-button [disableRipple]="true" [value]="option.label">
-                                        {{ option.label }}
+                                      <span isEllipsisActive  class="text-wrap-fw">{{ option.label }}</span>
                                       </mat-radio-button>
 
                                     </div>
@@ -694,65 +708,80 @@
                             <!-- DROPDOWN Question ValueType -->
                             <ng-container *ngSwitchCase="'dropdown'">
                               <label class="questionLabel">
-                               
+
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
                                 <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                               </label>
-
-                              
-
-                              <mat-select [formControlName]="attribute.key" name="questionnaire">
-                                
-                                <mat-option #optionLabel style="width:100%"
-                                  *ngFor="let option of attribute.attributeOptions.attributeData[0].values"
-                                  [value]="option.label"><span>{{option.label}}</span></mat-option>
-                              </mat-select>
-                              
+                              <ngx-select-dropdown
+                                class="prechat-dropdown"
+                                [formControlName]="attribute.key"
+                                [required]="attribute?.isRequired"
+                                [config]="dropdownConfig"
+                                [options]="attribute.attributeOptions.attributeData[0].values | simplifyOptions"
+                                [multiple]="false"
+                                bindLabel="label"
+                                bindValue="label">
+                              </ngx-select-dropdown>
 
                             </ng-container>
 
                             <ng-container *ngSwitchCase="'checkbox'">
-                              <label class="questionLabel">
-                                
-                                <span class="attributeName" id="{{ attribute.key }}">{{
-                                  attribute.label
-                                  }}</span>
-                                <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
-                              </label>
-                              <div class="checkbox-container">
-                                <div class="checkbox-box">
-                                  <div
-                                    *ngFor="let category of attribute.attributeOptions.attributeData; let categoryIndex = index"
-                                    class="category-group">
+                              <label class="inputField-label questionLabel"
+                                [attr.for]="'checkbox_' + attribute.key + '_' + i + '_' +
+      replaceSpacesWithUnderscores(attribute.attributeOptions.attributeData[0]?.label) + '_' +
+      replaceSpacesWithUnderscores(attribute.attributeOptions.attributeData[0]?.values[0]?.label)"
+  >
+                                      <span class="attributeName">
+                                          {{ attribute.label }}
+                                      </span>
+                                      <span *ngIf="attribute?.isRequired"
+                                          class="widget-required">*</span>
+                                  </label>
+                                  <div class="checkbox-container">
+                                      <div class="checkbox-box">
+                                          <div *ngFor="
+                                          let category of attribute.attributeOptions.attributeData;
+                                          let categoryIndex = index
+                                        " class="category-group">
+                                              <h3 *ngIf="attribute.attributeOptions.enableCategory"
+                                                  class="category-label">
+                                                  {{ category.label }}
+                                              </h3>
 
-                                    <!-- Category Label (Only shown if categories are enabled) -->
-                                    <h3 *ngIf="attribute.attributeOptions.enableCategory" class="category-label">
-                                      {{ category.label }}
-                                    </h3>
-
-                                   
-                                    <div class="option_field" [attr.data-required]="attribute.isRequired">
-                                      <label *ngFor="let option of category.values; let optionIndex = index"
-                                        class="checkbox-label">
-                                        <input type="checkbox" class="input-checkbox"
-                                          [checked]="isChecked(attribute.key, i, option.value, category.label)"
-                                          (change)="onCheckboxChange( $event,attribute.key,i, option.label,category.label,attribute.attributeOptions.enableCategory)" />
-                                        <span>{{ option.label }}</span>
-                                      </label>
-                                    </div>
-
+                                              <div class="option_field"
+                                                  [attr.data-required]="attribute.isRequired">
+                                                  <label
+                                                      *ngFor="let option of category.values; let optionIndex = index"
+                                                      class="checkbox-label">
+                                                      <input type="checkbox"
+                                                          class="input-checkbox"
+                                                          [id]="'checkbox_' + attribute.key + '_' + i + '_' + replaceSpacesWithUnderscores(category.label) + '_' + replaceSpacesWithUnderscores(option.label)"
+                                                          
+                                                          (change)="
+                                                onCheckboxChange(
+                                                  $event,
+                                                  attribute.key,
+                                                  i,
+                                                  option.label,
+                                                  category.label,
+                                                  attribute.attributeOptions.enableCategory
+                                                )
+                                              " />
+                                                      <span class="optionLabel">{{
+                                                          option.label }}</span>
+                                                  </label>
+                                              </div>
+                                          </div>
+                                      </div>
                                   </div>
-                                </div>
-                              </div>
                               <div>
                               </div>
                             </ng-container>
-
                             <ng-container *ngSwitchCase="'boolean'">
                               <label class=" questionLabel">
-                               
+
                                 <span class="attributeName" id="{{ attribute.key }}">{{
                                   attribute.label
                                   }}</span>
@@ -792,7 +821,7 @@
                               <ng-container
                                 *ngIf="attribute.attributeOptions.attributeData[0].values[0].optionStyle.type=='star' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'filled' ||attribute.attributeOptions.attributeData[0].values[0].optionStyle.type== 'outlined'">
                                 <label class="questionLabel">
-                                 
+
                                   <span class="attributeName" id="{{ attribute.key }}">{{
                                     attribute.label
                                     }}</span>
@@ -818,6 +847,7 @@
                                     <ng-template #normalImage>
                                       <div
                                         (click)="selected5starOption(attribute.key, i, j, index, attribute.attributeOptions.attributeData[0].values[0].optionStyle.type, option.label)"
+                                        (keydown)="($event.key === 'Enter' || $event.key === ' ') && selected5starOption(attribute.key, i, j, index, attribute.attributeOptions.attributeData[0].values[0].optionStyle.type, option.label)"
                                         [innerHtml]="option.optionStyle.media | svgFormat:'imageSvg':'32px':'32px':('option-' + i + '-' + j + '-' + attribute.attributeOptions.attributeData[0].values[0].optionStyle.type) | async">
                                         >
                                       </div>
@@ -937,7 +967,8 @@
 
                                       <div class="nps-option"
                                         [style.background]="j | npsColor : index : selectedIndices"
-                                        (click)="changeNpsColor(attribute.key, i, j, index, option.value)">
+                                        (click)="changeNpsColor(attribute.key, i, j, index, option.value)"
+                                        (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeNpsColor(attribute.key, i, j, index, option.value)">
                                         {{ option.value }}
                                       </div>
 
@@ -1042,25 +1073,29 @@
   <ng-container *ngIf="widgetChatScreen">
     <!-- Active chat screen -->
     <div class="widget-form-area">
+      <ngx-spinner type="ball-spin" size = "default" [fullScreen] = "false"></ngx-spinner>
       <div class="widget-form">
         <!-- Widget Chat Header -->
-        <div class="widget-chat-header widget-color">
-          <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon">
-            <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+        <div class="widget-form-header widget-chat-header widget-color">
+          <div class="widget-chat-header-top">
+            <h5 id="title" [innerHTML]='title'></h5> <!-- //NOSONAR -->
+            <div class="widget-header-icon">
+            <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
               <mat-icon>remove</mat-icon>
             </button>
-            <button matMiniFab (click)="endChat()"  aria-label="close conversation" matTooltipPosition="above"  matTooltip="{{ 'button.end-conversation' | translate }}">
+            <button matMiniFab *ngIf="!isExitIconDisable" (click)="endChat()"  aria-label="close conversation" matTooltipPosition="above"  matTooltip="{{ 'button.end-conversation' | translate }}">
               <mat-icon>close</mat-icon>
             </button>
 
+            </div>
           </div>
-
+          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
         </div>
+
         <!-- Widget Control Toolbar On TOP Side Chat / ScreenShare/ Video / Text -->
         <div class="widget-chat-navbar">
 
-          
+
           <span class="widget-navbar-icon material-symbols-outlined"
             matTooltip="{{ 'button.request-callback' | translate }}" [ngClass]="{
               btnTwo: enableFontResize === true,
@@ -1069,16 +1104,19 @@
                 isChatActive === true && activeCallbackView === true,
               'away-chat-icon':
                 isChatActive === true && activeCallbackView === false
-            }" (click)="changeView('callback')" *ngIf="enabledCallback" [matTooltipPosition]="matToolTipPosition!">
+            }" (click)="changeView('callback')"
+            (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeView('callback')" *ngIf="enabledCallback"
+            [matTooltipPosition]="matToolTipPosition!">
             perm_phone_msg
           </span>
-          
+
           <span class="widget-navbar-icon material-symbols-outlined" (click)="
               activeScreenShareView || activeAudioView || activeVideoView
                 ? convertCallView('video')
                 : changeView('video')
-            "
-            *ngIf=" (__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED || isVideoCallActive === true) && enableWebRtc && __appConfig.appConfig.VIDEO"
+            " (keydown)="($event.key === 'Enter' || $event.key === ' ') && (activeScreenShareView || activeAudioView || activeVideoView ? convertCallView('video')
+ : changeView('video'))
+  " *ngIf=" (__appConfig.appConfig.IS_DIRECT_WEBRTC_CALL_ENABLED || isVideoCallActive === true) && enableWebRtc && __appConfig.appConfig.VIDEO"
             [ngClass]="{
               btnOne: enabledCallback === false && enableFontResize === false,
               btnThree: enabledCallback === true && enableFontResize === true,
@@ -1107,7 +1145,7 @@
             }">
             call
           </span>
-          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')" [ngClass]="{
+          <span class="widget-navbar-icon material-symbols-outlined" (click)="changeView('chat')"  (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeView('chat')" [ngClass]="{
               btnOne:
                 enabledCallback === false &&
                 enableFontResize === false &&
@@ -1139,8 +1177,21 @@
             }">
             forum
           </span>
-
+          <span class="material-symbols-outlined widget-navbar-icon"
+                *ngIf="!__appConfig.appConfig.MUTE_NOTIFICATIONS" (click)="toggleMute()"
+                (keydown)="($event.key === 'Enter' || $event.key === ' ') && toggleMute()"
+            [ngClass]="{
+              btnOne: enableFontResize === false && enabledCallback === false,
+              btnTwo: enableFontResize === true && enabledCallback === false,
+              btnThree: enableFontResize === false && enabledCallback === true,
+              btnFour: enableFontResize === true && enabledCallback === true
+            }"
+            [matTooltip]="isMuted ? ('button.unmute' | translate) : ('button.mute' | translate)"
+            [matTooltipPosition]="matToolTipPosition!">
+            {{ isMuted ? 'volume_off' : 'volume_up' }}
+          </span>
           <span class="font-selection material-symbols-outlined widget-navbar-icon" (click)="changeFont()"
+            (keydown)="($event.key === 'Enter' || $event.key === ' ') && changeFont()"
             [ngClass]="{ btnOne: enableFontResize === true }" matTooltip="{{ 'button.change-font-size' | translate }}"
             [matTooltipPosition]="matToolTipPosition!" *ngIf="enableFontResize">
             text_fields
@@ -1148,18 +1199,18 @@
           <ng-container *ngIf="fontDropDown">
             <div class="font-dropdown-container">
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-top" matTooltip="12px"
-                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12' }"
-                (click)="setFontSize('12')" [ngClass]="{ btnOne: enableFontResize === true }">
+                matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '12', btnOne: enableFontResize === true }"
+                (click)="setFontSize('12')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('12')">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-middle" matTooltip="14px"
-                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14' }"
-                (click)="setFontSize('14')" [ngClass]="{ btnOne: enableFontResize === true }">
+                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '14', btnOne: enableFontResize === true }"
+                (click)="setFontSize('14')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('14')">
                 text_fields
               </span>
               <span class="material-symbols-outlined font-dropdown-icon font-dropdown-icon-bottom" matTooltip="16px"
-                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16' }"
-                (click)="setFontSize('16')" [ngClass]="{ btnOne: enableFontResize === true }">
+                    matTooltipPosition="left" [ngClass]="{ active: fontSize.value == '16', btnOne: enableFontResize === true }"
+                (click)="setFontSize('16')" (keydown)="($event.key === 'Enter' || $event.key === ' ') && setFontSize('16')">
                 text_fields
               </span>
             </div>
@@ -1171,11 +1222,11 @@
           <!-- If secure link is expired -->
 
           <div class="call-session-expired" *ngIf="isSecureLinkExpired">
-            <mat-icon class="discard-error-notify" (click)="isSecureLinkExpired = false">cancel</mat-icon>
+            <mat-icon class="discard-error-notify" (click)="isSecureLinkExpired = false" (keydown)="($event.key === 'Enter' || $event.key === ' ') && isSecureLinkExpired = false">cancel</mat-icon>
             <div class="call-session-expired-inner">
               <span class="icon-error"><mat-icon>priority_high</mat-icon></span>
               <h3>The link has expired</h3>
-              
+
             </div>
           </div>
 
@@ -1183,6 +1234,7 @@
 
           <!-- Widget Chat Content -->
           <div class="widget-chat-content" #scrollMe>
+
             <div *ngFor="let message of cimMessage">
               <div class="widget-chat-notification-area" *ngIf="
                   message.body.type == 'NOTIFICATION' &&
@@ -1292,7 +1344,7 @@
                     message.header.sender.type == 'CUSTOMER' ||
                     message.header.sender.type == 'CONNECTOR'
                   ">
-                  <div class="customer-message">
+                  <div *ngIf="message.body.type != 'FORM_DATA'" class="customer-message">
                     <div class="header">
                       <span class="name" [ngStyle]="{
                           'font-size':
@@ -1301,9 +1353,23 @@
                               : fontSize.value == '16'
                               ? '13px'
                               : '9px'
-                        }">YOU</span>
+                        }">{{ 'message.you' | translate }}</span>
                     </div>
 
+
+                    <div *ngIf="message.header?.quotedType === 'Carousel'" class="quoted-reply-info quoted-message-area">
+                      <!-- Replace with whatever data or HTML structure you want to show -->
+                      <span class="quoted-sender-name">{{message.senderType}}</span>
+                      <div class="quoted-carousal-details quoted-inner-main">
+                        <img [src]="message.body.quotedCardImage" alt="message.body.quotedAltImage" /> <!-- //NOSONAR -->
+                        <span class="quoted-carousal-content">
+                          <strong>{{message.body.quotedCardTitle}}</strong>
+                          <p>{{message.body.quotedText}}</p>
+                          <span class="quoted-time time">{{message.body.quotedTime | date: "h:mm a"}}</span>
+                        </span>
+
+                      </div>
+                    </div>
                     <span class="message msg-1" *ngIf="message.body.type == 'PLAIN'" innerHTML="{{
                         (message.body.markdownText | tagFormat:enableDynamicLink)
                       }}" [ngStyle]="{
@@ -1380,10 +1446,16 @@
                               : '18px'
                         }">
                       </span>
-                      <a *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
-                        [href]="srcURL" target="_blank">
-                        <img class="message-image" *ngIf="srcURL" [src]="srcURL" alt="{{ message.body.caption }}" />
-                      </a>
+                      <button *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
+                        class="message-image-container"
+                        (click)="openImageOverlay(srcURL, message.body.caption)"
+                        [attr.aria-label]="'View image: ' + message.body.caption"
+                        style="cursor: pointer; border: none; background: none; padding: 0;">
+                        <img class="message-image"
+                             *ngIf="srcURL"
+                             [src]="srcURL"
+                             alt="{{ message.body.caption }}" />
+                      </button>
                       <a *ngIf="message.body.type == 'VIDEO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
                         [href]="srcURL" target="_blank">
                         <video *ngIf="srcURL" width="238" height="120" controls>
@@ -1445,7 +1517,7 @@
                     </span>
                   </div>
                 </div>
-                <div class="widget-chat-message-agent" *ngIf="
+                <div class="widget-chat-message-agent {{message.body.type.toLowerCase()}}" *ngIf="
                     message.header.sender.type == 'AGENT' ||
                     message.header.sender.type == 'BOT'
                   ">
@@ -1458,7 +1530,7 @@
                         message.header.sender.type == 'AGENT'
                           ? 'user.png'
                           : logoEnabled === true
-                          ? 'custom-logo.svg'
+                          ? 'bot-ava.png'
                           : 'robot-dark.svg'
                       }}" alt="avatar" />
                   </div>
@@ -1490,6 +1562,339 @@
                       }">
                     </span>
 
+
+<!--                    Start Rich update messages-->
+      <div class="rich-messages-main">
+<!--                    form type-->
+        <div *ngIf="message.body.type.toLowerCase() === 'form_data'" class="message-type-form rich-message-content pt-3 pb-3">
+          <!-- Form Title and Description -->
+          <div class="rich-form-header">
+          <h4>{{ message.body.formTitle }}</h4>
+          <span>{{ message.body.formDescription }}</span>
+          </div>
+
+          <!-- Global error for this specific message form -->
+          <div class="fields-validation-error mr-2" *ngIf="formGroupsMap[message.id]?.invalid && formGroupsMap[message.id]?.touched">
+            <span class="field-error error_text_for_filling">
+              {{ 'error.incomplete-required-fields' | translate }}
+            </span>
+          </div>
+
+          <div class="message-inner-form">
+            <form
+              class="compact-form"
+              [formGroup]="formGroupsMap[message.id]"
+              (ngSubmit)="onFormMessageTypeSubmit(message)"
+              *ngIf="formGroupsMap[message.id]?.get('sections')"
+            >
+              <div class="main-form" formArrayName="sections">
+                <div class="form-main-section"
+                  *ngFor="let sectionGroup of getSectionsControls(message.id); let i = index"
+                  [formGroup]="sectionGroup"
+                >
+                  <div class="form-inner-header">
+                  <!-- Section Header -->
+                  <p>{{ message.body.sections[i].sectionName }}</p>
+                  <span *ngIf="message.body.sections[i].sectionDescription">
+                    {{ message.body.sections[i].sectionDescription }}
+                  </span>
+                  </div>
+
+                  <!-- Fields Rendering -->
+                  <ng-container *ngFor="let attribute of message.body.sections[i].attributes">
+                    <div class="form-group" [ngSwitch]="attribute.valueType">
+
+                      <div *ngSwitchCase="'number'">
+                        <label for="{{ attribute.key }}">
+                          {{ attribute.label }}
+                          <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
+                        <mat-form-field appearance="outline">
+                          <!-- Use text type, but keep numeric restrictions manually -->
+                          <input
+                            matInput
+                            type="text"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            [formControlName]="attribute.key"
+                          />
+                        </mat-form-field>
+                      </div>
+
+
+                      <!-- Email -->
+                      <div *ngSwitchCase="'email'">
+                        <label for="{{ attribute.key }}">
+                          {{ attribute.label }}
+                          <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
+                        <mat-form-field appearance="outline">
+                          <input matInput type="email" [formControlName]="attribute.key" />
+                        </mat-form-field>
+                      </div>
+
+                      <!-- Short Answer -->
+
+                      <div *ngSwitchCase="'shortAnswer'">
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                          </label>
+                        <mat-form-field appearance="outline">
+                          <input matInput type="text" [formControlName]="attribute.key" />
+                        </mat-form-field>
+                      </div>
+
+                      <!-- Paragraph -->
+                      <div *ngSwitchCase="'paragraph'">
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
+                        <mat-form-field appearance="outline">
+                          <textarea matInput rows="3" [formControlName]="attribute.key"></textarea>
+                        </mat-form-field>
+                      </div>
+
+
+                      <!-- Checkbox -->
+                      <div *ngSwitchCase="'checkbox'">
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
+                        <div *ngFor="let category of attribute.attributeOptions?.attributeData; let categoryIndex = index">
+                          <!-- Show category label if categories are enabled -->
+                          <h3 *ngIf="attribute.attributeOptions.enableCategory" class="category-label">
+                            {{ category.label }}
+                          </h3>
+
+                          <div class="option_field" [attr.data-required]="attribute.isRequired">
+                            <label
+                              *ngFor="let option of category.values; let optionIndex = index"
+                              class="checkbox-label"
+                            >
+                              <input
+                                type="checkbox"
+                                [disabled]="message.body.disableFormMessageInteraction"
+                                [id]="'checkbox_' + attribute.key + '_' + i + '_' + replaceSpacesWithUnderscores(category.label) + '_' + replaceSpacesWithUnderscores(option.label)"
+                                [checked]="isCheckboxChecked(i, attribute.key, option.value, category.label, attribute.attributeOptions.enableCategory, message.id)"
+                                (change)="onCheckboxChange(
+                                  $event,
+                                  attribute.key,
+                                  i,
+                                  option.value,
+                                  category.label,
+                                  attribute.attributeOptions.enableCategory,
+                                  message.id
+                                )"
+                              />
+                              {{ option.label }}
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <!-- Radio -->
+                      <div *ngSwitchCase="'radio'" class="form-group custom-radio-action">
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
+                        <mat-radio-group [formControlName]="attribute.key">
+                          <mat-radio-button
+                            *ngFor="let option of attribute.attributeOptions?.attributeData[0]?.values"
+                            [value]="option.value"
+                          >
+                            {{ option.label }}
+                          </mat-radio-button>
+                        </mat-radio-group>
+                      </div>
+
+                      <!-- Dropdown -->
+                      <div *ngSwitchCase="'dropdown'" class="form-group custom-dropdown-field">
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
+                        <mat-form-field appearance="outline">
+                          <mat-select [formControlName]="attribute.key">
+                            <mat-option
+                              *ngFor="let option of attribute.attributeOptions?.attributeData[0]?.values"
+                              [value]="option.value"
+                            >
+                              {{ option.label }}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+
+                      <!-- Date -->
+                      <div *ngSwitchCase="'date'" class="form-group custom-datentime">
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
+
+
+                          <input
+                            [owlDateTime]="dtPicker"
+                            [owlDateTimeTrigger]="dtPicker"
+                            [formControlName]="attribute.key"
+                            placeholder="Select Date"
+                          />
+                          <span [owlDateTimeTrigger]="dtPicker">
+                                <mat-icon>today</mat-icon>
+                          </span>
+                        <owl-date-time pickerType="calendar" #dtPicker></owl-date-time>
+                      </div>
+
+                      <!-- Time -->
+                      <div *ngSwitchCase="'time'" class="form-group custom-datentime">
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
+
+                          <input
+                            [owlDateTime]="timePicker"
+                            [owlDateTimeTrigger]="timePicker"
+                            [formControlName]="attribute.key"
+                            placeholder="Select Time"
+                          />
+                          <span [owlDateTimeTrigger]="timePicker">
+                            <mat-icon>access_time</mat-icon>
+                          </span>
+                        <owl-date-time pickerType="timer" [hour12Timer]="true" #timePicker></owl-date-time>
+                      </div>
+
+
+
+                      <!-- DateTime -->
+                      <div *ngSwitchCase="'dateTime'" class="form-group custom-datentime">
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                        </label>
+                          <input
+                            [owlDateTime]="dateTimePicker"
+                            [owlDateTimeTrigger]="dateTimePicker"
+                            [formControlName]="attribute.key"
+                            placeholder="Select Date & Time"
+                          />
+                          <span [owlDateTimeTrigger]="dateTimePicker">
+                            <mat-icon>calendar_month</mat-icon>
+                          </span>
+                        <owl-date-time [hour12Timer]="true" #dateTimePicker></owl-date-time>
+                      </div>
+
+                      <!-- color picker -->
+                      <div *ngSwitchCase="'color'" class="color-selection">
+                        <label for="{{ attribute.key }}">{{ attribute.label }}<span *ngIf="attribute?.isRequired" class="widget-required">*</span></label>
+                        <input matInput type="color" [formControlName]="attribute.key" />
+                      </div>
+
+
+                      <!-- Interactive range slider -->
+                    <div *ngSwitchCase="'range'" class="form-group main-range-slider">
+                      <label for="{{ attribute.key }}">
+                        {{ attribute.label }}
+                        <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
+                      </label>
+
+                      <mat-slider
+                        thumbLabel
+                        [displayWith]="formatLabel"
+                        [formControlName]="attribute.key"
+                        [min]="attribute.min || 0"
+                        [max]="attribute.max || 100"
+                        [step]="attribute.step || 1"
+                        aria-label="units"
+                        tickInterval="auto" color="primary">
+                      </mat-slider>
+                    </div>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="button-group form-inner-action mt-2" *ngIf="message.body?.additionalDetails?.actionButtons?.length">
+                <button
+                  *ngFor="let button of message.body.additionalDetails.actionButtons"
+                  [type]="button.action === 'submit' ? 'submit' : 'button'"
+                  [disabled]="message.body?.disableFormMessageInteraction"
+                  [ngClass]="{
+                    'mat-flat-button': button.action === 'submit',
+                    'mat-stroked-button': button.action !== 'submit',
+                    'disabled': message.body?.disableFormMessageInteraction,
+                    'selected-button': button.isSelected
+                  }"
+                  mat-button
+                  (click)="handleActionButtonClick(button, message)"
+                >
+                  {{ button.text | titlecase }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+
+
+
+
+<!--                    carousel message-->
+
+                    <div *ngIf="message.body.type === 'Carousel'" class="carousel-container-main">
+                    <div class="carousel-container">
+                      <div class="carousel-wrapper">
+                        <div class="carousel-track" [style.transform]="'translateX(-' + currentIndex * 100 + '%)'">
+                          <mat-card class="carousel-card pt-0" *ngFor="let item of message.body.elements">
+                            <div class="carousel-banner" [ngStyle]="{'background-image': 'url(' + item.additionalCarouselElementDetails.image_url + ')'}">
+                            </div>
+                            <mat-card-content>
+                              <h3>{{ item.additionalCarouselElementDetails.title }}</h3>
+                              <p>{{ item.text }}</p>
+                              <div class="carousel-actions" [ngClass]="item.buttons?.[currentTypeIndex]?.type">
+                                <ng-container *ngFor="let button of item.buttons">
+                                  <!-- If link type -->
+                                  <a *ngIf="button.type === 'linkButton'"
+                                    [href]="button.additionalButtonDetails?.url"
+                                    [attr.target]="button.additionalButtonDetails?.target"
+                                    class="link-button">
+                                    {{ button.payload }}
+                                  </a>
+
+                                  <!-- If normal button -->
+                                  <button mat-stroked-button class="{{button.type}}"
+                                    *ngIf="button.type === 'button' || button.type === 'clickableList'"
+                                    (click)="sendCarousalMessage(button, message.id, item.additionalCarouselElementDetails.id)"
+                                    [disabled]="message.body.disableAllButtons || message.body.additionalDetails?.disableButtonType"
+                                    [ngClass]="{
+                                      'disabled': message.body.disableAllButtons || message.body.additionalDetails?.disableButtonType,
+                                      'selected-button': button.isSelected
+                                    }"
+                                    >
+
+                                    {{ button.title }}
+                                  </button>
+                                </ng-container>
+                              </div>
+                            </mat-card-content>
+                          </mat-card>
+                        </div>
+                      </div>
+
+                      <div class="carousel-trigger-area">
+                        <button class="carousel-trigger" mat-icon-button (click)="prev()" [style.visibility]="currentIndex === 0 ? 'hidden' : 'visible'">
+                          <mat-icon>chevron_left</mat-icon>
+                        </button>
+                        <button class="carousel-trigger"mat-icon-button (click)="next(message)" [style.visibility]="currentIndex === message.body.elements.length - 1 ? 'hidden' : 'visible'">
+                          <mat-icon>chevron_right</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+                      <div class="carousel-dots-area">
+                        <span *ngFor="let el of message.body.elements; let i = index"
+                              class="dot"
+                              [class.active]="i === currentIndex"
+                              (click)="selectSlide(i)"
+                              (keydown)="($event.key === 'Enter' || $event.key === ' ') && selectSlide(i)">
+                        </span>
+                      </div>
+                    </div>
+ <!--                    ./carousel message-->
+                    </div>
+<!--                    ./Start Rich update messages-->
+
+
+
                     <div class="surveyDiv">
                       <span *ngIf="message.body?.subType == 'SURVEY'"
                         class="material-symbols-outlined surveyicon">description</span>
@@ -1506,9 +1911,11 @@
                         {{ surveyTitle }}
                       </a>
                     </div>
+
+
                     <!--              Securelink -->
 
-                    
+
 
                     <!--              /Securelink -->
                     <!-- Message Type Button -->
@@ -1543,9 +1950,23 @@
                         }">
                       </span>
                       <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
-                        <mat-chip *ngFor="let btn of message.body.buttons"
+                        <mat-chip [ngStyle]="{
+                          'font-size': fontSize.value + 'px',
+                          'line-height':
+                            fontSize.value == '14'
+                              ? '20px'
+                              : fontSize.value == '16'
+                              ? '24px'
+                              : '18px'
+                        }" *ngFor="let btn of message.body.buttons; let i = index"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
-                          (click)="sendButtonMessage(btn, message.id)">
+                          (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
+                          (keydown)="($event.key === 'Enter' || $event.key === ' ') && !message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
+                          [disabled]="message.body.additionalDetails?.disableButtonType"
+                          [ngClass]="[
+                            message.body?.additionalDetails?.interactive?.type,
+                            btn.isSelected ? 'selected-chip' : ''
+                          ]">
                           {{ btn.title }}
                         </mat-chip>
                       </mat-chip-list>
@@ -1614,10 +2035,16 @@
                               : '18px'
                         }">
                       </span>
-                      <a *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
-                        [href]="srcURL" target="_blank">
-                        <img class="message-image" *ngIf="srcURL" [src]="srcURL" alt="{{ message.body.caption }}" />
-                      </a>
+                      <button *ngIf="message.body.type == 'IMAGE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
+                        class="message-image-container"
+                        (click)="openImageOverlay(srcURL, message.body.caption)"
+                        [attr.aria-label]="'View image: ' + message.body.caption"
+                        style="cursor: pointer; border: none; background: none; padding: 0;">
+                        <img class="message-image"
+                             *ngIf="srcURL"
+                             [src]="srcURL"
+                             alt="{{ message.body.caption }}" />
+                      </button>
                       <a *ngIf="message.body.type == 'VIDEO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
                         [href]="srcURL" target="_blank">
                         <video *ngIf="srcURL" width="225" height="120" controls>
@@ -1641,7 +2068,7 @@
 
                       <a *ngIf="message.body.type == 'URL' && message.header.additionalData.secureWebRTCLink"
                         target="_blank">
-                        <div class="s-link quoted-message-url" (click)="processSecureLinkMessage(message)">
+                        <div class="s-link quoted-message-url" (click)="processSecureLinkMessage(message)" (keydown)="($event.key === 'Enter' || $event.key === ' ') && processSecureLinkMessage(message)">
                           <span class="video-call-detail"><mat-icon>videocam</mat-icon> Video Call</span>
                           <span class="video-call-link">Join Video Call
                             <span class="call-link">{{message.body.mediaUrl}}</span>
@@ -1701,7 +2128,7 @@
                     file.fileType == 'image'
                       ? file.filesPath
                       : 'widget-assets/images/file-type.svg'
-                  " />
+                  " alt="upload" />
                 <span>{{ file.fileName }}</span>
                 <span *ngIf="file.fileType !== 'image'" class="file-type">
                   {{
@@ -1732,26 +2159,28 @@
                 <span>{{ file.fileName }}</span>
               </div>
             </div>
-            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()" class="remove-all-icon">close</mat-icon>
+            <mat-icon *ngIf="!fileLoading" (click)="removeUploadFile()" (keydown.enter)="removeUploadFile()" class="remove-all-icon">close</mat-icon>
           </div>
           <!-- Widget Message Composer -->
-          <div class="widget-composer main-composer-area">
-            <div class="maxLimitError" *ngIf="text.length == messageLimit">
+
+          <div class="widget-composer main-composer-area" [ngClass]="{
+                'error-border': messageElement?.nativeElement?.value?.length >= messageLimit}">
+
+            <div class="maxLimitError" *ngIf="messageElement?.nativeElement?.value?.length >= messageLimit">
             <span>Max Limit Reached</span>
-           </div>
-            
-            <textarea class="widget-chat-composer" #messageComposer [attr.data-emoji-picker]="enableEmoji" matInput
+            </div>
+            <textarea class="widget-chat-composer" #messageComposer
+              [attr.data-emoji-picker]="enableEmoji" matInput
               id="messageTextarea" cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
               cdkAutosizeMaxRows="4" placeholder="{{ 'composer-placeholder' | translate }}" #message
               maxlength="{{ messageLimit }}" [(ngModel)]="text" (change)="textChanged()" (focus)="onTextAreaFocus()"
               (keyup)="onKeyPress($event)" (keyup.enter)="isMobile ? '' : onSendMessage(messageComposer.value)"
               (keydown.enter)="onEnterKey($event)" [ngClass]="{
-                'error-border': text.length == messageLimit,
                 'resize-left': enableEmoji === false,
                 'resize-right': enableFileTransfer === false
               }"></textarea>
             <div id="file-btn" *ngIf="
-                enableFileTransfer && text.length < 1 && imageUrls?.length == 0
+                enableFileTransfer && messageElement?.nativeElement?.value?.length < 1 && imageUrls?.length == 0
               ">
               <label for="file-upload">
                 <span class="material-symbols-outlined file-btn" matTooltip="{{ 'button.file-transfer' | translate }}"
@@ -1763,10 +2192,15 @@
                 accept=".rtf,.txt,.png,.jpg,.jpeg,.pdf,.ppt,.xlsx,.xls,.doc,.docx,.mp4,.mp3,.mpga,.webp,.pptx,.ppt"
                 id="file-upload" type="file" name="file-upload" (change)="previewFile($event)" />
             </div>
-            <span [ngClass]="{'chat-disable':isComposerDisable}" class="material-symbols-outlined send-btn"
-              *ngIf="isTyping" (click)="onSendMessage(messageComposer.value);">
-              send
-            </span>
+            <span
+            class="material-symbols-outlined send-btn"
+            [ngClass]="{'chat-disable': isComposerDisable}"
+            (click)="!isComposerDisable && onSendMessage(messageComposer.value);"
+            (keydown)="($event.key === 'Enter' || $event.key === ' ') && (!isComposerDisable && onSendMessage(messageComposer.value))"
+            >
+            send
+          </span>
+
           </div>
         </ng-container>
 
@@ -1776,16 +2210,22 @@
               'widget-audio-section': activeAudioView,
               'widget-video-section': activeVideoView || activeScreenShareView
             }">
-            
+          
+        <div class="sub-call-participants">
+      <span [ngStyle]="{ 'background-color': disableCam ? 'black' : 'transparent'}" [matTooltip]="disableCam ? ('error.camera-access-denied' | translate) : ''" [matTooltipPosition]="this.positionOptions[2]">
+         <mat-icon *ngIf="disableCam" class="camera-mode">videocam_off</mat-icon>
             <video #localVideo id="localVideo" autoplay playsinline class="localVideo"></video>
-           
+      </span>
 
-             <!-- test  div start -->
+    </div>
+
+
+
+            <!-- test  div start -->
             <div class="video-container">
               <!-- Remote video when visible -->
-              
-              <video #remoteVideo id="remoteVideo" autoplay playsinline
-                class="remoteVideo"></video>
+
+              <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
 
               <!-- Full-size cam-off icon placeholder -->
               <div *ngIf="remoteStreamStatus" class="remoteVideo cam-off-placeholder">
@@ -1793,7 +2233,7 @@
               </div>
 
               <!-- Optional fallback message -->
-             
+
             </div>
 
             <!-- test div end -->
@@ -1803,9 +2243,9 @@
               <img src="../../widget-assets/images/dummy-user.svg" alt="agent call icon" />
             </div>
 
-            <div class="localVideoView" *ngIf="activeVideoView">
+            <div class="localVideoView" *ngIf="activeVideoView && !disableCam">
               <span class="material-symbols-outlined localVideoIcon" [ngClass]="{ iconHide: isVideoHide }"
-                [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="toggleCallVideo(null)">
+                [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="toggleCallVideo(null)" (keydown)="($event.key === 'Enter' || $event.key === ' ') && toggleCallVideo(null)">
               </span>
             </div>
 
@@ -1817,9 +2257,7 @@
 
             <div class="widget-composer">
               <div class="widget-call-controls">
-                <div *ngIf="!__appConfig.appConfig.VIDEO"
-                  class="control-btn"
-                  [ngClass]="{
+                <div *ngIf="!__appConfig.appConfig.VIDEO" class="control-btn" [ngClass]="{
                     'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
 
                     'focus-icon-video ': isScreenShareActive === true
@@ -1828,35 +2266,41 @@
                   'disable-icon-callControl': isSecureWebCall || isAudioCallActive
                 }" matTooltip="Screen Share" [matTooltipPosition]="this.positionOptions[2]"
                     class="material-symbols-outlined" [attr.aria-disabled]="isSecureWebCall || isAudioCallActive"
-                    (click)="handleScreenShareClick()">
+                    (click)="handleScreenShareClick()" (keydown)="($event.key === 'Enter' || $event.key === ' ') && handleScreenShareClick()">
                     present_to_all
                   </span>
                 </div>
-                
-                <div class="control-btn" [ngClass]="{
+
+                <div class="control-btn" [ngClass]="{'disabled': disableCam,
                     'end-call': isVideoHide,
                     'disable-icon-callControl': !__appConfig.appConfig.VIDEO,
                     'focus-icon-video ': isVideoCallActive === true
                   }">
                   <span class="material-symbols-outlined"
-                    [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
+                    [matTooltip]="disableCam ? ('notification.camera-permission-denied' | translate) : (isVideoHide ? 'Turn on camera' : 'Turn off camera')"
                     [matTooltipPosition]="this.positionOptions[2]"
-                    [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="handleVideoIconClick(tooltip5)"
+                    [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="handleVideoIconClick(camTooltip)"
+                    (keydown)="($event.key === 'Enter' || $event.key === ' ') && handleVideoIconClick(camTooltip)"
                     [ngClass]="{
                   'disable-icon-callControl': isAudioCallActive
-                }" [attr.aria-disabled]="isAudioCallActive" #tooltip5="matTooltip">
+                }" [attr.aria-disabled]="isAudioCallActive" #camTooltip="matTooltip">
                   </span>
+                  <span *ngIf="disableCam" class="error-badge">!</span>
                 </div>
-                <div class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
-                  <span class="material-symbols-outlined" [matTooltip]="isCallMute ? 'Unmute' : 'Mute'"
+                <div [class.disabled]="disableMic" class="control-btn" [ngClass]="{ 'end-call': isCallMute }">
+                  <span class="material-symbols-outlined" 
+                    [matTooltip]="disableMic ? ('notification.microphone-permission-denied' | translate) : (isCallMute ? 'Unmute' : 'Mute')"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallMute ? 'mic_off' : 'mic'"
-                    (click)="toggleCallMic(tooltip3);" #tooltip3="matTooltip">
+                    (click)="toggleCallMic(micTooltip);" (keydown.enter)="toggleCallMic(micTooltip)"
+                    (keydown.space)="toggleCallMic(micTooltip)" #micTooltip="matTooltip">
                   </span>
+                  <span *ngIf="disableMic" class="error-badge">!</span>
                 </div>
                 <div class="control-btn" [ngClass]="{ 'end-call': isCallOnHold }">
                   <span class="material-symbols-outlined" [matTooltip]="isCallOnHold ? 'Resume' : 'Hold'"
                     [matTooltipPosition]="this.positionOptions[2]" [innerHTML]="isCallOnHold ? 'resume' : 'pause'"
-                    (click)="toggleCallHold(tooltip2);" #tooltip2="matTooltip">
+                    (click)="toggleCallHold(tooltip2);" (keydown.enter)="toggleCallHold(tooltip2)"
+                    (keydown.space)="toggleCallHold(tooltip2)" #tooltip2="matTooltip">
                   </span>
                 </div>
                 <div class="control-btn disable-icon-callControl">
@@ -1864,7 +2308,7 @@
                     class="material-symbols-outlined"> more_horiz </span>
                 </div>
                 <div matTooltip="End Call" [matTooltipPosition]="this.positionOptions[2]" class="control-btn end-call"
-                  (click)="callEnd()">
+                  (click)="callEnd()" (keydown)="($event.key === 'Enter' || $event.key === ' ') && callEnd()">
                   <span class="material-symbols-outlined"> call_end </span>
                 </div>
               </div>
@@ -1895,7 +2339,7 @@
                 ">
                   <!-- INPUT Fields -->
                   <ng-container *ngSwitchCase="'INPUT'">
-                    <label>
+                    <label for="{{ attribute.key }}">
                       <ng-container *ngIf="attribute.valueType === 'file'">
                         <span id="{{ attribute.key }}">{{
                           attribute.label
@@ -2028,7 +2472,7 @@
 
                   <!-- TEXTAREA Fields -->
                   <ng-container *ngSwitchCase="'TEXTAREA'">
-                    <label>
+                    <label for="{{ attribute.key }}">
                       <span id="{{ attribute.key }}">{{ attribute.label }}</span>
                       <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                     </label>
@@ -2047,7 +2491,7 @@
 
                   <!-- OPTIONS Fields -->
                   <ng-container *ngSwitchCase="'OPTIONS'">
-                    <label>
+                    <label for="{{ attribute.key }}">
                       <span id="{{ attribute.key }}">{{ attribute.label }}</span>
                       <span *ngIf="attribute?.isRequired" class="widget-required">*</span>
                     </label>
@@ -2144,13 +2588,15 @@
     <div class="widget-form-area">
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
-          <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon">
-
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+          <div class="widget-chat-header-top">
+            <h5 id="title" [innerHTML]="title"></h5> <!-- //NOSONAR -->
+            <div class="widget-header-icon">
+              <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
                 <mat-icon>remove</mat-icon>
               </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]="subtitle"></p>
         </div>
         <div class="widget-error-content">
           <div class="error-icon">
@@ -2169,14 +2615,9 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input
-              id="formTrigger"
-              type="submit"
-              class="widget-error-trigger"
+            <input id="formTrigger" type="submit" class="widget-error-trigger"
               value="{{ 'button.download-transcript' | translate }}"
-              *ngIf="enableDownloadTranscript && !standaloneWebRtc"
-              (click)="chatTranscript()"
-            />
+              *ngIf="enableDownloadTranscript && !standaloneWebRtc" (click)="chatTranscript()" />
           </div>
         </div>
       </div>
@@ -2191,12 +2632,18 @@
     <div class="widget-form-area">
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
-          <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon">
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
+
+          <div class="widget-chat-header-top">
+            <h5 id="title" [innerHTML]="title"></h5> <!-- //NOSONAR -->
+
+            <div class="widget-header-icon">
+                <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                  <mat-icon>remove</mat-icon>
+                </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]="subtitle"></p>
+
         </div>
         <div class="widget-error-content">
           <div class="error-icon">
@@ -2251,13 +2698,15 @@
     <div class="widget-form-area">
       <div class="widget-form">
         <div class="widget-chat-header widget-color">
-          <h5 id="title">{{ title }}</h5>
-          <div class="widget-header-icon">
-
-              <button matMiniFab (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
-                <mat-icon>remove</mat-icon>
-              </button>
+          <div class="widget-chat-header-top">
+            <h5 id="title" [innerHTML]='title'></h5> <!-- //NOSONAR -->
+            <div class="widget-header-icon">
+                <button matMiniFab *ngIf="!isMinimizeIconDisable" (click)="changeScreen('widget')"  aria-label="minimize conversation" matTooltipPosition="above" matTooltip="{{'button.minimize' | translate}}">
+                  <mat-icon>remove</mat-icon>
+                </button>
+            </div>
           </div>
+          <p class="widget-sub-heading" [innerHTML]='subtitle'></p>
         </div>
         <div class="widget-error-content">
           <div class="error-icon">
@@ -2276,8 +2725,8 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn" value="{{ 'button.call-on-my-number' | translate }}"
-              *ngIf="enableWebRtc" />
+            <input id="formTrigger" type="submit" class="widget-error-trigger call-btn"
+              value="{{ 'button.call-on-my-number' | translate }}" *ngIf="enableWebRtc" />
 
             <input id="formTrigger" typCall pope="submit" class="widget-error-trigger"
               value="{{ 'button.send-me-transcript' | translate }}" *ngIf="enableDownloadTranscript" />
@@ -2301,7 +2750,7 @@
         <div class="agent-detail">
           <p class="name">{{ agentName }}</p>
         </div>
-        <div class="end-call-btn" [class.disabled]="!dialogId" (click)="callEnd()">
+        <div class="end-call-btn" [class.disabled]="!dialogId" (click)="callEnd()" (keydown)="($event.key === 'Enter' || $event.key === ' ') && callEnd()">
           <div class="end-call-btn-sm">
             <span class="material-symbols-outlined"> call_end </span>
           </div>
@@ -2341,7 +2790,7 @@
             close
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg"
+          <img class="custom-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
             alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
         </button>
       </div>
@@ -2354,7 +2803,7 @@
             video_call
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg"
+          <img class="custom-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
             alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
         </button>
       </div>
@@ -2377,7 +2826,7 @@
             sms
           </span>
           <!-- Custom Widget logo -->
-          <img class="custom-logo" src="../../widget-assets/images/custom-logo.svg"
+          <img class="custom-logo" src="../../widget-assets/images/ava-anime-launchbutton-icon-small.png"
             alt="{{ 'button.live-chat' | translate }}" *ngIf="logoEnabled" />
         </button>
       </div>
@@ -2386,9 +2835,17 @@
   </ng-container>
 </div>
 
+<!-- Image Overlay Component -->
+<app-image-overlay
+  [imageUrl]="overlayImageUrl"
+  [altText]="overlayImageAlt"
+  [isOpen]="isImageOverlayOpen"
+  (closeOverlay)="closeImageOverlay()">
+</app-image-overlay>
+
 <!-- Sound Notification Starts-->
 <div id="notificationSound">
-  <audio controls id="soundNotif" [muted]="false" [hidden]="true">
+  <audio controls id="soundNotif" [muted]="isMuted" [hidden]="true">
     <source src="widget-assets/sounds/beep.ogg" type="audio/ogg" />
     <source src="widget-assets/sounds/beep.mp3" type="audio/mpeg" />
     <source src="widget-assets/sounds/beep.wav" type="audio/wav" />

@@ -22,7 +22,6 @@ export class DeliveryNotificationService {
   //     if (cimMessage.header.sender.type.toLowerCase() == "agent") {
   //       console.log("Event  received with data  ", cimMessage.body);
 
-
   //         this.typingIndicatorTimer = setTimeout(() => {
   //           console.log("timer ended for indicator to show ", cimMessage.body);
   //           this.typingIndicatorTimer = null;
@@ -62,13 +61,9 @@ export class DeliveryNotificationService {
   //    let index = cimMessage.findIndex((message: { id: any; }) => message.id == msgId);
   //    // mark all the previous messages as 'seen' or 'successed' before that message except failed messages
 
-  
-
   // private changeMessageStatusToFailed(cimMessage: any, msgId: any, msgStatus: string) {
   //   // find index of the message for the notification
   //   let index = cimMessage.findIndex((message: { id: any; }) => message.id == msgId);
-
-  
 
   // public handleMessageReport(cimMessage: { header: { sender: { type: string; }; }; body: { type: string; }; id: any; }, customerData:any) {
   //   if (document.hasFocus() && (cimMessage.header.sender.type.toLowerCase() == "agent" || cimMessage.header.sender.type.toLowerCase() == "bot")) {
@@ -83,15 +78,11 @@ export class DeliveryNotificationService {
   //     let header = { replyToMessageId: null, intent: null };
   //     let body = { markdownText: "", type: "DELIVERYNOTIFICATION", messageId: msgId, status: "READ", reasonCode: 200 };
 
-  
-
   // public processSeenMessages(cimMessage:any) {
   //   let latestMessage = cimMessage[cimMessage.length - 1];
   //   if (latestMessage) {
   //     // mark all the message Successed
   //     this.markMessageStatusToSeenOrSuccessed(cimMessage, latestMessage.id, "successed");
-
-  
 
   // private getLatestDeliveryMessage(cimMessage:any) {
   //   for (let i = (cimMessage.length - 1); i >= 0; i--) {

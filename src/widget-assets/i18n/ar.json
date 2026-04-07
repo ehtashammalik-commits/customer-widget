@@ -16,7 +16,8 @@
     "required-password-format": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
     "maximum-limit": "تم الوصول إلى الحد الأقصى",
     "invalid-session-code": "رمز الجلسة غير صالح!",
-    "html5-not-supported": "متصفحك لا يدعم فيديو HTML5."
+    "html5-not-supported": "متصفحك لا يدعم فيديو HTML5.",
+    "camera-access-denied": "الوصول إلى الكاميرا مطلوب للمكالمات الفيديو. يرجى السماح بالوصول وحاول مرة أخرى."
   },
   "session-end-reasons": {
     "agent" :"session ended because the agent left the conversation",
@@ -75,5 +76,10 @@
     "choose-file": "اختر ملف",
     "sorry": "عذرًا!",
     "thankyou": "شكرًا لك!"
+  },
+  "dropdown": {
+    "placeholder": "اختر خياراً",
+    "search-placeholder": "🔍 ابحث",
+    "no-results": "لا توجد نتائج!"
   }
 }

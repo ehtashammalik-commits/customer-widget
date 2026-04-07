@@ -1,6 +1,6 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule,ReactiveFormsModule } from '@angular/forms'; // Import the FormsModule
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'; // Import the FormsModule
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,7 +14,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatRadioModule } from '@angular/material/radio';
 
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -32,13 +31,23 @@ import { getMediaFromTask } from './getMediaFromTask.pipe';
 import { NpsColorPipe } from './npsColor.pipe';
 import { SvgNpsFormatPipe } from './svgFormat.pipe';
 import { IsEllipsisActiveDirective } from './isEllipsisActive.directive';
+import {MatCardModule} from "@angular/material/card";
+import {MatDatepickerModule} from "@angular/material/datepicker";
+import {MatRadioModule} from "@angular/material/radio";
+import {MatNativeDateModule} from "@angular/material/core";
+import {MatCheckboxModule} from "@angular/material/checkbox";
+import {OwlDateTimeModule, OwlNativeDateTimeModule} from "ng-pick-datetime";
 import { TranscriptComponent } from './chat-transcript/chat-transcript.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
 import { NgxUiLoaderModule } from 'ngx-ui-loader';
 import { SanitizeHtmlPipe } from './sanitizeHtml.pipe';
 import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
 import { SanitizeHtmlForEmail } from './pipes/sanitize-html-for-email.pipe';
-
+import { SimplifyOptionsPipe } from  './pipes/simplify-options.pipe';
+import {MatSliderModule} from "@angular/material/slider";
+import { ImageOverlayComponent } from './image-overlay/image-overlay.component';
+import { NgxSpinnerModule } from 'ngx-spinner';
+import { SelectDropDownModule } from 'ngx-select-dropdown';
 export function initializeApp1(appConfigService: ConfigService) {
   return async () => {
     console.log('Initializing App');
@@ -58,6 +67,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     ConfirmDialogComponent,
     tagFormatPipe,
     SafeFileURLPipe,
+    SimplifyOptionsPipe,
     getMediaFromTask,
     NpsColorPipe,
     SvgNpsFormatPipe,
@@ -67,6 +77,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     SanitizeHtmlPipe,
     SafeAttachmentUrlPipe,
     SanitizeHtmlForEmail,
+    ImageOverlayComponent,
   ],
   imports: [
     NgxLinkifyjsModule.forRoot({
@@ -79,6 +90,7 @@ export function initializeApp1(appConfigService: ConfigService) {
       pbDirection: 'ltr',
       text: 'Loading...',
     }),
+    NgxSpinnerModule.forRoot({ type: 'ball-spin' }),
     BrowserModule,
     HttpClientModule,
     TranslateModule.forRoot({
@@ -104,6 +116,15 @@ export function initializeApp1(appConfigService: ConfigService) {
     MatDialogModule,
     MatChipsModule,
     MatRadioModule,
+    MatCardModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatRadioModule,
+    MatCheckboxModule,
+    OwlDateTimeModule,
+    OwlNativeDateTimeModule,
+    MatSliderModule,
+    SelectDropDownModule,
   ],
   exports: [getMediaFromTask, TranscriptComponent],
   providers: [

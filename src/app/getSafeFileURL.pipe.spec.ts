@@ -28,19 +28,26 @@ describe('SafeFileURLPipe', () => {
   });
 
   it('should call sdk.getFileURLfromServer and cache result if not cached', () => {
-  mockSdk.getFileURLfromServer.mockImplementation((url, cb) => cb('blob:bar'));
-  pipe['cache'] = {}; // clear cache
+    mockSdk.getFileURLfromServer.mockImplementation((url, cb) =>
+      cb('blob:bar'),
+    );
+    pipe['cache'] = {}; // clear cache
 
-  pipe.transform('bar'); // <-- Call transform to trigger the logic
+    pipe.transform('bar'); // <-- Call transform to trigger the logic
 
-  expect(mockSdk.getFileURLfromServer).toHaveBeenCalledWith('bar', expect.any(Function));
-  expect(mockSanitizer.bypassSecurityTrustUrl).toHaveBeenCalledWith('blob:bar');
-  expect(pipe['cache']['bar']).toBe('safe:blob:bar');
-});
+    expect(mockSdk.getFileURLfromServer).toHaveBeenCalledWith(
+      'bar',
+      expect.any(Function),
+    );
+    expect(mockSanitizer.bypassSecurityTrustUrl).toHaveBeenCalledWith(
+      'blob:bar',
+    );
+    expect(pipe['cache']['bar']).toBe('safe:blob:bar');
+  });
 
   it('should not call sdk.getFileURLfromServer again if cache is empty string', () => {
-  pipe['cache']['baz'] = '';
-  expect(pipe.transform('baz')).toBeUndefined(); // <-- undefined, not ''
-  expect(mockSdk.getFileURLfromServer).not.toHaveBeenCalled();
-});
+    pipe['cache']['baz'] = '';
+    expect(pipe.transform('baz')).toBeUndefined(); // <-- undefined, not ''
+    expect(mockSdk.getFileURLfromServer).not.toHaveBeenCalled();
+  });
 });

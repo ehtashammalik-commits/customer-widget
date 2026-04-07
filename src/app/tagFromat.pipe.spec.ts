@@ -2,7 +2,9 @@ import { tagFormatPipe } from './tagFormat.pipe';
 
 // Mock ibsFormat globally
 jest.mock('ibs-format', () => ({
-  ibsFormat: jest.fn((value, tags, opts, xss) => `formatted:${value}:${opts.detectLinks}`),
+  ibsFormat: jest.fn(
+    (value, tags, opts, xss) => `formatted:${value}:${opts.detectLinks}`,
+  ),
 }));
 
 describe('tagFormatPipe', () => {
@@ -26,7 +28,7 @@ describe('tagFormatPipe', () => {
         ['mark', '!'],
       ],
       { detectLinks: true, target: '_blank' },
-      { allowXssEscaping: true }
+      { allowXssEscaping: false },
     );
     expect(result).toBe('formatted:Hello *world*:true');
   });
@@ -43,7 +45,7 @@ describe('tagFormatPipe', () => {
         ['mark', '!'],
       ],
       { detectLinks: false, target: '_blank' },
-      { allowXssEscaping: true }
+      { allowXssEscaping: false },
     );
     expect(result).toBe('formatted:Test _italic_:false');
   });

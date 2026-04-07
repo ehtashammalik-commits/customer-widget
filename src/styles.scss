@@ -1,5 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-
+@import "~ng-pick-datetime/assets/style/picker.min.css";
 html,
 body {
   height: 100%;
@@ -37,6 +37,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px !important;
+  width: 100%;
 }
 
 .mat-select {
@@ -46,10 +47,50 @@ body {
   margin-bottom: 10px;
 }
 .error-snackbar {
-    bottom: 150px;
-    position: relative;
-    right: -1px;
+    bottom: 50px;
+    // position: relative;
     min-width: 319px !important;
+    position: fixed;
+    right: 0;
+}
+
+.mcqAttribute {
+  .radioGroup {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px; // spacing between radio buttons
+  }
+
+  .radioWrapper {
+    width: 100%;
+
+    mat-radio-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+
+      // Make sure the internal label content is laid out properly
+      .mat-radio-label {
+        width: 100%;
+        display: flex;
+        align-items: center;
+      }
+
+      .mat-radio-label-content {
+        flex-grow: 1;
+        overflow: hidden;
+      }
+
+      .text-wrap-fw {
+        display: inline-block;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
 }
 
 @media print {
@@ -63,5 +104,156 @@ body {
     margin: 0 0 0 10px;
     border-left: 1px solid rgb(211 211 211);
     padding-left: 10px;
+    }
+  }
+
+.message-type-form {
+    padding-right: 2px;
+    width: 260px;
+    max-width: 260px;
+
+    .message-inner-form {
+
+      .mat-form-field-appearance-outline {
+        .mat-form-field-wrapper {
+          padding-bottom: 0;
+          margin: 4px 0;
+          }
+        }
+
+      .mat-form-field-infix {
+        padding: 1em 0 1em 0;
+        color: #232323;
+        border-top-width: 3px;
+        }
+
+      .mat-form-field-outline {
+        background: #fff;
+        border-radius: 4px;
+        }
+
+      .mat-radio-button.mat-accent .mat-radio-inner-circle, .mat-radio-button.mat-accent .mat-radio-ripple .mat-ripple-element:not(.mat-radio-persistent-ripple), .mat-radio-button.mat-accent.mat-radio-checked .mat-radio-persistent-ripple, .mat-radio-button.mat-accent:active .mat-radio-persistent-ripple,
+      .mat-checkbox-indeterminate.mat-accent .mat-checkbox-background, .mat-checkbox-checked.mat-accent .mat-checkbox-background, .mat-checkbox-checked:not(.mat-checkbox-disabled).mat-accent .mat-ripple-element, .mat-checkbox:active:not(.mat-checkbox-disabled).mat-accent .mat-ripple-element {
+        background-color: var(--main-color);
+        }
+
+      .mat-radio-button.mat-accent.mat-radio-checked .mat-radio-outer-circle {
+        border-color: var(--main-color);
+        }
+      }
+  }
+.custom-radio-action{
+  mat-radio-button {
+    margin-right: 10px;
+    }
+  .mat-radio-label-content{
+    font-size: 14px;
+    padding-inline-start: 5px;
+    }
+  }
+.custom-dropdown-field{
+  .mat-select{
+    border: none;
+    padding: 0;
+    margin-bottom: 0;
+}
+}
+
+.mat-slider.mat-primary .mat-slider-track-fill, .mat-slider.mat-primary .mat-slider-thumb, .mat-slider.mat-primary .mat-slider-thumb-label {
+  background-color: var(--main-color);
+  }
+
+.owl-dt-timer-hour12 .owl-dt-timer-hour12-box {
+  border: 1px solid rgb(134 134 134);
+  transition: background .2s ease;
+  color: #000;
+  width: 38px;
+  height: 30px;
+  border-radius: 3px;
+  }
+.owl-dt-container-buttons button.owl-dt-control.owl-dt-control-button {
+  color: #555;
+  }
+.form-main-section{
+  .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+    color: #888888;
+    }
+  }
+
+  .mat-chip.mat-standard-chip.mat-chip-disabled {
+    cursor: default !important;
+}
+
+.message {
+  padding: 5px 10px;
+  a {
+    overflow-wrap: anywhere !important;
+  }
+}
+
+.widget-sub-heading a {
+  color: white;
+  text-decoration: underline;
+}
+
+.prechat-dropdown .ngx-dropdown-container .selected-items .selected-item {
+    display: flex !important;
+    flex-direction: row-reverse !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+}
+
+.prechat-dropdown .ngx-dropdown-container .ngx-dropdown-list-container {
+  max-height: 250px !important;
+}
+
+.prechat-dropdown .ngx-dropdown-container .ngx-dropdown-button .display-text {
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+}
+
+.right-direction{
+  .emoji-btn, div#EmojiLink {
+    left: inherit !important;
+    right: 10px !important;
+    }
+
+  .message-inner-form .form-group.custom-datentime mat-icon{
+    left: 5px;
+    right: inherit !important;
+    }
+
+  .ngx-dropdown-container .ngx-dropdown-button{
+    text-align: right !important;
+
+    .nsdicon-angle-down {
+      right: inherit !important;
+      left: 5px;
+      float: none !important;
+      }
+    }
+  .ngx-dropdown-list-container{
+    .search-container{
+      input{
+        text-align: right !important;
+        direction: rtl !important;
+        }
+      label{
+        left: inherit !important;
+        right: 0 !important;
+        }
+      }
+    }
+  }
+
+.main-attributes {
+  .ngx-dropdown-container .ngx-dropdown-button{
+    min-height: 40px !important;
+    }
+  .available-item{
+    &:hover {
+      background: #f1f1f1;
+      }
     }
   }

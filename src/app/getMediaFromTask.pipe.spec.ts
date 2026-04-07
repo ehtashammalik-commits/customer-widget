@@ -6,8 +6,16 @@ describe('getMediaFromTask Pipe', () => {
 
   const mockTask = {
     activeMedia: [
-      { state: 'connected', type: { direction: 'inbound' }, queue: { name: 'MainQueue' } },
-      { state: 'queued', type: { direction: 'outbound' }, queue: { name: 'SupportQueue' } },
+      {
+        state: 'connected',
+        type: { direction: 'inbound' },
+        queue: { name: 'MainQueue' },
+      },
+      {
+        state: 'queued',
+        type: { direction: 'outbound' },
+        queue: { name: 'SupportQueue' },
+      },
     ],
   };
 
@@ -31,7 +39,13 @@ describe('getMediaFromTask Pipe', () => {
 
   it('should return undefined if no queued media exists', () => {
     const taskWithoutQueued = {
-      activeMedia: [{ state: 'connected', type: { direction: 'inbound' }, queue: { name: 'MainQueue' } }],
+      activeMedia: [
+        {
+          state: 'connected',
+          type: { direction: 'inbound' },
+          queue: { name: 'MainQueue' },
+        },
+      ],
     };
     const result = pipe.transform(taskWithoutQueued, 'direction');
     expect(result).toBeUndefined();

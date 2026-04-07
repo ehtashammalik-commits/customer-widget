@@ -16,16 +16,17 @@
         "required-password-format": "Password must be at least 8 characters long",
         "maximum-limit": "Maximum limit reached",
         "invalid-session-code": "Invalid Session Code!",
-        "html5-not-supported": "Your browser does not support HTML5 video."
+        "html5-not-supported": "Your browser does not support HTML5 video.",
+        "camera-access-denied": "Camera access is required for video calls. Please allow access and try again."
     },
     "session-end-reasons": {
         "agent" :"session ended because the agent left the conversation",
-"customer" :"session ended because the customer left the conversation",
-"force-closed":"session ended due to customer's inactivity",
-"force_closed":"session ended due to customer's inactivity",
-"inactivity":"session ended due to customer's inactivity",
-"network":"session ended due to customer's network connectivity issue",
-"unknown":"session ended due to an unknown or unspecified reason"
+        "customer" :"session ended because the customer left the conversation",
+        "force-closed":"session ended due to customer's inactivity",
+        "force_closed":"session ended due to customer's inactivity",
+        "inactivity":"session ended due to customer's inactivity",
+        "network":"session ended due to customer's network connectivity issue",
+        "unknown":"session ended due to an unknown or unspecified reason"
     },
      "agent-notifications": {
         "joined": "has joined",
@@ -50,7 +51,9 @@
         "send-me-transcript": "Send me Transcript",
         "call-on-my-number": "Call on my number",
         "request-callback": "Request Callback",
-        "video-call": "Video Call"
+        "video-call": "Video Call",
+        "unmute": "Unmute",
+        "mute": "Mute"
     },
     "callback": {
         "title": "Callback",
@@ -75,5 +78,18 @@
         "choose-file": "Choose File",
         "sorry": "Sorry!",
         "thankyou": "Thank You!"
+    },
+    "dropdown": {
+        "placeholder": "Select an option",
+        "search-placeholder": "🔍 Search",
+        "no-results": "No results found!"
+    },
+    "message": {
+        "you": "You"
+    },
+    "chat-transcript": {
+        "title": "Conversation Transcript",
+        "disclaimer-text": "Below is the transcript of your recent chat session with our support team.",
+        "print-or-download-pdf": "Print / Save as PDF"
     }
 }

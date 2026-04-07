@@ -26,6 +26,7 @@ export class TranscriptComponent implements OnInit {
   conversationAreaClass = '';
   state: string = '';
   enableTranscriptNotifications: boolean = false;
+  private receivedToken: string = '';
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -39,6 +40,30 @@ export class TranscriptComponent implements OnInit {
   ) {
     translate.setDefaultLang('en');
     translate.use('en');
+
+    // Listen for JWT token via postMessage
+    window.addEventListener('message', (event) => {
+      // Validate origin for security - allow same origin and opener's origin
+      const trustedOrigins = [window.location.origin];
+      if (window.opener) {
+        try {
+          trustedOrigins.push(new URL(window.opener.location.href).origin);
+        } catch (e) {
+          // Cross-origin opener, can't access location
+          console.error('Error accessing opener location:', e);
+        }
+      }
+
+      if (!trustedOrigins.includes(event.origin)) {
+        console.warn('Received message from untrusted origin:', event.origin);
+        return;
+      }
+
+      if (event.data?.type === 'JWT_TOKEN') {
+        this.receivedToken = event.data.token;
+        console.log('JWT token received via postMessage');
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -48,6 +73,7 @@ export class TranscriptComponent implements OnInit {
     this.route.queryParams.subscribe(async (params) => {
       const conversationId = params['conversationId'] || '';
       this.browserLang = params['browserLang'] || '';
+      this.translate.use(this.browserLang || 'en');
       this.state = params['state'] || '';
 
       if (!conversationId) {
@@ -65,9 +91,13 @@ export class TranscriptComponent implements OnInit {
       };
 
       this.ngxLoader.start();
+      // Wait briefly for postMessage token, then fallback to storage
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const jwtToken =
+        this.receivedToken || this.storageService.getItem('jwt_token') || '';
+      this.storageService.setItem('jwt_token', jwtToken);
       await this.loadChatData(req);
       this.ngxLoader.stop();
-      this.printChatTranscript();
 
       // Prepare icon URLs
       let originURL = '';
@@ -91,8 +121,6 @@ export class TranscriptComponent implements OnInit {
         'smpp-connector': `${originURL}/file-engine/api/downloadFileStream?filename=_SMS.svg`,
         default: `${originURL}/file-engine/api/downloadFileStream?filename=_WEB.svg`,
       };
-
-      const jwtToken = this.storageService.getItem('jwt_token') || '';
       await this.loadIcons(senderIconMap, jwtToken);
     });
   }
@@ -237,14 +265,14 @@ export class TranscriptComponent implements OnInit {
   }
 
   getAgentDisplayName(keycloakUser: any): string {
-
     if (this.__appConfig.appConfig.USERNAME_ENABLED) {
-
-      return keycloakUser.username || keycloakUser.senderName ||'Agent';
+      return keycloakUser.username || keycloakUser.senderName || 'Agent';
     }
 
-    const firstName = keycloakUser.firstName || keycloakUser.additionalDetail?.firstName;
-    const lastName = keycloakUser.lastName || keycloakUser.additionalDetail?.lastName;
+    const firstName =
+      keycloakUser.firstName || keycloakUser.additionalDetail?.firstName;
+    const lastName =
+      keycloakUser.lastName || keycloakUser.additionalDetail?.lastName;
     if (firstName && lastName) {
       return `${firstName} ${lastName}`;
     } else if (firstName) {
@@ -254,5 +282,9 @@ export class TranscriptComponent implements OnInit {
     } else {
       return keycloakUser.username || 'Agent';
     }
+  }
+
+  async downloadAsPDF() {
+    window.print();
   }
 }

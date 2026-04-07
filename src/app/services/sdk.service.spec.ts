@@ -423,4 +423,102 @@ describe('SdkService', () => {
       expect(getFileURLMock).toHaveBeenCalledWith('some-url', expect.any(Function));
     });
   });
+
+/////////////////////////////////
+
+describe('WebRTC Stream Handling', () => {
+  let service: SdkService;
+  let configServiceMock: any;
+
+  beforeEach(() => {
+    configServiceMock = { appConfig: {} };
+    service = new SdkService(configServiceMock as any);
+  });
+
+  it('should update localStreamSubject when setLocalStream is called', (done) => {
+    const mockStream = {} as MediaStream;
+
+    service.localStream$.subscribe((stream) => {
+      if (stream) {
+        expect(stream).toBe(mockStream);
+        done();
+      }
+    });
+
+    service.setLocalStream(mockStream);
+  });
+
+  it('should update remoteStreamSubject when setRemoteStream is called', (done) => {
+    const mockStream = {} as MediaStream;
+
+    service.remoteStreamObs$.subscribe((stream) => {
+      if (stream) {
+        expect(stream).toBe(mockStream);
+        done();
+      }
+    });
+
+    service.setRemoteStream(mockStream);
+  });
+
+it('should call setLocalStream & setRemoteStream when handleCallStart detects global streams', () => {
+  const mockLocal = {} as MediaStream;
+  const mockRemote = {} as MediaStream;
+
+  (global as any).local_stream = mockLocal;
+  (global as any).remote_stream = mockRemote;
+
+  // spy on setter methods
+  const spyLocal = jest.spyOn(service, 'setLocalStream');
+  const spyRemote = jest.spyOn(service, 'setRemoteStream');
+
+  // spy on postMessages to capture the payload
+  const postMessagesSpy = jest.spyOn(window as any, 'postMessages').mockImplementation(() => {});
+
+  const payload = {
+    type: 'audio',
+    authConfigs: {
+      diallingUri: '1001'
+    }
+  };
+
+  service.handleCallStart(payload);
+
+  // extract callback from the arguments passed to postMessages
+  const dialCallArg = postMessagesSpy.mock.calls[0][0] as any;
+  const callback = dialCallArg.parameter.clientCallbackFunction;
+
+  callback({ status: 'ok' });
+
+  expect(spyLocal).toHaveBeenCalledWith(mockLocal);
+  expect(spyRemote).toHaveBeenCalledWith(mockRemote);
+});
+
+
+ it('should update local stream on convertCall when global local_stream exists', () => {
+  const mockLocal = {} as MediaStream;
+  (global as any).local_stream = mockLocal;
+
+  const spyLocal = jest.spyOn(service, 'setLocalStream');
+
+  // Spy on postMessages to capture the payload
+  const postMessagesSpy = jest
+    .spyOn(window as any, 'postMessages')
+    .mockImplementation(() => {});
+
+  service.convertCall('on', 'video', '123');
+  const callConvertArg = postMessagesSpy.mock.calls[0][0] as any;
+
+  const callback = callConvertArg.parameter.clientCallbackFunction;
+
+ 
+  callback({ status: 'ok' });
+
+
+  expect(spyLocal).toHaveBeenCalledWith(mockLocal);
+});
+
+});
+
+
 });

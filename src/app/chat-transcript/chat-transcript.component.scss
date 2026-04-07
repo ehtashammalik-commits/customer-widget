@@ -44,6 +44,39 @@
         font-weight: 600;
         letter-spacing: 1px;
     }
+
+    .download-pdf-btn {
+        position: absolute;
+        height: 39px;
+        right: 0px;
+        padding: 0px 10px;
+        background-color: #4773b5;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+            background-color: #365a94;
+        }
+
+        &:active {
+            background-color: #2d4a7a;
+        }
+
+        @media(max-width: 480px){
+            position: static;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        @media print {
+            display: none;
+        }
+    }
 }
 
 /* Right direction */
@@ -157,10 +190,11 @@
 }
 
 .transcript-header img {
-    width: 100px;
+    width: auto;
     vertical-align: middle;
     position: absolute;
     top: 10px;
+    height: 26px;
 }
 
 .transcript-header h3 {
@@ -715,3 +749,8 @@ small.edit-message {
     transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
+.disclaimer-text {
+    text-align: center;
+    font-weight: 500;
+    color: #ff4b4b;
+}

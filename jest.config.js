@@ -15,7 +15,7 @@ module.exports = {
       ]
     },
     transformIgnorePatterns: [
-       'node_modules/(?!@angular|@ngx-translate|rxjs|ngx-ui-loader)'
+       'node_modules/(?!@angular|@ngx-translate|rxjs|ngx-ui-loader|ngx-spinner)'
     ],
     moduleNameMapper: {
        '^src/(.*)$': '<rootDir>/src/$1'
