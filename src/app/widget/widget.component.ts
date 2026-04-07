@@ -1146,12 +1146,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       'formMessageType',
     );
 
-    // Step 2: Update fields from form data (if needed)
-    finalPayload.header.timestamp = Date.now();
-    finalPayload.id = messageId;
-    finalPayload.header.intent = '';
-    finalPayload.body.formId = '';
-    finalPayload.body.formTitle = message.body.formTitle || '';
+      // Step 2: Update fields from form data (if needed)
+      finalPayload.header.timestamp = Date.now();
+      finalPayload.id = messageId;
+      finalPayload.header.intent = '';
+      finalPayload.body.formId = message.body.formId || '';
+      finalPayload.body.formTitle= message.body.formTitle || '';
 
     this.constructCimMessage('FORM_DATA', {
       text: null,
@@ -3219,7 +3219,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     header.intent = intent || null;
 
     body.sections = formMessageTypeData?.body?.sections || [];
-    body.additionalDetails = formMessageTypeData?.body?.additionalDetails || {};
+    body.additionalDetails =
+      formMessageTypeData?.body?.additionalDetails || {};
+    body.formId = formMessageTypeData?.body?.formId || '';
+    body.formTitle = formMessageTypeData?.body?.formTitle || '';
     if (status) {
       body.additionalDetails.status = status;
     }
@@ -3677,7 +3680,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               type: 'JWT_TOKEN',
               token: jwtToken,
             },
-            window.location.origin,
+            globalThis.location.origin,
           );
           console.log('JWT token sent via postMessage');
         } catch (error) {
