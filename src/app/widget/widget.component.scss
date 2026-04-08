@@ -251,9 +251,6 @@ $emoji-margin: 6px;
   margin: 0;
   font-size: 12px;
   font-weight: 400;
-  margin: 0;
-  font-family: "Roboto";
-  font-style: normal;
   color: $white-color;
 }
 
@@ -261,9 +258,7 @@ $emoji-margin: 6px;
   font-size: 16px;
   margin: 0;
   display: inline-block;
-  font-family: "Roboto";
   font-weight: 500;
-  font-style: normal;
   max-width: 30ch;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -276,22 +271,19 @@ $emoji-margin: 6px;
   text-align: center;
   background: $white-color;
   position: relative;
-
   width: 100%;
   height: 125px;
-  border-radius: 10px;
+  border-radius: 15px;
   bottom: 5px;
-}
 
-.widget-wrapper-content p {
+  p {
   text-align: left;
   font-size: 12px;
   color: #555;
   margin: 0;
   line-height: 1.5;
 }
-
-.widget-wrapper-content button {
+button {
   padding: 10px;
   outline: none;
   border: 0;
@@ -299,11 +291,15 @@ $emoji-margin: 6px;
   margin: 15px auto 0;
   cursor: pointer;
   transition: all 0.3s;
-}
-
-.widget-wrapper-content button:hover {
+  &:hover {
   transition: all 0.3s;
 }
+}
+}
+
+
+
+
 
 
 button.close-widget-wrapper {
@@ -406,14 +402,14 @@ button.close-widget-wrapper {
 * Bar View Chat Button
 **/
 
-.widget-icon button#chatIconBtn {
+.widget-icon button.widget-bar-trigger {
   width: 60px;
   border-radius: 50%;
   height: 60px;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
 }
 
-.widget-icon button#chatIconBtn span {
+.widget-icon button.widget-bar-trigger span {
   text-align: left;
   padding: 0 16px;
   line-height: 0;
@@ -512,7 +508,6 @@ button.close-widget-wrapper {
 .field-error {
   font-size: 10px;
   font-weight: 400;
-  font-family: "Roboto", Arial, Helvetica, sans-serif;
   color: $danger-color;
 
 }
@@ -529,6 +524,7 @@ button.close-widget-wrapper {
   height: calc(100% - 20px);
   width: 100%;
   border-radius: 5px 5px 0 0;
+
 }
 
 .widget-form-area.widget-mobile-version .widget-header-icon {
@@ -551,10 +547,10 @@ button.close-widget-wrapper {
   height: 100%;
   border-radius: 25px;
   position: relative;
+  margin: 0 10px;
 }
 
 .widget-form-header {
-  padding: 0 10px;
   border-radius: 10px;
   cursor: pointer;
 
@@ -577,10 +573,8 @@ button.close-widget-wrapper {
   display: inline-block;
 
   left: 10px;
-  font-family: "Roboto";
   font-size: 14px;
   font-weight: 500;
-  font-style: normal;
   text-align: left;
   color: $white-color;
 }
@@ -592,47 +586,51 @@ button.close-widget-wrapper {
   width: 20px;
 }
 
-.widget-form-area form {
+.widget-form-area{
+  form {
   margin: 0;
   height: 100%;
   overflow-y: auto;
+}
+.widget-form{
+  form{
+    padding: 0 0 0 15px;
+  }
+}
 }
 
 .widget-form-content {
   background-color: $white-color;
   border-radius: 10px;
-  position: absolute;
   overflow-y: scroll;
   height: calc(100% - 110px);
-  padding: 8px 0px 5px 10px !important;
   width: 100%;
-}
+  padding-top: 10px;
 
-.widget-form-content p {
-  font-family: "Roboto";
+  p {
   font-size: 13px;
   margin-left: 5px;
   font-weight: normal;
-  font-style: normal;
   text-align: left;
   color: #010101;
 }
+}
+
 
 .widget-form-area .widget-form-group {
   margin-bottom: 4px;
-}
 
-.widget-form-area .widget-form-group label {
+  label {
   display: inline-block;
   margin-bottom: 0px;
   margin-left: 10px;
-  font-family: "Roboto";
   font-size: 12px;
   font-weight: 500;
-  font-style: normal;
   text-align: left;
   color: #454545;
 }
+}
+
 
 .input-border-warning {
   border: 2px solid red !important;
@@ -641,8 +639,6 @@ button.close-widget-wrapper {
 /* File upload wrapper */
 .fileType {
   font-size: smaller;
-  font-style: normal;
-  font-family: Roboto;
   margin-left: 2px;
 }
 
@@ -663,9 +659,7 @@ button.close-widget-wrapper {
   cursor: pointer;
   border-radius: 25px;
   margin-left: 8px;
-  font-family: "Roboto";
   font-size: 12px;
-  font-style: normal;
 }
 
 .file-input {
@@ -846,17 +840,15 @@ button.close-widget-wrapper {
   border-radius: 10px 10px 0px 0px;
   flex-direction: row;
   justify-content: space-between;
-  margin: 5px;
+  margin: 5px 0 0;
 
   h5 {
     line-height: 36px;
     margin: 0;
 
     left: 10px;
-    font-family: "Roboto";
     font-size: 14px;
     font-weight: 400;
-    font-style: normal;
     }
   }
 
@@ -920,13 +912,11 @@ button.close-widget-wrapper {
   background-color: $white-color;
   position: relative;
   height: 78%;
-  bottom: 14px;
 }
 
 .widget-authentication-content {
   font-size: 12px;
   font-weight: 400;
-  font-family: "Roboto";
   background-color: $white-color;
   position: relative;
   height: 75%;
@@ -978,7 +968,7 @@ button.close-widget-wrapper {
       }
 
       .widget-auth-input {
-        font-style: normal;
+
         text-align: center;
         width: 100%;
         font-size: 14px;
@@ -997,7 +987,7 @@ button.close-widget-wrapper {
       }
 
       .widget-auth-trigger {
-        font-style: normal;
+
         text-align: center;
         width: 100%;
         font-size: 14px;
@@ -1041,24 +1031,25 @@ button.close-widget-wrapper {
   width: 100%;
   justify-content: end;
   display: flex;
+  align-items: center;
+}
+button.widget-navbar-action {
+border: 0;
+    background: transparent;
+    height: 24px;
+    padding: 0;
+    margin: 0 5px;
+    outline: none;
+    border-radius: 7px;
+
+    &.focus-icon mat-icon, &.focus-icon-video mat-icon{
+  color: $white-color !important;
+  background: var(--main-color) !important;
 }
 
-.widget-navbar-icon {
-
-  width: 24px;
-  height: 24px;
-  border: 1px solid #eff2f7;
-  border-radius: 7px;
-  color: var(--main-color);
-  background: rgb(255, 255, 255);
-  font-size: 15px;
-  text-align: center;
-  padding-top: 4px;
-  margin: 6px 4px 6px 4px;
-
-  &.font-selection {
+ &.font-selection {
     position: relative;
-    margin-left: 4px;
+    // margin-left: 4px;
     &:before {
       content: "|";
       position: absolute;
@@ -1067,21 +1058,30 @@ button.close-widget-wrapper {
       color: #ccc;
     }
   }
+}
+.widget-navbar-icon {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  border: 1px solid #eff2f7;
+  border-radius: 7px;
+  color: var(--main-color);
+  background: rgb(255, 255, 255);
+  font-size: 15px;
+  text-align: center;
+  // padding-top: 4px;
+  // margin: 6px 4px 6px 4px;
 
   &:hover {
     cursor: pointer;
   }
 }
 
-.focus-icon {
+.focus-icon, .focus-icon-video {
   color: $white-color !important;
   background: var(--main-color) !important;
 }
 
-.focus-icon-video {
-  color: $white-color !important;
-  background: var(--main-color) !important;
-}
 
 .away-chat-icon {
   color: var(--main-color) !important;
@@ -1126,10 +1126,8 @@ button.close-widget-wrapper {
 .widget-chat-alert {
   position: relative;
   top: 10px;
-  font-family: "Roboto";
   font-size: 10px;
   font-weight: normal;
-  font-style: normal;
   text-align: center;
   color: #8e8e8e;
 }
@@ -1159,10 +1157,8 @@ button.close-widget-wrapper {
 
 .widget-chat-notification span {
   line-height: 24px;
-  font-family: "Roboto";
   font-size: 10px;
   font-weight: normal;
-  font-style: normal;
   text-align: center;
   color: #868686;
 }
@@ -1200,21 +1196,19 @@ button.close-widget-wrapper {
     }
 
     .name {
-      font-family: "Roboto";
       font-size: 9px;
       font-weight: 500;
-      font-style: normal;
+
       text-align: left;
       color: #3e3e3e;
       word-break: break-word;
     }
 
     .message {
-      font-family: "Roboto";
       font-size: 12px;
       font-weight: normal;
       line-height: 18px;
-      font-style: normal;
+
       text-align: left;
       color: #000000;
       width: auto;
@@ -1268,10 +1262,9 @@ button.close-widget-wrapper {
     position: relative;
     width: auto;
     height: 5px;
-    font-family: "Roboto";
     font-size: 9px;
     font-weight: normal;
-    font-style: normal;
+
     color: #777777;
     top: 2px;
     left: 0px;
@@ -1323,21 +1316,19 @@ button.close-widget-wrapper {
     }
 
     .name {
-      font-family: "Roboto";
       font-size: 9px;
       font-weight: 500;
-      font-style: normal;
+
       text-align: left;
       color: #3e3e3e;
       word-break: break-word;
     }
 
     .message {
-      font-family: "Roboto";
       font-size: 12px;
       font-weight: normal;
       line-height: 18px;
-      font-style: normal;
+
       text-align: left;
       color: #000000;
       width: auto;
@@ -1394,10 +1385,9 @@ button.close-widget-wrapper {
   .time {
     position: relative;
     height: 2px;
-    font-family: "Roboto";
     font-size: 9px;
     font-weight: normal;
-    font-style: normal;
+
     color: #777777;
     bottom: 0px;
     max-width: inherit;
@@ -1456,7 +1446,7 @@ button.close-widget-wrapper {
 
   .send-btn {
     position: absolute;
-    right: 0;
+    right: 5px;
     bottom: 10px;
     cursor: pointer;
     font-size: 20px;
@@ -1469,7 +1459,6 @@ button.close-widget-wrapper {
   display: grid;
   font-size: 20px;
   font-weight: 600;
-  font-family: "Roboto";
   position: inherit;
   opacity: 0.75;
   color: var(--main-color);
@@ -1483,10 +1472,7 @@ button.close-widget-wrapper {
 
 .error-message {
   position: inherit;
-  font-family: "Roboto";
   font-size: 13px;
-  font-weight: normal;
-  font-style: normal;
   text-align: center;
   color: var(--main-color);
   top: 15%;
@@ -1504,8 +1490,6 @@ button.close-widget-wrapper {
   left: 0px;
 
   .widget-error-trigger {
-    font-family: "Roboto";
-    font-style: normal;
     text-align: center !important;
     width: 100%;
     font-size: 14px;
@@ -2010,11 +1994,10 @@ mat-spinner {
     background: rgba(52, 52, 52, 1);
 
     p {
-      font-family: "Roboto";
       font-size: 14px;
       font-weight: 300;
       line-height: 2px;
-      font-style: normal;
+
       text-align: center;
       color: #ffffff;
       position: inherit;
@@ -2074,12 +2057,10 @@ mat-spinner {
       filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.16));
       background: rgba(218, 48, 48, 0.68);
       cursor: pointer;
+      text-align: center;
+      padding: 0;
 
       .end-call-btn-sm {
-        position: relative;
-        top: 3px;
-        left: 4px;
-        width: 85px;
         height: 31px;
         border-radius: 25px;
         filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.16));
@@ -2087,9 +2068,6 @@ mat-spinner {
 
         span {
           color: white;
-          position: relative;
-          top: 2px;
-          left: 28px;
         }
       }
     }
@@ -2130,30 +2108,27 @@ mat-spinner {
 
     text-align: center;
     line-height: 10px;
-    font-style: normal;
+
     color: #ffffff;
     left: 0;
     width: 100%;
 
     .name {
       text-align: center;
-      font-family: "Roboto";
       font-size: 19px;
       font-weight: 500;
     }
 
     .text {
-      font-family: "Roboto";
       font-size: 12px;
       font-weight: normal;
       text-align: center;
     }
 
     .timer {
-      font-family: "Roboto";
       font-size: 17px;
       font-weight: 500;
-      font-style: normal;
+
       text-align: center;
     }
   }
@@ -2162,7 +2137,7 @@ mat-spinner {
 &.widget-video-section {
   visibility: visible;
   display: block;
-  width: 98%;
+  width: calc(100% - 10px);
   position: relative;
   top: 40px;
   bottom: 0;
@@ -2246,26 +2221,23 @@ mat-spinner {
     top: 3%;
     left: 3%;
     line-height: 5px;
-    font-style: normal;
+
     color: #ffffff;
 
     .name {
-      font-family: "Roboto";
       font-size: 14px;
       font-weight: 500;
     }
 
     .text {
-      font-family: "Roboto";
       font-size: 12px;
       font-weight: normal;
     }
 
     .timer {
-      font-family: "Roboto";
       font-size: 12px;
       font-weight: 500;
-      font-style: normal;
+
     }
   }
 }
@@ -2291,7 +2263,11 @@ mat-spinner {
     border-radius: 50%;
     background: #000000;
     cursor: pointer;
-
+    display: inline-flex;
+    line-height: 1;
+    &:focus{
+      outline: none;
+    }
     span.material-symbols-outlined {
       font-size: 20px;
       position: relative;
@@ -2373,40 +2349,52 @@ mat-spinner {
 .font-dropdown-container {
   position: absolute;
   right: 0px;
-  top: 30px;
+  top: 32px;
 
-  .font-dropdown-icon {
+  button {
     position: relative;
     width: 24px;
-    height: auto;
+    height: 24px;
     border: 1px solid #eff2f7;
     color: var(--main-color);
     background: rgb(255, 255, 255);
     text-align: center;
-    padding: 4px 0px;
+    padding: 0;
     margin: 0px 5px 0px 5px;
     display: block;
     cursor: pointer;
-  }
-
-  .font-dropdown-icon-top {
-    font-size: 12px;
     font-weight: bold;
+    border-radius: 0;
+    mat-icon{
+          line-height: 24px;
+          width: 22px;
+    }
+
+     &.font-dropdown-icon-top {
     border-top-right-radius: 7px;
     border-top-left-radius: 7px;
+    mat-icon{
+      font-size: 12px;
+    }
   }
 
-  .font-dropdown-icon-middle {
-    font-size: 16px;
-    font-weight: bold;
+   &.font-dropdown-icon-middle {
+
+    mat-icon{
+      font-size: 16px;
+    }
   }
 
-  .font-dropdown-icon-bottom {
-    font-size: 18px;
-    font-weight: bold;
+  &.font-dropdown-icon-bottom {
     border-bottom-right-radius: 7px;
     border-bottom-left-radius: 7px;
+
+      mat-icon{
+      font-size: 18px;
+    }
   }
+  }
+
 
   .active {
     background: #eff2f7;
@@ -2446,10 +2434,8 @@ mat-spinner {
 .callback-title {
   position: relative;
   left: 5px;
-  font-family: "Roboto";
   font-size: 22px;
   font-weight: 500;
-  font-style: normal;
   text-align: left;
   color: var(--main-color);
   margin-bottom: 5px;
@@ -2459,7 +2445,7 @@ mat-spinner {
   padding: 10px;
   background-color: rgb(255, 255, 255);
   border-radius: 10px;
-  margin-top: 20px;
+  margin-top: 30px;
 
 
   p {
@@ -2479,7 +2465,6 @@ mat-spinner {
     display: block;
     font-size: 20px;
     font-weight: 600;
-    font-family: "Roboto";
     position: inherit;
     width: 100.5px;
     opacity: 0.75;
@@ -2494,11 +2479,10 @@ mat-spinner {
 
   .response-message {
     position: inherit;
-    font-family: "Roboto";
     font-size: 13px;
     font-weight: normal;
     line-height: 16px;
-    font-style: normal;
+
     text-align: center;
     color: #000000;
     padding-top: 10px;
@@ -2515,8 +2499,6 @@ mat-spinner {
     left: 0px;
 
     .widget-response-trigger {
-      font-family: "Roboto";
-      font-style: normal;
       text-align: center;
       width: 100%;
       font-size: 14px;
@@ -2576,11 +2558,9 @@ mat-spinner {
 }
 
 .message2 {
-  font-family: "Roboto";
   font-size: 12px;
   font-weight: normal;
   line-height: 18px;
-  font-style: normal;
   text-align: left;
   color: #000000;
   width: auto;
@@ -2700,9 +2680,7 @@ mat-spinner {
   cursor: pointer;
   border-radius: 25px;
   margin-left: 8px;
-  font-family: "Roboto";
   font-size: 12px;
-  font-style: normal;
 }
 
 .file-input {
@@ -2755,8 +2733,6 @@ mat-spinner {
 
 .fileType {
   font-size: smaller;
-  font-style: normal;
-  font-family: "Roboto";
   margin-left: 2px;
 }
 
@@ -2798,7 +2774,6 @@ mat-spinner {
     align-items: center;
     justify-content: center;
     font-size: 10px;
-    font-family: 'Roboto';
 
   }
 
@@ -2859,7 +2834,6 @@ mat-spinner {
   text-align: center;
   font-size: 12px;
   font-weight: normal;
-  font-family: "Roboto";
   letter-spacing: 0px;
   color: #9a9a9a;
   margin-top: 0 !important;
@@ -3380,11 +3354,8 @@ mat-spinner {
   padding-top: 5px;
 
   .attributeName {
-
-    font-family: 'Roboto';
     font-size: 12px;
     font-weight: 500;
-    font-style: normal;
     text-align: left;
     color: #454545;
   }
@@ -3981,59 +3952,60 @@ input[type='radio'] {
 .fields-validation-error{
   position: absolute;
   width: 96%;
-  top: -4px;
+  top: 0;
   }
+button:focus-visible {
+  outline: -webkit-focus-ring-color auto 1px !important;
+}
 
-
-
-     .sub-call-participants {
+.sub-call-participants {
+  height: 100%;
+  position: absolute;
+  right: 10px;
+  z-index: 2;
+  span {
+    display: block;
+    width: 150px;
+    background: #9d9d9d40;
+    height: 100px;
+    position: relative;
+    text-align: center;
+    margin: 5px 5px;
+    border-radius: 5px;
+    .local-stream-max {
+      width: 100%;
       height: 100%;
-      position: absolute;
-      right: 10px;
-      z-index: 2;
-      span {
-        display: block;
-        width: 150px;
-        background: #9d9d9d40;
-        height: 100px;
-        position: relative;
-        text-align: center;
-        margin: 5px 5px;
-        border-radius: 5px;
-        .local-stream-max {
-          width: 100%;
-          height: 100%;
-        }
-      }
-      mat-icon {
-        line-height: 100px;
-        font-size: 3em;
-      }
-      strong {
-        background: #000000b0;
-        color: #f1f1f1;
-        width: 50px;
-        height: 50px;
-        display: block;
-        line-height: 50px;
-        border-radius: 100%;
-        margin: 0 auto;
-        position: relative;
-        z-index: 2;
-        top: 23px;
       }
     }
-
-    .camera-mode {
-    position: absolute;
-    font-size: 25vh;
-    color: rgb(145 143 143 / 80%);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: inherit;
-    height: inherit;
+  mat-icon {
+    line-height: 100px;
+    font-size: 3em;
+    }
+  strong {
+    background: #000000b0;
+    color: #f1f1f1;
+    width: 50px;
+    height: 50px;
+    display: block;
+    line-height: 50px;
+    border-radius: 100%;
+    margin: 0 auto;
+    position: relative;
     z-index: 2;
-    max-width: fit-content;
-    max-height: 25vh;
+    top: 23px;
+    }
+  }
+
+.camera-mode {
+  position: absolute;
+  font-size: 25vh;
+  color: rgb(145 143 143 / 80%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: inherit;
+  height: inherit;
+  z-index: 2;
+  max-width: fit-content;
+  max-height: 25vh;
   }
