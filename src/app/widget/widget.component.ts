@@ -8,7 +8,7 @@ import {
   Input,
   ChangeDetectorRef,
   Inject,
-  HostListener
+  HostListener,
 } from '@angular/core';
 import {
   FormGroup,
@@ -36,7 +36,7 @@ import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import { DOCUMENT } from '@angular/common';
 import { FormMessageTypeService } from '../services/form-message-type.service';
-import { NgxSpinnerService } from "ngx-spinner";
+import { NgxSpinnerService } from 'ngx-spinner';
 
 declare let EmojiPicker: any;
 interface Shift {
@@ -81,7 +81,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private onChatResumedSubject: Subscription = new Subscription();
   private onWebRtcCallSubject: Subscription = new Subscription();
   private onCallbackRequestSubject: Subscription = new Subscription();
-  private readonly onLanguageChangeSubscription: Subscription = new Subscription();
+  private readonly onLanguageChangeSubscription: Subscription =
+    new Subscription();
   @ViewChild('autosize')
   autosize!: CdkTextareaAutosize;
   @ViewChild('myFileInput')
@@ -101,6 +102,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   localStream!: MediaStream | null;
   remoteStream!: MediaStream | null;
+
+  private localStreamSubscription: Subscription | null = null;
+  private remoteStreamSubscription: Subscription | null = null;
 
   scrollTop = 0;
   fontSize = new FormControl('12');
@@ -169,7 +173,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   { value: '16', tooltip: '16px', iconClass: 'font-dropdown-icon-bottom' }
 ];
 
-
   // Teneo
   formatLabel(value: number): string {
     if (value >= 1000) {
@@ -178,12 +181,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     return `${value}`;
   }
-  INTERACTIVE_TYPES = ['button', 'carousel','form_data'];
+  INTERACTIVE_TYPES = ['button', 'carousel', 'form_data'];
   // Variables for Call Controls
   isCallMute = false;
   isVideoHide = false;
   isCallOnHold = false;
   remoteStreamStatus = false;
+  private remoteCameraOffTimer: any;
   //varibales for MAX MIN length of the attributes (short Answer)
   short_ans_maxLength: number = 0;
   short_ans_minLength: number = 0;
@@ -267,8 +271,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     file: 'File',
   };
 
-  private readonly formStateMap = new Map<string, { values: any; status: string; schema: any }>();
-
+  private readonly formStateMap = new Map<
+    string,
+    { values: any; status: string; schema: any }
+  >();
 
   // Widget Configuration
   title = '';
@@ -311,7 +317,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     valueKey: 'label',
     singleValue: true,
   };
-
 
   @Input() formData!: any[];
   @Input() callbackFormData!: any[];
@@ -400,12 +405,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   isStarRating = true;
   isCarouselView = true;
-  
+
   // Additional Schema and Values from Widget Config
   additionalSchema: any[] = [];
   additionalValues: any[] = [];
   additionalValuesMap: { [key: string]: any } = {};
-  widgetType = "COMPACT";
+  widgetType = 'COMPACT';
   isCalloutViewCompact = false;
   appliedColorTheme: string = '';
   avaClientId: string = '';
@@ -415,9 +420,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   reconnectAttemptsConfig = {
     currentAttempt: 0,
     maxAttempts: 5,
-  }
+  };
   private endViewTimerSubscription: Subscription | null = null;
-  
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly fb: FormBuilder,
@@ -437,7 +442,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private readonly router: Router,
     @Inject(DOCUMENT) private readonly doc: Document,
     private readonly formMessageTypeService: FormMessageTypeService,
-    private readonly spinner: NgxSpinnerService
+    private readonly spinner: NgxSpinnerService,
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.isUsernameEnabled = __appConfig.appConfig.USERNAME_ENABLED;
@@ -449,7 +454,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     translate.use('en');
     this.setDropdownTranslations();
     this.onLanguageChangeSubscription = this.translate.onLangChange.subscribe(
-      () => this.setDropdownTranslations()
+      () => this.setDropdownTranslations(),
     );
   }
 
@@ -531,7 +536,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
       if (
         this.__appConfig.appConfig.CHANNEL_IDENTIFIER ===
-        'channel_customer_identifier' &&
+          'channel_customer_identifier' &&
         !this.customerIdentifier
       ) {
         alert(
@@ -555,12 +560,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private subscribeToWidgetConfigs(): void {
     this.widgetConfigsSubscription = this.sdk.widgetConfigs$.subscribe(
       (configs: any) => {
-        console.log("SUBSCRIBERS: Widget configs received", configs);
+        console.log('SUBSCRIBERS: Widget configs received', configs);
         this.setWidgetConfigs(configs);
         this.loadBrowserLanguage();
 
         console.log('Widget configurations:', configs);
-        
+
         // Log additional schema and values processing
         if (configs.additionalSchema || configs.additionalValues) {
           console.log('Processing additional schema and values...');
@@ -578,8 +583,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         });
         this.widgetLoaded = true;
         this.__postMessageHandlerService.sendPostMessage({
-          state: "EF_WIDGET_LOADED",
-          message: "Customer Widget Loaded Successfully"
+          state: 'EF_WIDGET_LOADED',
+          message: 'Customer Widget Loaded Successfully',
         });
       },
     );
@@ -609,7 +614,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             this.storageType,
             false,
           );
-          if (this.getAdditionalValue('AUTO_MAXIMIZE_WIDGET') === true && userData == null) {
+          if (
+            this.getAdditionalValue('AUTO_MAXIMIZE_WIDGET') === true &&
+            userData == null
+          ) {
             this.changeScreen('chatForm');
           }
         },
@@ -704,7 +712,36 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.setFontFromLocalStorage();
     this.getCalendarEvents();
     window.addEventListener('message', this.receiveMessage.bind(this), false);
+  }
+  private subscribeToStreams(): void {
+    if (!this.sdk) return;
 
+    this.localStreamSubscription?.unsubscribe();
+    this.remoteStreamSubscription?.unsubscribe();
+
+    // Subscribe to local stream updates
+    if (this.sdk.localStream$) {
+      this.localStreamSubscription = this.sdk.localStream$.subscribe(
+        (stream) => {
+          this.localStream = stream;
+          if (this.localVideoRef?.nativeElement) {
+            this.localVideoRef.nativeElement.srcObject = stream;
+          }
+        },
+      );
+    }
+
+    // Subscribe to remote stream updates
+    if (this.sdk.remoteStreamObs$) {
+      this.remoteStreamSubscription = this.sdk.remoteStreamObs$.subscribe(
+        (stream) => {
+          this.remoteStream = stream;
+          if (this.remoteVideoRef?.nativeElement) {
+            this.remoteVideoRef.nativeElement.srcObject = stream;
+          }
+        },
+      );
+    }
   }
 
   initPrechatform() {
@@ -724,7 +761,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   receiveMessage(event: MessageEvent): void {
     const action = event.data?.action?.toLowerCase();
-    
+
     switch (action) {
       case 'initialize_chat':
         if (this.isChatActive === false) {
@@ -733,30 +770,41 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.changeScreen('chat');
         }
         break;
-        
+
       case 'update_input_params':
         // verify input params is not null or empty
-        if (event.data?.inputParams != null && Object.keys(event.data?.inputParams).length > 0) {
+        if (
+          event.data?.inputParams != null &&
+          Object.keys(event.data?.inputParams).length > 0
+        ) {
           let storedInputParams = this.getAdditionalValue('INPUT_PARAMS') || {};
-          Object.keys(event.data?.inputParams).forEach(element => {
+          Object.keys(event.data?.inputParams).forEach((element) => {
             storedInputParams[element] = event.data?.inputParams[element];
           });
           this.setAdditionalValue('INPUT_PARAMS', storedInputParams);
-          console.log('Updated INPUT_PARAMS:', this.getAdditionalValue('INPUT_PARAMS'));
+          console.log(
+            'Updated INPUT_PARAMS:',
+            this.getAdditionalValue('INPUT_PARAMS'),
+          );
         }
         break;
 
       case 'update_theme':
-        console.log('Updating theme color to:', event.data?.value.toLowerCase());
+        console.log(
+          'Updating theme color to:',
+          event.data?.value.toLowerCase(),
+        );
         this.appliedColorTheme = event.data?.value.toLowerCase();
         break;
 
       case 'set_ava_client_id':
-        console.log('Setting AVA Client ID to:', event.data?.value.toLowerCase());
+        console.log(
+          'Setting AVA Client ID to:',
+          event.data?.value.toLowerCase(),
+        );
         this.avaClientId = event.data?.value.toLowerCase();
         break;
     }
-    
   }
 
   async getCalendarEvents() {
@@ -870,9 +918,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     formSchema: any[],
     formValidation: any[],
     formType: string,
-    targetFormGroup?: FormGroup
+    targetFormGroup?: FormGroup,
   ): void {
-
     console.log('formSchema', formSchema);
     const sectionsArray: FormArray = this.fb.array([]); // Create the main sections FormArray
 
@@ -946,11 +993,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           }
         }
 
-
         // 🔑 Compute default value only for formMessageType
-      const defaultValue =
-        formType === 'formMessageType' ? this.formMessageTypeService.getDefaultValue(attribute) : '';
-      sectionGroup.addControl(attribute.key, this.fb.control(defaultValue, validators));
+        const defaultValue =
+          formType === 'formMessageType'
+            ? this.formMessageTypeService.getDefaultValue(attribute)
+            : '';
+        sectionGroup.addControl(
+          attribute.key,
+          this.fb.control(defaultValue, validators),
+        );
       });
       console.log('section', section);
 
@@ -961,17 +1012,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.preChatFormGroup.setControl('sections', sectionsArray);
     }
 
-    if(formType === 'formMessageType') {
+    if (formType === 'formMessageType') {
       targetFormGroup.setControl('sections', sectionsArray);
     }
   }
 
   getSectionsControls(messageId: string): AbstractControl[] {
-  const formGroup = this.formGroupsMap[messageId];
-  const sections = formGroup?.get('sections');
-  return sections && sections instanceof FormArray ? sections.controls : [];
-}
-
+    const formGroup = this.formGroupsMap[messageId];
+    const sections = formGroup?.get('sections');
+    return sections && sections instanceof FormArray ? sections.controls : [];
+  }
 
   async setWidgetConfigs(configs: any) {
     this.title = configs.title;
@@ -1009,14 +1059,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.processAdditionalSchemaAndValues(configs);
   }
 
-
   private processAdditionalSchemaAndValues(configs: any): void {
     // Store additional schema
     this.additionalSchema = configs.additionalSchema || [];
-    
+
     // Store additional values
     this.additionalValues = configs.additionalValues || [];
-    
+
     // Create a map for easy lookup of values by key
     this.additionalValuesMap = {};
     if (this.additionalValues && Array.isArray(this.additionalValues)) {
@@ -1024,19 +1073,22 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         if (item.key) {
           this.additionalValuesMap[item.key] = {
             type: item.type,
-            value: item.value
+            value: item.value,
           };
         }
       });
     }
-    
+
     this.additionalValuesMap['INPUT_PARAMS'] = {
       type: 'object',
-      value: this.getInputParamsAsEntities()
+      value: this.getInputParamsAsEntities(),
     };
-    this.isExitIconDisable = this.additionalValuesMap["HIDE_WIDGET_EXIT_ICON"]?.value || false;
-    this.isMinimizeIconDisable = this.additionalValuesMap["HIDE_WIDGET_MINIMIZE_ICON"]?.value || false;
-    this.isCalloutViewCompact = this.additionalValuesMap["IS_CALLOUT_VIEW_COMPACT"]?.value || false;
+    this.isExitIconDisable =
+      this.additionalValuesMap['HIDE_WIDGET_EXIT_ICON']?.value || false;
+    this.isMinimizeIconDisable =
+      this.additionalValuesMap['HIDE_WIDGET_MINIMIZE_ICON']?.value || false;
+    this.isCalloutViewCompact =
+      this.additionalValuesMap['IS_CALLOUT_VIEW_COMPACT']?.value || false;
     console.log('Additional Schema:', this.additionalSchema);
     console.log('Additional Values:', this.additionalValues);
     console.log('Additional Values Map:', this.additionalValuesMap);
@@ -1065,7 +1117,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   getInputParamsAsEntities(): any {
     const entities: any = {};
     let inputParamList = this.getAdditionalValue('INPUT_PARAMS_LIST');
-    inputParamList = inputParamList ? inputParamList.split(',').map(item => item.trim()) : [];
+    inputParamList = inputParamList
+      ? inputParamList.split(',').map((item) => item.trim())
+      : [];
     if (inputParamList && Array.isArray(inputParamList)) {
       inputParamList.forEach((paramKey: string) => {
         if (this.hasAdditionalValue(paramKey)) {
@@ -1079,45 +1133,45 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   async onFormMessageTypeSubmit(message: any): Promise<void> {
     const messageId = message.id;
     const form = this.formGroupsMap[messageId];
-      if (form.invalid) {
-        form.markAllAsTouched(); // Mark all fields touched so errors show
-        this.snackBar.open('Please fill all the required fields', 'X', {
+    if (form.invalid) {
+      form.markAllAsTouched(); // Mark all fields touched so errors show
+      this.snackBar.open('Please fill all the required fields', 'X', {
         duration: 3000, // 5 seconds
         panelClass: ['error-snackbar'],
         horizontalPosition: 'center',
         verticalPosition: 'bottom',
       });
-        return; // Stop submission
-      }
+      return; // Stop submission
+    }
 
-      let finalPayload = this.createFormDataObject();
+    let finalPayload = this.createFormDataObject();
 
-      finalPayload.body.sections = await this.creatingSectionsforSchema(form.value, "formMessageType");
+    finalPayload.body.sections = await this.creatingSectionsforSchema(
+      form.value,
+      'formMessageType',
+    );
 
       // Step 2: Update fields from form data (if needed)
       finalPayload.header.timestamp = Date.now();
       finalPayload.id = messageId;
       finalPayload.header.intent = '';
-      finalPayload.body.formId = '';
+      finalPayload.body.formId = message.body.formId || '';
       finalPayload.body.formTitle= message.body.formTitle || '';
 
-      this.constructCimMessage('FORM_DATA', {
-        text: null,
-        intent: null,
-        originalMessageId: finalPayload.id,
-        fileMimeType: null,
-        fileName: null,
-        fileSize: null,
-        additionalText: null,
-        fileType: null,
-        carousalCardId: null,
-        formMessageTypeData: finalPayload,
-        status: 'filled'
-      });
+    this.constructCimMessage('FORM_DATA', {
+      text: null,
+      intent: null,
+      originalMessageId: finalPayload.id,
+      fileMimeType: null,
+      fileName: null,
+      fileSize: null,
+      additionalText: null,
+      fileType: null,
+      carousalCardId: null,
+      formMessageTypeData: finalPayload,
+      status: 'filled',
+    });
   }
-
-
-
 
   private markFormGroupTouched(formGroup: FormGroup) {
     Object.values(formGroup.controls).forEach((control) => {
@@ -1154,7 +1208,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.serviceIdentifier !== null &&
           this.serviceIdentifier !== undefined
         ) {
-          console.log('Pre Chat Form Data:', this.preChatFormData); 
+          console.log('Pre Chat Form Data:', this.preChatFormData);
           let eventPayload = this.getEventPayload(this.preChatFormData);
           console.log('Event Payload: ==>', eventPayload);
           // If Error is false than proceed with the start Chat and user data setting
@@ -1178,17 +1232,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   initializeChatWithRandomIdentifier(): void {
-
     try {
       this.preChatFormData = {
-          "sections": [
-              {
-                  "name": "Test User",
-                  [this.__appConfig.appConfig.CHANNEL_IDENTIFIER]: this.avaClientId !== '' ? this.avaClientId : Math.floor(10000000 + Math.random() * 90000000).toString()
-              }
-          ]
-      }
-      console.log('Pre Chat Form Data:', this.preChatFormData); 
+        sections: [
+          {
+            name: 'Test User',
+            [this.__appConfig.appConfig.CHANNEL_IDENTIFIER]:
+              this.avaClientId !== ''
+                ? this.avaClientId
+                : Math.floor(10000000 + Math.random() * 90000000).toString(),
+          },
+        ],
+      };
+      console.log('Pre Chat Form Data:', this.preChatFormData);
       let eventPayload = this.getEventPayload(this.preChatFormData);
       console.log('Event Payload: ==>', eventPayload);
       // If Error is false than proceed with the start Chat and user data setting
@@ -1213,7 +1269,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   setUserData(data: any, eventType: any) {
     this.customerData = data;
-    if (this.customerData.channelCustomerIdentifier == '' ||
+    if (
+      this.customerData.channelCustomerIdentifier == '' ||
       this.customerData.serviceIdentifier == '' ||
       this.customerData.browserDeviceInfo.deviceType == ''
     ) {
@@ -1306,7 +1363,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             timezone: this.browserInfoData?.geoLocationData?.time_zone?.name
               ? this.browserInfoData.geoLocationData.time_zone.name
               : null,
-            language: this.translate.currentLang 
+            language: this.translate.currentLang
               ? this.translate.currentLang
               : this.browserInfoData?.geoLocationData?.languages || null,
             country: this.browserInfoData?.geoLocationData?.country_name
@@ -1346,29 +1403,45 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
     this.sdk.postFormDataAsActivity(finalPayload);
   }
-  
+
   calculateAttributeScore(formData: any) {
     formData.body.sections.forEach((section) => {
-      section.attributes.forEach(attribute => {
-        let selectedOption = attribute?.answer.find(option => option?.isSelected === true);
+      section.attributes.forEach((attribute) => {
+        let selectedOption = attribute?.answer.find(
+          (option) => option?.isSelected === true,
+        );
         if (selectedOption) {
-          let selectedOptionWeightage = selectedOption?.additionalAttributes?.optionWeightage;
-          attribute.attributeScore = parseFloat(((selectedOptionWeightage / 100) * attribute?.attributeWeightage).toFixed(1));
+          let selectedOptionWeightage =
+            selectedOption?.additionalAttributes?.optionWeightage;
+          attribute.attributeScore = parseFloat(
+            (
+              (selectedOptionWeightage / 100) *
+              attribute?.attributeWeightage
+            ).toFixed(1),
+          );
         }
-      })
+      });
     });
   }
 
   calculateSectionScores(formData: any) {
-    formData.body.sections.forEach(section => {
+    formData.body.sections.forEach((section) => {
       let totalAttributeWeightage = null;
       section.attributes.forEach((attribute) => {
         if (formData.body.enableWeightage && attribute.attributeScore != null) {
           totalAttributeWeightage += attribute.attributeScore;
         }
-      })
-      section.sectionScore = totalAttributeWeightage == null ? totalAttributeWeightage : parseFloat(((totalAttributeWeightage / 100) * section.sectionWeightage).toFixed(1));
-    })
+      });
+      section.sectionScore =
+        totalAttributeWeightage == null
+          ? totalAttributeWeightage
+          : parseFloat(
+              (
+                (totalAttributeWeightage / 100) *
+                section.sectionWeightage
+              ).toFixed(1),
+            );
+    });
   }
 
   calculateFormScore(formData): any {
@@ -1379,13 +1452,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (formData.body.enableWeightage && section.sectionScore != null) {
         totalSectionWeightages += section.sectionScore;
       }
-    })
+    });
 
     if (!formData?.body?.enableWeightage || totalSectionWeightages == null) {
       formData.body.formScore = null;
     } else {
       formData.body.formScore = Math.round(
-        (totalSectionWeightages / 100) * formData?.body?.formWeightage
+        (totalSectionWeightages / 100) * formData?.body?.formWeightage,
       );
     }
   }
@@ -1444,21 +1517,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         },
         sections: [],
       },
-      id:''
+      id: '',
     };
   }
 
-
   creatingSectionsforSchema(messageTypeFormValues?, messageType?): any {
-
-    let formData : any[] = [];
+    let formData: any[] = [];
     let formValues: any[] = [];
 
-    if (messageType === "formMessageType" && this.formMessageTypeData && this.isChatActive) {
+    if (
+      messageType === 'formMessageType' &&
+      this.formMessageTypeData &&
+      this.isChatActive
+    ) {
       formData = this.formMessageTypeData || [];
       formValues = messageTypeFormValues;
       // removed the !this.isChatActive condition to allow form submission
-    } else if( this.preChatFormInfo) {
+    } else if (this.preChatFormInfo) {
       formData = this.formData;
       formValues = this.preChatFormGroup.value;
     }
@@ -1471,19 +1546,17 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         sectionName: section.sectionName,
         sectionWeightage: section.sectionWeightage || null,
         sectionScore: null,
-        attributes: []
+        attributes: [],
       };
-
-
 
       const sectionAttributes = formValues['sections'];
 
-      const currentSectionAttributes = sectionAttributes[sectionIndex]
+      const currentSectionAttributes = sectionAttributes[sectionIndex];
       if (currentSectionAttributes) {
         section.attributes.forEach((attribute: any) => {
-
           const attributeData = attribute.attributeOptions?.attributeData || [];
-          const possibleValues = attributeData.length > 0 ? attributeData[0].values : [];
+          const possibleValues =
+            attributeData.length > 0 ? attributeData[0].values : [];
           const selectedValue = currentSectionAttributes[attribute.key];
 
           let newAttribute = {
@@ -1492,13 +1565,20 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             valueType: attribute.valueType,
             attributeWeightage: attribute.attributeWeightage || null,
             attributeScore: null,
-            attributeType: attribute.attributeType || "OPTIONS",
+            attributeType: attribute.attributeType || 'OPTIONS',
             skipType: null,
-            attributeAttachment: attribute.attributeAttachment || "",
+            attributeAttachment: attribute.attributeAttachment || '',
             isRequired: attribute.isRequired,
-            answer: this.getAnswerObj(attribute, possibleValues, selectedValue, currentSectionAttributes)
+            answer: this.getAnswerObj(
+              attribute,
+              possibleValues,
+              selectedValue,
+              currentSectionAttributes,
+            ),
           };
-          newAttribute.skipType = this.isSkiptype(newAttribute) ? 'Optional' : null
+          newAttribute.skipType = this.isSkiptype(newAttribute)
+            ? 'Optional'
+            : null;
           newSection.attributes.push(newAttribute);
         });
       }
@@ -1507,18 +1587,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return finalSections;
   }
 
- getAnswerObj(attribute: any, possibleValues: any[], selectedValue: any, currentSectionAttributes: any) {
-    if (attribute.attributeType == 'INPUT' || attribute.attributeType == 'TEXTAREA') {
-      return [selectedValue]
-    }
-    else if (attribute.valueType === 'checkbox') {
+  getAnswerObj(
+    attribute: any,
+    possibleValues: any[],
+    selectedValue: any,
+    currentSectionAttributes: any,
+  ) {
+    if (
+      attribute.attributeType == 'INPUT' ||
+      attribute.attributeType == 'TEXTAREA'
+    ) {
+      return [selectedValue];
+    } else if (attribute.valueType === 'checkbox') {
       const rawValue = currentSectionAttributes?.[attribute.key];
 
-      const enableCategory = attribute.attributeOptions?.enableCategory || false;
+      const enableCategory =
+        attribute.attributeOptions?.enableCategory || false;
       const attributeData = attribute.attributeOptions?.attributeData || [];
 
       if (enableCategory) {
-        return attributeData.map(category => {
+        return attributeData.map((category) => {
           const categoryLabel = category.label;
           const selectedValues = rawValue?.[categoryLabel] || [];
 
@@ -1531,23 +1619,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               additionalAttributes: {
                 optionWeightage: option.optionWeightage || null,
                 enableStyle: attribute.attributeOptions?.enableStyle || false,
-                optionStyle: option.optionStyle || null
-              }
-            }))
+                optionStyle: option.optionStyle || null,
+              },
+            })),
           };
         });
       } else {
         const selectedValues = Array.isArray(rawValue) ? rawValue : [];
 
-        return possibleValues.map(option => ({
+        return possibleValues.map((option) => ({
           label: option.label,
           value: option.value || option.label,
           isSelected: selectedValues.includes(option.label),
           additionalAttributes: {
             optionWeightage: option.optionWeightage || null,
             enableStyle: attribute.attributeOptions?.enableStyle || false,
-            optionStyle: option.optionStyle || null
-          }
+            optionStyle: option.optionStyle || null,
+          },
         }));
       }
     } else {
@@ -1556,31 +1644,35 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           ? (selectedValue.value ?? selectedValue)
           : null;
 
-      return possibleValues.map(option => ({
+      return possibleValues.map((option) => ({
         label: option.label,
         value: this.getValue(option, attribute.valueType),
-        isSelected: this.getSelectedValue(option, selectedValue, attribute.valueType),
+        isSelected: this.getSelectedValue(
+          option,
+          selectedValue,
+          attribute.valueType,
+        ),
         additionalAttributes: {
           optionWeightage: option.optionWeightage,
           enableStyle: attribute.attributeOptions?.enableStyle || false,
           optionStyle: option.optionStyle || null,
-        }
-      }))
+        },
+      }));
     }
   }
 
   getValue(option: any, valueType: string) {
-    if(valueType === "boolean"){
-      return option.label
+    if (valueType === 'boolean') {
+      return option.label;
     }
     return option.value ?? option.label;
   }
 
   getSelectedValue(option: any, selectedValue: any, valueType: string) {
-    if(valueType === "nps"){
-      return option.value === selectedValue
+    if (valueType === 'nps') {
+      return option.value === selectedValue;
     }
-    return option.label === selectedValue || option.value === selectedValue
+    return option.label === selectedValue || option.value === selectedValue;
   }
 
   getFormDataByPreChatForm(preChatFormData: any[]): any {
@@ -1639,15 +1731,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.isWebRtcMax = false;
         this.changeView('chat');
         this.resizeWidget('form-view');
-        if(this.enableEmoji) {
-        setTimeout(() => {
-        // Intentionally instantiate EmojiPicker for DOM side effects
-        new EmojiPicker(); // NOSONAR
-      }, 500);
-    }
+        if (this.enableEmoji) {
+          setTimeout(() => {
+            // Intentionally instantiate EmojiPicker for DOM side effects
+            new EmojiPicker(); // NOSONAR
+          }, 500);
+        }
         break;
       case 'chatForm':
-        if (this.getAdditionalValue("PRECHAT_FORM_DISABLED")){
+        if (this.getAdditionalValue('PRECHAT_FORM_DISABLED')) {
           this.changeScreen('chat');
           this.initializeChatWithRandomIdentifier();
           return;
@@ -1663,7 +1755,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatEndScreen = false;
         this.isChatMax = true;
         this.isCallbackMax = false;
-        this.isWebRtcMax = false;        
+        this.isWebRtcMax = false;
         this.resizeWidget('form-view');
 
         break;
@@ -1771,15 +1863,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.isCallbackMax = false;
     this.isWebRtcMax = false;
     this.fileName = '';
-    if(this.getAdditionalValue('HIDE_WIDGET_ICON')){
+    if (this.getAdditionalValue('HIDE_WIDGET_ICON')) {
       this.isIconWidget = false;
-    } else{
+    } else {
       this.isIconWidget = true;
     }
     if (this.isChatActive) {
       this.__postMessageHandlerService.sendPostMessage({
-        type: "EF_WIDGET_STATE_CHANGED",
-        state: "CHAT_MINIMIZED"
+        type: 'EF_WIDGET_STATE_CHANGED',
+        state: 'CHAT_MINIMIZED',
       });
     }
   }
@@ -1866,6 +1958,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleAudioView() {
+    this.subscribeToStreams();
     if (this.isAudioCallActive) {
       this.setView({ audio: true });
     } else {
@@ -1876,19 +1969,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private handleVideoView() {
     // Subscribe to local stream updates
-    this.sdk.localStream$.subscribe((stream) => {
-      this.localStream = stream;
-      if (this.localVideoRef?.nativeElement) {
-        this.localVideoRef.nativeElement.srcObject = stream;
-      }
-    });
-    // Subscribe to remote stream updates
-    this.sdk.remoteStreamObs$.subscribe((stream) => {
-      this.remoteStream = stream;
-      if (this.remoteVideoRef?.nativeElement) {
-        this.remoteVideoRef.nativeElement.srcObject = stream;
-      }
-    });
+    this.subscribeToStreams();
 
     if (this.isVideoCallActive) {
       this.setView({ video: true });
@@ -1901,6 +1982,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleScreenShareView() {
+    this.subscribeToStreams();
     if (this.isSecureWebCall) {
       console.warn('WebRTC Call Is GOING ON');
       return;
@@ -1914,6 +1996,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleStandaloneVideoView() {
+    this.subscribeToStreams();
     if (this.showInvalidCodeError) {
       console.warn('Error : Some Issues in initiating Stand alone Call');
       return;
@@ -1925,6 +2008,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleSecureWebVideoCallView() {
+    this.subscribeToStreams();
     if (this.isSecureWebCall) {
       this.setView({ video: true });
     } else {
@@ -2025,7 +2109,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   resizeWidget(state: string): void {
     // send height and width of widget-form-area to parent window
-      window.parent.postMessage({ state }, this.__postMessageHandlerService.getParentOrigin());
+    window.parent.postMessage(
+      { state },
+      this.__postMessageHandlerService.getParentOrigin(),
+    );
   }
 
   eventListener(event: any) {
@@ -2066,7 +2153,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             break;
 
           case 'CONNECT_ERROR':
-            this.handleReconnectsAttempts(this.reconnectAttemptsConfig.currentAttempt + 1);
+            this.handleReconnectsAttempts(
+              this.reconnectAttemptsConfig.currentAttempt + 1,
+            );
             console.log('event response:', event.data);
             break;
 
@@ -2083,7 +2172,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleChannelSessionEnd(messageType: string, eventType: string) {
-
     if (messageType !== 'survey') {
       this.clearSession();
     } else {
@@ -2092,20 +2180,19 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
     this.composerDisable();
     this.__postMessageHandlerService.sendPostMessage({
-      type: "EF_WIDGET_STATE_CHANGED",
-      state: "CHAT_SESSION_ENDED",
-      reason: eventType
+      type: 'EF_WIDGET_STATE_CHANGED',
+      state: 'CHAT_SESSION_ENDED',
+      reason: eventType,
     });
   }
 
   private handleSocketConnected(event?: any) {
-
     this.handleReconnectsAttempts(0);
     console.log(
       '[SOCKET_CONNECTED] ==> Connection Request Response:',
       event.data,
     );
-    
+
     if (this.eventTriggerType === 'startChat') {
       this.chatPayLoad = {
         type: 'CHAT_REQUESTED',
@@ -2113,10 +2200,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       };
       this.sdk.sendChatRequest(this.chatPayLoad);
       if (this.enabledWebhook)
-        this.sdk.sendWebhookNotification(
-          this.webhookUrl,
-          this.chatPayLoad,
-        );
+        this.sdk.sendWebhookNotification(this.webhookUrl, this.chatPayLoad);
       console.log('New Chat Start Request Sent');
     } else if (this.eventTriggerType === '') {
       console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
@@ -2132,7 +2216,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             event.data.auth.channelCustomerIdentifier,
           );
         }
-          console.log(
+        console.log(
           '[SOCKET_CONNECTED] ==> Chat Resume event response:',
           this.customerData,
         );
@@ -2143,14 +2227,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleConversationResumed(event: any) {
-
     console.log(
       '[CONVERSATION_RESUMED] ==> Chat Resumed Response:',
       event.data,
     );
     this.isChatActive = true;
     this.handleReconnectsAttempts(0);
-    
+
     this.preChatFormLoader = false;
     this.changeScreen('chat');
     this.enableComposer();
@@ -2168,8 +2251,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleChannelSessionStarted(event: any) {
-
-
     this.isChatActive = true;
     this.isComposerDisable = false;
     this.preChatFormLoader = false;
@@ -2195,7 +2276,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (event.data.includes('server')) {
         this.changeScreen('end');
       } else {
-        this.handleReconnectsAttempts(this.reconnectAttemptsConfig.currentAttempt + 1);
+        this.handleReconnectsAttempts(
+          this.reconnectAttemptsConfig.currentAttempt + 1,
+        );
       }
     }
   }
@@ -2228,7 +2311,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  enableComposer() {  
+  enableComposer() {
     console.log('message element is ', this.messageElement);
     const messageRef: any = this.messageElement?.nativeElement;
     if (messageRef) {
@@ -2245,12 +2328,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
   }
 
-
   handleCimMessage(cimMessage: any) {
-    if (cimMessage.body.type?.toLowerCase() === 'form_data' &&
-       cimMessage.header.sender?.type?.toLowerCase() === 'bot') {
-        this.showTypingIndicator();
-        this.createFormMapGroup(cimMessage);
+    if (
+      cimMessage.body.type?.toLowerCase() === 'form_data' &&
+      cimMessage.header.sender?.type?.toLowerCase() === 'bot'
+    ) {
+      this.showTypingIndicator();
+      this.createFormMapGroup(cimMessage);
     }
 
     const type = cimMessage.body.type?.toLowerCase();
@@ -2283,29 +2367,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   handleCustomerCimMessage(cimMessage: any) {
     this.disableOldInteractiveMessages(this.cimMessage);
-      if (
-        cimMessage.header.originalMessageId &&
-        cimMessage.header.intent &&
-        cimMessage.header.intent.toLowerCase() !== 'update' &&
-        cimMessage.header.additionalData?.carousalCardId
-      ) {
-        this.handleCarousalQuotedMessage(cimMessage);
-      } else if(cimMessage.header.originalMessageId &&
-        cimMessage.header.intent && cimMessage.header.intent.toLowerCase() !== 'update') {
-          this.handleClickableList(cimMessage);
-      } else if(cimMessage.body.type.toLowerCase() === 'form_data') {
-        this.handleFormMessageType(cimMessage);
-      } else {
-       this.cimMessage.push(cimMessage);
-       this.browserNotificationService.notify(cimMessage);
-       this.scrollToBottom();
-       this.handleMessageReport(cimMessage);
-      }
+    if (
+      cimMessage.header.originalMessageId &&
+      cimMessage.header.intent &&
+      cimMessage.header.intent.toLowerCase() !== 'update' &&
+      cimMessage.header.additionalData?.carousalCardId
+    ) {
+      this.handleCarousalQuotedMessage(cimMessage);
+    } else if (
+      cimMessage.header.originalMessageId &&
+      cimMessage.header.intent &&
+      cimMessage.header.intent.toLowerCase() !== 'update'
+    ) {
+      this.handleClickableList(cimMessage);
+    } else if (cimMessage.body.type.toLowerCase() === 'form_data') {
+      this.handleFormMessageType(cimMessage);
+    } else {
+      this.cimMessage.push(cimMessage);
+      this.browserNotificationService.notify(cimMessage);
+      this.scrollToBottom();
+      this.handleMessageReport(cimMessage);
+    }
 
-      // ✅ Apply interaction state only once
-      if (cimMessage.header.originalMessageId) {
-        this.applyInteractionState(cimMessage);
-      }
+    // ✅ Apply interaction state only once
+    if (cimMessage.header.originalMessageId) {
+      this.applyInteractionState(cimMessage);
+    }
   }
 
   private isDeliveryNotification(type: string, senderType: string): boolean {
@@ -2485,7 +2572,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (!isFromBot || !this.INTERACTIVE_TYPES.includes(type)) return;
 
       const userReply = cimMessages.find(
-        (m: any) => m.header?.originalMessageId === message.id
+        (m: any) => m.header?.originalMessageId === message.id,
       );
 
       // If a reply exists, apply interaction state
@@ -2493,32 +2580,36 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.applyInteractionState(userReply);
       }
       if (type === 'button') {
-        const disableInteraction = message.body?.additionalDetails?.interactive?.disableInteraction;
+        const disableInteraction =
+          message.body?.additionalDetails?.interactive?.disableInteraction;
 
-          if (disableInteraction === true) {
-            message.body.additionalDetails = {
+        if (disableInteraction === true) {
+          message.body.additionalDetails = {
             ...(message.body.additionalDetails || {}),
             disableButtonType: true,
-          }
+          };
         }
       }
 
       if (type === 'carousel') {
-        const disableInteraction = message.body?.elements?.[0]?.additionalCarouselElementDetails?.disableInteraction;
-          if (disableInteraction === true) {
-            message.body.additionalDetails = {
+        const disableInteraction =
+          message.body?.elements?.[0]?.additionalCarouselElementDetails
+            ?.disableInteraction;
+        if (disableInteraction === true) {
+          message.body.additionalDetails = {
             ...(message.body.additionalDetails || {}),
             disableButtonType: true,
-          }
+          };
         }
       }
 
-      if(type === 'form_data') {
+      if (type === 'form_data') {
         const fg = this.formGroupsMap[message.id];
-        const disableInteraction = message.body?.additionalDetails?.disableInteraction;
-        if(disableInteraction) {
+        const disableInteraction =
+          message.body?.additionalDetails?.disableInteraction;
+        if (disableInteraction) {
           fg.disable({ emitEvent: false });
-          message.body.disableFormMessageInteraction = true
+          message.body.disableFormMessageInteraction = true;
         }
       }
     });
@@ -2534,7 +2625,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // Fallback if not found (refresh case or missed sync)
     if (!originalMessage) {
       originalMessage = this.cimMessage.find(
-        (m: any) => m.id === originalMessageId
+        (m: any) => m.id === originalMessageId,
       );
       if (originalMessage) {
         this.messageMap.set(originalMessageId, originalMessage);
@@ -2549,8 +2640,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (type === 'button') {
       originalMessage.body.buttons?.forEach((btn: any) => {
         btn.isSelected =
-          (btn.payload === userReply.body.markdownText ||
-          btn.title === userReply.body.markdownText);
+          btn.payload === userReply.body.markdownText ||
+          btn.title === userReply.body.markdownText;
       });
     }
 
@@ -2560,13 +2651,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         el.buttons?.forEach((btn: any) => {
           btn.isSelected =
             (btn.payload === userReply.body.markdownText ||
-            btn.title === userReply.body.markdownText) &&
-            btn.type === userReply.body.quotedButtons?.find(
-              (qb: any) =>
-                qb.payload === userReply.body.markdownText ||
-                qb.title === userReply.body.markdownText
-            )?.type &&
-            el.additionalCarouselElementDetails?.title === userReply.body.quotedCardTitle;
+              btn.title === userReply.body.markdownText) &&
+            btn.type ===
+              userReply.body.quotedButtons?.find(
+                (qb: any) =>
+                  qb.payload === userReply.body.markdownText ||
+                  qb.title === userReply.body.markdownText,
+              )?.type &&
+            el.additionalCarouselElementDetails?.title ===
+              userReply.body.quotedCardTitle;
         });
       });
     }
@@ -2577,15 +2670,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       // mapping between status and button actions
       const statusToActionMap: Record<string, string> = {
         cancelled: 'cancel',
-        filled: 'submit'
+        filled: 'submit',
       };
 
-      originalMessage.body.additionalDetails?.actionButtons?.forEach((button: any) => {
-        const expectedAction = statusToActionMap[status];
-        button.isSelected = button.action?.toLowerCase() === expectedAction;
-      });
+      originalMessage.body.additionalDetails?.actionButtons?.forEach(
+        (button: any) => {
+          const expectedAction = statusToActionMap[status];
+          button.isSelected = button.action?.toLowerCase() === expectedAction;
+        },
+      );
     }
-
   }
 
   editMessage(cimMessage: any) {
@@ -2617,7 +2711,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.isComposerDisable = true;
     }
 
-    // disabling the emoji button if the composer is disabled for any reason. 
+    // disabling the emoji button if the composer is disabled for any reason.
     const emojiTrigger = document.querySelector('.emoji-btn');
     if (emojiTrigger instanceof HTMLElement) {
       emojiTrigger.style.pointerEvents = 'none';
@@ -2625,7 +2719,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-    // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
+  // this.renderer.setAttribute(messageRef, 'class', 'composer-disable')
 
   composerEnable() {
     console.log('message element is ', this.messageElement);
@@ -2635,12 +2729,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.renderer.setAttribute(
         messageRef,
         'placeholder',
-        this.translate.instant('composer-placeholder')
+        this.translate.instant('composer-placeholder'),
       );
       this.isComposerDisable = false;
     }
   }
-
 
   handleResumedMessages(cimMessages: any[]) {
     this.cimMessage = [];
@@ -2666,7 +2759,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  private processPlainMessage(cimMessage: any, senderType: string, intent: string) {
+  private processPlainMessage(
+    cimMessage: any,
+    senderType: string,
+    intent: string,
+  ) {
     this.extractSurveyFromPlainMessage(cimMessage);
     if (senderType === 'agent') {
       this.setAgentName(cimMessage);
@@ -2681,7 +2778,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.scrollToBottom();
   }
 
-  private processNonPlainMessage(cimMessage: any, type: string, senderType: string, intent: string) {
+  private processNonPlainMessage(
+    cimMessage: any,
+    type: string,
+    senderType: string,
+    intent: string,
+  ) {
     this.clearTypingIndicatorIfNeeded(type, senderType, cimMessage);
 
     if (type === 'notification' && senderType === 'agent') {
@@ -2695,24 +2797,28 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.editMessage(cimMessage);
     }
 
-    if(cimMessage.header.additionalData?.carousalCardId) {
+    if (cimMessage.header.additionalData?.carousalCardId) {
       this.handleCarousalQuotedMessage(cimMessage);
     }
 
-    if(cimMessage.header.originalMessageId && cimMessage.header.intent && !cimMessage.header.additionalData?.carousalCardId) {
-      this.handleClickableList(cimMessage)
+    if (
+      cimMessage.header.originalMessageId &&
+      cimMessage.header.intent &&
+      !cimMessage.header.additionalData?.carousalCardId
+    ) {
+      this.handleClickableList(cimMessage);
     }
 
-    if(cimMessage.body.type.toLowerCase() != 'deliverynotification') {
+    if (cimMessage.body.type.toLowerCase() != 'deliverynotification') {
       this.disableOldInteractiveMessages(this.cimMessage);
     }
     this.cimMessage.push(cimMessage);
-    
+
     this.isChatActive = true;
     this.processSeenMessages();
     this.scrollToBottom();
   }
-  
+
   getAgentDisplayName(user: any): string {
     if (user) {
       const { firstName, lastName } = user;
@@ -2911,7 +3017,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.constructCimMessage('PLAIN', {
         text: replyInputValue.trim(),
         intent: null,
-        originalMessageId: null
+        originalMessageId: null,
       });
 
       this.clearMessageData();
@@ -2955,7 +3061,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       formMessageTypeData?: any;
       status?: 'filled' | 'cancelled';
       additionalButtonDetails?: any;
-    }
+    },
   ) {
     const messageType = msgType.toLowerCase();
 
@@ -3068,13 +3174,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private sendMediaMessage(
     msgType: string,
     messageType: string,
-    {
-      fileMimeType,
-      fileName,
-      fileSize,
-      additionalText,
-      fileType,
-    }: any,
+    { fileMimeType, fileName, fileSize, additionalText, fileType }: any,
   ): void {
     const header = this.buildBaseHeader();
     const body: any = { markdownText: '', type: '' };
@@ -3115,12 +3215,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private sendFormDataMessage(
     msgType: string,
-    {
-      formMessageTypeData,
-      originalMessageId,
-      intent,
-      status,
-    }: any,
+    { formMessageTypeData, originalMessageId, intent, status }: any,
   ): void {
     const header = this.buildBaseHeader();
     const body: any = { markdownText: '', type: 'FORM_DATA' };
@@ -3131,6 +3226,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     body.sections = formMessageTypeData?.body?.sections || [];
     body.additionalDetails =
       formMessageTypeData?.body?.additionalDetails || {};
+    body.formId = formMessageTypeData?.body?.formId || '';
+    body.formTitle = formMessageTypeData?.body?.formTitle || '';
     if (status) {
       body.additionalDetails.status = status;
     }
@@ -3294,7 +3391,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               fileName: res.name,
               fileSize: res.size,
               additionalText: additionalText,
-              fileType: res.name.split('.').pop()
+              fileType: res.name.split('.').pop(),
             });
           });
         } else {
@@ -3326,7 +3423,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   sendButtonMessage(
-    data: { title: string; payload: any , additionalButtonDetails?: any},
+    data: { title: string; payload: any; additionalButtonDetails?: any },
     originalMessageId: any,
   ) {
     console.log('Button data is ', data);
@@ -3335,12 +3432,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         text: data.title.trim(),
         intent: data.payload,
         originalMessageId: originalMessageId,
-        additionalButtonDetails: data.additionalButtonDetails
+        additionalButtonDetails: data.additionalButtonDetails,
       });
     }
   }
 
-  sendCarousalMessage(data: any, originalMessageId : string, carousalCardId? : null | string) {
+  sendCarousalMessage(
+    data: any,
+    originalMessageId: string,
+    carousalCardId?: null | string,
+  ) {
     if (data.title.trim() !== '') {
       this.constructCimMessage('PLAIN', {
         text: data.title.trim(),
@@ -3351,47 +3452,55 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         fileSize: null,
         additionalText: null,
         fileType: null,
-        carousalCardId: carousalCardId
+        carousalCardId: carousalCardId,
       });
     }
   }
 
   handleCarousalQuotedMessage(cimMessage: any) {
-
     const originalMessageId = cimMessage.header.originalMessageId;
     const carousalCardId = cimMessage.header.additionalData?.carousalCardId;
 
-    const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
+    const originalMessage = this.cimMessage.find(
+      (msg) => msg.id === originalMessageId,
+    );
 
     if (originalMessage) {
       cimMessage.body.quotedText = originalMessage.body?.markdownText || '';
       cimMessage.body.quotedTime = originalMessage.header?.timestamp || '';
       cimMessage.header.quotedType = originalMessage.body?.type;
-      cimMessage.senderType = originalMessage.header.sender.type
+      cimMessage.senderType = originalMessage.header.sender.type;
 
       const elements = originalMessage.body?.elements || [];
       // Find the carousel element matching the carousalCardId
       const matchedElement = elements.find(
         (element: any) =>
-          element.additionalCarouselElementDetails?.id === carousalCardId
+          element.additionalCarouselElementDetails?.id === carousalCardId,
       );
 
-      if (matchedElement?.additionalCarouselElementDetails?.disableInteraction === true) {
+      if (
+        matchedElement?.additionalCarouselElementDetails?.disableInteraction ===
+        true
+      ) {
         originalMessage.body.disableAllButtons = true;
       }
 
       if (matchedElement) {
-        cimMessage.body.quotedText = matchedElement.text
-        cimMessage.body.quotedCardTitle = matchedElement.additionalCarouselElementDetails?.title;
-        cimMessage.body.quotedCardImage = matchedElement.additionalCarouselElementDetails?.image_url;
-        cimMessage.body.quotedAltImage = matchedElement.additionalCarouselElementDetails?.alt
+        cimMessage.body.quotedText = matchedElement.text;
+        cimMessage.body.quotedCardTitle =
+          matchedElement.additionalCarouselElementDetails?.title;
+        cimMessage.body.quotedCardImage =
+          matchedElement.additionalCarouselElementDetails?.image_url;
+        cimMessage.body.quotedAltImage =
+          matchedElement.additionalCarouselElementDetails?.alt;
         cimMessage.body.quotedButtons = matchedElement.buttons || [];
       }
     }
 
-
-    if(cimMessage.header.sender.type.toLowerCase() === "customer" && cimMessage.header.additionalData?.carousalCardId) {
-
+    if (
+      cimMessage.header.sender.type.toLowerCase() === 'customer' &&
+      cimMessage.header.additionalData?.carousalCardId
+    ) {
       this.cimMessage.push(cimMessage);
       this.browserNotificationService.notify(cimMessage);
       this.scrollToBottom();
@@ -3400,14 +3509,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleFormMessageType(cimMessage: any) {
-    
     const originalMessageId = cimMessage.header.originalMessageId;
-    const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
+    const originalMessage = this.cimMessage.find(
+      (msg) => msg.id === originalMessageId,
+    );
     if (originalMessage) {
-
       const fg = this.formGroupsMap[originalMessageId];
-      if(fg && originalMessage.body.additionalDetails.disableInteraction === true) {
-
+      if (
+        fg &&
+        originalMessage.body.additionalDetails.disableInteraction === true
+      ) {
         fg.disable({ emitEvent: false }); // disables all fields & buttons bound via form controls
         originalMessage.body.disableFormMessageInteraction = true;
       }
@@ -3417,27 +3528,29 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.browserNotificationService.notify(cimMessage);
     this.scrollToBottom();
     this.handleMessageReport(cimMessage);
-}
-
-
-
-  handleClickableList(cimMessage: any) {
-
-      const originalMessageId = cimMessage.header.originalMessageId;
-      const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
-
-        if(originalMessage && originalMessage.body.additionalDetails.interactive.type.toLowerCase() === "clickablelist") {
-          originalMessage.body.disableClickaAbleList = true;
-        }
-
-       if(cimMessage.header.sender.type.toLowerCase() === "customer") {
-        this.cimMessage.push(cimMessage);
-        this.browserNotificationService.notify(cimMessage);
-        this.scrollToBottom();
-        this.handleMessageReport(cimMessage);
-       }
   }
 
+  handleClickableList(cimMessage: any) {
+    const originalMessageId = cimMessage.header.originalMessageId;
+    const originalMessage = this.cimMessage.find(
+      (msg) => msg.id === originalMessageId,
+    );
+
+    if (
+      originalMessage &&
+      originalMessage.body.additionalDetails.interactive.type.toLowerCase() ===
+        'clickablelist'
+    ) {
+      originalMessage.body.disableClickaAbleList = true;
+    }
+
+    if (cimMessage.header.sender.type.toLowerCase() === 'customer') {
+      this.cimMessage.push(cimMessage);
+      this.browserNotificationService.notify(cimMessage);
+      this.scrollToBottom();
+      this.handleMessageReport(cimMessage);
+    }
+  }
 
   endChat(): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent);
@@ -3452,9 +3565,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         this.clearSession();
         this.__postMessageHandlerService.sendPostMessage({
-          type: "EF_WIDGET_STATE_CHANGED",
-          state: "CHAT_SESSION_ENDED",
-          reason: "MANUAL_CLOSURE"
+          type: 'EF_WIDGET_STATE_CHANGED',
+          state: 'CHAT_SESSION_ENDED',
+          reason: 'MANUAL_CLOSURE',
         });
       }
     });
@@ -3479,8 +3592,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.serviceIdentifier,
         parsedUserData.data.channelCustomerIdentifier,
       );
-    // } else {
-    //     this.changeScreen('widget');
+      // } else {
+      //     this.changeScreen('widget');
     }
   }
 
@@ -3562,15 +3675,18 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const absoluteUrl = `${window.location.origin}/customer-widget/#/chat-transcript?${params.toString()}`;
     const transcriptWindow = window.open(absoluteUrl, '_blank');
     console.log(absoluteUrl);
-    
+
     // Send JWT token via postMessage after window loads
     if (transcriptWindow && jwtToken) {
       setTimeout(() => {
         try {
-          transcriptWindow.postMessage({
-            type: 'JWT_TOKEN',
-            token: jwtToken
-          }, window.location.origin);
+          transcriptWindow.postMessage(
+            {
+              type: 'JWT_TOKEN',
+              token: jwtToken,
+            },
+            globalThis.location.origin,
+          );
           console.log('JWT token sent via postMessage');
         } catch (error) {
           console.error('Error sending token via postMessage:', error);
@@ -3595,7 +3711,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     console.log('Final selected language is :' + this.translate.currentLang);
   }
-  
 
   logInToFreeSwitch() {
     if (!this.IsRegisteredInFreeSwitch && this.webRTCConfig.sipExtension) {
@@ -3673,9 +3788,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (callType === 'video' || callType === 'audio') {
       this.isVideoHide = false;
       this.isCallMute = false;
+      this.isCallOnHold = false;
+      this.disableCam = false;
+      this.disableMic = false;
     }
 
     this.callText = callType;
+    if (this.remoteCameraOffTimer) clearTimeout(this.remoteCameraOffTimer);
+    this.remoteStreamStatus = false;
 
     if (this.standaloneWebRtc) {
       this.handleStandaloneWebRtcCall(callType);
@@ -3758,7 +3878,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   handleVideoIconClick(tooltip: MatTooltip) {
     // Do not proceed if audio call is active
-    if (this.isAudioCallActive) {
+    if (this.disableCam || this.isAudioCallActive) {
       return;
     }
 
@@ -3915,7 +4035,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       data.dialog?.streamStatus === 'off'
     ) {
       console.log('Remote Camera Off');
-      setTimeout(() => {
+      if (this.remoteCameraOffTimer) clearTimeout(this.remoteCameraOffTimer);
+      this.remoteCameraOffTimer = setTimeout(() => {
         this.remoteStreamStatus = true;
       }, 2000);
     } else if (
@@ -3923,6 +4044,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       data.dialog?.streamStatus === 'on'
     ) {
       console.log('Remote Camera On');
+      if (this.remoteCameraOffTimer) {
+        clearTimeout(this.remoteCameraOffTimer);
+        this.remoteCameraOffTimer = null;
+      }
+
       this.remoteStreamStatus = false;
     }
   }
@@ -4007,7 +4133,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     // ---------------- Snackbar #2 / 3 / 4 ----------------
     if (
       errorMessage !=
-      'Please add Camera permissions in your browser to enable video.' &&
+        'Please add Camera permissions in your browser to enable video.' &&
       errorMessage != 'Audio/Video Device is being used by Someother Party'
     ) {
       this.handleAuthenticationError(errorMessage);
@@ -4019,7 +4145,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-
   private getErrorMessage(data: any): string {
     switch (data.response?.type) {
       case 'generalError': {
@@ -4029,7 +4154,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
 
       case 'subscriptionFailed': {
-        const subMessage = 'Certificate Issues: Please contact with your administrator';
+        const subMessage =
+          'Certificate Issues: Please contact with your administrator';
         console.log('[Error] Call terminated:', subMessage);
         return subMessage;
       }
@@ -4047,47 +4173,47 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleAuthenticationError(errorMessage: string): void {
-  this.showAuthenticationResponseMessage = errorMessage;
-  this.activeVideoView = false;
-
-  if (this.standaloneWebRtc) {
-    if (this.dialogId === null || this.dialogId === undefined) {
-      this.showInvalidCodeError = true;
-      this.callPopUpView = false;
-      this.activeVideoView = false;
-      this.isWebRtcVideoCallActive = false;
-    }
-    this.showErrorSnack(errorMessage);
-    return;
-  }
-
-  if (
-    (this.dialogId != null || this.dialogId != undefined) &&
-    errorMessage === 'Please add microphone permissions in your browser.'
-  ) {
-    this.showErrorSnack(errorMessage);
-
-    this.isAudioCallActive = false;
-    this.isSecureWebCall = true;
-    this.isVideoCallActive = true;
-    this.activeVideoView = true;
-    this.errorDuringWebRTCCall = false;
-
-    if (!this.__appConfig.appConfig.VIDEO) {
-      this.isAudioCallActive = true;
-      this.activeVideoView = false;
-    }
-  } else {
-    this.showErrorSnack(errorMessage);
-
-    this.isAudioCallActive = false;
-    this.isSecureWebCall = false;
-    this.isVideoCallActive = false;
+    this.showAuthenticationResponseMessage = errorMessage;
     this.activeVideoView = false;
-    this.errorDuringWebRTCCall = true;
-    this.changeView('chat');
-   }
- }
+
+    if (this.standaloneWebRtc) {
+      if (this.dialogId === null || this.dialogId === undefined) {
+        this.showInvalidCodeError = true;
+        this.callPopUpView = false;
+        this.activeVideoView = false;
+        this.isWebRtcVideoCallActive = false;
+      }
+      this.showErrorSnack(errorMessage);
+      return;
+    }
+
+    if (
+      (this.dialogId != null || this.dialogId != undefined) &&
+      errorMessage === 'Please add microphone permissions in your browser.'
+    ) {
+      this.showErrorSnack(errorMessage);
+
+      this.isAudioCallActive = false;
+      this.isSecureWebCall = true;
+      this.isVideoCallActive = true;
+      this.activeVideoView = true;
+      this.errorDuringWebRTCCall = false;
+
+      if (!this.__appConfig.appConfig.VIDEO) {
+        this.isAudioCallActive = true;
+        this.activeVideoView = false;
+      }
+    } else {
+      this.showErrorSnack(errorMessage);
+
+      this.isAudioCallActive = false;
+      this.isSecureWebCall = false;
+      this.isVideoCallActive = false;
+      this.activeVideoView = false;
+      this.errorDuringWebRTCCall = true;
+      this.changeView('chat');
+    }
+  }
 
   private showErrorSnack(message: string): void {
     this.snackBar.open(message, 'Dismiss', {
@@ -4196,6 +4322,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.isAudioCallActive = false;
     this.isVideoCallActive = false;
     this.isScreenShareActive = false;
+    this.disableCam = false;
+    this.disableMic = false;
+    this.isCallOnHold = false;
+    if (this.remoteCameraOffTimer) clearTimeout(this.remoteCameraOffTimer);
+    this.remoteStreamStatus = false;
+    this.localStream = null;
+    this.remoteStream = null;
+
     this.endCountdown();
 
     if (this.IsRegisteredInFreeSwitch) {
@@ -4697,16 +4831,15 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     control.setValue(value);
   }
 
-
   onCheckboxChange(
-      event: Event,
-      controlName: string,
-      sectionIndex: number,
-      optionValue: string | null,
-      categoryLabel: string,
-      hasCategory: boolean,
-      messageId? : string
-    ): void {
+    event: Event,
+    controlName: string,
+    sectionIndex: number,
+    optionValue: string | null,
+    categoryLabel: string,
+    hasCategory: boolean,
+    messageId?: string,
+  ): void {
     if (!optionValue) return;
 
     const formGroup = this.formGroupsMap?.[messageId] || this.preChatFormGroup;
@@ -4724,7 +4857,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     control.markAsTouched();
 
     if (hasCategory) {
-      this.handleCategoryCheckboxChange(control, optionValue, categoryLabel, isChecked);
+      this.handleCategoryCheckboxChange(
+        control,
+        optionValue,
+        categoryLabel,
+        isChecked,
+      );
     } else {
       this.handleSimpleCheckboxChange(control, optionValue, isChecked);
     }
@@ -4734,7 +4872,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     control: any,
     optionValue: string,
     categoryLabel: string,
-    isChecked: boolean
+    isChecked: boolean,
   ): void {
     const selectedValues = this.getCategorySelectedValues(control.value);
 
@@ -4748,7 +4886,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     control.setValue(isEmpty ? '' : selectedValues, { emitEvent: true });
   }
 
-  private getCategorySelectedValues(currentValue: any): { [key: string]: string[] } {
+  private getCategorySelectedValues(currentValue: any): {
+    [key: string]: string[];
+  } {
     return typeof currentValue === 'object' && !Array.isArray(currentValue)
       ? { ...currentValue }
       : {};
@@ -4757,7 +4897,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private addToCategory(
     selectedValues: { [key: string]: string[] },
     categoryLabel: string,
-    optionValue: string
+    optionValue: string,
   ): void {
     if (!Array.isArray(selectedValues[categoryLabel])) {
       selectedValues[categoryLabel] = [];
@@ -4770,11 +4910,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private removeFromCategory(
     selectedValues: { [key: string]: string[] },
     categoryLabel: string,
-    optionValue: string
+    optionValue: string,
   ): void {
-    selectedValues[categoryLabel] = (selectedValues[categoryLabel] || []).filter(
-      (v: string) => v !== optionValue
-    );
+    selectedValues[categoryLabel] = (
+      selectedValues[categoryLabel] || []
+    ).filter((v: string) => v !== optionValue);
     if (selectedValues[categoryLabel].length === 0) {
       delete selectedValues[categoryLabel];
     }
@@ -4783,7 +4923,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private handleSimpleCheckboxChange(
     control: any,
     optionValue: string,
-    isChecked: boolean
+    isChecked: boolean,
   ): void {
     let selectedValues = Array.isArray(control.value) ? [...control.value] : [];
 
@@ -4793,19 +4933,26 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       selectedValues = this.removeFromSimpleArray(selectedValues, optionValue);
     }
 
-    control.setValue(selectedValues.length === 0 ? '' : selectedValues, { emitEvent: true });
+    control.setValue(selectedValues.length === 0 ? '' : selectedValues, {
+      emitEvent: true,
+    });
   }
 
-  private addToSimpleArray(selectedValues: string[], optionValue: string): void {
+  private addToSimpleArray(
+    selectedValues: string[],
+    optionValue: string,
+  ): void {
     if (!selectedValues.includes(optionValue)) {
       selectedValues.push(optionValue);
     }
   }
 
-  private removeFromSimpleArray(selectedValues: string[], optionValue: string): string[] {
+  private removeFromSimpleArray(
+    selectedValues: string[],
+    optionValue: string,
+  ): string[] {
     return selectedValues.filter((v: string) => v !== optionValue);
   }
-
 
   parseCheckboxValue(val: string): { [key: string]: string[] } {
     try {
@@ -4815,9 +4962,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-
-  booleanEmojiSet(sectionIndex: number, attributeIndex: number, itemIndex: number) {
-    console.log("boooean emoji set", itemIndex);
+  booleanEmojiSet(
+    sectionIndex: number,
+    attributeIndex: number,
+    itemIndex: number,
+  ) {
+    console.log('boooean emoji set', itemIndex);
     // Select all SVG elements within the booleanOption container
     const svgElements = document.querySelectorAll(
       `#booleanOption-${sectionIndex}-${attributeIndex} svg`,
@@ -5069,8 +5219,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     optionValue: string,
     categoryLabel?: string,
     hasCategory?: boolean,
-    messageId?: string
-   ): boolean {
+    messageId?: string,
+  ): boolean {
     const formGroup = this.formGroupsMap?.[messageId] || this.preChatFormGroup;
     const control = formGroup.get(`sections.${sectionIndex}.${controlName}`);
 
@@ -5083,7 +5233,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     if (hasCategory && categoryLabel) {
       // For categorized checkboxes: { categoryName: [values] }
       const categoryValues = controlValue?.[categoryLabel];
-      return Array.isArray(categoryValues) && categoryValues.includes(optionValue);
+      return (
+        Array.isArray(categoryValues) && categoryValues.includes(optionValue)
+      );
     } else {
       // For simple checkboxes: [value1, value2]
       return Array.isArray(controlValue) && controlValue.includes(optionValue);
@@ -5217,53 +5369,61 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TENEO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   async handleRefreshCasesofFormMessageType(cimMessage: any) {
-     const status = cimMessage.body.additionalDetails?.status?.toLowerCase();
-    if (cimMessage.header.originalMessageId && status!=="unfilled") {
+    const status = cimMessage.body.additionalDetails?.status?.toLowerCase();
+    if (cimMessage.header.originalMessageId && status !== 'unfilled') {
       const formGroup = await this.buildFormMessage(cimMessage);
-     
+
       if (status === 'filled') {
-        this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
+        this.formMessageTypeService.patchFromMessageTypeUponRefresh(
+          formGroup,
+          cimMessage,
+        );
       }
 
       this.handleFormMessageType(cimMessage);
     } else {
       this.createFormMapGroup(cimMessage);
     }
-}
+  }
 
-
-
-   createFormMapGroup(cimMessage: any) {
-
+  createFormMapGroup(cimMessage: any) {
     // This method is used to create a form group for the form message type against the message id
-      const messageId = cimMessage.id;
-      const formGroup = this.fb.group({
-      sections: this.fb.array([])});
+    const messageId = cimMessage.id;
+    const formGroup = this.fb.group({
+      sections: this.fb.array([]),
+    });
 
-      const sections: any[] = Array.isArray(cimMessage.body?.sections)
+    const sections: any[] = Array.isArray(cimMessage.body?.sections)
       ? cimMessage.body.sections
       : [];
 
-      this.formMessageTypeData = sections
-      this.formGroupsMap[messageId] = formGroup;
-      this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
-   }
+    this.formMessageTypeData = sections;
+    this.formGroupsMap[messageId] = formGroup;
+    this.createFormValidationControls(
+      sections,
+      this.formValidations,
+      'formMessageType',
+      formGroup,
+    );
+  }
 
   private async buildFormMessage(cimMessage: any) {
     const originalMessageId = cimMessage.header?.originalMessageId;
     if (!originalMessageId) {
-      console.warn("No originalMessageId found in message header.");
+      console.warn('No originalMessageId found in message header.');
       return;
     }
 
     const originalMessage = await this.waitForMessageById(originalMessageId);
     if (!originalMessage) {
-      console.warn(`Original message with ID ${originalMessageId} not found after retries.`);
+      console.warn(
+        `Original message with ID ${originalMessageId} not found after retries.`,
+      );
       return;
     }
 
     const formGroup = this.fb.group({
-      sections: this.fb.array([])
+      sections: this.fb.array([]),
     });
 
     const sections = Array.isArray(originalMessage.body?.sections)
@@ -5271,29 +5431,41 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       : [];
 
     this.formGroupsMap[originalMessageId] = formGroup;
-    this.createFormValidationControls(sections, this.formValidations, 'formMessageType', formGroup);
+    this.createFormValidationControls(
+      sections,
+      this.formValidations,
+      'formMessageType',
+      formGroup,
+    );
     return formGroup;
-}
+  }
 
   private async waitForMessageById(id: any, timeoutMs = 2000) {
-    const normalizeId = (val: any) => String(val ?? '').trim().toLowerCase();
+    const normalizeId = (val: any) =>
+      String(val ?? '')
+        .trim()
+        .toLowerCase();
     const targetId = normalizeId(id);
 
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
-      const found = this.cimMessage.find(msg => normalizeId(msg.id) === targetId);
+      const found = this.cimMessage.find(
+        (msg) => normalizeId(msg.id) === targetId,
+      );
       if (found) return found;
-      await new Promise(r => setTimeout(r, 100)); // wait a bit before retrying
+      await new Promise((r) => setTimeout(r, 100)); // wait a bit before retrying
     }
     return null;
   }
 
-
-//  carousel function
+  //  carousel function
   currentIndex = 0;
 
   next(message) {
-    if (message?.body?.elements && this.currentIndex < message.body.elements.length - 1) {
+    if (
+      message?.body?.elements &&
+      this.currentIndex < message.body.elements.length - 1
+    ) {
       this.currentIndex++;
     }
   }
@@ -5308,60 +5480,61 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.currentIndex = index;
   }
 
+  async handleActionButtonClick(button: any, message: any): Promise<void> {
+    const messageId = message.id;
+    const formGroup = this.formGroupsMap[messageId];
 
-async handleActionButtonClick(button: any, message: any): Promise<void> {
-  const messageId = message.id;
-  const formGroup = this.formGroupsMap[messageId];
+    if (!formGroup) {
+      return;
+    }
 
-  if (!formGroup) {
-    return;
-  } 
+    if (button.action === 'reset') {
+      const formGroup = this.formGroupsMap[message.id];
+      if (formGroup) {
+        // Get schema of attributes again
+        const sections: any[] = Array.isArray(message.body?.sections)
+          ? message.body.sections
+          : [];
 
-  if (button.action === 'reset') {
-    const formGroup = this.formGroupsMap[message.id];
-    if (formGroup) {
-      // Get schema of attributes again
-      const sections: any[] = Array.isArray(message.body?.sections) ? message.body.sections : [];
+        sections.forEach((section, sectionIndex) => {
+          section.attributes.forEach((attribute: any) => {
+            const control = (formGroup.get('sections') as FormArray)
+              .at(sectionIndex)
+              .get(attribute.key);
 
-      sections.forEach((section, sectionIndex) => {
-        section.attributes.forEach((attribute: any) => {
-          const control = (formGroup.get('sections') as FormArray)
-            .at(sectionIndex)
-            .get(attribute.key);
-
-          if (control) {
-            control.setValue(this.formMessageTypeService.getDefaultValue(attribute));
-          }
+            if (control) {
+              control.setValue(
+                this.formMessageTypeService.getDefaultValue(attribute),
+              );
+            }
+          });
         });
+      }
+      return;
+    }
+
+    if (button.action === 'cancel') {
+      const finalPayload = this.createFormDataObject();
+      finalPayload.body.sections = []; // No data for cancelled
+      finalPayload.header.timestamp = Date.now();
+      finalPayload.id = messageId;
+      finalPayload.body.formTitle = message.body.formTitle || '';
+
+      this.constructCimMessage('FORM_DATA', {
+        text: null,
+        intent: null,
+        originalMessageId: finalPayload.id,
+        fileMimeType: null,
+        fileName: null,
+        fileSize: null,
+        additionalText: null,
+        fileType: null,
+        carousalCardId: null,
+        formMessageTypeData: finalPayload,
+        status: 'cancelled',
       });
     }
-    return;
   }
-
-  if (button.action === 'cancel') {
-    const finalPayload = this.createFormDataObject();
-    finalPayload.body.sections = []; // No data for cancelled
-    finalPayload.header.timestamp = Date.now();
-    finalPayload.id = messageId;
-    finalPayload.body.formTitle = message.body.formTitle || '';
-
-    this.constructCimMessage('FORM_DATA', {
-      text: null,
-      intent: null,
-      originalMessageId: finalPayload.id,
-      fileMimeType: null,
-      fileName: null,
-      fileSize: null,
-      additionalText: null,
-      fileType: null,
-      carousalCardId: null,
-      formMessageTypeData: finalPayload,
-      status: 'cancelled'
-    });
-  }
-}
-
-
 
   handleRefreshCaseForWebRTC() {
     try {
@@ -5406,10 +5579,10 @@ async handleActionButtonClick(button: any, message: any): Promise<void> {
     ) {
       this.spinner.hide();
       this.__postMessageHandlerService.sendPostMessage({
-        type: "EF_WIDGET_STATE_CHANGED",
-        state: "CHAT_SESSION_ENDED",
-        reason: "SOCKET_DISCONNECTED"
-      })
+        type: 'EF_WIDGET_STATE_CHANGED',
+        state: 'CHAT_SESSION_ENDED',
+        reason: 'SOCKET_DISCONNECTED',
+      });
       this.changeScreen('error');
     }
   }
@@ -5418,25 +5591,27 @@ async handleActionButtonClick(button: any, message: any): Promise<void> {
     console.log('Starting end view timer');
     this.stopEndViewTimer();
     const startDate = new Date();
-    const duration = this.__appConfig.appConfig.WIDGET_END_VIEW_TIMEOUT_SECONDS * 1000 || 60 * 1000;
+    const duration =
+      this.__appConfig.appConfig.WIDGET_END_VIEW_TIMEOUT_SECONDS * 1000 ||
+      60 * 1000;
 
     this.endViewTimerSubscription = interval(1000).subscribe(() => {
-        const currentTime = new Date();
-        const elapsed = currentTime.getTime() - startDate.getTime();
+      const currentTime = new Date();
+      const elapsed = currentTime.getTime() - startDate.getTime();
 
-        if (elapsed >= duration) {
-            console.log('End view timer completed, switching to widget view');
-            this.changeScreen('widget');
-        }
+      if (elapsed >= duration) {
+        console.log('End view timer completed, switching to widget view');
+        this.changeScreen('widget');
+      }
     });
   }
 
   // Ensure you call this on component destruction for cleanup
   stopEndViewTimer() {
-      if (this.endViewTimerSubscription) {
-          this.endViewTimerSubscription.unsubscribe();
-          this.endViewTimerSubscription = null;
-      }
+    if (this.endViewTimerSubscription) {
+      this.endViewTimerSubscription.unsubscribe();
+      this.endViewTimerSubscription = null;
+    }
   }
 
   @HostListener('document:click', ['$event'])
@@ -5445,7 +5620,9 @@ async handleActionButtonClick(button: any, message: any): Promise<void> {
     const link = target.closest('a');
     if (link) {
       const linkUrl = link.href;
-      const chatContainer = document.getElementsByClassName('widget-chat-content')[0];
+      const chatContainer = document.getElementsByClassName(
+        'widget-chat-content',
+      )[0];
       if (chatContainer?.contains(link)) {
         console.log('Link detected:', linkUrl);
         this.__postMessageHandlerService.sendLinkClickedPostMessage(linkUrl);
@@ -5457,19 +5634,19 @@ async handleActionButtonClick(button: any, message: any): Promise<void> {
   }
 
   isSkiptype(attr: any) {
-  if (attr?.attributeType?.toLowerCase() == 'input' || attr?.attributeType?.toLowerCase() == 'textarea') {
-    return !attr.answer[0];
+    if (
+      attr?.attributeType?.toLowerCase() == 'input' ||
+      attr?.attributeType?.toLowerCase() == 'textarea'
+    ) {
+      return !attr.answer[0];
+    } else {
+      return attr.answer.every((answer) => {
+        if (answer.options) {
+          return answer.options.every((opt) => !opt.isSelected);
+        } else {
+          return !answer.isSelected;
+        }
+      });
+    }
   }
-  else {
-    return attr.answer.every(answer => {
-      if (answer.options) {
-        return answer.options.every((opt) => !opt.isSelected);
-      } else {
-
-        return !answer.isSelected;
-      }
-    });
-   }
-  }
-
 }

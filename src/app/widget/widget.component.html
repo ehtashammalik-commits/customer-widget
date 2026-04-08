@@ -2113,7 +2113,7 @@
                     'focus-icon-video ': isVideoCallActive === true
                   }">
                   <span class="material-symbols-outlined"
-                    [matTooltip]="isVideoHide ? 'Turn on camera' : 'Turn off camera'"
+                    [matTooltip]="disableCam ? ('notification.camera-permission-denied' | translate) : (isVideoHide ? 'Turn on camera' : 'Turn off camera')"
                     [matTooltipPosition]="this.positionOptions[2]"
                     [innerHTML]="isVideoHide ? 'videocam_off' : 'videocam'" (click)="handleVideoIconClick(camTooltip)"
                     (keydown)="($event.key === 'Enter' || $event.key === ' ') && handleVideoIconClick(camTooltip)"
