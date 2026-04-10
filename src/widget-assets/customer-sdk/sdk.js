@@ -3312,8 +3312,20 @@ function setupRemoteMedia(session, callback, dialogId) {
       remoteStream.addTrack(receivervideo.track);
     }
   }
-  remote_stream = remoteStream;
+
+  if (receiverVideo) {
+    remoteStreamVideo.addTrack(receiverVideo.track);
+    console.log('[setupRemoteMedia] Added video track to remoteStreamVideo');
+  }
+
+  var remoteStream = new MediaStream();
+  var originalTrack = receiverVideo?.track;
+  var blackTrack = createBlackTrack();
+
+  // Wrap all in timeout for stable playback & DOM availability
   setTimeout(() => {
+    const remoteVideoElem = document.getElementById('remoteVideo');
+    const remoteAudioElem = document.getElementById('remoteAudio');
 
     if (document.getElementById('remoteVideo')) {
       console.log("document.getElementById('remoteVideo').srcObject", document.getElementById('remoteVideo').srcObject)
@@ -3342,43 +3354,53 @@ function setupRemoteMedia(session, callback, dialogId) {
   //   });
   //   remoteVideo.srcObject = remoteStream;
 
+  // Setup local video stream
   var localStream_1;
   if (pc.getSenders) {
-    localStream_1 = new window.MediaStream();
-    pc.getSenders().forEach(function (sender) {
-      var track = sender.track;
-      // audio, video and screenshare
-      if (_sessionall.additionalDetail.localMediaType == "video" || _sessionall.additionalDetail.localMediaType == "screenshare") {
+    localStream_1 = new MediaStream();
+    pc.getSenders().forEach(sender => {
+      if (sender.track?.kind === 'video') {
+        localStream_1.addTrack(sender.track);
+        sender.track.addEventListener('ended', () => {
+          console.log("[setupRemoteMedia] Screen sharing ended.");
+          const inviteRequest = session.incomingInviteRequest || session.outgoingInviteRequest;
+          const callIdHeader = inviteRequest?.message?.headers["X-Call-Id"]?.[0]?.raw ||
+            inviteRequest?.message?.headers["Call-ID"]?.[0]?.raw;
 
-        if (track && track.kind === "video") {
-          localStream_1.addTrack(track);
-
-          //trigger when user press browser button of Stop Sharing
-          // track.addEventListener('ended', (e) => {
-          //   console.log("==>> SIPJS CONSOLE -> Screen Sharing / Video is Tured off -> ", e)
-          //   _sessionall.additionalDetail.localMediaType = "audio"
-          //   if (typeof session.incomingInviteRequest !== 'undefined') {
-          //     let _dialogId = session.incomingInviteRequest.message.headers["X-Call-Id"] != undefined ? session.incomingInviteRequest.message.headers["X-Call-Id"][0]['raw'] : session.incomingInviteRequest.message.headers["Call-ID"][0]['raw'];
-          //     setupRemoteMedia(session, callback, _dialogId)
-          //     publishMediaStreamUpdateEvent(_dialogId, "screenshare", "off", callback)
-          //   }
-          //   else if (typeof session.outgoingInviteRequest !== 'undefined') {
-          //     let _dialogId = session.outgoingInviteRequest.message.headers["Call-ID"][0]
-          //     setupRemoteMedia(session, callback, _dialogId)
-          //     publishMediaStreamUpdateEvent(_dialogId, "screenshare", "off", callback)
-          //   }
-          // });
-        }
+          if (callIdHeader) {
+            generateConversionEvent(callIdHeader, "screenshare", "off", callback);
+          }
+        });
       }
     });
-  }
-  else {
+  } else {
     localStream_1 = pc.getLocalStreams()[0];
+    console.log('[setupRemoteMedia] Fallback to pc.getLocalStreams()');
   }
 
   var localVideo = document.getElementById('localVideo');
-  if (localVideo) localVideo.srcObject = localStream_1;
+  if (localVideo) {
+    localVideo.srcObject = localStream_1;
+    console.log('[setupRemoteMedia] Assigned localStream_1 to #localVideo');
+  } else {
+    console.warn("[setupRemoteMedia] Element with ID 'localVideo' not found.");
+  }
+
   local_stream = localStream_1;
+
+  // === Helper Function ===
+  function createBlackTrack() {
+    console.log('[createBlackTrack] Creating black canvas track...');
+    var canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 480;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    var stream = canvas.captureStream(30); // 30 FPS
+    return stream.getVideoTracks()[0];
+  }
 }
 
 

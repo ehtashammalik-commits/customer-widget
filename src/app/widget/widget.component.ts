@@ -36,7 +36,6 @@ import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import { DOCUMENT } from '@angular/common';
 import { FormMessageTypeService } from '../services/form-message-type.service';
-import { NgxSpinnerService } from 'ngx-spinner';
 
 declare let EmojiPicker: any;
 interface Shift {
@@ -441,8 +440,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     private readonly translate: TranslateService,
     private readonly router: Router,
     @Inject(DOCUMENT) private readonly doc: Document,
-    private readonly formMessageTypeService: FormMessageTypeService,
-    private readonly spinner: NgxSpinnerService,
+    private readonly formMessageTypeService: FormMessageTypeService
   ) {
     this.logoEnabled = __appConfig.appConfig.ENABLE_LOGO;
     this.isUsernameEnabled = __appConfig.appConfig.USERNAME_ENABLED;
@@ -4510,6 +4508,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   processSecureLinkMessage(message: any) {
+
+    console.log("step1 ======= > processSecureLinkMessage", message);
+
     this.isSecureWebCall = false;
     const mediaUrl = message.body.mediaUrl;
     const queryString = mediaUrl.split('?')[1];
