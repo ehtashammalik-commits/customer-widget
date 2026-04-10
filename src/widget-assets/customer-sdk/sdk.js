@@ -127,7 +127,7 @@ function eventListeners(callback) {
   this.socket.on('connect', () => {
     if (this.socket.id != undefined) {
       console.log(`you are connected with socket:`, this.socket);
-        callback({ type: "SOCKET_CONNECTED", data: this.socket });
+      callback({ type: "SOCKET_CONNECTED", data: this.socket });
     }
   });
   this.socket.on('TOKEN_GENERATED', (data) => {
@@ -792,7 +792,9 @@ var remotesession = null;
 var loginid = null;
 var agentInfo = false;
 var callbackFunction = null;
-var remote_stream;
+var remote_stream = new MediaStream();
+var remote_audio_stream = new MediaStream();
+var remote_video_stream = new MediaStream();
 var local_stream;
 var call_variable_array = {};
 var dialogStatedata = null;
@@ -1081,6 +1083,16 @@ let inviteDelegate = {
       }
     }
   },
+  onInvite(request) {
+    console.log("==>> SIPJS CONSOLE => Remote Re-INVITE Received (Media Update)");
+    // Small delay to allow SIP.js to process the SDP and update transceivers
+    setTimeout(() => {
+      var _session = calls[0]; // Assuming primary session for now
+      if (_session && _session.session) {
+        setupRemoteMedia(_session.session, globalEventCallback, _session.response.dialog.id);
+      }
+    }, 500);
+  }
 }
 
 let registrationDelegate = {
@@ -1359,7 +1371,7 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
             .catch((error) => {
               console.error("==>> SIPJS CONSOLE => Failed to send REGISTER ->", error);
             });
-          }
+        }
       },
       onDisconnect: (errorr) => {
         again_register = true;
@@ -1729,13 +1741,13 @@ function connect_useragent(extension, sip_uri, sip_password, wssFs, sip_log, cal
               if (_tempDialogState.response.dialog.state && _tempDialogState.response.dialog.state !== "DROPPED") {
                 var currentCallStatus = ""
 
-                  let data = {
-                    event: _tempDialogState.event,
-                    response: _tempDialogState.response
-                  };
-                  var _tempData = JSON.parse(JSON.stringify(data))
-                  callback(_tempData)
-                  SendPostMessage(_tempData)
+                let data = {
+                  event: _tempDialogState.event,
+                  response: _tempDialogState.response
+                };
+                var _tempData = JSON.parse(JSON.stringify(data))
+                callback(_tempData)
+                SendPostMessage(_tempData)
 
 
                 // adding logic to check if call is still there or not
@@ -1921,7 +1933,7 @@ function initiate_call(calledNumber, DN, mediaType, authData, callback, callType
   }
 
   globalEventCallback = callback
-  if (userAgent !== null && userAgent !== undefined ) {  // NEED INPUT && userAgent.transport.isConnected()
+  if (userAgent !== null && userAgent !== undefined) {  // NEED INPUT && userAgent.transport.isConnected()
     // Target URI
     var sip_uri = SIP.UserAgent.makeURI('sip:' + calledNumber + "@" + sipconfig.uriFs);
     if (!sip_uri) {
@@ -2304,7 +2316,8 @@ function phone_hold(callback, dialogId) {
           const eventCopy = JSON.parse(JSON.stringify(_sessionDialog))
           callback(eventCopy)
           SendPostMessage(eventCopy);
-
+          // Set up remote media (for hold music)
+          setupRemoteMedia(sessionall.session, callback, dialogId);
         }
       },
       onReject: (response) => {
@@ -2360,10 +2373,26 @@ function phone_unhold(callback, dialogId) {
     if (sender.track) sender.track.enabled = true;
   });
 
-  // Hold the session by sending a re-INVITE with hold session description
+  // Detect current media type to ensure a correct sendrecv offer
+  var isVideo = false;
+  if (index !== -1 && calls[index].additionalDetail && calls[index].additionalDetail.localMediaType) {
+    const mediaType = calls[index].additionalDetail.localMediaType.toLowerCase();
+    if (mediaType === "video" || mediaType === "screenshare") {
+      isVideo = true;
+    }
+  }
+
+  // Aggressive Resume: Force ICE Restart and explicit constraints to bypass CUBE/FusionPBX signaling stalls
   const holdOptions = {
     sessionDescriptionHandlerOptions: {
-      hold: false,
+      constraints: {
+        audio: true,
+        video: isVideo
+      },
+      offerOptions: {
+        iceRestart: true,
+      },
+      iceGatheringTimeout: 500
     },
     requestDelegate: {
       onAccept: (response) => {
@@ -3284,85 +3313,155 @@ const attemptReconnection = (reconnectionAttempt = 1) => {
  * @param {Object} session - The session in Established state.
  * @param {Function} callback - The callback function to execute after setting up media.
  */
+/**
+ * Atomically re-binds media streams to DOM elements.
+ * This is a "hard reset" that forces the browser to reconstruct its media pipeline,
+ * typically triggering a FIR/Keyframe request to the remote sender.
+ */
+function atomicRefreshRemoteMedia() {
+  console.log('[atomicRefreshRemoteMedia] Triggering atomic renderer restart...');
+
+  const videoElems = document.querySelectorAll('[id="remoteVideo"]');
+  const audioElems = document.querySelectorAll('[id="remoteAudio"]');
+
+  videoElems.forEach(el => {
+    // Resetting srcObject to null is required to kill stalled decoders
+    el.srcObject = null;
+    el.srcObject = remote_stream;
+
+    // Diagnostic logging for actual frames
+    el.onloadedmetadata = () => {
+      console.log(`[setupRemoteMedia] Video Metadata Loaded: ${el.videoWidth}x${el.videoHeight} on element ${el.id}`);
+    };
+
+    el.play().catch(err => {
+      if (err.name !== 'AbortError') console.warn('[setupRemoteMedia] Video play failed:', err);
+    });
+  });
+
+  audioElems.forEach(el => {
+    console.log('[setupRemoteMedia] Resetting and re-binding #remoteAudio srcObject...');
+    el.srcObject = null;
+    el.srcObject = remote_audio_stream;
+    el.play().catch(err => {
+      if (err.name !== 'AbortError') console.warn('[setupRemoteMedia] Audio play failed:', err);
+    });
+  });
+}
+
 function setupRemoteMedia(session, callback, dialogId) {
+  console.log('[setupRemoteMedia] Initializing stability-first setup...');
+
   var pc = session.sessionDescriptionHandler.peerConnection;
-  var remoteStream;
-  remoteStream = new MediaStream();
-  var sendersize = pc.getSenders().length;
-  console.log('==>>  SIPJS CONSOLE => Sender RTPSenders size is ', sendersize);
-  var receiversize = pc.getReceivers().length;
-  console.log('==>>  SIPJS CONSOLE => Receivers RTPReceivers size is ', receiversize);
-  var receiver = pc.getReceivers()[0];
-  var receivervideo = pc.getReceivers()[1];
-  remoteStream.addTrack(receiver.track);
 
-  var index = getCallIndex(dialogId)
-  var _sessionall = null
-  if (index !== -1) {
-    _sessionall = calls[index]
-  }
-  if (!_sessionall) {
-    return
-  }
+  // Use persistent global streams
+  remote_stream.getTracks().forEach(track => remote_stream.removeTrack(track));
+  remote_audio_stream.getTracks().forEach(track => remote_audio_stream.removeTrack(track));
+  remote_video_stream.getTracks().forEach(track => remote_video_stream.removeTrack(track));
 
-  // audio, video and screenshare
-  if (_sessionall.additionalDetail.remoteMediaType == "video" || _sessionall.additionalDetail.remoteMediaType == "screenshare") {
-    if (receivervideo) {
-      console.log('==>> SIPJS CONSOLE => video found');
-      remoteStream.addTrack(receivervideo.track);
-    }
+  var receiverAudio = pc.getReceivers().find(r => r.track && r.track.kind === 'audio');
+  var receiverVideo = pc.getReceivers().find(r => r.track && r.track.kind === 'video');
+
+  console.log('[setupRemoteMedia] Found receiverAudio:', !!receiverAudio, receiverAudio?.track?.id);
+  console.log('[setupRemoteMedia] Found receiverVideo:', !!receiverVideo, receiverVideo?.track?.id);
+
+  if (receiverAudio) {
+    const track = receiverAudio.track;
+    remote_stream.addTrack(track);
+    remote_audio_stream.addTrack(track);
+    console.log('[setupRemoteMedia] Linked receiverAudio:', track.id);
+
+    // Audio Un-mute sync (Hold Music termination)
+    track.onunmute = () => {
+      console.log("=====> [setupRemoteMedia] Audio Track Unmuted (Voice Resumed) -> Refreshing renderer");
+      atomicRefreshRemoteMedia();
+    };
   }
 
   if (receiverVideo) {
-    remoteStreamVideo.addTrack(receiverVideo.track);
-    console.log('[setupRemoteMedia] Added video track to remoteStreamVideo');
+    const track = receiverVideo.track;
+    remote_stream.addTrack(track);
+    remote_video_stream.addTrack(track);
+    console.log('[setupRemoteMedia] Linked receiverVideo:', track.id);
+    console.log('[setupRemoteMedia] receiverVideo track state - muted:', track.muted, 'enabled:', track.enabled);
+    try {
+      console.log('[setupRemoteMedia] receiverVideo Settings:', JSON.stringify(track.getSettings()));
+    } catch (e) { }
+
+    // Synchronize un-mute with atomic binding
+    track.onmute = () => {
+      console.log("=====> [setupRemoteMedia] Video Track Muted (Signaling/Network)");
+      publishMediaStreamUpdateEvent(dialogId, "video", "off", callback, "remote");
+    };
+
+    track.onunmute = () => {
+      console.log("=====> [setupRemoteMedia] Video Track Unmuted -> Initializing atomic refresh");
+      publishMediaStreamUpdateEvent(dialogId, "video", "on", callback, "remote");
+      atomicRefreshRemoteMedia();
+    };
   }
 
-  var remoteStream = new MediaStream();
-  var originalTrack = receiverVideo?.track;
-  var blackTrack = createBlackTrack();
+  // Media Watchdog: Detect and repair signaling-media mismatch (CUBE/FusionPBX interoperability)
+  // If the dialogue is ACTIVE but WebRTC says media is INACTIVE/RECVONLY, force a repair.
+  try {
+    const isCallActive = calls.find(c => c.response.dialog.id === dialogId)?.response?.dialog?.state === "ACTIVE";
+    if (isCallActive && pc.getTransceivers) {
+      const audioTransceiver = pc.getTransceivers().find(t => t.receiver && t.receiver.track && t.receiver.track.kind === 'audio');
+      const videoTransceiver = pc.getTransceivers().find(t => t.receiver && t.receiver.track && t.receiver.track.kind === 'video');
 
-  // Wrap all in timeout for stable playback & DOM availability
-  setTimeout(() => {
-    const remoteVideoElem = document.getElementById('remoteVideo');
-    const remoteAudioElem = document.getElementById('remoteAudio');
+      const isAudioStuck = audioTransceiver && (audioTransceiver.currentDirection === 'inactive' || audioTransceiver.currentDirection === 'sendonly' || audioTransceiver.currentDirection === 'recvonly');
+      const isVideoStuck = videoTransceiver && (videoTransceiver.currentDirection === 'inactive' || videoTransceiver.currentDirection === 'sendonly' || videoTransceiver.currentDirection === 'recvonly');
 
-    if (document.getElementById('remoteVideo')) {
-      console.log("document.getElementById('remoteVideo').srcObject", document.getElementById('remoteVideo').srcObject)
-      document.getElementById('remoteVideo').srcObject = remoteStream;
-    } else {
-      console.error("Element with ID 'remoteVideo' does not exist.");
+      if (isAudioStuck || isVideoStuck) {
+        console.warn(`[MediaWatchdog] Detected stuck media direction: Audio=${audioTransceiver?.currentDirection}, Video=${videoTransceiver?.currentDirection}. Call state is ACTIVE. Forcing recovery...`);
+        
+        // Debounce: Don't trigger if we recently sent an invite
+        if (!session._lastRepairTime || Date.now() - session._lastRepairTime > 5000) {
+          session._lastRepairTime = Date.now();
+          setTimeout(() => {
+            console.log("[MediaWatchdog] Triggering Forced Recovery Invite (iceRestart)...");
+            phone_unhold(callback, dialogId); // Re-run aggressive unhold
+          }, 1500);
+        }
+      }
     }
+  } catch (e) {
+    console.error("[MediaWatchdog] Error during transceiver inspection:", e);
+  }
 
+  // Self-Healing Observer: Listen for track changes on the PeerConnection
+  if (pc && !pc._observerAttached) {
+    pc.ontrack = (event) => {
+      console.log(`[setupRemoteMedia] New track detected on PeerConnection: ${event.track.kind} (${event.track.id})`);
+      // Re-run setup to link the new track to persistent streams
+      setTimeout(() => {
+        setupRemoteMedia(session, callback, dialogId);
+      }, 200);
+    };
+    pc._observerAttached = true;
+    console.log('[setupRemoteMedia] Self-healing track observer attached to PeerConnection');
+  }
 
-    // var remoteVideo = document.getElementById('remoteVideo');
-    // if (remoteVideo) remoteVideo.srcObject = remoteStream;
-    console.log('<== remote Stream Audio Track:', remoteStream.getAudioTracks());
-    console.log('<== remote Video Tag:', document.getElementById('remoteVideo'));
-    console.log('<== remote Stream Video Track:', remoteStream.getVideoTracks());
-  }, 2000)
+  // Safe timeout block for initial binding
+  setTimeout(() => {
+    console.log('[setupRemoteMedia] setup timeout triggered');
+    atomicRefreshRemoteMedia();
+    console.log('[setupRemoteMedia] Remote media synchronization complete.');
+  }, 100);
 
-
-  // var remoteVideo = document.getElementById('remoteVideo');
-  // if (remoteVideo) remoteVideo.srcObject = remoteStream;
-
-
-  // session.sessionDescriptionHandler.peerConnection.getReceivers().forEach((receiver) => {
-  //     if (receiver.track) {
-  //       remoteStream.addTrack(receiver.track);
-  //     }
-  //   });
-  //   remoteVideo.srcObject = remoteStream;
 
   // Setup local video stream
   var localStream_1;
   if (pc.getSenders) {
-    localStream_1 = new MediaStream();
-    pc.getSenders().forEach(sender => {
-      if (sender.track?.kind === 'video') {
-        localStream_1.addTrack(sender.track);
-        sender.track.addEventListener('ended', () => {
-          console.log("[setupRemoteMedia] Screen sharing ended.");
+    localStream_1 = new window.MediaStream();
+    pc.getSenders().forEach(function (sender) {
+      var track = sender.track;
+      if (track && track.kind === "video") {
+        localStream_1.addTrack(track);
+        console.log('[setupRemoteMedia] Added local video track');
+
+        track.addEventListener('ended', () => {
+          console.log("[setupRemoteMedia] Screen Sharing ended or track disconnected.");
           const inviteRequest = session.incomingInviteRequest || session.outgoingInviteRequest;
           const callIdHeader = inviteRequest?.message?.headers["X-Call-Id"]?.[0]?.raw ||
             inviteRequest?.message?.headers["Call-ID"]?.[0]?.raw;
@@ -3382,25 +3481,28 @@ function setupRemoteMedia(session, callback, dialogId) {
   if (localVideo) {
     localVideo.srcObject = localStream_1;
     console.log('[setupRemoteMedia] Assigned localStream_1 to #localVideo');
+    localVideo.onloadedmetadata = () => {
+      localVideo.play().catch(err => console.warn('[setupRemoteMedia] Local video play failed:', err));
+    };
   } else {
     console.warn("[setupRemoteMedia] Element with ID 'localVideo' not found.");
   }
 
   local_stream = localStream_1;
+}
 
-  // === Helper Function ===
-  function createBlackTrack() {
-    console.log('[createBlackTrack] Creating black canvas track...');
-    var canvas = document.createElement('canvas');
-    canvas.width = 640;
-    canvas.height = 480;
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+// === Helper Function ===
+function createBlackTrack() {
+  console.log('[createBlackTrack] Creating black canvas track...');
+  var canvas = document.createElement('canvas');
+  canvas.width = 640;
+  canvas.height = 480;
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    var stream = canvas.captureStream(30); // 30 FPS
-    return stream.getVideoTracks()[0];
-  }
+  var stream = canvas.captureStream(30); // 30 FPS
+  return stream.getVideoTracks()[0];
 }
 
 
@@ -3829,17 +3931,17 @@ function updateAgentDetails(message) {
  * @param {string} streamStatus - The status of the stream ("on" or "off").
  * @param {Function} callback - Callback function to handle the event generation.
  */
-function publishMediaStreamUpdateEvent(dialogId, streamType, streamStatus, callback) {
+function publishMediaStreamUpdateEvent(dialogId, streamType, streamStatus, callback, eventRequest = "local") {
   const sysdate = new Date();
   const datetime = sysdate.toISOString();
 
-  // Local media conversion
+  // Media conversion notification
   const _mediaStreamUpdate = createMediaStreamUpdateEvent(
     {
       loginId: loginid,
       status: "success",
       dialogId: dialogId,
-      eventRequest: "local",
+      eventRequest: eventRequest,
       stream: streamType,
       streamStatus: streamStatus,
       errorReason: ""
@@ -3875,28 +3977,28 @@ async function terminateAllRemainingCalls() {
   terminateIndexOneCall()
 }
 
-function terminateIndexOneCall(){
+function terminateIndexOneCall() {
   if (calls && calls[1] && calls[1].session && calls[1].session.state !== SIP.SessionState.Terminating && calls[1].session.state !== SIP.SessionState.Terminated) {
-      var terminate_session_id = calls[1].response.dialog.id
-      if (functionLocks['terminate_call']) {
-          setTimeout(() => {
-              terminate_call(terminate_session_id);
-          }, 1000);
-      } else {
-          terminate_call(terminate_session_id);
-      }
+    var terminate_session_id = calls[1].response.dialog.id
+    if (functionLocks['terminate_call']) {
+      setTimeout(() => {
+        terminate_call(terminate_session_id);
+      }, 1000);
+    } else {
+      terminate_call(terminate_session_id);
+    }
   }
 }
-function terminateIndexZeroCall(){
+function terminateIndexZeroCall() {
   if (calls && calls[0] && calls[0].session && calls[0].session.state !== SIP.SessionState.Terminating && calls[0].session.state !== SIP.SessionState.Terminated) {
-      var terminate_session_id = calls[0].response.dialog.id
-      if (functionLocks['terminate_call']) {
-          setTimeout(() => {
-              terminate_call(terminate_session_id);
-          }, 1000);
-      } else {
-          terminate_call(terminate_session_id);
-      }
+    var terminate_session_id = calls[0].response.dialog.id
+    if (functionLocks['terminate_call']) {
+      setTimeout(() => {
+        terminate_call(terminate_session_id);
+      }, 1000);
+    } else {
+      terminate_call(terminate_session_id);
+    }
   }
 }
 
@@ -4019,11 +4121,23 @@ function ReEstablishVoiceCall(currentSession, currentState, errorType, callback,
       })
     }
     if (currentState == "ACTIVE") {
+      var index = getCallIndex(dialogId);
+      var isVideo = false;
+      if (index !== -1 && calls[index].additionalDetail && calls[index].additionalDetail.localMediaType) {
+        const mediaType = calls[index].additionalDetail.localMediaType.toLowerCase();
+        if (mediaType === "video" || mediaType === "screenshare") {
+          isVideo = true;
+        }
+      }
+
       currentSession.invite({
         sessionDescriptionHandlerOptions: {
           constraints: {
             audio: true,
-            video: false
+            video: isVideo
+          },
+          offerOptions: {
+            iceRestart: true,
           },
           iceGatheringTimeout: 500
         },
@@ -4064,41 +4178,67 @@ function ReEstablishVoiceCall(currentSession, currentState, errorType, callback,
 
 
 function EnableVoiceTrack(currentSession) {
-  console.log("==>> SIPJS Console => ENABLE VOICE TRACK GET CALLED")
+  console.log("==>> SIPJS Console => ENABLE MEDIA TRACKS (NUDGE) GET CALLED")
   var _peer = currentSession.sessionDescriptionHandler.peerConnection;
   let _senders = _peer.getSenders();
+  let _receivers = _peer.getReceivers();
 
-  if (!_senders.length) return;
+  if (!_senders.length && !_receivers.length) {
+    console.warn("==>> SIPJS Console => No senders or receivers to nudge.");
+    return;
+  }
+
+  // Nudge Senders (Outgoing)
   _senders.forEach(function (sender) {
-    if (sender.track && sender.track.kind == "audio") {
-      sender.track.enabled = false;
-      sender.track.enabled = true;
+    if (sender.track) {
+      if (sender.track.enabled) {
+        sender.track.enabled = false;
+        sender.track.enabled = true;
+        console.log(`==>> SIPJS Console => Nudged local ${sender.track.kind} track`);
+      } else {
+        console.log(`==>> SIPJS Console => Skipping nudge for disabled local ${sender.track.kind} track`);
+      }
+    }
+  });
+
+  // Nudge Receivers (Incoming)
+  _receivers.forEach(function (receiver) {
+    if (receiver.track) {
+      if (receiver.track.enabled) {
+        receiver.track.enabled = false;
+        receiver.track.enabled = true;
+        console.log(`==>> SIPJS Console => Nudged remote ${receiver.track.kind} track`);
+      } else {
+        console.log(`==>> SIPJS Console => Skipping nudge for disabled remote ${receiver.track.kind} track`);
+      }
     }
   });
 }
 
 function DisableVoiceTrack(currentSession) {
-  console.log("==> SIPJS Console => DISABLE VOICE TRACK GET CALLED")
+  console.log("==> SIPJS Console => DISABLE MEDIA TRACKS GET CALLED")
   var _peer = currentSession.sessionDescriptionHandler.peerConnection;
   let _senders = _peer.getSenders();
 
   if (!_senders.length) return;
   _senders.forEach(function (sender) {
-    if (sender.track && sender.track.kind == "audio") {
+    if (sender.track) {
       sender.track.enabled = false;
+      console.log(`==>> SIPJS Console => Disabled ${sender.track.kind} track`);
     }
   });
 }
 
 function DisableVideoTrack(currentSession) {
-  console.log("==>> SIPJS Console => DISABLE VIDEO TRACK GET CALLED")
+  console.log("==>> SIPJS Console => DISABLE VIDEO TRACK GET CALLED (NON-DESTRUCTIVE)")
   var _peer = currentSession.sessionDescriptionHandler.peerConnection;
   let _senders = _peer.getSenders();
 
   if (!_senders.length) return;
   _senders.forEach(function (sender) {
     if (sender.track && sender.track.kind == "video") {
-      sender.track.stop()
+      sender.track.enabled = false;
+      console.log("==>> SIPJS Console => Disabled video track (nudge)");
     }
   });
 }
@@ -4603,10 +4743,10 @@ const createMediaPermissionStatusUpdateEvent = (dialogId, mediaType, status, err
   };
 }
 
-function getLocalStream(){
+function getLocalStream() {
   return local_stream;
 }
 
-function getRemoteStream(){
+function getRemoteStream() {
   return remote_stream;
 }

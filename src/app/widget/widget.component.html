@@ -106,7 +106,8 @@
         <!-- Video Call Screen -->
         <ng-container *ngIf="isWebRtcVideoCallActive">
           <div class="widget-section widget-video-section">
-            <video #remoteVideo id="remoteVideo" autoplay="autoplay" class="remoteVideo">
+            <audio id="remoteAudio" autoplay playsinline style="display: none;"></audio>
+            <video #remoteVideo id="remoteVideo" autoplay="autoplay" muted="true" playsinline class="remoteVideo">
               {{ 'error.html5-not-supported' | translate }}
             </video>
 
@@ -2061,7 +2062,7 @@
             <div class="video-container">
               <!-- Remote audio video when visible -->
             <audio id="remoteAudio" autoplay playsinline style="display: none;"></audio>
-              <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
+              <video #remoteVideo id="remoteVideo" autoplay muted="true" playsinline class="remoteVideo"></video>
 
               <!-- Full-size cam-off icon placeholder -->
               <div *ngIf="remoteStreamStatus" class="remoteVideo cam-off-placeholder">
