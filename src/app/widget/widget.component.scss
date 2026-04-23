@@ -1387,10 +1387,23 @@ button.close-widget-wrapper {
         margin: 2px !important;
 
         &.selected-chip{
-          color: #fff !important;
-          opacity: 1;
+          cursor: default !important;
+          background: #c2c2c2 !important;
+          color: #000000 !important;
+          opacity: 0.6 !important;
+          text-shadow: none !important;
+          pointer-events: none !important;
           }
+
+        &.mat-chip-disabled {
+          cursor: default;
+          background: #ffffff;
+          color: #666666;
+          opacity: 0.6;
+          text-shadow: none;
+          pointer-events: none;
         }
+      }
       }
     }
 
@@ -1799,8 +1812,23 @@ mat-spinner {
     background: var(--main-color);
     color: $white-color;
   }
-  &:disabled {
+
+  &.selected-chip {
+    cursor: default !important;
+    background: #c2c2c2 !important;
+    color: #000000 !important;
+    opacity: 0.6 !important;
+    text-shadow: none !important;
+    pointer-events: none !important;
+  }
+
+  &.mat-chip-disabled {
     cursor: default;
+    background: #ffffff;
+    color: #666666;
+    opacity: 0.6;
+    text-shadow: none;
+    pointer-events: none;
   }
 }
 
@@ -1814,6 +1842,24 @@ mat-spinner {
     font-weight: normal;
     cursor: pointer;
     margin: 2px;
+
+      &.selected-chip {
+      cursor: default !important;
+      background: #c2c2c2 !important;
+      color: #000000 !important;
+      opacity: 0.6 !important;
+      text-shadow: none !important;
+      pointer-events: none !important;
+    }
+
+    &.mat-chip-disabled {
+      cursor: default;
+      background: #ffffff;
+      color: #666666;
+      opacity: 0.6;
+      text-shadow: none;
+      pointer-events: none;
+    }
   }
 }
 
@@ -3902,6 +3948,14 @@ input[type='radio'] {
       &:focus {
         outline: none;
         }
+
+      &:disabled, &.disabled {
+        cursor: default !important;
+        background: #ffffff !important;
+        color: #666666 !important;
+        opacity: 0.6 !important;
+        pointer-events: none !important;
+      }
       }
     }
 
@@ -4055,8 +4109,11 @@ input[type='radio'] {
   }
 
 .selected-button {
-  color: #fff !important;
-  opacity: 1;
+  cursor: default !important;
+  background: #ffffff !important;
+  color: #666666 !important;
+  opacity: 0.6 !important;
+  pointer-events: none !important;
 }
 .fields-validation-error{
   position: absolute;
