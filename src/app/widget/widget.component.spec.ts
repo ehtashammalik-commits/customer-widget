@@ -3475,55 +3475,122 @@ describe('WidgetComponent', () => {
       });
     });
 
-    // describe('toggleCallMic, toggleCallVideo, toggleCallHold', () => {
-    //   beforeEach(() => {
-    //     const mockConfig = { enableWebRtc: true, config: 'testConfig', then: jest.fn() };
-    //     component.sdk = {
-    //       handleCallMic: jest.fn(() => Promise.resolve()),
-    //       convertCall: jest.fn(),
-    //       handleCallHoldState: jest.fn(),
-    //       widgetConfigs$: new BehaviorSubject(mockConfig),
-    //     } as any;
-    //   });
+    describe('toggleCallMic, toggleCallVideo, toggleCallHold', () => {
+      const tooltipMock = {
+        hide: jest.fn(),
+        show: jest.fn(),
+      };
 
-    //   // it('should toggle call mic', async () => {
-    //   //   component.isCallMute = false;
-    //   //   // Ensure widgetConfigs$ emits the correct config before running the test
-    //   //   const mockConfig = { enableWebRtc: true, config: 'testConfig', then: jest.fn() };
-    //   //   (component.sdk.widgetConfigs$ as any).next(mockConfig);
-    //   //   await component.toggleCallMic({ hide: jest.fn(), show: jest.fn() });
-    //   //   expect(component.sdk.handleCallMic).toHaveBeenCalledWith(
-    //   //     'mute_call',
-    //   //     undefined,
-    //   //   );
-    //   //   expect(component.isCallMute).toBe(true);
-    //   // });
+      beforeEach(() => {
+        component.sdk = {
+          handleCallMic: jest.fn(),
+          convertCall: jest.fn(),
+          handleCallHoldState: jest.fn(),
+        } as any;
+        component.dialogId = 'dialog-123';
+        jest.spyOn(component as any, 'updateTooltip').mockResolvedValue(undefined);
+        jest.useFakeTimers();
+      });
 
-    //   // it('should toggle call video', async () => {
-    //   //   component.isVideoHide = false;
+      afterEach(() => {
+        jest.useRealTimers();
+      });
 
-    //   //   await component.toggleCallVideo({ hide: jest.fn(), show: jest.fn() });
+      it('should mute the call and flip the mute state', async () => {
+        component.isCallMute = false;
 
-    //   //   expect(component.sdk.convertCall).toHaveBeenCalledWith(
-    //   //     'off',
-    //   //     'video',
-    //   //     undefined,
-    //   //   );
-    //   //   expect(component.isVideoHide).toBe(true);
-    //   // });
+        const togglePromise = component.toggleCallMic(tooltipMock);
+        expect((component as any).updateTooltip).toHaveBeenCalledWith(tooltipMock);
+        expect(component.sdk.handleCallMic).toHaveBeenCalledWith(
+          'mute_call',
+          'dialog-123',
+        );
 
-    //   // it('should toggle call hold', async () => {
-    //   //   component.isCallOnHold = false;
+        jest.advanceTimersByTime(100);
+        await togglePromise;
 
-    //   //   await component.toggleCallHold({ hide: jest.fn(), show: jest.fn() });
+        expect(component.isCallMute).toBe(true);
+      });
 
-    //   //   expect(component.sdk.handleCallHoldState).toHaveBeenCalledWith(
-    //   //     'holdCall',
-    //   //     undefined,
-    //   //   );
-    //   //   expect(component.isCallOnHold).toBe(true);
-    //   // });
-    // });
+      it('should unmute the call when already muted', async () => {
+        component.isCallMute = true;
+
+        const togglePromise = component.toggleCallMic(tooltipMock);
+        expect(component.sdk.handleCallMic).toHaveBeenCalledWith(
+          'unmute_call',
+          'dialog-123',
+        );
+
+        jest.advanceTimersByTime(100);
+        await togglePromise;
+
+        expect(component.isCallMute).toBe(false);
+      });
+
+      it('should turn the camera off and flip the video state', async () => {
+        component.isVideoHide = false;
+
+        const togglePromise = component.toggleCallVideo(tooltipMock);
+        expect((component as any).updateTooltip).toHaveBeenCalledWith(tooltipMock);
+        expect(component.sdk.convertCall).toHaveBeenCalledWith(
+          'off',
+          'video',
+          'dialog-123',
+        );
+
+        jest.advanceTimersByTime(100);
+        await togglePromise;
+
+        expect(component.isVideoHide).toBe(true);
+      });
+
+      it('should turn the camera on when it is already hidden', async () => {
+        component.isVideoHide = true;
+
+        const togglePromise = component.toggleCallVideo(tooltipMock);
+        expect(component.sdk.convertCall).toHaveBeenCalledWith(
+          'on',
+          'video',
+          'dialog-123',
+        );
+
+        jest.advanceTimersByTime(100);
+        await togglePromise;
+
+        expect(component.isVideoHide).toBe(false);
+      });
+
+      it('should hold the call and flip the hold state', async () => {
+        component.isCallOnHold = false;
+
+        const togglePromise = component.toggleCallHold(tooltipMock);
+        expect((component as any).updateTooltip).toHaveBeenCalledWith(tooltipMock);
+        expect(component.sdk.handleCallHoldState).toHaveBeenCalledWith(
+          'holdCall',
+          'dialog-123',
+        );
+
+        jest.advanceTimersByTime(100);
+        await togglePromise;
+
+        expect(component.isCallOnHold).toBe(true);
+      });
+
+      it('should retrieve the call when it is already on hold', async () => {
+        component.isCallOnHold = true;
+
+        const togglePromise = component.toggleCallHold(tooltipMock);
+        expect(component.sdk.handleCallHoldState).toHaveBeenCalledWith(
+          'retrieveCall',
+          'dialog-123',
+        );
+
+        jest.advanceTimersByTime(100);
+        await togglePromise;
+
+        expect(component.isCallOnHold).toBe(false);
+      });
+    });
 
     describe('handleScreenShareClick', () => {
       it('should return early when isSecureWebCall is true', () => {
@@ -4361,7 +4428,8 @@ describe('WidgetComponent', () => {
         mockFile = {
           name: 'test.txt',
           type: 'text/plain',
-          size: 1024
+          size: 1024,
+          text: jest.fn()
         };
 
         mockReader = {
@@ -4377,35 +4445,34 @@ describe('WidgetComponent', () => {
         global.FileReader = originalFileReader;
       });
 
-      it('should handle text file preview', () => {
+      it('should handle text file preview', async () => {
         mockFile.name = 'test.txt';
         mockFile.type = 'text/plain';
+        mockFile.text.mockResolvedValue('file content');
 
-        component.previewFileForm(mockFile, 0, 0);
+        await component.previewFileForm(mockFile, 0, 0);
 
         expect(global.FileReader).toHaveBeenCalled();
-        expect(mockReader.readAsText).toHaveBeenCalledWith(mockFile);
-
-        // Trigger onload to test the callback
-        mockReader.onload({ target: { result: 'file content' } });
+        expect(mockFile.text).toHaveBeenCalled();
+        expect(mockReader.readAsText).not.toHaveBeenCalled();
 
         expect(component.fileContent['0-0']).toBe('file content');
       });
 
-      it('should handle JSON file preview', () => {
+      it('should handle JSON file preview', async () => {
         mockFile.name = 'test.json';
         mockFile.type = 'application/json';
+        const originalJson = JSON.stringify({ key: 'value' });
+        mockFile.text.mockResolvedValue(originalJson);
 
-        component.previewFileForm(mockFile, 1, 0);
+        await component.previewFileForm(mockFile, 1, 0);
 
         expect(global.FileReader).toHaveBeenCalled();
-        expect(mockReader.readAsText).toHaveBeenCalledWith(mockFile);
+        expect(mockFile.text).toHaveBeenCalled();
+        expect(mockReader.readAsText).not.toHaveBeenCalled();
 
-        // Trigger onload to test the callback with proper JSON string
         // The implementation stringifies the content again for JSON files
-        const originalJson = JSON.stringify({ key: "value" });
         const expectedDoubleStringified = JSON.stringify(originalJson);
-        mockReader.onload({ target: { result: originalJson } });
 
         expect(component.fileContent['1-0']).toBe(expectedDoubleStringified);
       });
@@ -5286,6 +5353,26 @@ describe('WidgetComponent', () => {
       expect(component.toggleCallMic).toHaveBeenCalled();
     });
 
+    it('should skip microphone toggle when it is already muted', () => {
+      component.isCallMute = true;
+
+      const data = {
+        id: '12',
+        dialog: {
+          permissionType: 'microphone',
+          permissionStatus: 'granted'
+        }
+      };
+
+      (component as any).handleMediaPermissionStatusEvent(data);
+
+      expect(component.disableMic).toBe(false);
+      expect(component.toggleCallMic).not.toHaveBeenCalled();
+      expect(console.warn).toHaveBeenCalledWith(
+        'MIC already muted, no action needed',
+      );
+    });
+
     it('should handle microphone denied', () => {
       const data = {
         id: '22',
@@ -5314,6 +5401,26 @@ describe('WidgetComponent', () => {
 
       expect(component.disableCam).toBe(false);
       expect(component.handleVideoIconClick).toHaveBeenCalled();
+    });
+
+    it('should skip camera toggle when video is already hidden', () => {
+      component.isVideoHide = true;
+
+      const data = {
+        id: '34',
+        dialog: {
+          permissionType: 'video',
+          permissionStatus: 'granted'
+        }
+      };
+
+      (component as any).handleMediaPermissionStatusEvent(data);
+
+      expect(component.disableCam).toBe(false);
+      expect(component.handleVideoIconClick).not.toHaveBeenCalled();
+      expect(console.warn).toHaveBeenCalledWith(
+        'Video is already OFF, skipping toggle.',
+      );
     });
 
     it('should handle camera denied', () => {

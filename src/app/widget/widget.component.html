@@ -106,7 +106,8 @@
         <!-- Video Call Screen -->
         <ng-container *ngIf="isWebRtcVideoCallActive">
           <div class="widget-section widget-video-section">
-            <video #remoteVideo id="remoteVideo" autoplay="autoplay" class="remoteVideo">
+            <audio id="remoteAudio" autoplay playsinline style="display: none;"></audio>
+            <video #remoteVideo id="remoteVideo" autoplay="autoplay" muted="true" playsinline class="remoteVideo">
               {{ 'error.html5-not-supported' | translate }}
             </video>
 
@@ -389,7 +390,7 @@
               </div>
             </div>
             <div class="widget-form-button">
-              <button id="formTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
+              <button id="callbackFormTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
                 class="widget-btn widget-form-trigger widget-color">
                 {{ 'button.request-callback' | translate }}
               </button>
@@ -1051,7 +1052,7 @@
 
           <!-- Form Submit Button -->
           <div class="widget-form-button">
-            <button id="formTrigger" type="submit" [ngClass]="{ 'disable-btn': preChatFormGroup.invalid }"
+            <button id="preChatFormTrigger" type="submit" [ngClass]="{ 'disable-btn': preChatFormGroup.invalid }"
               [disabled]="preChatFormGroup.invalid" class="widget-btn widget-form-trigger widget-color">
               {{ 'button.start-chat' | translate }}
             </button>
@@ -2059,9 +2060,9 @@
 
             <!-- test  div start -->
             <div class="video-container">
-              <!-- Remote video when visible -->
-
-              <video #remoteVideo id="remoteVideo" autoplay playsinline class="remoteVideo"></video>
+              <!-- Remote audio video when visible -->
+            <audio id="remoteAudioDirect" autoplay playsinline style="display: none;"></audio>
+              <video #remoteVideo id="remoteVideoDirect" autoplay muted="true" playsinline class="remoteVideo"></video>
 
               <!-- Full-size cam-off icon placeholder -->
               <div *ngIf="remoteStreamStatus" class="remoteVideo cam-off-placeholder">
@@ -2360,7 +2361,7 @@
                 </div>
               </div>
               <div class="widget-form-button">
-                <button id="formTrigger" type="submit" [disabled]="callbackFormGroup.invalid"
+                <button id="callbackFormTriggerSecondary" type="submit" [disabled]="callbackFormGroup.invalid"
                   class="widget-btn widget-form-trigger widget-color">
                   {{ 'button.request-callback' | translate }}
                 </button>
@@ -2443,7 +2444,7 @@
         </div>
         <div class="widget-composer">
           <div class="widget-error-button">
-            <input id="formTrigger" type="submit" class="widget-error-trigger keyEv"
+            <input id="downloadTranscriptTrigger" type="submit" class="widget-error-trigger keyEv"
               value="{{ 'button.download-transcript' | translate }}"
               *ngIf="enableDownloadTranscript && !standaloneWebRtc" (click)="chatTranscript()"
               (keydown)="($event.key === 'Enter' || $event.key === ' ') && chatTranscript()" />
@@ -2580,7 +2581,7 @@
 
 <div class="widget-icon-content changed 2" *ngIf="standaloneCallback && enabledCallback && !standaloneWebRtc">
   <button
-    id="chatIconBtn"
+    id="callbackChatIconBtn"
     [title]="isCallbackMax ? 'Callback Widget' : 'Callback'"
     class="widget-bar-trigger widget-chat-trigger widget-color"
     (click)="changeScreen(isCallbackMax ? 'widget' : 'callbackForm')"
@@ -2593,7 +2594,7 @@
 
 <!-- standAloneWebRtc -->
  <div class="widget-icon-content" *ngIf="standaloneWebRtc">
-<button id="chatIconBtn" class="widget-bar-trigger widget-chat-trigger widget-color"
+<button id="webRtcChatIconBtn" class="widget-bar-trigger widget-chat-trigger widget-color"
   [title]="isWebRtcMax && !isWebRtcVideoCallActive
       ? 'Callback Widget'
       : 'Video Call'

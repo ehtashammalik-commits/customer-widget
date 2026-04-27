@@ -16,6 +16,8 @@
     "sonar": "node sonar-project.js",
     "tdd-test": "jest --testMatch \"**/*.spec.ts\" --coverage"
   },
+
+  
   "private": true,
   "dependencies": {
     "@angular/animations": "^14.0.0",

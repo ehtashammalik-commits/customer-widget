@@ -931,10 +931,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         );
 
         // Initialize validators array
-        const validators = [];
+        let validators = [];
         console.log(attribute.isRequired);
         if (attribute.isRequired) {
-          validators.push(Validators.required);
+          validators = [...validators, Validators.required];
         }
 
         let minLength = 1;
@@ -958,25 +958,25 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               extractedLength = this.extractMinMaxLength(
                 matchingValidation.regex,
               );
-              validators.push(
+              validators = [
+                ...validators,
                 Validators.minLength(extractedLength.minLength ?? minLength),
-              );
-              validators.push(
                 Validators.maxLength(extractedLength.maxLength ?? maxLength),
-              );
+              ];
 
               if (
                 !['shortanswer', 'paragraph'].includes(
                   matchingValidation.type.toLowerCase(),
                 )
               ) {
-                validators.push(
+                validators = [
+                  ...validators,
                   Validators.pattern(
                     matchingValidation.type.toLowerCase() === 'password'
                       ? /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,256}$/
                       : new RegExp(matchingValidation.regex),
                   ),
-                );
+                ];
               }
               break;
 
@@ -986,9 +986,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               break; // No validation needed
 
             default:
-              validators.push(
+              validators = [
+                ...validators,
                 Validators.pattern(new RegExp(matchingValidation.regex)),
-              );
+              ];
               break;
           }
         }
@@ -2172,11 +2173,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleChannelSessionEnd(messageType: string, eventType: string) {
-    if (messageType !== 'survey') {
-      this.clearSession();
-    } else {
+    if (messageType === 'survey') {
       this.storageService.removeItem('user', this.storageType);
       this.isChatActive = false;
+    } else {
+      this.clearSession();
     }
     this.composerDisable();
     this.__postMessageHandlerService.sendPostMessage({
@@ -2465,7 +2466,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           cimMessage.body.subType = 'SURVEY';
           cimMessage.body.surveyLink = url;
           cimMessage.body.markdownText = cimMessage.body.markdownText
-            .replace(urlRegex, '')
+            .replaceAll(urlRegex, '')
             .trim();
           break;
         }
@@ -2585,7 +2586,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
         if (disableInteraction === true) {
           message.body.additionalDetails = {
-            ...(message.body.additionalDetails || {}),
+            ...message.body.additionalDetails,
             disableButtonType: true,
           };
         }
@@ -2597,7 +2598,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             ?.disableInteraction;
         if (disableInteraction === true) {
           message.body.additionalDetails = {
-            ...(message.body.additionalDetails || {}),
+            ...message.body.additionalDetails,
             disableButtonType: true,
           };
         }
@@ -2937,24 +2938,23 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       // mark all the message to seen which are seen by agent or bot
       let latestReadNotificationMessage = this.getLatestDeliveryMessage();
       if (
-        latestReadNotificationMessage &&
-        latestReadNotificationMessage.body.status.toLowerCase() == 'read'
+        latestReadNotificationMessage?.body?.status?.toLowerCase() === 'read'
       ) {
-        this.markMessageStatusToSeenOrSucceed(
-          latestReadNotificationMessage.body.messageId,
-          'seen',
-        );
+        const latestReadMessageId = latestReadNotificationMessage?.body?.messageId;
+        if (latestReadMessageId) {
+          this.markMessageStatusToSeenOrSucceed(latestReadMessageId, 'seen');
+        }
       }
     }
     // mark failed status
 
     this.cimMessage.forEach((message: any) => {
       if (
-        message.body.type.toLowerCase() == 'deliverynotification' &&
-        message.body.status.toLowerCase() == 'failed'
+        message?.body?.type?.toLowerCase() === 'deliverynotification' &&
+        message?.body?.status?.toLowerCase() === 'failed'
       ) {
         this.changeMessageStatusToFailedInHistoryMessages(
-          message.body.messageId,
+          message?.body?.messageId,
         );
       }
     });
@@ -2964,11 +2964,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     for (let i = this.cimMessage.length - 1; i >= 0; i--) {
       const message = this.cimMessage[i];
       if (
-        message &&
-        message.body.type.toLowerCase() == 'deliverynotification' &&
-        message.header.sender &&
-        (message.header.sender.type.toLowerCase() == 'agent' ||
-          message.header.sender.type.toLowerCase() == 'bot')
+        message?.body?.type?.toLowerCase() === 'deliverynotification' &&
+        (message?.header?.sender?.type?.toLowerCase() === 'agent' ||
+          message?.header?.sender?.type?.toLowerCase() === 'bot')
       ) {
         return message;
       }
@@ -3327,7 +3325,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     fileControl.updateValueAndValidity();
   }
   uploadFile(files: any, additionalText: string) {
-    let availableExtensions = [
+    const availableExtensions = new Set([
       'txt',
       'png',
       'jpg',
@@ -3343,13 +3341,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       'mp3',
       'mp4',
       'webp',
-    ];
+    ]);
     let ln = files.length;
     if (ln > 0) {
       for (let i = 0; i < ln; i++) {
         const fileSize = files[i].size;
         const fileMimeType = files[i].name.split('.').pop();
-        if (availableExtensions.includes(fileMimeType.toLowerCase())) {
+        if (availableExtensions.has(fileMimeType.toLowerCase())) {
           let fd = new FormData();
           fd.append('file', files[i]);
           fd.append(
@@ -3537,9 +3535,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     );
 
     if (
-      originalMessage &&
-      originalMessage.body.additionalDetails.interactive.type.toLowerCase() ===
-        'clickablelist'
+      originalMessage?.body?.additionalDetails?.interactive?.type?.toLowerCase() ===
+      'clickablelist'
     ) {
       originalMessage.body.disableClickaAbleList = true;
     }
@@ -3723,14 +3720,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // Audio Functions
   async toggleCallMic(tooltip: any) {
     this.updateTooltip(tooltip);
-    const action = !this.isCallMute ? 'mute_call' : 'unmute_call';
+    const action = this.isCallMute ? 'unmute_call' : 'mute_call';
     this.sdk.handleCallMic(action, this.dialogId);
     // Short delay to ensure proper state transition
 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Update the control state that affects the tooltip text
-    this.isCallMute = !this.isCallMute;
+    this.isCallMute = this.isCallMute !== true;
   }
 
   convertCallRequest(view: any) {
@@ -3750,13 +3747,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   async toggleCallVideo(tooltip: any) {
     if (tooltip) this.updateTooltip(tooltip);
-    const cameraStatus = !this.isVideoHide ? 'off' : 'on';
+    const cameraStatus = this.isVideoHide ? 'on' : 'off';
     this.sdk.convertCall(cameraStatus, 'video', this.dialogId);
     // Short delay to ensure proper state transition
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Update the control state that affects the tooltip text
-    this.isVideoHide = !this.isVideoHide;
+    this.isVideoHide = this.isVideoHide !== true;
   }
 
   async updateTooltip(tooltip: any) {
@@ -3776,12 +3773,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.updateTooltip(tooltip);
 
     // Handle the call action
-    const action = !this.isCallOnHold ? 'holdCall' : 'retrieveCall';
+    const action = this.isCallOnHold ? 'retrieveCall' : 'holdCall';
     this.sdk.handleCallHoldState(action, this.dialogId);
     // Short delay to ensure proper state transition
     await new Promise((resolve) => setTimeout(resolve, 100));
     // Update the control state that affects the tooltip text
-    this.isCallOnHold = !this.isCallOnHold;
+    this.isCallOnHold = this.isCallOnHold !== true;
   }
 
   initiateWebRtcCall(callType: any) {
@@ -3890,10 +3887,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   startCountdown(): void {
-    const countDownDate = new Date().getTime();
+    const countDownDate = Date.now();
     if (!this.counterVar) {
       this.counterVar = setInterval(() => {
-        const now = new Date().getTime();
+        const now = Date.now();
         const distance = now - countDownDate;
         const minutes = (
           '0' + Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
@@ -4097,10 +4094,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     else if (isGranted) this.disableMic = false;
 
     if (isGranted) {
-      if (!this.isCallMute) {
-        this.toggleCallMic(this.micTooltip);
-      } else {
+      if (this.isCallMute) {
         console.warn('MIC already muted, no action needed');
+      } else {
+        this.toggleCallMic(this.micTooltip);
       }
     }
   }
@@ -4110,10 +4107,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     else if (isGranted) this.disableCam = false;
 
     if (isGranted) {
-      if (!this.isVideoHide) {
-        this.handleVideoIconClick(this.camTooltip);
-      } else {
+      if (this.isVideoHide) {
         console.warn('Video is already OFF, skipping toggle.');
+      } else {
+        this.handleVideoIconClick(this.camTooltip);
       }
     }
   }
@@ -4237,6 +4234,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         return 'Please add Camera permissions in your browser to enable video.';
       case 'Audio/Video Device is being used by Someother Party':
         return 'Audio/Video Device is being used by Someother Party';
+      case 'Invalid Credentials. Please provide valid credentials.':
+        return 'Authentication failed. Please verify your SIP credentials and try again.'
       default:
         return 'An unknown general error occurred.';
     }
@@ -5080,7 +5079,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.renderer.setAttribute(uploadedBtn, 'disabled', 'true'); // Correct way
   }
 
-  previewFileForm(file: File, sectionIndex: number, attributeIndex: number) {
+  async previewFileForm(
+    file: File,
+    sectionIndex: number,
+    attributeIndex: number,
+  ) {
     if (!file) return;
 
     const reader = new FileReader();
@@ -5090,8 +5093,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       !fileExtension || ['txt', 'json'].includes(fileExtension);
 
     if (isTextOrJson) {
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        let content = e.target?.result as string;
+      try {
+        let content = await file.text();
 
         if (!this.fileContent) this.fileContent = {};
 
@@ -5107,8 +5110,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
         this.fileContent[key] = content;
         this.filePreviewUrl[key] = content;
-      };
-      reader.readAsText(file);
+      } catch (error) {
+        console.error('Error reading file:', error);
+      }
     } else {
       reader.onload = (e: ProgressEvent<FileReader>) => {
         const blobUrl = URL.createObjectURL(file);
@@ -5630,7 +5634,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
   replaceSpacesWithUnderscores(input: string): string {
-    return input.replace(/\s+/g, '_');
+    return input.replaceAll(/\s+/g, '_');
   }
 
   isSkiptype(attr: any) {
