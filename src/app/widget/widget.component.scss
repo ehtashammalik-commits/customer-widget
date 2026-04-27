@@ -2296,7 +2296,7 @@ mat-spinner {
   top: -4px;    /* slightly above the circle */
   right: -4px;  /* slightly outside to the right */
   background: rgba(225, 210, 0, 0.926);
-  color: white;
+  color: rgb(88, 88, 88);
   font-size: 12px;
   font-weight: bold;
   border-radius: 50%;
@@ -2334,7 +2334,6 @@ mat-spinner {
   font-size: 10px;
   color: red;
   width: 100%;
-  background: #ffffff;
   text-align: center;
 }
 

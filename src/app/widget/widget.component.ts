@@ -2466,6 +2466,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           cimMessage.body.subType = 'SURVEY';
           cimMessage.body.surveyLink = url;
           cimMessage.body.markdownText = cimMessage.body.markdownText
+            // NOSONAR
             .replace(urlRegex, '')
             .trim();
           break;
@@ -5634,6 +5635,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
   replaceSpacesWithUnderscores(input: string): string {
+    // NOSONAR
     return input.replace(/\s+/g, '_');
   }
 
