@@ -4361,7 +4361,8 @@ describe('WidgetComponent', () => {
         mockFile = {
           name: 'test.txt',
           type: 'text/plain',
-          size: 1024
+          size: 1024,
+          text: jest.fn()
         };
 
         mockReader = {
@@ -4377,35 +4378,34 @@ describe('WidgetComponent', () => {
         global.FileReader = originalFileReader;
       });
 
-      it('should handle text file preview', () => {
+      it('should handle text file preview', async () => {
         mockFile.name = 'test.txt';
         mockFile.type = 'text/plain';
+        mockFile.text.mockResolvedValue('file content');
 
-        component.previewFileForm(mockFile, 0, 0);
+        await component.previewFileForm(mockFile, 0, 0);
 
         expect(global.FileReader).toHaveBeenCalled();
-        expect(mockReader.readAsText).toHaveBeenCalledWith(mockFile);
-
-        // Trigger onload to test the callback
-        mockReader.onload({ target: { result: 'file content' } });
+        expect(mockFile.text).toHaveBeenCalled();
+        expect(mockReader.readAsText).not.toHaveBeenCalled();
 
         expect(component.fileContent['0-0']).toBe('file content');
       });
 
-      it('should handle JSON file preview', () => {
+      it('should handle JSON file preview', async () => {
         mockFile.name = 'test.json';
         mockFile.type = 'application/json';
+        const originalJson = JSON.stringify({ key: 'value' });
+        mockFile.text.mockResolvedValue(originalJson);
 
-        component.previewFileForm(mockFile, 1, 0);
+        await component.previewFileForm(mockFile, 1, 0);
 
         expect(global.FileReader).toHaveBeenCalled();
-        expect(mockReader.readAsText).toHaveBeenCalledWith(mockFile);
+        expect(mockFile.text).toHaveBeenCalled();
+        expect(mockReader.readAsText).not.toHaveBeenCalled();
 
-        // Trigger onload to test the callback with proper JSON string
         // The implementation stringifies the content again for JSON files
-        const originalJson = JSON.stringify({ key: "value" });
         const expectedDoubleStringified = JSON.stringify(originalJson);
-        mockReader.onload({ target: { result: originalJson } });
 
         expect(component.fileContent['1-0']).toBe(expectedDoubleStringified);
       });
