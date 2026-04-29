@@ -2161,13 +2161,16 @@
                              [src]="srcURL"
                              alt="{{ message.body.caption }}" />
                       </button>
-                      <a *ngIf="message.body.type == 'VIDEO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
+                      <a *ngIf="message.body.type == 'VIDEO' && message.body.additionalDetails?.videoProvider != 'YOUTUBE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
                         [href]="srcURL" target="_blank">
                         <video *ngIf="srcURL" width="225" height="120" controls>
                           <source [src]="srcURL" type="video/mp4" />
                           {{ message.body.caption }}
                         </video>
                       </a>
+                      <iframe *ngIf="message.body.type == 'VIDEO' && message.body.additionalDetails?.videoProvider == 'YOUTUBE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
+                        [src]="srcURL" width="280" height="150" frameborder="0" allowfullscreen>
+                      </iframe>
                       <a *ngIf="message.body.type == 'AUDIO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
                         [href]="srcURL" target="_blank">
                         <audio *ngIf="srcURL" class="audioPlayer" controls>

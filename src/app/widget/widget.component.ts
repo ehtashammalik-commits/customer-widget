@@ -385,7 +385,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   isStarRating = true;
   isCarouselView = true;
-  
+
   // Additional Schema and Values from Widget Config
   additionalSchema: any[] = [];
   additionalValues: any[] = [];
@@ -405,7 +405,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // disconnects the old socket while a new chat start is in progress.
   private isReconnectingForNewChat: boolean = false;
   private endViewTimerSubscription: Subscription | null = null;
-  
+
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -528,7 +528,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
         this.loadBrowserLanguage();
         console.log('Widget configurations:', configs);
-        
+
         // Log additional schema and values processing
         if (configs.additionalSchema || configs.additionalValues) {
           console.log('Processing additional schema and values...');
@@ -606,6 +606,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log('on Chat Resumed Response:', data.data);
           if (data.data && data.data.length > 0) {
             this.changeScreen('chat');
+            this.enableComposer();
             this.handleResumedMessages(data.data);
           } else {
             // Session exists but has no messages — treat as stale/not found
@@ -691,7 +692,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   receiveMessage(event: MessageEvent): void {
     const action = event.data?.action?.toLowerCase();
-    
+
     switch (action) {
       case 'initialize_chat':
         if (this.isChatActive === false) {
@@ -700,7 +701,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.changeScreen('chat');
         }
         break;
-        
+
       case 'update_input_params':
         let inputParams = event.data?.inputParams;
         // verify input params is not null or empty
@@ -726,7 +727,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.avaClientId = avaClientId;
         break;
     }
-    
+
   }
 
   async getCalendarEvents() {
@@ -985,10 +986,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private processAdditionalSchemaAndValues(configs: any): void {
     // Store additional schema
     this.additionalSchema = configs.additionalSchema || [];
-    
+
     // Store additional values
     this.additionalValues = configs.additionalValues || [];
-    
+
     // Create a map for easy lookup of values by key
     this.additionalValuesMap = {};
     if (this.additionalValues && Array.isArray(this.additionalValues)) {
@@ -1001,7 +1002,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
       });
     }
-    
+
     this.additionalValuesMap['INPUT_PARAMS'] = {
       type: 'object',
       value: this.getInputParamsAsEntities()
@@ -1125,7 +1126,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.serviceIdentifier !== null &&
           this.serviceIdentifier !== undefined
         ) {
-          console.log('Pre Chat Form Data:', this.preChatFormData); 
+          console.log('Pre Chat Form Data:', this.preChatFormData);
           let eventPayload = this.getEventPayload(this.preChatFormData);
           console.log('Event Payload: ==>', eventPayload);
           // If Error is false than proceed with the start Chat and user data setting
@@ -1158,7 +1159,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               }
           ]
       }
-      console.log('Pre Chat Form Data:', this.preChatFormData); 
+      console.log('Pre Chat Form Data:', this.preChatFormData);
       let eventPayload = this.getEventPayload(this.preChatFormData);
       console.log('Event Payload: ==>', eventPayload);
       // If Error is false than proceed with the start Chat and user data setting
@@ -1166,7 +1167,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.setUserData(eventPayload.data, 'startChat');
       }
     } catch (error) {
-      
+
     }
   }
 
@@ -1263,7 +1264,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             timezone: this.browserInfoData?.geoLocationData?.time_zone?.name
               ? this.browserInfoData.geoLocationData.time_zone.name
               : null,
-            language: this.translate.currentLang 
+            language: this.translate.currentLang
               ? this.translate.currentLang
               : this.browserInfoData?.geoLocationData?.languages || null,
             country: this.browserInfoData?.geoLocationData?.country_name
@@ -1654,7 +1655,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.chatEndScreen = false;
         this.isChatMax = true;
         this.isCallbackMax = false;
-        this.isWebRtcMax = false;        
+        this.isWebRtcMax = false;
         this.resizeWidget('form-view');
 
         break;
@@ -2082,7 +2083,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               '[SOCKET_CONNECTED] ==> Connection Request Response:',
               event.data,
             );
-            
+
             if (this.eventTriggerType === 'startChat') {
               this.chatPayLoad = {
                 type: 'CHAT_REQUESTED',
@@ -2121,7 +2122,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
               // Do NOT changeScreen here — onChatResumedSubject will handle it.
             }
             break;
-          
+
           case 'CONVERSATION_RESUMED':
             console.log(
               '[CONVERSATION_RESUMED] ==> Chat Resumed Response:',
@@ -2129,7 +2130,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
             );
             this.isChatActive = true;
             this.handleReconnectsAttempts(0);
-            
+
             this.preChatFormLoader = false;
             this.changeScreen('chat');
             this.enableComposer();
@@ -2234,7 +2235,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     }
   }
 
-  enableComposer() {  
+  enableComposer() {
     console.log('message element is ', this.messageElement);
     const messageRef: any = this.messageElement?.nativeElement;
     if (messageRef) {
@@ -2596,7 +2597,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.isComposerDisable = true;
     }
 
-    // disabling the emoji button if the composer is disabled for any reason. 
+    // disabling the emoji button if the composer is disabled for any reason.
     const emojiTrigger = document.querySelector('.emoji-btn') as HTMLElement;
     if (emojiTrigger) {
       emojiTrigger.style.pointerEvents = 'none';
@@ -2736,7 +2737,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.disableOldInteractiveMessages(this.cimMessage);
         }
         this.cimMessage.push(cimMessage);
-        
+
         this.isChatActive = true;
         this.processSeenMessages();
         this.scrollToBottom();
@@ -3024,32 +3025,32 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (transformedIntent.entities) {
         header.entities = transformedIntent.entities;
       }
-      
+
       // Extract and merge additionalButtonDetails parameters into entities
       if (additionalButtonDetails && additionalButtonDetails.parameters) {
         try {
           let buttonParameters: any = {};
-          
+
           // Parse the parameters if it's a string
           if (typeof additionalButtonDetails.parameters === 'string') {
             buttonParameters = JSON.parse(additionalButtonDetails.parameters);
           } else if (typeof additionalButtonDetails.parameters === 'object') {
             buttonParameters = additionalButtonDetails.parameters;
           }
-          
+
           // Merge with existing entities
           if (header.entities && typeof header.entities === 'object') {
             header.entities = { ...header.entities, ...buttonParameters };
           } else {
             header.entities = buttonParameters;
           }
-          
+
           console.log('Merged button parameters into entities:', header.entities);
         } catch (error) {
           console.error('Error parsing additionalButtonDetails parameters:', error);
         }
       }
-      
+
       header.additionalData = {
         carousalCardId:
           typeof carousalCardId === 'string' && carousalCardId.trim() !== ''
@@ -3391,7 +3392,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleFormMessageType(cimMessage: any) {
-    
+
     const originalMessageId = cimMessage.header.originalMessageId;
     const originalMessage = this.cimMessage.find(msg => msg.id === originalMessageId);
     if (originalMessage) {
@@ -3571,7 +3572,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     const absoluteUrl = `${window.location.origin}/customer-widget/#/chat-transcript?${params.toString()}`;
     const transcriptWindow = window.open(absoluteUrl, '_blank');
     console.log(absoluteUrl);
-    
+
     // Send JWT token via postMessage after window loads
     if (transcriptWindow && jwtToken) {
       setTimeout(() => {
@@ -3604,7 +3605,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
     console.log('Final selected language is :' + this.translate.currentLang);
   }
-  
+
 
   logInToFreeSwitch() {
     if (!this.IsRegisteredInFreeSwitch && this.webRTCConfig.sipExtension) {
@@ -5125,7 +5126,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
      const status = cimMessage.body.additionalDetails?.status?.toLowerCase();
     if (cimMessage.header.originalMessageId && status!=="unfilled") {
       const formGroup = await this.buildFormMessage(cimMessage);
-     
+
       if (status === 'filled') {
         await this.formMessageTypeService.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
       }

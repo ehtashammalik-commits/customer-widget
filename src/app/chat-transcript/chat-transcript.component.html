@@ -70,10 +70,13 @@
           <div class="chat-message-content file-type-message image-type">
             <p>
               <span>
-                <video class="videoPlayer" autoplay muted>
+                <video *ngIf="message.body.additionalDetails?.videoProvider != 'YOUTUBE'" class="videoPlayer" autoplay muted>
                   <source [src]="message.body.attachment.mediaUrl | safeFileURL" type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
+                <iframe *ngIf="message.body.additionalDetails?.videoProvider == 'YOUTUBE'"
+                  [src]="message.body.attachment.mediaUrl | safeFileURL" width="280" height="150" frameborder="0" allowfullscreen>
+                </iframe>
               </span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
@@ -302,10 +305,13 @@
             </div>
             <p>
               <span>
-                <video class="videoPlayer" controls>
+                <video *ngIf="message.body.additionalDetails?.videoProvider != 'YOUTUBE'" class="videoPlayer" controls>
                   <source [src]="message.body.attachment.mediaUrl | safeFileURL" type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
+                <iframe *ngIf="message.body.additionalDetails?.videoProvider == 'YOUTUBE'"
+                  [src]="message.body.attachment.mediaUrl | safeFileURL" width="280" height="150" frameborder="0" allowfullscreen>
+                </iframe>
               </span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
@@ -557,10 +563,13 @@
           <div class="chat-message-content file-type-message image-type">
             <p>
               <span>
-                <video class="videoPlayer" controls>
+                <video *ngIf="message.body.additionalDetails?.videoProvider != 'YOUTUBE'" class="videoPlayer" controls>
                   <source [src]="message.body.attachment.mediaUrl | safeFileURL" type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
+                <iframe *ngIf="message.body.additionalDetails?.videoProvider == 'YOUTUBE'"
+                  [src]="message.body.attachment.mediaUrl | safeFileURL" width="280" height="150" frameborder="0" allowfullscreen>
+                </iframe>
               </span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
