@@ -391,6 +391,7 @@ export class SdkService {
   }
 
   handleCallStart(callPayload: any) {
+    console.log('Step 6 ==== > handle start call in sdk service: ===> ', callPayload);
     const dialCall = {
       action: 'makeCall',
       parameter: {
