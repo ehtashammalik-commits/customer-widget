@@ -15,7 +15,7 @@ import { Pipe, PipeTransform } from '@angular/core';
  * If the argument is falsy the pipe defaults to `8px` (rounded).
  */
 @Pipe({
-  name: 'cornerShape'
+  name: 'cornerShape',
 })
 export class CornerShapePipe implements PipeTransform {
   transform(shape?: string): string {

@@ -622,7 +622,9 @@ describe('TranscriptComponent (unit)', () => {
           { label: 'Option B', isSelected: false },
           { label: 'Option C', isSelected: true },
         ];
-        expect(component.getFormAnswerLabels(answer)).toBe('Option A, Option C');
+        expect(component.getFormAnswerLabels(answer)).toBe(
+          'Option A, Option C',
+        );
       });
 
       it('should handle all unselected options', () => {
@@ -659,10 +661,7 @@ describe('TranscriptComponent (unit)', () => {
       });
 
       it('should return false if no option is selected', () => {
-        const answer = [
-          { isSelected: false },
-          { isSelected: false },
-        ];
+        const answer = [{ isSelected: false }, { isSelected: false }];
         expect(component.hasSelectedOption(answer)).toBe(false);
       });
     });
@@ -674,27 +673,21 @@ describe('TranscriptComponent (unit)', () => {
       });
 
       it('should return false for empty answer array', () => {
-        expect(component.isAnswered({ answer: [], attributeType: 'TEXT' })).toBe(
-          false,
-        );
+        expect(
+          component.isAnswered({ answer: [], attributeType: 'TEXT' }),
+        ).toBe(false);
       });
 
       it('should check OPTIONS type for selected items', () => {
         const unselected = {
           attributeType: 'OPTIONS',
-          answer: [
-            { isSelected: false },
-            { isSelected: false },
-          ],
+          answer: [{ isSelected: false }, { isSelected: false }],
         };
         expect(component.isAnswered(unselected)).toBe(false);
 
         const selected = {
           attributeType: 'OPTIONS',
-          answer: [
-            { isSelected: false },
-            { isSelected: true },
-          ],
+          answer: [{ isSelected: false }, { isSelected: true }],
         };
         expect(component.isAnswered(selected)).toBe(true);
       });
@@ -794,30 +787,20 @@ describe('TranscriptComponent (unit)', () => {
           },
         ];
 
-        expect(
-          component.getGlobalIndex(sections, sections[0], 0),
-        ).toBe(0);
-        expect(
-          component.getGlobalIndex(sections, sections[0], 2),
-        ).toBe(1);
-        expect(
-          component.getGlobalIndex(sections, sections[1], 1),
-        ).toBe(2);
+        expect(component.getGlobalIndex(sections, sections[0], 0)).toBe(0);
+        expect(component.getGlobalIndex(sections, sections[0], 2)).toBe(1);
+        expect(component.getGlobalIndex(sections, sections[1], 1)).toBe(2);
       });
 
       it('should return count if attribute not found', () => {
         const sections = [
           {
-            attributes: [
-              { attributeType: 'TEXT', answer: ['yes'] },
-            ],
+            attributes: [{ attributeType: 'TEXT', answer: ['yes'] }],
           },
         ];
 
         // Request index beyond section length
-        expect(
-          component.getGlobalIndex(sections, sections[0], 99),
-        ).toBe(1);
+        expect(component.getGlobalIndex(sections, sections[0], 99)).toBe(1);
       });
 
       it('should handle empty sections', () => {
@@ -892,7 +875,9 @@ describe('TranscriptComponent (unit)', () => {
         const result = component.getMessageData(updateMsg);
         // Component returns the entire originalMessage object
         expect((result as any).body?.formTitle).toBe('Original Title');
-        expect((result as any).body?.formDescription).toBe('Original Description');
+        expect((result as any).body?.formDescription).toBe(
+          'Original Description',
+        );
       });
 
       it('should use default values when nothing found', () => {

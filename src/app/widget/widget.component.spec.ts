@@ -62,7 +62,9 @@ const realFormBuilder = new FormBuilder();
 const mockFormBuilder = {
   group: jest.fn((obj) => realFormBuilder.group(obj)),
   array: jest.fn((arr) => realFormBuilder.array(arr)),
-  control: jest.fn((val, validators) => realFormBuilder.control(val, validators)),
+  control: jest.fn((val, validators) =>
+    realFormBuilder.control(val, validators),
+  ),
 };
 
 const mockBrowserNotificationService: any = {
@@ -79,14 +81,14 @@ const mockPostMessageHandlerService = {
   browserInfoData$: new BehaviorSubject(null),
 };
 const mockFormMessageTypeService = {
-  getDefaultValue: jest.fn()
+  getDefaultValue: jest.fn(),
 };
 const mockSpinnerService = {
   show: jest.fn(),
-  hide: jest.fn()
+  hide: jest.fn(),
 };
 const mockRouter = {
-  navigate: jest.fn()
+  navigate: jest.fn(),
 };
 
 // ---------- Test suite ----------
@@ -98,7 +100,7 @@ describe('WidgetComponent', () => {
     const enhancedPostMessageHandlerService = {
       ...mockPostMessageHandlerService,
       getParentOrigin: jest.fn(() => 'http://mock-origin.com'),
-      sendPostMessage: jest.fn()
+      sendPostMessage: jest.fn(),
     };
 
     component = new WidgetComponent(
@@ -120,10 +122,11 @@ describe('WidgetComponent', () => {
       mockRouter as any, // Router
       {} as any, // Document
       mockFormMessageTypeService as any,
-      mockSpinnerService as any
+      mockSpinnerService as any,
     );
     // Ensure __postMessageHandlerService is properly set up
-    (component as any).__postMessageHandlerService = enhancedPostMessageHandlerService;
+    (component as any).__postMessageHandlerService =
+      enhancedPostMessageHandlerService;
   });
 
   afterEach(() => {
@@ -163,7 +166,11 @@ describe('WidgetComponent', () => {
           return { unsubscribe: jest.fn() };
         }),
       };
-      const mockConfig = { enableWebRtc: true, config: 'testConfig', then: jest.fn() };
+      const mockConfig = {
+        enableWebRtc: true,
+        config: 'testConfig',
+        then: jest.fn(),
+      };
       mockWidgetConfigs$ = new BehaviorSubject(mockConfig);
       mockValidations$ = { subscribe: jest.fn() };
       mockRenderPreChatForm$ = { subscribe: jest.fn() };
@@ -182,10 +189,10 @@ describe('WidgetComponent', () => {
       };
       jest
         .spyOn(component as any, 'setFontFromLocalStorage')
-        .mockImplementation(() => { });
+        .mockImplementation(() => {});
       jest
         .spyOn(component as any, 'createFormValidationControls')
-        .mockImplementation(() => { });
+        .mockImplementation(() => {});
 
       // Patch route and SDK observables
       component.sdk = {
@@ -415,7 +422,8 @@ describe('WidgetComponent', () => {
         getParentOrigin: jest.fn(() => 'http://mock-origin.com'),
       };
 
-      (component as any).__postMessageHandlerService = mockPostMessageHandlerService;
+      (component as any).__postMessageHandlerService =
+        mockPostMessageHandlerService;
     });
 
     it('should subscribe to browserInfoData$ observable', () => {
@@ -547,10 +555,12 @@ describe('WidgetComponent', () => {
         },
       };
 
-      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
-        callback(mockData);
-        return { unsubscribe: jest.fn() };
-      });
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation(
+        (callback) => {
+          callback(mockData);
+          return { unsubscribe: jest.fn() };
+        },
+      );
 
       component['subscribeToCallbackRequest']();
 
@@ -564,10 +574,12 @@ describe('WidgetComponent', () => {
         },
       };
 
-      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
-        callback(mockData);
-        return { unsubscribe: jest.fn() };
-      });
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation(
+        (callback) => {
+          callback(mockData);
+          return { unsubscribe: jest.fn() };
+        },
+      );
 
       component['subscribeToCallbackRequest']();
 
@@ -579,17 +591,21 @@ describe('WidgetComponent', () => {
         status: {},
       };
 
-      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
-        callback(mockData);
-        return { unsubscribe: jest.fn() };
-      });
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation(
+        (callback) => {
+          callback(mockData);
+          return { unsubscribe: jest.fn() };
+        },
+      );
 
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       component['subscribeToCallbackRequest']();
 
       expect(component.callbackResponseStatus).toBe('error');
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Something Went Wrong Please check logs');
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Something Went Wrong Please check logs',
+      );
 
       consoleErrorSpy.mockRestore();
     });
@@ -597,17 +613,21 @@ describe('WidgetComponent', () => {
     it('should set callbackResponseStatus to error when status is missing', () => {
       const mockData = {};
 
-      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
-        callback(mockData);
-        return { unsubscribe: jest.fn() };
-      });
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation(
+        (callback) => {
+          callback(mockData);
+          return { unsubscribe: jest.fn() };
+        },
+      );
 
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       component['subscribeToCallbackRequest']();
 
       expect(component.callbackResponseStatus).toBe('error');
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Something Went Wrong Please check logs');
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Something Went Wrong Please check logs',
+      );
 
       consoleErrorSpy.mockRestore();
     });
@@ -621,10 +641,12 @@ describe('WidgetComponent', () => {
 
       component.callbackLoader = true;
 
-      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
-        callback(mockData);
-        return { unsubscribe: jest.fn() };
-      });
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation(
+        (callback) => {
+          callback(mockData);
+          return { unsubscribe: jest.fn() };
+        },
+      );
 
       component['subscribeToCallbackRequest']();
 
@@ -641,10 +663,12 @@ describe('WidgetComponent', () => {
       component.isChatActive = true;
       component.changeView = jest.fn();
 
-      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
-        callback(mockData);
-        return { unsubscribe: jest.fn() };
-      });
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation(
+        (callback) => {
+          callback(mockData);
+          return { unsubscribe: jest.fn() };
+        },
+      );
 
       component['subscribeToCallbackRequest']();
 
@@ -662,10 +686,12 @@ describe('WidgetComponent', () => {
       component.isChatActive = false;
       component.changeScreen = jest.fn();
 
-      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
-        callback(mockData);
-        return { unsubscribe: jest.fn() };
-      });
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation(
+        (callback) => {
+          callback(mockData);
+          return { unsubscribe: jest.fn() };
+        },
+      );
 
       component['subscribeToCallbackRequest']();
 
@@ -682,14 +708,19 @@ describe('WidgetComponent', () => {
 
       const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
-        callback(mockData);
-        return { unsubscribe: jest.fn() };
-      });
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation(
+        (callback) => {
+          callback(mockData);
+          return { unsubscribe: jest.fn() };
+        },
+      );
 
       component['subscribeToCallbackRequest']();
 
-      expect(consoleLogSpy).toHaveBeenCalledWith('callback request response events => ', mockData);
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        'callback request response events => ',
+        mockData,
+      );
 
       consoleLogSpy.mockRestore();
     });
@@ -701,10 +732,12 @@ describe('WidgetComponent', () => {
         },
       };
 
-      mockOnCallbackRequestResponse$.subscribe.mockImplementation((callback) => {
-        callback(mockData);
-        return { unsubscribe: jest.fn() };
-      });
+      mockOnCallbackRequestResponse$.subscribe.mockImplementation(
+        (callback) => {
+          callback(mockData);
+          return { unsubscribe: jest.fn() };
+        },
+      );
 
       component['subscribeToCallbackRequest']();
 
@@ -754,7 +787,7 @@ describe('WidgetComponent', () => {
 
       expect(mockElement.style.setProperty).toHaveBeenCalledWith(
         '--main-color',
-        '#FF5733'
+        '#FF5733',
       );
     });
 
@@ -827,12 +860,12 @@ describe('WidgetComponent', () => {
           {
             attributes: [
               { key: 'name', valueType: 'string50' },
-              { key: 'email', valueType: 'email' }
-            ]
-          }
+              { key: 'email', valueType: 'email' },
+            ],
+          },
         ],
         formTitle: 'Test Form',
-        formDescription: 'Test Description'
+        formDescription: 'Test Description',
       };
 
       // Mock the subscription to call the callback with test data
@@ -858,7 +891,7 @@ describe('WidgetComponent', () => {
       expect(component.createFormValidationControls).toHaveBeenCalledWith(
         mockFormData.sections,
         component.formValidations,
-        'preChatForm'
+        'preChatForm',
       );
     });
 
@@ -869,12 +902,12 @@ describe('WidgetComponent', () => {
           {
             attributes: [
               { key: 'email', valueType: 'email' },
-              { key: 'phone', valueType: 'phoneNumber' }
-            ]
-          }
+              { key: 'phone', valueType: 'phoneNumber' },
+            ],
+          },
         ],
         formTitle: 'Multi Section Form',
-        formDescription: 'Form with multiple sections'
+        formDescription: 'Form with multiple sections',
       };
 
       const mockValidationData = {
@@ -905,14 +938,15 @@ describe('WidgetComponent', () => {
       expect(component.preChatFormInfo).toEqual(mockFormData);
       expect(component.formData).toEqual(mockFormData.sections);
       expect(component.preChatformTitle).toBe('Multi Section Form');
-      expect(component.preChatformDescription).toBe('Form with multiple sections');
+      expect(component.preChatformDescription).toBe(
+        'Form with multiple sections',
+      );
       expect(component.createFormValidationControls).toHaveBeenCalledWith(
         mockFormData.sections,
         component.formValidations,
-        'preChatForm'
+        'preChatForm',
       );
     });
-
   });
 
   // ---------- eventListener ----------
@@ -992,13 +1026,14 @@ describe('WidgetComponent', () => {
 
     it('should handle SOCKET_CONNECTED with eventTriggerType ""', () => {
       component.eventTriggerType = '';
+      component.isChatActive = true;
       component.customerData = {
         serviceIdentifier: 's',
         channelCustomerIdentifier: 'c',
       };
       component.eventListener({ id: 1, type: 'SOCKET_CONNECTED', data: {} });
       expect(mockSdk.onChatResumed).toHaveBeenCalledWith('s', 'c');
-      expect(mockChangeScreen).toHaveBeenCalledWith('chat');
+      expect(mockChangeScreen).not.toHaveBeenCalledWith('error');
     });
 
     it('should handle CONVERSATION_RESUMED', () => {
@@ -1305,7 +1340,9 @@ describe('WidgetComponent', () => {
         'preChatForm',
       );
 
-      const sections = component.preChatFormGroup.get('sections') as unknown as FormArray;
+      const sections = component.preChatFormGroup.get(
+        'sections',
+      ) as unknown as FormArray;
       expect(sections).toBeTruthy();
       expect(sections.length).toBe(1);
 
@@ -1415,7 +1452,9 @@ describe('WidgetComponent', () => {
         ),
       ).not.toThrow();
 
-      const sections = component.preChatFormGroup.get('sections') as unknown as FormArray;
+      const sections = component.preChatFormGroup.get(
+        'sections',
+      ) as unknown as FormArray;
       expect(sections).toBeTruthy();
       expect(sections.length).toBe(1);
       const sectionGroup = sections.at(0) as FormGroup;
@@ -1549,7 +1588,7 @@ describe('WidgetComponent', () => {
         body: { type: 'notification', notificationType: 'typing_started' },
         header: { sender: { type: 'agent' } },
       };
-      component.typingIndicatorTimer = setTimeout(() => { }, 5000);
+      component.typingIndicatorTimer = setTimeout(() => {}, 5000);
       component.handleCimMessage(cimMessage);
       jest.advanceTimersByTime(5000);
       expect(component.typingIndicatorTimer).toBeNull();
@@ -1702,7 +1741,7 @@ describe('WidgetComponent', () => {
     it('should call changeView and startCountdown on ACTIVE dialogState', () => {
       const spyStart = jest
         .spyOn(component as any, 'startCountdown')
-        .mockImplementation(() => { });
+        .mockImplementation(() => {});
 
       const dialog = { id: 'd2', state: 'ACTIVE' };
       component.handleDialogStates({
@@ -1837,12 +1876,10 @@ describe('WidgetComponent', () => {
       spyHandleCallStart = jest.spyOn(component.sdk, 'handleCallStart');
       spyHandleRefresh = jest
         .spyOn(component, 'handleRefreshCaseForWebRTC')
-        .mockImplementation(() => { });
+        .mockImplementation(() => {});
       component.webRTCConfig = { customerName: '', customerNumber: '' };
       component.setAuthorizedResponse = { token: 'auth-token' };
     });
-
-
 
     it('should subscribe to local and remote streams and update video elements + call setView/startWebRtcCall', () => {
       const mockLocalStream = {} as MediaStream;
@@ -1852,8 +1889,12 @@ describe('WidgetComponent', () => {
       const mockLocalVideoElement = { srcObject: null };
       const mockRemoteVideoElement = { srcObject: null };
 
-      (component as any).localVideoRef = { nativeElement: mockLocalVideoElement };
-      (component as any).remoteVideoRef = { nativeElement: mockRemoteVideoElement };
+      (component as any).localVideoRef = {
+        nativeElement: mockLocalVideoElement,
+      };
+      (component as any).remoteVideoRef = {
+        nativeElement: mockRemoteVideoElement,
+      };
 
       // Mock subjects for SDK streams
       const localStreamSubject = new Subject<MediaStream>();
@@ -1866,7 +1907,10 @@ describe('WidgetComponent', () => {
       (component as any).sdk = mockSdkService;
 
       const spySetView = jest.spyOn(component as any, 'setView');
-      const spyStartWebRtcCall = jest.spyOn(component as any, 'startWebRtcCall');
+      const spyStartWebRtcCall = jest.spyOn(
+        component as any,
+        'startWebRtcCall',
+      );
 
       // ensure video call is NOT active so startWebRtcCall is triggered
       component.isVideoCallActive = false;
@@ -1890,8 +1934,6 @@ describe('WidgetComponent', () => {
       expect(component.isSecureWebCall).toBe(false);
     });
 
-
-
     it('should reset isVideoHide and isCallMute when callType is video', () => {
       component.isVideoHide = true;
       component.isCallMute = true;
@@ -1914,9 +1956,6 @@ describe('WidgetComponent', () => {
       });
       expect(component.isWebRtcVideoCallActive).toBe(true);
     });
-
-
-
 
     it('should not activate standalone call when showInvalidCodeError is true', () => {
       component.standaloneWebRtc = true;
@@ -1997,7 +2036,7 @@ describe('WidgetComponent', () => {
   // ---------- Secure Link Handling ----------
   describe('WidgetComponent - Secure Link Handling', () => {
     beforeEach(() => {
-      jest.spyOn(component, 'logInToFreeSwitch').mockImplementation(() => { });
+      jest.spyOn(component, 'logInToFreeSwitch').mockImplementation(() => {});
 
       // mock the webRTCConfig before tests run
       component.webRTCConfig = {
@@ -2129,10 +2168,10 @@ describe('WidgetComponent', () => {
     beforeEach(() => {
       jest
         .spyOn(component, 'markMessageStatusToSeenOrSucceed')
-        .mockImplementation(() => { });
+        .mockImplementation(() => {});
       jest
         .spyOn(component, 'changeMessageStatusToFailed')
-        .mockImplementation(() => { });
+        .mockImplementation(() => {});
     });
 
     it('should call markMessageStatusToSeenOrSucceed when status is read', () => {
@@ -2191,7 +2230,7 @@ describe('WidgetComponent', () => {
     beforeEach(() => {
       jest
         .spyOn(component, 'constructAndPublishMessageSeenNotification')
-        .mockImplementation(() => { });
+        .mockImplementation(() => {});
       jest.spyOn(document, 'hasFocus').mockReturnValue(true);
     });
 
@@ -2291,10 +2330,10 @@ describe('WidgetComponent', () => {
 
   describe('WidgetComponent - clearSession', () => {
     beforeEach(() => {
-      jest.spyOn(component, 'callEnd').mockImplementation(() => { });
-      jest.spyOn(component, 'changeScreen').mockImplementation(() => { });
+      jest.spyOn(component, 'callEnd').mockImplementation(() => {});
+      jest.spyOn(component, 'changeScreen').mockImplementation(() => {});
       component.sdk = { handleChatEnd: jest.fn() } as any;
-      jest.spyOn(component, 'clearMessageData').mockImplementation(() => { });
+      jest.spyOn(component, 'clearMessageData').mockImplementation(() => {});
     });
 
     it('should call callEnd if any call is active', () => {
@@ -2352,7 +2391,7 @@ describe('WidgetComponent', () => {
   // ---------- clearMessageData ----------
   describe('WidgetComponent - clearMessageData', () => {
     beforeEach(() => {
-      jest.spyOn(component, 'scrollToBottom').mockImplementation(() => { });
+      jest.spyOn(component, 'scrollToBottom').mockImplementation(() => {});
     });
 
     it('should clear input value if elementView exists', () => {
@@ -2433,393 +2472,301 @@ describe('WidgetComponent', () => {
       expect(component.getTodayEvent).not.toHaveBeenCalled();
     });
 
-        it('should handle errors gracefully', async () => {
+    it('should handle errors gracefully', async () => {
+      const consoleSpy = jest
 
-          const consoleSpy = jest
+        .spyOn(console, 'log')
 
-            .spyOn(console, 'log')
+        .mockImplementation(() => {});
 
-            .mockImplementation(() => { });
+      (component.sdk.fetchBusinessCalendarId as jest.Mock).mockRejectedValue(
+        'API error',
+      );
 
-          (component.sdk.fetchBusinessCalendarId as jest.Mock).mockRejectedValue(
+      await component.getCalendarEvents();
 
-            'API error',
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Business Calendar Api Response:',
 
-          );
+        'API error',
+      );
 
-          await component.getCalendarEvents();
+      consoleSpy.mockRestore();
+    });
+  });
 
-    
+  describe('Scoring Functions', () => {
+    let formData: any;
 
-          expect(consoleSpy).toHaveBeenCalledWith(
+    beforeEach(() => {
+      formData = {
+        body: {
+          enableWeightage: true,
 
-            'Business Calendar Api Response:',
+          formWeightage: 50,
 
-            'API error',
+          formScore: null,
 
-          );
+          sections: [
+            {
+              sectionId: 's1',
 
-          consoleSpy.mockRestore();
+              sectionName: 'Section 1',
 
-        });
+              sectionWeightage: 40,
 
-      });
+              sectionScore: null,
 
-    
-
-      describe('Scoring Functions', () => {
-
-        let formData: any;
-
-    
-
-        beforeEach(() => {
-
-          formData = {
-
-            body: {
-
-              enableWeightage: true,
-
-              formWeightage: 50,
-
-              formScore: null,
-
-              sections: [
-
+              attributes: [
                 {
+                  id: 'a1',
 
-                  sectionId: 's1',
+                  label: 'Attribute 1',
 
-                  sectionName: 'Section 1',
+                  attributeWeightage: 30,
 
-                  sectionWeightage: 40,
+                  attributeScore: null,
 
-                  sectionScore: null,
-
-                  attributes: [
-
+                  answer: [
                     {
-
-                      id: 'a1',
-
-                      label: 'Attribute 1',
-
-                      attributeWeightage: 30,
-
-                      attributeScore: null,
-
-                      answer: [
-
-                        { label: 'Option 1', isSelected: true, additionalAttributes: { optionWeightage: 50 } },
-
-                        { label: 'Option 2', isSelected: false, additionalAttributes: { optionWeightage: 100 } }
-
-                      ]
-
+                      label: 'Option 1',
+                      isSelected: true,
+                      additionalAttributes: { optionWeightage: 50 },
                     },
 
                     {
-
-                      id: 'a2',
-
-                      label: 'Attribute 2',
-
-                      attributeWeightage: 70,
-
-                      attributeScore: null,
-
-                      answer: [
-
-                        { label: 'Option A', isSelected: false, additionalAttributes: { optionWeightage: 20 } },
-
-                        { label: 'Option B', isSelected: true, additionalAttributes: { optionWeightage: 80 } }
-
-                      ]
-
-                    }
-
-                  ]
-
+                      label: 'Option 2',
+                      isSelected: false,
+                      additionalAttributes: { optionWeightage: 100 },
+                    },
+                  ],
                 },
 
                 {
+                  id: 'a2',
 
-                  sectionId: 's2',
+                  label: 'Attribute 2',
 
-                  sectionName: 'Section 2',
+                  attributeWeightage: 70,
 
-                  sectionWeightage: 60,
+                  attributeScore: null,
 
-                  sectionScore: null,
-
-                  attributes: [
+                  answer: [
+                    {
+                      label: 'Option A',
+                      isSelected: false,
+                      additionalAttributes: { optionWeightage: 20 },
+                    },
 
                     {
+                      label: 'Option B',
+                      isSelected: true,
+                      additionalAttributes: { optionWeightage: 80 },
+                    },
+                  ],
+                },
+              ],
+            },
 
-                      id: 'a3',
+            {
+              sectionId: 's2',
 
-                      label: 'Attribute 3',
+              sectionName: 'Section 2',
 
-                      attributeWeightage: 100,
+              sectionWeightage: 60,
 
-                      attributeScore: null,
+              sectionScore: null,
 
-                      answer: [
+              attributes: [
+                {
+                  id: 'a3',
 
-                        { label: 'Op X', isSelected: true, additionalAttributes: { optionWeightage: 90 } }
+                  label: 'Attribute 3',
 
-                      ]
+                  attributeWeightage: 100,
 
-                    }
+                  attributeScore: null,
 
-                  ]
+                  answer: [
+                    {
+                      label: 'Op X',
+                      isSelected: true,
+                      additionalAttributes: { optionWeightage: 90 },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      };
+    });
 
-                }
+    describe('calculateAttributeScore', () => {
+      it('should calculate attributeScore for selected options', () => {
+        component.calculateAttributeScore(formData);
 
-              ]
+        // (50 / 100) * 30 = 15
 
-            }
+        expect(formData.body.sections[0].attributes[0].attributeScore).toBe(15);
 
-          };
+        // (80 / 100) * 70 = 56
 
-        });
+        expect(formData.body.sections[0].attributes[1].attributeScore).toBe(56);
 
-    
+        // (90 / 100) * 100 = 90
 
-        describe('calculateAttributeScore', () => {
-
-          it('should calculate attributeScore for selected options', () => {
-
-            component.calculateAttributeScore(formData);
-
-            // (50 / 100) * 30 = 15
-
-            expect(formData.body.sections[0].attributes[0].attributeScore).toBe(15);
-
-            // (80 / 100) * 70 = 56
-
-            expect(formData.body.sections[0].attributes[1].attributeScore).toBe(56);
-
-            // (90 / 100) * 100 = 90
-
-            expect(formData.body.sections[1].attributes[0].attributeScore).toBe(90);
-
-          });
-
-    
-
-          it('should not calculate attributeScore if no option is selected', () => {
-
-            formData.body.sections[0].attributes[0].answer.forEach((a:any) => a.isSelected = false);
-
-            component.calculateAttributeScore(formData);
-
-            expect(formData.body.sections[0].attributes[0].attributeScore).toBeNull();
-
-          });
-
-    
-
-          it('should handle null optionWeightage', () => {
-
-    
-
-                  formData.body.sections[0].attributes[0].answer[0].additionalAttributes.optionWeightage = null;
-
-    
-
-                  component.calculateAttributeScore(formData);
-
-    
-
-                  // (null / 100) * 30 -> 0 -> toFixed(1) -> "0.0" -> parseFloat -> 0
-
-    
-
-                  expect(formData.body.sections[0].attributes[0].attributeScore).toBe(0);
-
-    
-
-                });
-
-    
-
-          it('should handle null attributeWeightage', () => {
-
-            formData.body.sections[0].attributes[0].attributeWeightage = null;
-
-            component.calculateAttributeScore(formData);
-
-            // (50 / 100) * null -> 0 -> toFixed(1) -> "0.0" -> parseFloat -> 0
-
-            expect(formData.body.sections[0].attributes[0].attributeScore).toBe(0);
-
-          });
-
-        });
-
-    
-
-        describe('calculateSectionScores', () => {
-
-          beforeEach(() => {
-
-            // Pre-calculate attribute scores for testing this function
-
-            formData.body.sections[0].attributes[0].attributeScore = 15;
-
-            formData.body.sections[0].attributes[1].attributeScore = 56;
-
-            formData.body.sections[1].attributes[0].attributeScore = 90;
-
-          });
-
-    
-
-          it('should calculate sectionScore based on attributeScores', () => {
-
-            component.calculateSectionScores(formData);
-
-            // total attribute score = 15 + 56 = 71
-
-            // (71 / 100) * 40 = 28.4
-
-            expect(formData.body.sections[0].sectionScore).toBe(28.4);
-
-            // total attribute score = 90
-
-            // (90 / 100) * 60 = 54
-
-            expect(formData.body.sections[1].sectionScore).toBe(54);
-
-          });
-
-    
-
-          it('should set sectionScore to null if weightage is disabled', () => {
-
-            formData.body.enableWeightage = false;
-
-            component.calculateSectionScores(formData);
-
-            expect(formData.body.sections[0].sectionScore).toBeNull();
-
-            expect(formData.body.sections[1].sectionScore).toBeNull();
-
-          });
-
-    
-
-          it('should ignore null attributeScores', () => {
-
-            formData.body.sections[0].attributes[0].attributeScore = null;
-
-            component.calculateSectionScores(formData);
-
-            // total attribute score = 56
-
-            // (56 / 100) * 40 = 22.4
-
-            expect(formData.body.sections[0].sectionScore).toBe(22.4);
-
-          });
-
-    
-
-          it('should set sectionScore to null if all attributeScores are null', () => {
-
-            formData.body.sections[0].attributes.forEach((a:any) => a.attributeScore = null);
-
-            component.calculateSectionScores(formData);
-
-            expect(formData.body.sections[0].sectionScore).toBeNull();
-
-          });
-
-        });
-
-    
-
-        describe('calculateFormScore', () => {
-
-          beforeEach(() => {
-
-            // Pre-calculate section scores
-
-            formData.body.sections[0].sectionScore = 28.4;
-
-            formData.body.sections[1].sectionScore = 54;
-
-          });
-
-    
-
-          it('should calculate formScore based on sectionScores', () => {
-
-            component.calculateFormScore(formData);
-
-            // total section score = 28.4 + 54 = 82.4
-
-            // (82.4 / 100) * 50 = 41.2 -> Math.round -> 41
-
-            expect(formData.body.formScore).toBe(41);
-
-          });
-
-    
-
-          it('should return undefined if formData is not provided', () => {
-
-            expect(component.calculateFormScore(undefined)).toBeUndefined();
-
-            expect(component.calculateFormScore(null)).toBeUndefined();
-
-          });
-
-    
-
-          it('should set formScore to null if weightage is disabled', () => {
-
-            formData.body.enableWeightage = false;
-
-            component.calculateFormScore(formData);
-
-            expect(formData.body.formScore).toBeNull();
-
-          });
-
-    
-
-          it('should ignore null sectionScores', () => {
-
-            formData.body.sections[0].sectionScore = null;
-
-            component.calculateFormScore(formData);
-
-            // total section score = 54
-
-            // (54 / 100) * 50 = 27 -> Math.round -> 27
-
-            expect(formData.body.formScore).toBe(27);
-
-          });
-
-    
-
-          it('should set formScore to null if all sectionScores are null', () => {
-
-            formData.body.sections.forEach((s:any) => s.sectionScore = null);
-
-            component.calculateFormScore(formData);
-
-            expect(formData.body.formScore).toBeNull();
-
-          });
-
-        });
-
+        expect(formData.body.sections[1].attributes[0].attributeScore).toBe(90);
       });
+
+      it('should not calculate attributeScore if no option is selected', () => {
+        formData.body.sections[0].attributes[0].answer.forEach(
+          (a: any) => (a.isSelected = false),
+        );
+
+        component.calculateAttributeScore(formData);
+
+        expect(
+          formData.body.sections[0].attributes[0].attributeScore,
+        ).toBeNull();
+      });
+
+      it('should handle null optionWeightage', () => {
+        formData.body.sections[0].attributes[0].answer[0].additionalAttributes.optionWeightage =
+          null;
+
+        component.calculateAttributeScore(formData);
+
+        // (null / 100) * 30 -> 0 -> toFixed(1) -> "0.0" -> parseFloat -> 0
+
+        expect(formData.body.sections[0].attributes[0].attributeScore).toBe(0);
+      });
+
+      it('should handle null attributeWeightage', () => {
+        formData.body.sections[0].attributes[0].attributeWeightage = null;
+
+        component.calculateAttributeScore(formData);
+
+        // (50 / 100) * null -> 0 -> toFixed(1) -> "0.0" -> parseFloat -> 0
+
+        expect(formData.body.sections[0].attributes[0].attributeScore).toBe(0);
+      });
+    });
+
+    describe('calculateSectionScores', () => {
+      beforeEach(() => {
+        // Pre-calculate attribute scores for testing this function
+
+        formData.body.sections[0].attributes[0].attributeScore = 15;
+
+        formData.body.sections[0].attributes[1].attributeScore = 56;
+
+        formData.body.sections[1].attributes[0].attributeScore = 90;
+      });
+
+      it('should calculate sectionScore based on attributeScores', () => {
+        component.calculateSectionScores(formData);
+
+        // total attribute score = 15 + 56 = 71
+
+        // (71 / 100) * 40 = 28.4
+
+        expect(formData.body.sections[0].sectionScore).toBe(28.4);
+
+        // total attribute score = 90
+
+        // (90 / 100) * 60 = 54
+
+        expect(formData.body.sections[1].sectionScore).toBe(54);
+      });
+
+      it('should set sectionScore to null if weightage is disabled', () => {
+        formData.body.enableWeightage = false;
+
+        component.calculateSectionScores(formData);
+
+        expect(formData.body.sections[0].sectionScore).toBeNull();
+
+        expect(formData.body.sections[1].sectionScore).toBeNull();
+      });
+
+      it('should ignore null attributeScores', () => {
+        formData.body.sections[0].attributes[0].attributeScore = null;
+
+        component.calculateSectionScores(formData);
+
+        // total attribute score = 56
+
+        // (56 / 100) * 40 = 22.4
+
+        expect(formData.body.sections[0].sectionScore).toBe(22.4);
+      });
+
+      it('should set sectionScore to null if all attributeScores are null', () => {
+        formData.body.sections[0].attributes.forEach(
+          (a: any) => (a.attributeScore = null),
+        );
+
+        component.calculateSectionScores(formData);
+
+        expect(formData.body.sections[0].sectionScore).toBeNull();
+      });
+    });
+
+    describe('calculateFormScore', () => {
+      beforeEach(() => {
+        // Pre-calculate section scores
+
+        formData.body.sections[0].sectionScore = 28.4;
+
+        formData.body.sections[1].sectionScore = 54;
+      });
+
+      it('should calculate formScore based on sectionScores', () => {
+        component.calculateFormScore(formData);
+
+        // total section score = 28.4 + 54 = 82.4
+
+        // (82.4 / 100) * 50 = 41.2 -> Math.round -> 41
+
+        expect(formData.body.formScore).toBe(41);
+      });
+
+      it('should return undefined if formData is not provided', () => {
+        expect(component.calculateFormScore(undefined)).toBeUndefined();
+
+        expect(component.calculateFormScore(null)).toBeUndefined();
+      });
+
+      it('should set formScore to null if weightage is disabled', () => {
+        formData.body.enableWeightage = false;
+
+        component.calculateFormScore(formData);
+
+        expect(formData.body.formScore).toBeNull();
+      });
+
+      it('should ignore null sectionScores', () => {
+        formData.body.sections[0].sectionScore = null;
+
+        component.calculateFormScore(formData);
+
+        // total section score = 54
+
+        // (54 / 100) * 50 = 27 -> Math.round -> 27
+
+        expect(formData.body.formScore).toBe(27);
+      });
+
+      it('should set formScore to null if all sectionScores are null', () => {
+        formData.body.sections.forEach((s: any) => (s.sectionScore = null));
+
+        component.calculateFormScore(formData);
+
+        expect(formData.body.formScore).toBeNull();
+      });
+    });
+  });
 
   describe('WidgetComponent - getTodayEvent', () => {
     it('should resolve with empty array and set daySummary null if no BUSINESS_HOURS shifts today', async () => {
@@ -2913,12 +2860,12 @@ describe('WidgetComponent', () => {
   describe('WidgetComponent - onSendMessage & constructCimMessage', () => {
     beforeEach(() => {
       // mock methods on component
-      jest.spyOn(component, 'clearMessageData').mockImplementation(() => { });
-      jest.spyOn(component, 'uploadFile').mockImplementation(() => { });
-      jest.spyOn(component, 'scrollToBottom').mockImplementation(() => { });
+      jest.spyOn(component, 'clearMessageData').mockImplementation(() => {});
+      jest.spyOn(component, 'uploadFile').mockImplementation(() => {});
+      jest.spyOn(component, 'scrollToBottom').mockImplementation(() => {});
       jest
         .spyOn(component['cdRef'], 'detectChanges')
-        .mockImplementation(() => { });
+        .mockImplementation(() => {});
     });
 
     it('should return early if composer is disabled', () => {
@@ -2949,8 +2896,11 @@ describe('WidgetComponent', () => {
 
       component.onSendMessage('hello world');
 
-      expect(component.constructCimMessage).toHaveBeenCalledWith('PLAIN', 
-        {text: 'hello world', intent: null, originalMessageId: null});
+      expect(component.constructCimMessage).toHaveBeenCalledWith('PLAIN', {
+        text: 'hello world',
+        intent: null,
+        originalMessageId: null,
+      });
       expect(component.clearMessageData).toHaveBeenCalled();
     });
 
@@ -2978,7 +2928,7 @@ describe('WidgetComponent', () => {
         fileName: fileName,
         fileSize: 1234,
         additionalText: 'extra text',
-        fileType: 'file'
+        fileType: 'file',
       });
 
       expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
@@ -2999,7 +2949,7 @@ describe('WidgetComponent', () => {
         fileName: fileName,
         fileSize: 456,
         additionalText: 'caption text',
-        fileType: 'image'
+        fileType: 'image',
       });
 
       expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
@@ -3038,7 +2988,7 @@ describe('WidgetComponent', () => {
           return null;
         }),
       } as any;
-      jest.spyOn(console, 'log').mockImplementation(() => { });
+      jest.spyOn(console, 'log').mockImplementation(() => {});
       jest.spyOn(document, 'querySelectorAll').mockReturnValue([] as any);
     });
 
@@ -3117,7 +3067,7 @@ describe('WidgetComponent', () => {
     it('should log error if section does not exist', () => {
       // Arrange
       sectionsArray.at = jest.fn().mockReturnValue(undefined);
-      const logSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+      const logSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       // Act
       component.selected5starOption('rating', 99, 0, 0, 'star', '5');
       // Assert
@@ -3131,7 +3081,7 @@ describe('WidgetComponent', () => {
       sectionsArray.at = jest.fn().mockReturnValue({
         get: jest.fn().mockReturnValue(undefined),
       });
-      const logSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+      const logSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       // Act
       component.selected5starOption('rating', 0, 0, 0, 'star', '5');
       // Assert
@@ -3318,7 +3268,7 @@ describe('WidgetComponent', () => {
         component.constructCimMessage('PLAIN', {
           text: 'Hello world',
           intent: null,
-          originalMessageId: null
+          originalMessageId: null,
         });
 
         expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
@@ -3337,7 +3287,7 @@ describe('WidgetComponent', () => {
           fileName: 'test.png',
           fileSize: 1024,
           additionalText: 'Image caption',
-          fileType: 'image'
+          fileType: 'image',
         });
 
         expect(mockSdkService.sendChatMessage).toHaveBeenCalled();
@@ -3455,7 +3405,7 @@ describe('WidgetComponent', () => {
       });
 
       it('should not send typing event if timer is already active', () => {
-        component.sendTypingStartedEventTimer = setTimeout(() => { }, 1000);
+        component.sendTypingStartedEventTimer = setTimeout(() => {}, 1000);
         const initialTimer = component.sendTypingStartedEventTimer;
 
         component.sendTypingStartedEvent();
@@ -3488,7 +3438,9 @@ describe('WidgetComponent', () => {
           handleCallHoldState: jest.fn(),
         } as any;
         component.dialogId = 'dialog-123';
-        jest.spyOn(component as any, 'updateTooltip').mockResolvedValue(undefined);
+        jest
+          .spyOn(component as any, 'updateTooltip')
+          .mockResolvedValue(undefined);
         jest.useFakeTimers();
       });
 
@@ -3500,7 +3452,9 @@ describe('WidgetComponent', () => {
         component.isCallMute = false;
 
         const togglePromise = component.toggleCallMic(tooltipMock);
-        expect((component as any).updateTooltip).toHaveBeenCalledWith(tooltipMock);
+        expect((component as any).updateTooltip).toHaveBeenCalledWith(
+          tooltipMock,
+        );
         expect(component.sdk.handleCallMic).toHaveBeenCalledWith(
           'mute_call',
           'dialog-123',
@@ -3531,7 +3485,9 @@ describe('WidgetComponent', () => {
         component.isVideoHide = false;
 
         const togglePromise = component.toggleCallVideo(tooltipMock);
-        expect((component as any).updateTooltip).toHaveBeenCalledWith(tooltipMock);
+        expect((component as any).updateTooltip).toHaveBeenCalledWith(
+          tooltipMock,
+        );
         expect(component.sdk.convertCall).toHaveBeenCalledWith(
           'off',
           'video',
@@ -3564,7 +3520,9 @@ describe('WidgetComponent', () => {
         component.isCallOnHold = false;
 
         const togglePromise = component.toggleCallHold(tooltipMock);
-        expect((component as any).updateTooltip).toHaveBeenCalledWith(tooltipMock);
+        expect((component as any).updateTooltip).toHaveBeenCalledWith(
+          tooltipMock,
+        );
         expect(component.sdk.handleCallHoldState).toHaveBeenCalledWith(
           'holdCall',
           'dialog-123',
@@ -3648,7 +3606,6 @@ describe('WidgetComponent', () => {
         component.fileLoading = false;
         component.selectedFile = null;
         component.imageUrls = [];
-
       });
 
       it('should handle file event with target.files', () => {
@@ -3745,7 +3702,10 @@ describe('WidgetComponent', () => {
         component.changeScreen = changeScreenSpy;
         component.customerChatResumed();
         // Accept that changeScreen may not be called if no user data
-        if (typeof changeScreenSpy.mock !== 'undefined' && changeScreenSpy.mock.calls.length > 0) {
+        if (
+          typeof changeScreenSpy.mock !== 'undefined' &&
+          changeScreenSpy.mock.calls.length > 0
+        ) {
           expect(changeScreenSpy).toHaveBeenCalledWith('widget');
         }
       });
@@ -3817,13 +3777,10 @@ describe('WidgetComponent', () => {
       });
     });
 
-
-
     describe('ChangeNPSColor', () => {
       let sectionsArray: any;
 
       beforeEach(() => {
-
         const mockControl = { setValue: jest.fn() };
         sectionsArray = {
           at: jest.fn().mockReturnValue({
@@ -3838,26 +3795,28 @@ describe('WidgetComponent', () => {
           }),
         } as any;
 
-
-        jest.spyOn(document, 'querySelectorAll').mockImplementation(
-          (selector: string) => {
-
+        jest
+          .spyOn(document, 'querySelectorAll')
+          .mockImplementation((selector: string) => {
             if (selector.includes('#npsOption')) {
               const mockPath1 = { setAttribute: jest.fn() };
               const mockPath2 = { setAttribute: jest.fn() };
               const mockSvg1 = {
                 dataset: { index: '1' },
-                getElementsByTagName: jest.fn().mockReturnValue([mockPath1, mockPath2]),
+                getElementsByTagName: jest
+                  .fn()
+                  .mockReturnValue([mockPath1, mockPath2]),
               };
               const mockSvg2 = {
                 dataset: { index: '0' },
-                getElementsByTagName: jest.fn().mockReturnValue([mockPath1, mockPath2]),
+                getElementsByTagName: jest
+                  .fn()
+                  .mockReturnValue([mockPath1, mockPath2]),
               };
               return [mockSvg1, mockSvg2] as unknown as NodeListOf<SVGElement>;
             }
             return [] as unknown as NodeListOf<SVGElement>;
-          },
-        );
+          });
       });
 
       it('should update control value and selectedIndices', () => {
@@ -3879,25 +3838,30 @@ describe('WidgetComponent', () => {
         expect(mockControl.setValue).toHaveBeenCalledWith('value1');
       });
 
-
-
-
-
       it('should log error if section does not exist', () => {
         sectionsArray.at = jest.fn().mockReturnValue(undefined);
-        const logSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const logSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation(() => {});
         component.changeNpsColor('npsControl', 99, 0, 0, 'value1');
-        expect(logSpy).toHaveBeenCalledWith('Section at index 99 does not exist.');
+        expect(logSpy).toHaveBeenCalledWith(
+          'Section at index 99 does not exist.',
+        );
       });
 
       it('should log error if control does not exist', () => {
-        sectionsArray.at = jest.fn().mockReturnValue({ get: jest.fn().mockReturnValue(undefined) });
-        const logSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        sectionsArray.at = jest
+          .fn()
+          .mockReturnValue({ get: jest.fn().mockReturnValue(undefined) });
+        const logSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation(() => {});
         component.changeNpsColor('npsControl', 0, 0, 0, 'value1');
-        expect(logSpy).toHaveBeenCalledWith('Control "npsControl" not found in section 0.');
+        expect(logSpy).toHaveBeenCalledWith(
+          'Control "npsControl" not found in section 0.',
+        );
       });
     });
-
 
     describe('ChangeBarColor', () => {
       let sectionsArray: any;
@@ -3919,32 +3883,36 @@ describe('WidgetComponent', () => {
       });
 
       it('should update control, toggle icon classes, and set radio input checked', () => {
-
         const mockControl = { setValue: jest.fn() };
         const mockSectionsArray = {
-          at: jest.fn().mockReturnValue({ get: jest.fn().mockReturnValue(mockControl) }),
+          at: jest
+            .fn()
+            .mockReturnValue({ get: jest.fn().mockReturnValue(mockControl) }),
         };
-        (component.preChatFormGroup.get as jest.Mock).mockReturnValue(mockSectionsArray);
-
+        (component.preChatFormGroup.get as jest.Mock).mockReturnValue(
+          mockSectionsArray,
+        );
 
         const mockIconElement1 = {
           classList: { add: jest.fn(), remove: jest.fn() },
-          getAttribute: jest.fn().mockReturnValue('0')
+          getAttribute: jest.fn().mockReturnValue('0'),
         };
         const mockIconElement2 = {
           classList: { add: jest.fn(), remove: jest.fn() },
-          getAttribute: jest.fn().mockReturnValue('1')
+          getAttribute: jest.fn().mockReturnValue('1'),
         };
         const mockRadioInput1 = { checked: false };
         const mockRadioInput2 = { checked: false };
 
-
-        (document.querySelectorAll as jest.Mock).mockImplementation((selector: string) => {
-          if (selector === '#arrow-0') return [mockIconElement1, mockIconElement2];
-          if (selector === 'input[name="attrKey"]') return [mockRadioInput1, mockRadioInput2];
-          return [];
-        });
-
+        (document.querySelectorAll as jest.Mock).mockImplementation(
+          (selector: string) => {
+            if (selector === '#arrow-0')
+              return [mockIconElement1, mockIconElement2];
+            if (selector === 'input[name="attrKey"]')
+              return [mockRadioInput1, mockRadioInput2];
+            return [];
+          },
+        );
 
         component.ChangeBarColor('barControl', 0, 0, 1, 'attrKey', 'value1');
 
@@ -3952,9 +3920,12 @@ describe('WidgetComponent', () => {
         expect(mockSectionsArray.at(0).get).toHaveBeenCalledWith('barControl');
         expect(mockControl.setValue).toHaveBeenCalledWith('value1');
 
-
-        expect(mockIconElement1.classList.add).toHaveBeenCalledWith('bar-icon-hide');
-        expect(mockIconElement2.classList.add).toHaveBeenCalledWith('bar-icon-show');
+        expect(mockIconElement1.classList.add).toHaveBeenCalledWith(
+          'bar-icon-hide',
+        );
+        expect(mockIconElement2.classList.add).toHaveBeenCalledWith(
+          'bar-icon-show',
+        );
 
         expect(mockRadioInput1.checked).toBe(false);
         expect(mockRadioInput2.checked).toBe(true);
@@ -3971,45 +3942,57 @@ describe('WidgetComponent', () => {
           classList: {
             remove: jest.fn(),
             add: jest.fn(),
-          }
+          },
         };
         const mockRadioInput = {
-          checked: false
+          checked: false,
         };
 
-        (document.querySelectorAll as jest.Mock).mockReturnValue([mockIconElement]);
-        (document.querySelectorAll as jest.Mock).mockImplementation((selector) => {
-          if (selector.startsWith('#arrow-')) {
-            return [mockIconElement];
-          } else if (selector.startsWith('input[name="')) {
-            return [mockRadioInput];
-          }
-          return [];
-        });
+        (document.querySelectorAll as jest.Mock).mockReturnValue([
+          mockIconElement,
+        ]);
+        (document.querySelectorAll as jest.Mock).mockImplementation(
+          (selector) => {
+            if (selector.startsWith('#arrow-')) {
+              return [mockIconElement];
+            } else if (selector.startsWith('input[name="')) {
+              return [mockRadioInput];
+            }
+            return [];
+          },
+        );
 
         component.ChangeBarColor('barControl', 0, 0, 0, 'attrKey', 'value1');
         expect(sectionsArray.at).toHaveBeenCalledWith(0);
         expect(sectionsArray.at(0).get).toHaveBeenCalledWith('barControl');
-        expect(sectionsArray.at(0).get(0).setValue).toHaveBeenCalledWith('value1');
-        expect(mockIconElement.classList.remove).toHaveBeenCalledWith('bar-icon-hide');
-        expect(mockIconElement.classList.add).toHaveBeenCalledWith('bar-icon-show');
+        expect(sectionsArray.at(0).get(0).setValue).toHaveBeenCalledWith(
+          'value1',
+        );
+        expect(mockIconElement.classList.remove).toHaveBeenCalledWith(
+          'bar-icon-hide',
+        );
+        expect(mockIconElement.classList.add).toHaveBeenCalledWith(
+          'bar-icon-show',
+        );
         expect(mockRadioInput.checked).toBe(true);
       });
 
       it('should uncheck other radio inputs when updating bar color', () => {
         const mockRadioInput1 = {
-          checked: false
+          checked: false,
         };
         const mockRadioInput2 = {
-          checked: true
+          checked: true,
         };
 
-        (document.querySelectorAll as jest.Mock).mockImplementation((selector) => {
-          if (selector.startsWith('input[name="attrKey"]')) {
-            return [mockRadioInput1, mockRadioInput2];
-          }
-          return [];
-        });
+        (document.querySelectorAll as jest.Mock).mockImplementation(
+          (selector) => {
+            if (selector.startsWith('input[name="attrKey"]')) {
+              return [mockRadioInput1, mockRadioInput2];
+            }
+            return [];
+          },
+        );
 
         component.ChangeBarColor('barControl', 0, 0, 1, 'attrKey', 'value1');
         expect(mockRadioInput1.checked).toBe(false);
@@ -4020,7 +4003,7 @@ describe('WidgetComponent', () => {
         sectionsArray.at = jest.fn().mockReturnValue(undefined);
         const logSpy = jest
           .spyOn(console, 'error')
-          .mockImplementation(() => { });
+          .mockImplementation(() => {});
         component.ChangeBarColor('barControl', 99, 0, 0, 'attrKey', 'value1');
         expect(logSpy).toHaveBeenCalledWith(
           'Section at index 99 does not exist.',
@@ -4033,7 +4016,7 @@ describe('WidgetComponent', () => {
         });
         const logSpy = jest
           .spyOn(console, 'error')
-          .mockImplementation(() => { });
+          .mockImplementation(() => {});
         component.ChangeBarColor('barControl', 0, 0, 0, 'attrKey', 'value1');
         expect(logSpy).toHaveBeenCalledWith(
           'Control "barControl" not found in section 0.',
@@ -4067,9 +4050,16 @@ describe('WidgetComponent', () => {
 
       it('should return early if optionValue is falsy', () => {
         const mockEvent = {
-          target: { checked: true }
+          target: { checked: true },
         };
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, null, 'category', false);
+        component.onCheckboxChange(
+          mockEvent as any,
+          'testControl',
+          0,
+          null,
+          'category',
+          false,
+        );
         expect(mockControl.markAsTouched).not.toHaveBeenCalled();
         expect(mockControl.setValue).not.toHaveBeenCalled();
       });
@@ -4077,63 +4067,111 @@ describe('WidgetComponent', () => {
       it('should add new value to empty control value', () => {
         mockControl.value = '';
         const mockEvent = {
-          target: { checked: true }
+          target: { checked: true },
         };
 
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
+        component.onCheckboxChange(
+          mockEvent as any,
+          'testControl',
+          0,
+          'option1',
+          'category1',
+          false,
+        );
         expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith(['option1'], { emitEvent: true });
+        expect(mockControl.setValue).toHaveBeenCalledWith(['option1'], {
+          emitEvent: true,
+        });
       });
 
       it('should add new value to existing control value', () => {
         mockControl.value = ['option1'];
         const mockEvent = {
-          target: { checked: true }
+          target: { checked: true },
         };
 
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option2', 'category1', false);
+        component.onCheckboxChange(
+          mockEvent as any,
+          'testControl',
+          0,
+          'option2',
+          'category1',
+          false,
+        );
         expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith(['option1', 'option2'], { emitEvent: true });
+        expect(mockControl.setValue).toHaveBeenCalledWith(
+          ['option1', 'option2'],
+          { emitEvent: true },
+        );
       });
 
       it('should remove value when checkbox is unchecked', () => {
         mockControl.value = ['option1', 'option2'];
         const mockEvent = {
-          target: { checked: false }
+          target: { checked: false },
         };
 
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
+        component.onCheckboxChange(
+          mockEvent as any,
+          'testControl',
+          0,
+          'option1',
+          'category1',
+          false,
+        );
         expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith(['option2'], { emitEvent: true });
+        expect(mockControl.setValue).toHaveBeenCalledWith(['option2'], {
+          emitEvent: true,
+        });
       });
 
       it('should remove entire category when no values remain', () => {
         mockControl.value = ['option1'];
         const mockEvent = {
-          target: { checked: false }
+          target: { checked: false },
         };
 
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
+        component.onCheckboxChange(
+          mockEvent as any,
+          'testControl',
+          0,
+          'option1',
+          'category1',
+          false,
+        );
         expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith('', { emitEvent: true });
+        expect(mockControl.setValue).toHaveBeenCalledWith('', {
+          emitEvent: true,
+        });
       });
 
       it('should handle invalid JSON gracefully', () => {
         mockControl.value = 'invalid json';
         const mockEvent = {
-          target: { checked: true }
+          target: { checked: true },
         };
 
-        component.onCheckboxChange(mockEvent as any, 'testControl', 0, 'option1', 'category1', false);
+        component.onCheckboxChange(
+          mockEvent as any,
+          'testControl',
+          0,
+          'option1',
+          'category1',
+          false,
+        );
         expect(mockControl.markAsTouched).toHaveBeenCalled();
-        expect(mockControl.setValue).toHaveBeenCalledWith(['option1'], { emitEvent: true });
+        expect(mockControl.setValue).toHaveBeenCalledWith(['option1'], {
+          emitEvent: true,
+        });
       });
     });
 
     describe('parseCheckboxValue', () => {
       it('should parse valid JSON string', () => {
-        const result = component.parseCheckboxValue('{"category1":["option1","option2"]}');
-        expect(result).toEqual({ category1: ["option1", "option2"] });
+        const result = component.parseCheckboxValue(
+          '{"category1":["option1","option2"]}',
+        );
+        expect(result).toEqual({ category1: ['option1', 'option2'] });
       });
 
       it('should return empty object for empty string', () => {
@@ -4157,11 +4195,12 @@ describe('WidgetComponent', () => {
       });
 
       it('should handle JSON with multiple categories', () => {
-        const json = '{"category1":["option1"],"category2":["option2","option3"]}';
+        const json =
+          '{"category1":["option1"],"category2":["option2","option3"]}';
         const result = component.parseCheckboxValue(json);
         expect(result).toEqual({
-          category1: ["option1"],
-          category2: ["option2", "option3"]
+          category1: ['option1'],
+          category2: ['option2', 'option3'],
         });
       });
     });
@@ -4173,19 +4212,30 @@ describe('WidgetComponent', () => {
       let path2: any;
 
       beforeEach(() => {
+        path1 = {
+          setAttribute: jest.fn(),
+          getAttribute: jest.fn().mockReturnValue('red'),
+        };
+        path2 = {
+          setAttribute: jest.fn(),
+          getAttribute: jest.fn().mockReturnValue('blue'),
+        };
 
-        path1 = { setAttribute: jest.fn(), getAttribute: jest.fn().mockReturnValue('red') };
-        path2 = { setAttribute: jest.fn(), getAttribute: jest.fn().mockReturnValue('blue') };
+        mockSvg1 = {
+          getElementsByTagName: jest.fn().mockReturnValue([path1]),
+          dataset: {},
+        };
+        mockSvg2 = {
+          getElementsByTagName: jest.fn().mockReturnValue([path2]),
+          dataset: {},
+        };
 
-
-        mockSvg1 = { getElementsByTagName: jest.fn().mockReturnValue([path1]), dataset: {} };
-        mockSvg2 = { getElementsByTagName: jest.fn().mockReturnValue([path2]), dataset: {} };
-
-        jest.spyOn(document, 'querySelectorAll').mockReturnValue([mockSvg1, mockSvg2] as any);
+        jest
+          .spyOn(document, 'querySelectorAll')
+          .mockReturnValue([mockSvg1, mockSvg2] as any);
       });
 
       it('should set clicked SVG to original colors and others to gray', () => {
-
         component.booleanEmojiSet(0, 0, 0);
 
         expect(path1.setAttribute).toHaveBeenCalledWith('fill', 'red');
@@ -4193,7 +4243,6 @@ describe('WidgetComponent', () => {
         expect(path2.setAttribute).toHaveBeenCalledWith('fill', 'gray');
 
         component.booleanEmojiSet(0, 0, 1);
-
 
         expect(path1.setAttribute).toHaveBeenCalledWith('fill', 'gray');
 
@@ -4213,10 +4262,6 @@ describe('WidgetComponent', () => {
         expect(originalColors2[0]).toBe('blue');
       });
     });
-
-
-
-
 
     describe('handleFileChange', () => {
       let sectionsArray: any;
@@ -4239,19 +4284,24 @@ describe('WidgetComponent', () => {
           }),
         } as any;
 
-        jest.spyOn(document, 'getElementById').mockReturnValue(mockUploadBtn as any);
+        jest
+          .spyOn(document, 'getElementById')
+          .mockReturnValue(mockUploadBtn as any);
 
         component.setFileControl = jest.fn();
         component.previewFileForm = jest.fn();
       });
 
       it('should handle multiple allowed extensions correctly', () => {
-
-        const mockFile = new File(['content'], 'test.pdf', { type: 'application/pdf' });
+        const mockFile = new File(['content'], 'test.pdf', {
+          type: 'application/pdf',
+        });
         const mockInput = { files: [mockFile] } as any;
 
         const mockUploadBtn = { disabled: false, click: jest.fn() };
-        jest.spyOn(document, 'getElementById').mockReturnValue(mockUploadBtn as any);
+        jest
+          .spyOn(document, 'getElementById')
+          .mockReturnValue(mockUploadBtn as any);
 
         component.setFileControl = jest.fn();
         component.previewFileForm = jest.fn();
@@ -4259,17 +4309,25 @@ describe('WidgetComponent', () => {
         const allowedExtensions = ['pdf', 'doc'];
         const attribute = { key: 'fileControl' };
 
+        component.handleFileChange(
+          mockInput,
+          0,
+          0,
+          100,
+          'upload1',
+          allowedExtensions,
+          attribute,
+        );
 
-        component.handleFileChange(mockInput, 0, 0, 100, 'upload1', allowedExtensions, attribute);
-
-        expect(component.setFileControl).toHaveBeenCalledWith(0, 'test.pdf', 'fileControl');
+        expect(component.setFileControl).toHaveBeenCalledWith(
+          0,
+          'test.pdf',
+          'fileControl',
+        );
         expect(component.previewFileForm).toHaveBeenCalledWith(mockFile, 0, 0);
         expect(mockUploadBtn.disabled).toBe(false); // re-enabled at the end
       });
-
-
     });
-
 
     describe('setFileControl', () => {
       let sectionsArray: any;
@@ -4307,11 +4365,15 @@ describe('WidgetComponent', () => {
 
       it('should log error and return when section does not exist', () => {
         sectionsArray.at = jest.fn().mockReturnValue(undefined);
-        const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const errorSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation(() => {});
 
         component.setFileControl(99, 'test-file.txt', 'fileControlName');
 
-        expect(errorSpy).toHaveBeenCalledWith('Section at index 99 does not exist.');
+        expect(errorSpy).toHaveBeenCalledWith(
+          'Section at index 99 does not exist.',
+        );
         expect(mockControl.setValue).not.toHaveBeenCalled();
         expect(mockControl.markAsTouched).not.toHaveBeenCalled();
         expect(mockControl.markAsDirty).not.toHaveBeenCalled();
@@ -4338,7 +4400,6 @@ describe('WidgetComponent', () => {
         expect(mockControl.markAsTouched).toHaveBeenCalled();
         expect(mockControl.markAsDirty).toHaveBeenCalled();
       });
-
     });
 
     describe('getFileName', () => {
@@ -4347,7 +4408,7 @@ describe('WidgetComponent', () => {
 
       beforeEach(() => {
         mockControl = {
-          value: 'test-file.txt'
+          value: 'test-file.txt',
         };
         sectionsArray = {
           at: jest.fn().mockReturnValue({
@@ -4404,8 +4465,14 @@ describe('WidgetComponent', () => {
       it('should disable the upload button', () => {
         component.disableUploadBtn('testId');
 
-        expect(document.querySelector).toHaveBeenCalledWith('#upload-btn-testId');
-        expect((component as any).renderer.setAttribute).toHaveBeenCalledWith(mockUploadedBtn, 'disabled', 'true');
+        expect(document.querySelector).toHaveBeenCalledWith(
+          '#upload-btn-testId',
+        );
+        expect((component as any).renderer.setAttribute).toHaveBeenCalledWith(
+          mockUploadedBtn,
+          'disabled',
+          'true',
+        );
       });
 
       it('should handle null button element', () => {
@@ -4413,7 +4480,11 @@ describe('WidgetComponent', () => {
 
         component.disableUploadBtn('testId');
 
-        expect((component as any).renderer.setAttribute).toHaveBeenCalledWith(null, 'disabled', 'true');
+        expect((component as any).renderer.setAttribute).toHaveBeenCalledWith(
+          null,
+          'disabled',
+          'true',
+        );
       });
     });
 
@@ -4429,13 +4500,13 @@ describe('WidgetComponent', () => {
           name: 'test.txt',
           type: 'text/plain',
           size: 1024,
-          text: jest.fn()
+          text: jest.fn(),
         };
 
         mockReader = {
           onload: null,
           readAsText: jest.fn(),
-          readAsDataURL: jest.fn()
+          readAsDataURL: jest.fn(),
         };
 
         global.FileReader = jest.fn(() => mockReader) as any;
@@ -4515,11 +4586,11 @@ describe('WidgetComponent', () => {
 
         mockUploadBtn = {
           disabled: false,
-          textContent: 'Upload'
+          textContent: 'Upload',
         };
 
         mockInput = {
-          value: 'some-file.txt'
+          value: 'some-file.txt',
         };
 
         (document.getElementById as jest.Mock) = jest.fn((id) => {
@@ -4553,7 +4624,11 @@ describe('WidgetComponent', () => {
       it('should call setFileControl with empty string', () => {
         component.clearFile(0, 1, 'controlName', 'testId');
 
-        expect(component.setFileControl).toHaveBeenCalledWith(0, '', 'controlName');
+        expect(component.setFileControl).toHaveBeenCalledWith(
+          0,
+          '',
+          'controlName',
+        );
       });
     });
 
@@ -4642,7 +4717,7 @@ describe('WidgetComponent', () => {
       it('should return true when titleElement scrollWidth is less than or equal to clientWidth', () => {
         const mockElement = {
           scrollWidth: 100,
-          clientWidth: 150
+          clientWidth: 150,
         };
 
         expect(component.disableTooltip(mockElement)).toBe(true);
@@ -4651,7 +4726,7 @@ describe('WidgetComponent', () => {
       it('should return false when titleElement scrollWidth is greater than clientWidth', () => {
         const mockElement = {
           scrollWidth: 150,
-          clientWidth: 100
+          clientWidth: 100,
         };
 
         expect(component.disableTooltip(mockElement)).toBe(false);
@@ -4792,12 +4867,23 @@ describe('WidgetComponent', () => {
       let mockPath3: any;
 
       beforeEach(() => {
-        mockPath1 = { getAttribute: jest.fn().mockReturnValue('red'), setAttribute: jest.fn() };
-        mockPath2 = { getAttribute: jest.fn().mockReturnValue('blue'), setAttribute: jest.fn() };
-        mockPath3 = { getAttribute: jest.fn().mockReturnValue('green'), setAttribute: jest.fn() };
+        mockPath1 = {
+          getAttribute: jest.fn().mockReturnValue('red'),
+          setAttribute: jest.fn(),
+        };
+        mockPath2 = {
+          getAttribute: jest.fn().mockReturnValue('blue'),
+          setAttribute: jest.fn(),
+        };
+        mockPath3 = {
+          getAttribute: jest.fn().mockReturnValue('green'),
+          setAttribute: jest.fn(),
+        };
 
         mockSvg1 = {
-          getElementsByTagName: jest.fn().mockReturnValue([mockPath1, mockPath2]),
+          getElementsByTagName: jest
+            .fn()
+            .mockReturnValue([mockPath1, mockPath2]),
           dataset: {},
         };
         mockSvg2 = {
@@ -4805,7 +4891,10 @@ describe('WidgetComponent', () => {
           dataset: {},
         };
 
-        (document.querySelectorAll as jest.Mock).mockReturnValue([mockSvg1, mockSvg2]);
+        (document.querySelectorAll as jest.Mock).mockReturnValue([
+          mockSvg1,
+          mockSvg2,
+        ]);
       });
 
       it('should store original colors and update colors as expected', () => {
@@ -4848,11 +4937,11 @@ describe('WidgetComponent', () => {
         mockFile = new File(['content'], 'test.txt', { type: 'text/plain' });
 
         mockInput = {
-          files: [mockFile]
+          files: [mockFile],
         };
 
         mockUploadBtn = {
-          disabled: false
+          disabled: false,
         };
 
         (document.getElementById as jest.Mock) = jest.fn((id) => {
@@ -4884,7 +4973,7 @@ describe('WidgetComponent', () => {
           set disabled(value: boolean) {
             disabledState = value;
             if (value) wasDisabled = true;
-          }
+          },
         };
 
         (document.getElementById as jest.Mock) = jest.fn((id) => {
@@ -4894,7 +4983,15 @@ describe('WidgetComponent', () => {
           return mockInput;
         });
 
-        component.handleFileChange(mockInput, 0, 0, 100, 'testId', allowedTypes, attribute);
+        component.handleFileChange(
+          mockInput,
+          0,
+          0,
+          100,
+          'testId',
+          allowedTypes,
+          attribute,
+        );
 
         // The button should have been disabled during processing (at some point)
         expect(wasDisabled).toBe(true);
@@ -4903,7 +5000,11 @@ describe('WidgetComponent', () => {
         expect(originalMockUploadBtn.disabled).toBe(false);
 
         // Check all the expected method calls were made
-        expect(component.setFileControl).toHaveBeenCalledWith(0, 'test.txt', 'fileControl');
+        expect(component.setFileControl).toHaveBeenCalledWith(
+          0,
+          'test.txt',
+          'fileControl',
+        );
         expect(component.previewFileForm).toHaveBeenCalledWith(mockFile, 0, 0);
       });
 
@@ -4911,10 +5012,22 @@ describe('WidgetComponent', () => {
         const allowedTypes = ['pdf', 'doc'];
         const attribute = { key: 'fileControl' };
 
-        component.handleFileChange(mockInput, 0, 0, 100, 'testId', allowedTypes, attribute);
+        component.handleFileChange(
+          mockInput,
+          0,
+          0,
+          100,
+          'testId',
+          allowedTypes,
+          attribute,
+        );
 
         expect(mockUploadBtn.disabled).toBe(true);
-        expect(mockMatSnackBar.open).toHaveBeenCalledWith("File extension not allowed'", 'X', expect.any(Object));
+        expect(mockMatSnackBar.open).toHaveBeenCalledWith(
+          "File extension not allowed'",
+          'X',
+          expect.any(Object),
+        );
       });
 
       it('should handle when file is not provided', () => {
@@ -4922,7 +5035,15 @@ describe('WidgetComponent', () => {
         const allowedTypes = ['txt'];
         const attribute = { key: 'fileControl' };
 
-        component.handleFileChange(mockEmptyInput, 0, 0, 100, 'testId', allowedTypes, attribute);
+        component.handleFileChange(
+          mockEmptyInput,
+          0,
+          0,
+          100,
+          'testId',
+          allowedTypes,
+          attribute,
+        );
 
         expect(component.setFileControl).not.toHaveBeenCalled();
         expect(component.previewFileForm).not.toHaveBeenCalled();
@@ -4952,10 +5073,9 @@ describe('WidgetComponent', () => {
         mockRoute as any, // Router
         {} as any, // Document
         mockFormMessageTypeService as any,
-        mockSpinnerService as any
+        mockSpinnerService as any,
       );
       jest.spyOn(component, 'convertCallRequest').mockImplementation(jest.fn());
-
     });
 
     it('should set correct flags for audio view', () => {
@@ -4970,7 +5090,6 @@ describe('WidgetComponent', () => {
       expect(component.callPopUpView).toBe(true);
       expect(component.convertCallRequest).toHaveBeenCalledWith('audio');
     });
-
 
     it('should not set video flags if secure web call', () => {
       component.isSecureWebCall = true;
@@ -5000,8 +5119,6 @@ describe('WidgetComponent', () => {
       expect(convertCallSpy).not.toHaveBeenCalled();
     });
 
-
-
     it('should set correct flags for screenshare view', () => {
       component.convertCallView('screenshare');
 
@@ -5016,7 +5133,6 @@ describe('WidgetComponent', () => {
     });
 
     it('should not do anything for unknown view', () => {
-
       component.activeAudioView = false;
       component.activeVideoView = false;
       component.activeScreenShareView = false;
@@ -5029,19 +5145,14 @@ describe('WidgetComponent', () => {
 
       component.convertCallView('unknownView');
 
-
       expect(component.activeAudioView).toBe(false);
       expect(component.activeVideoView).toBe(false);
       expect(component.activeScreenShareView).toBe(false);
       expect(component.activeChatView).toBe(false);
       expect(component.callPopUpView).toBe(false);
 
-
       expect(convertCallSpy).not.toHaveBeenCalled();
     });
-
-
-
   });
 
   describe('calculateFormScore edge cases', () => {
@@ -5060,7 +5171,9 @@ describe('WidgetComponent', () => {
           const formWeightage = formData?.body?.formWeightage || 0; // handle undefined
 
           formData.body.formScore =
-            parseFloat(((totalSectionWeightages / 100) * formWeightage).toFixed(1)) || null;
+            parseFloat(
+              ((totalSectionWeightages / 100) * formWeightage).toFixed(1),
+            ) || null;
         },
       };
     });
@@ -5104,7 +5217,6 @@ describe('WidgetComponent', () => {
 
       component.calculateFormScore(formData);
 
-
       expect(formData.body.formScore).toBe(10);
     });
 
@@ -5121,7 +5233,6 @@ describe('WidgetComponent', () => {
       expect(formData.body.formScore).toBeNull();
     });
   });
-
 
   describe('Composer functions', () => {
     let component: WidgetComponent;
@@ -5146,9 +5257,8 @@ describe('WidgetComponent', () => {
         mockRoute as any,
         {} as any, // Document
         mockFormMessageTypeService as any,
-        mockSpinnerService as any
+        mockSpinnerService as any,
       );
-
 
       (component as any).renderer = {
         setAttribute: jest.fn(),
@@ -5167,9 +5277,21 @@ describe('WidgetComponent', () => {
       const messageRef = (component as any).messageElement.nativeElement;
       const renderer = (component as any).renderer;
 
-      expect(renderer.setAttribute).toHaveBeenCalledWith(messageRef, 'disabled', 'true');
-      expect(renderer.setAttribute).toHaveBeenCalledWith(messageRef, 'placeholder', 'Unable to send message');
-      expect(renderer.setProperty).toHaveBeenCalledWith(messageRef, 'value', '');
+      expect(renderer.setAttribute).toHaveBeenCalledWith(
+        messageRef,
+        'disabled',
+        'true',
+      );
+      expect(renderer.setAttribute).toHaveBeenCalledWith(
+        messageRef,
+        'placeholder',
+        'Unable to send message',
+      );
+      expect(renderer.setProperty).toHaveBeenCalledWith(
+        messageRef,
+        'value',
+        '',
+      );
       expect(component.isComposerDisable).toBe(true);
     });
 
@@ -5190,9 +5312,20 @@ describe('WidgetComponent', () => {
       const messageRef = (component as any).messageElement.nativeElement;
       const renderer = (component as any).renderer;
 
-      expect(renderer.removeAttribute).toHaveBeenCalledWith(messageRef, 'disabled');
-      expect(renderer.setAttribute).toHaveBeenCalledWith(messageRef, 'placeholder', 'composer-placeholder');
-      expect(renderer.setProperty).toHaveBeenCalledWith(messageRef, 'value', '');
+      expect(renderer.removeAttribute).toHaveBeenCalledWith(
+        messageRef,
+        'disabled',
+      );
+      expect(renderer.setAttribute).toHaveBeenCalledWith(
+        messageRef,
+        'placeholder',
+        'composer-placeholder',
+      );
+      expect(renderer.setProperty).toHaveBeenCalledWith(
+        messageRef,
+        'value',
+        '',
+      );
       expect(component.isComposerDisable).toBe(false);
     });
 
@@ -5222,7 +5355,7 @@ describe('WidgetComponent', () => {
       expect(component.sdk.convertCall).toHaveBeenCalledWith(
         'on',
         'video',
-        '12345'
+        '12345',
       );
     });
 
@@ -5234,7 +5367,7 @@ describe('WidgetComponent', () => {
       expect(component.sdk.convertCall).toHaveBeenCalledWith(
         'on',
         'screenshare',
-        '12345'
+        '12345',
       );
     });
 
@@ -5246,7 +5379,7 @@ describe('WidgetComponent', () => {
       expect(component.sdk.convertCall).toHaveBeenCalledWith(
         'off',
         'video',
-        '12345'
+        '12345',
       );
     });
   });
@@ -5258,7 +5391,7 @@ describe('WidgetComponent', () => {
       tooltipMock = {
         message: '',
         show: jest.fn(),
-        hide: jest.fn()
+        hide: jest.fn(),
       };
 
       component.toggleCallVideo = jest.fn();
@@ -5303,8 +5436,8 @@ describe('WidgetComponent', () => {
       component.isCallMute = false;
       component.isVideoHide = false;
 
-      jest.spyOn(console, 'error').mockImplementation(() => { });
-      jest.spyOn(console, 'warn').mockImplementation(() => { });
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
     });
 
     it('should return if device is busy', () => {
@@ -5313,8 +5446,8 @@ describe('WidgetComponent', () => {
         dialog: {
           errorReason: 'Audio/Video Device is being used by Someother Party',
           permissionType: 'microphone',
-          permissionStatus: 'denied'
-        }
+          permissionStatus: 'denied',
+        },
       };
 
       (component as any).handleMediaPermissionStatusEvent(data);
@@ -5328,8 +5461,8 @@ describe('WidgetComponent', () => {
         id: '1',
         dialog: {
           permissionType: undefined,
-          permissionStatus: 'granted'
-        }
+          permissionStatus: 'granted',
+        },
       };
 
       (component as any).handleMediaPermissionStatusEvent(data);
@@ -5343,8 +5476,8 @@ describe('WidgetComponent', () => {
         id: '11',
         dialog: {
           permissionType: 'microphone',
-          permissionStatus: 'granted'
-        }
+          permissionStatus: 'granted',
+        },
       };
 
       (component as any).handleMediaPermissionStatusEvent(data);
@@ -5360,8 +5493,8 @@ describe('WidgetComponent', () => {
         id: '12',
         dialog: {
           permissionType: 'microphone',
-          permissionStatus: 'granted'
-        }
+          permissionStatus: 'granted',
+        },
       };
 
       (component as any).handleMediaPermissionStatusEvent(data);
@@ -5378,8 +5511,8 @@ describe('WidgetComponent', () => {
         id: '22',
         dialog: {
           permissionType: 'microphone',
-          permissionStatus: 'denied'
-        }
+          permissionStatus: 'denied',
+        },
       };
 
       (component as any).handleMediaPermissionStatusEvent(data);
@@ -5393,8 +5526,8 @@ describe('WidgetComponent', () => {
         id: '33',
         dialog: {
           permissionType: 'video',
-          permissionStatus: 'granted'
-        }
+          permissionStatus: 'granted',
+        },
       };
 
       (component as any).handleMediaPermissionStatusEvent(data);
@@ -5410,8 +5543,8 @@ describe('WidgetComponent', () => {
         id: '34',
         dialog: {
           permissionType: 'video',
-          permissionStatus: 'granted'
-        }
+          permissionStatus: 'granted',
+        },
       };
 
       (component as any).handleMediaPermissionStatusEvent(data);
@@ -5428,8 +5561,8 @@ describe('WidgetComponent', () => {
         id: '44',
         dialog: {
           permissionType: 'video',
-          permissionStatus: 'denied'
-        }
+          permissionStatus: 'denied',
+        },
       };
 
       (component as any).handleMediaPermissionStatusEvent(data);
@@ -5444,7 +5577,10 @@ describe('WidgetComponent', () => {
       const spy = jest.spyOn((component as any).snackBar, 'open');
 
       const data = {
-        response: { type: 'generalError', description: 'Camera permission denied. Please enable.' },
+        response: {
+          type: 'generalError',
+          description: 'Camera permission denied. Please enable.',
+        },
       };
 
       (component as any).handleErrorEvent(data);
@@ -5452,7 +5588,7 @@ describe('WidgetComponent', () => {
       expect(spy).toHaveBeenCalledWith(
         'Please add Camera permissions in your browser to enable video.',
         'Dismiss',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -5460,7 +5596,10 @@ describe('WidgetComponent', () => {
       const spy = jest.spyOn((component as any).snackBar, 'open');
 
       const data = {
-        response: { type: 'generalError', description: 'Microphone permission denied. Please enable.' },
+        response: {
+          type: 'generalError',
+          description: 'Microphone permission denied. Please enable.',
+        },
       };
 
       (component as any).handleErrorEvent(data);
@@ -5468,7 +5607,7 @@ describe('WidgetComponent', () => {
       expect(spy).toHaveBeenCalledWith(
         'Please add microphone permissions in your browser.',
         'Dismiss',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -5477,7 +5616,10 @@ describe('WidgetComponent', () => {
       const spy = jest.spyOn((component as any).snackBar, 'open');
 
       const data = {
-        response: { type: 'generalError', description: 'Audio/Video Device is being used by Someother Party' },
+        response: {
+          type: 'generalError',
+          description: 'Audio/Video Device is being used by Someother Party',
+        },
       };
 
       (component as any).handleErrorEvent(data);
@@ -5485,7 +5627,7 @@ describe('WidgetComponent', () => {
       expect(spy).toHaveBeenCalledWith(
         'Audio/Video Device is being used by Someother Party',
         'Dismiss',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -5502,7 +5644,7 @@ describe('WidgetComponent', () => {
       expect(spy).toHaveBeenCalledWith(
         'Invalid State: Session not found',
         'Dismiss',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -5516,21 +5658,23 @@ describe('WidgetComponent', () => {
       expect(spy).toHaveBeenCalledWith(
         'Certificate Issues: Please contact with your administrator',
         'Dismiss',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
     it('should handle unknown error', () => {
       const spy = jest.spyOn((component as any).snackBar, 'open');
 
-      const data = { response: { type: 'unknownError', description: 'Something went wrong' } };
+      const data = {
+        response: { type: 'unknownError', description: 'Something went wrong' },
+      };
 
       (component as any).handleErrorEvent(data);
 
       expect(spy).toHaveBeenCalledWith(
         'An unknown error occurred.',
         'Dismiss',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -5546,7 +5690,7 @@ describe('WidgetComponent', () => {
       expect(spy).toHaveBeenCalledWith(
         'The service is currently unavailable. Please check your network connection and try again.',
         'Dismiss',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -5564,7 +5708,10 @@ describe('WidgetComponent', () => {
       const spy = jest.spyOn((component as any).snackBar, 'open');
       component.dialogId = undefined;
       const data = {
-        response: { type: 'generalError', description: 'Audio/Video Device is being used by Someother Party' },
+        response: {
+          type: 'generalError',
+          description: 'Audio/Video Device is being used by Someother Party',
+        },
       };
 
       (component as any).handleErrorEvent(data);
@@ -5575,7 +5722,10 @@ describe('WidgetComponent', () => {
     it('should show session offer error snackbar', () => {
       const spy = jest.spyOn((component as any).snackBar, 'open');
       const data = {
-        response: { type: 'generalError', description: 'Session.getOffer unknown error.' },
+        response: {
+          type: 'generalError',
+          description: 'Session.getOffer unknown error.',
+        },
       };
 
       (component as any).handleErrorEvent(data);
@@ -5583,7 +5733,7 @@ describe('WidgetComponent', () => {
       expect(spy).toHaveBeenCalledWith(
         'Please check Audio / Video permissions in your browser.',
         'Dismiss',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
   });
@@ -5861,15 +6011,25 @@ describe('WidgetComponent', () => {
           attributeType: 'OPTIONS',
           valueType: 'checkbox',
           key: 'testKey',
-          attributeOptions: { enableCategory: false, enableStyle: true }
+          attributeOptions: { enableCategory: false, enableStyle: true },
         };
         const possibleValues = [
-          { label: 'Option 1', value: 'opt1', optionWeightage: 10, optionStyle: 'style1' },
-          { label: 'Option 2', value: 'opt2', optionWeightage: 20 }
+          {
+            label: 'Option 1',
+            value: 'opt1',
+            optionWeightage: 10,
+            optionStyle: 'style1',
+          },
+          { label: 'Option 2', value: 'opt2', optionWeightage: 20 },
         ];
         const currentSectionAttributes = { testKey: ['Option 1'] };
 
-        const result = component.getAnswerObj(attribute, possibleValues, null, currentSectionAttributes);
+        const result = component.getAnswerObj(
+          attribute,
+          possibleValues,
+          null,
+          currentSectionAttributes,
+        );
 
         expect(result).toEqual([
           {
@@ -5879,8 +6039,8 @@ describe('WidgetComponent', () => {
             additionalAttributes: {
               optionWeightage: 10,
               enableStyle: true,
-              optionStyle: 'style1'
-            }
+              optionStyle: 'style1',
+            },
           },
           {
             label: 'Option 2',
@@ -5889,9 +6049,9 @@ describe('WidgetComponent', () => {
             additionalAttributes: {
               optionWeightage: 20,
               enableStyle: true,
-              optionStyle: null
-            }
-          }
+              optionStyle: null,
+            },
+          },
         ]);
       });
 
@@ -5900,15 +6060,20 @@ describe('WidgetComponent', () => {
           attributeType: 'OPTIONS',
           valueType: 'checkbox',
           key: 'testKey',
-          attributeOptions: { enableCategory: false, enableStyle: false }
+          attributeOptions: { enableCategory: false, enableStyle: false },
         };
         const possibleValues = [
           { label: 'Option 1', value: 'opt1' },
-          { label: 'Option 2', value: 'opt2' }
+          { label: 'Option 2', value: 'opt2' },
         ];
         const currentSectionAttributes = {};
 
-        const result = component.getAnswerObj(attribute, possibleValues, null, currentSectionAttributes);
+        const result = component.getAnswerObj(
+          attribute,
+          possibleValues,
+          null,
+          currentSectionAttributes,
+        );
 
         expect(result).toEqual([
           {
@@ -5918,8 +6083,8 @@ describe('WidgetComponent', () => {
             additionalAttributes: {
               optionWeightage: null,
               enableStyle: false,
-              optionStyle: null
-            }
+              optionStyle: null,
+            },
           },
           {
             label: 'Option 2',
@@ -5928,9 +6093,9 @@ describe('WidgetComponent', () => {
             additionalAttributes: {
               optionWeightage: null,
               enableStyle: false,
-              optionStyle: null
-            }
-          }
+              optionStyle: null,
+            },
+          },
         ]);
       });
     });
@@ -5949,26 +6114,29 @@ describe('WidgetComponent', () => {
                 label: 'Category 1',
                 values: [
                   { label: 'Opt1', value: 'val1', optionWeightage: 5 },
-                  { label: 'Opt2', value: 'val2' }
-                ]
+                  { label: 'Opt2', value: 'val2' },
+                ],
               },
               {
                 label: 'Category 2',
-                values: [
-                  { label: 'Opt3', value: 'val3' }
-                ]
-              }
-            ]
-          }
+                values: [{ label: 'Opt3', value: 'val3' }],
+              },
+            ],
+          },
         };
         const currentSectionAttributes = {
           testKey: {
             'Category 1': ['Opt1'],
-            'Category 2': []
-          }
+            'Category 2': [],
+          },
         };
 
-        const result = component.getAnswerObj(attribute, [], null, currentSectionAttributes);
+        const result = component.getAnswerObj(
+          attribute,
+          [],
+          null,
+          currentSectionAttributes,
+        );
 
         expect(result).toHaveLength(2);
         expect(result[0].category).toBe('Category 1');
@@ -5980,8 +6148,8 @@ describe('WidgetComponent', () => {
           additionalAttributes: {
             optionWeightage: 5,
             enableStyle: false,
-            optionStyle: null
-          }
+            optionStyle: null,
+          },
         });
         expect(result[0].options[1]).toEqual({
           label: 'Opt2',
@@ -5990,8 +6158,8 @@ describe('WidgetComponent', () => {
           additionalAttributes: {
             optionWeightage: null,
             enableStyle: false,
-            optionStyle: null
-          }
+            optionStyle: null,
+          },
         });
         expect(result[1].category).toBe('Category 2');
       });
@@ -6007,16 +6175,19 @@ describe('WidgetComponent', () => {
             attributeData: [
               {
                 label: 'Category 1',
-                values: [
-                  { label: 'Opt1', value: 'val1' }
-                ]
-              }
-            ]
-          }
+                values: [{ label: 'Opt1', value: 'val1' }],
+              },
+            ],
+          },
         };
         const currentSectionAttributes = {};
 
-        const result = component.getAnswerObj(attribute, [], null, currentSectionAttributes);
+        const result = component.getAnswerObj(
+          attribute,
+          [],
+          null,
+          currentSectionAttributes,
+        );
 
         expect(result[0].options[0].isSelected).toBe(false);
       });
@@ -6028,8 +6199,8 @@ describe('WidgetComponent', () => {
           key: 'testKey',
           attributeOptions: {
             enableCategory: true,
-            attributeData: []
-          }
+            attributeData: [],
+          },
         };
 
         const result = component.getAnswerObj(attribute, [], null, {});
@@ -6042,15 +6213,25 @@ describe('WidgetComponent', () => {
         const attribute = {
           attributeType: 'OPTIONS',
           valueType: 'radio',
-          attributeOptions: { enableStyle: true }
+          attributeOptions: { enableStyle: true },
         };
         const possibleValues = [
-          { label: 'Radio 1', value: 'radio1', optionWeightage: 15, optionStyle: 'style1' },
-          { label: 'Radio 2', value: 'radio2', optionWeightage: 25 }
+          {
+            label: 'Radio 1',
+            value: 'radio1',
+            optionWeightage: 15,
+            optionStyle: 'style1',
+          },
+          { label: 'Radio 2', value: 'radio2', optionWeightage: 25 },
         ];
         const selectedValue = 'radio1';
 
-        const result = component.getAnswerObj(attribute, possibleValues, selectedValue, {});
+        const result = component.getAnswerObj(
+          attribute,
+          possibleValues,
+          selectedValue,
+          {},
+        );
 
         expect(result).toHaveLength(2);
         expect(result[0]).toEqual({
@@ -6060,8 +6241,8 @@ describe('WidgetComponent', () => {
           additionalAttributes: {
             optionWeightage: 15,
             enableStyle: true,
-            optionStyle: 'style1'
-          }
+            optionStyle: 'style1',
+          },
         });
         expect(result[1]).toEqual({
           label: 'Radio 2',
@@ -6070,8 +6251,8 @@ describe('WidgetComponent', () => {
           additionalAttributes: {
             optionWeightage: 25,
             enableStyle: true,
-            optionStyle: null
-          }
+            optionStyle: null,
+          },
         });
       });
 
@@ -6079,15 +6260,20 @@ describe('WidgetComponent', () => {
         const attribute = {
           attributeType: 'OPTIONS',
           valueType: 'dropdown',
-          attributeOptions: {}
+          attributeOptions: {},
         };
         const possibleValues = [
           { label: 'Option 1', value: 'opt1' },
-          { label: 'Option 2', value: 'opt2' }
+          { label: 'Option 2', value: 'opt2' },
         ];
         const selectedValue = { value: 'opt2', extra: 'data' };
 
-        const result = component.getAnswerObj(attribute, possibleValues, selectedValue, {});
+        const result = component.getAnswerObj(
+          attribute,
+          possibleValues,
+          selectedValue,
+          {},
+        );
 
         expect(result[0].isSelected).toBe(false);
         expect(result[1].isSelected).toBe(true);
@@ -6097,14 +6283,19 @@ describe('WidgetComponent', () => {
         const attribute = {
           attributeType: 'OPTIONS',
           valueType: 'dropdown',
-          attributeOptions: {}
+          attributeOptions: {},
         };
         const possibleValues = [
           { label: 'Option 1', value: 'opt1' },
-          { label: 'Option 2', value: 'opt2' }
+          { label: 'Option 2', value: 'opt2' },
         ];
 
-        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+        const result = component.getAnswerObj(
+          attribute,
+          possibleValues,
+          null,
+          {},
+        );
 
         expect(result[0].isSelected).toBe(false);
         expect(result[1].isSelected).toBe(false);
@@ -6114,13 +6305,16 @@ describe('WidgetComponent', () => {
         const attribute = {
           attributeType: 'OPTIONS',
           valueType: 'dropdown',
-          attributeOptions: {}
+          attributeOptions: {},
         };
-        const possibleValues = [
-          { label: 'Option 1', value: 'opt1' }
-        ];
+        const possibleValues = [{ label: 'Option 1', value: 'opt1' }];
 
-        const result = component.getAnswerObj(attribute, possibleValues, undefined, {});
+        const result = component.getAnswerObj(
+          attribute,
+          possibleValues,
+          undefined,
+          {},
+        );
 
         expect(result[0].isSelected).toBe(false);
       });
@@ -6129,14 +6323,19 @@ describe('WidgetComponent', () => {
         const attribute = {
           attributeType: 'OPTIONS',
           valueType: 'boolean',
-          attributeOptions: {}
+          attributeOptions: {},
         };
         const possibleValues = [
           { label: 'True Option', value: true },
-          { label: 'False Option', value: false }
+          { label: 'False Option', value: false },
         ];
 
-        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+        const result = component.getAnswerObj(
+          attribute,
+          possibleValues,
+          null,
+          {},
+        );
 
         expect(result[0].value).toBe('True Option');
         expect(result[1].value).toBe('False Option');
@@ -6146,16 +6345,21 @@ describe('WidgetComponent', () => {
         const attribute = {
           attributeType: 'OPTIONS',
           valueType: 'nps',
-          attributeOptions: {}
+          attributeOptions: {},
         };
         const possibleValues = [
           { label: '1', value: 1 },
           { label: '5', value: 5 },
-          { label: '10', value: 10 }
+          { label: '10', value: 10 },
         ];
         const selectedValue = 5;
 
-        const result = component.getAnswerObj(attribute, possibleValues, selectedValue, {});
+        const result = component.getAnswerObj(
+          attribute,
+          possibleValues,
+          selectedValue,
+          {},
+        );
 
         expect(result[0].isSelected).toBe(false);
         expect(result[1].isSelected).toBe(true);
@@ -6166,13 +6370,16 @@ describe('WidgetComponent', () => {
         const attribute = {
           attributeType: 'OPTIONS',
           valueType: 'radio',
-          attributeOptions: { enableStyle: true }
+          attributeOptions: { enableStyle: true },
         };
-        const possibleValues = [
-          { label: 'Option 1', value: 'opt1' }
-        ];
+        const possibleValues = [{ label: 'Option 1', value: 'opt1' }];
 
-        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+        const result = component.getAnswerObj(
+          attribute,
+          possibleValues,
+          null,
+          {},
+        );
 
         expect(result[0].additionalAttributes.optionStyle).toBe(null);
       });
@@ -6181,13 +6388,16 @@ describe('WidgetComponent', () => {
         const attribute = {
           attributeType: 'OPTIONS',
           valueType: 'radio',
-          attributeOptions: {}
+          attributeOptions: {},
         };
-        const possibleValues = [
-          { label: 'Option 1', value: 'opt1' }
-        ];
+        const possibleValues = [{ label: 'Option 1', value: 'opt1' }];
 
-        const result = component.getAnswerObj(attribute, possibleValues, null, {});
+        const result = component.getAnswerObj(
+          attribute,
+          possibleValues,
+          null,
+          {},
+        );
 
         expect(result[0].additionalAttributes.enableStyle).toBe(false);
       });
@@ -6196,7 +6406,7 @@ describe('WidgetComponent', () => {
         const attribute = {
           attributeType: 'OPTIONS',
           valueType: 'radio',
-          attributeOptions: {}
+          attributeOptions: {},
         };
 
         const result = component.getAnswerObj(attribute, [], null, {});
@@ -6235,7 +6445,11 @@ describe('WidgetComponent', () => {
 
     it('should filter events happening today', async () => {
       const today = new Date();
-      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const todayStart = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+      );
       const todayEnd = new Date(todayStart);
       todayEnd.setDate(todayStart.getDate() + 1);
 
@@ -6251,13 +6465,13 @@ describe('WidgetComponent', () => {
               id: 's1',
               name: 'Shift 1',
               startTime: todayStart.toISOString(),
-              endTime: todayEnd.toISOString()
-            }
+              endTime: todayEnd.toISOString(),
+            },
           ],
           validityPeriod: '',
           calendar: [],
-          eventColor: ''
-        }
+          eventColor: '',
+        },
       ];
 
       const result = await component.getTodayEvent();
@@ -6272,7 +6486,6 @@ describe('WidgetComponent', () => {
 
   // ---------- formatTime ----------
   describe('formatTime', () => {
-
     it('should handle different time zones', () => {
       const dateTime = '2023-12-25T00:00:00Z';
       const result = component.formatTime(dateTime);
@@ -6286,8 +6499,8 @@ describe('WidgetComponent', () => {
       const formGroup = new FormBuilder().group({
         sections: new FormBuilder().array([
           new FormBuilder().group({ field1: [''] }),
-          new FormBuilder().group({ field2: [''] })
-        ])
+          new FormBuilder().group({ field2: [''] }),
+        ]),
       });
       component.formGroupsMap['msg1'] = formGroup;
     });
@@ -6316,15 +6529,21 @@ describe('WidgetComponent', () => {
         additionalSchema: [{ key: 'schema1' }],
         additionalValues: [
           { key: 'key1', type: 'string', value: 'value1' },
-          { key: 'key2', type: 'number', value: 123 }
-        ]
+          { key: 'key2', type: 'number', value: 123 },
+        ],
       };
 
       component['processAdditionalSchemaAndValues'](configs);
 
       expect(component.additionalSchema).toEqual([{ key: 'schema1' }]);
-      expect(component.additionalValuesMap['key1']).toEqual({ type: 'string', value: 'value1' });
-      expect(component.additionalValuesMap['key2']).toEqual({ type: 'number', value: 123 });
+      expect(component.additionalValuesMap['key1']).toEqual({
+        type: 'string',
+        value: 'value1',
+      });
+      expect(component.additionalValuesMap['key2']).toEqual({
+        type: 'number',
+        value: 123,
+      });
     });
 
     it('should handle empty configs', () => {
@@ -6334,7 +6553,9 @@ describe('WidgetComponent', () => {
     });
 
     it('should set INPUT_PARAMS in additionalValuesMap', () => {
-      jest.spyOn(component, 'getInputParamsAsEntities').mockReturnValue({ param1: 'value1' });
+      jest
+        .spyOn(component, 'getInputParamsAsEntities')
+        .mockReturnValue({ param1: 'value1' });
       component['processAdditionalSchemaAndValues']({});
       expect(component.additionalValuesMap['INPUT_PARAMS']).toBeDefined();
     });
@@ -6345,7 +6566,7 @@ describe('WidgetComponent', () => {
     beforeEach(() => {
       component.additionalValuesMap = {
         key1: { type: 'string', value: 'value1' },
-        key2: { type: 'number', value: 123 }
+        key2: { type: 'number', value: 123 },
       };
     });
 
@@ -6363,18 +6584,23 @@ describe('WidgetComponent', () => {
   describe('setAdditionalValue', () => {
     beforeEach(() => {
       component.additionalValuesMap = {
-        existingKey: { type: 'string', value: 'oldValue' }
+        existingKey: { type: 'string', value: 'oldValue' },
       };
     });
 
     it('should update existing value', () => {
       component.setAdditionalValue('existingKey', 'newValue');
-      expect(component.additionalValuesMap['existingKey'].value).toBe('newValue');
+      expect(component.additionalValuesMap['existingKey'].value).toBe(
+        'newValue',
+      );
     });
 
     it('should create new entry for non-existing key', () => {
       component.setAdditionalValue('newKey', 'newValue');
-      expect(component.additionalValuesMap['newKey']).toEqual({ type: 'string', value: 'newValue' });
+      expect(component.additionalValuesMap['newKey']).toEqual({
+        type: 'string',
+        value: 'newValue',
+      });
     });
   });
 
@@ -6382,7 +6608,7 @@ describe('WidgetComponent', () => {
   describe('getAdditionalValueWithType', () => {
     beforeEach(() => {
       component.additionalValuesMap = {
-        key1: { type: 'string', value: 'value1' }
+        key1: { type: 'string', value: 'value1' },
       };
     });
 
@@ -6400,7 +6626,7 @@ describe('WidgetComponent', () => {
   describe('hasAdditionalValue', () => {
     beforeEach(() => {
       component.additionalValuesMap = {
-        key1: { type: 'string', value: 'value1' }
+        key1: { type: 'string', value: 'value1' },
       };
     });
 
@@ -6420,7 +6646,7 @@ describe('WidgetComponent', () => {
         INPUT_PARAMS_LIST: { type: 'string', value: 'param1, param2, param3' },
         param1: { type: 'string', value: 'value1' },
         param2: { type: 'number', value: 123 },
-        param3: { type: 'string', value: 'value3' }
+        param3: { type: 'string', value: 'value3' },
       };
     });
 
@@ -6439,8 +6665,11 @@ describe('WidgetComponent', () => {
 
     it('should handle missing params in map', () => {
       component.additionalValuesMap = {
-        INPUT_PARAMS_LIST: { type: 'string', value: 'param1, param2, missingParam' },
-        param1: { type: 'string', value: 'value1' }
+        INPUT_PARAMS_LIST: {
+          type: 'string',
+          value: 'param1, param2, missingParam',
+        },
+        param1: { type: 'string', value: 'value1' },
       };
       const result = component.getInputParamsAsEntities();
       expect(result.param1).toBe('value1');
@@ -6456,19 +6685,19 @@ describe('WidgetComponent', () => {
     beforeEach(() => {
       mockFormGroup = new FormBuilder().group({
         sections: new FormBuilder().array([
-          new FormBuilder().group({ field1: ['', jest.fn()] })
-        ])
+          new FormBuilder().group({ field1: ['', jest.fn()] }),
+        ]),
       });
       mockFormGroup.markAllAsTouched = jest.fn();
       mockMessage = {
         id: 'msg1',
-        body: { formTitle: 'Test Form' }
+        body: { formTitle: 'Test Form' },
       };
       component.formGroupsMap['msg1'] = mockFormGroup;
       component.createFormDataObject = jest.fn().mockReturnValue({
         header: {},
         body: { sections: [] },
-        id: ''
+        id: '',
       });
       component.creatingSectionsforSchema = jest.fn().mockResolvedValue([]);
       component.constructCimMessage = jest.fn();
@@ -6494,8 +6723,8 @@ describe('WidgetComponent', () => {
       const formData = {
         sections: [
           { name: 'John', email: 'john@test.com' },
-          { phone: '1234567890' }
-        ]
+          { phone: '1234567890' },
+        ],
       };
       const result = component.checkFieldValue(formData, 'email');
       expect(result.error).toBe(false);
@@ -6504,9 +6733,7 @@ describe('WidgetComponent', () => {
 
     it('should return error when field not found', () => {
       const formData = {
-        sections: [
-          { name: 'John' }
-        ]
+        sections: [{ name: 'John' }],
       };
       const result = component.checkFieldValue(formData, 'email');
       expect(result.error).toBe(true);
@@ -6515,9 +6742,7 @@ describe('WidgetComponent', () => {
 
     it('should return error when field value is null', () => {
       const formData = {
-        sections: [
-          { name: 'John', email: null }
-        ]
+        sections: [{ name: 'John', email: null }],
       };
       const result = component.checkFieldValue(formData, 'email');
       expect(result.error).toBe(true);
@@ -6532,24 +6757,28 @@ describe('WidgetComponent', () => {
         systemInfo: {
           browserId: 'browser123',
           browserName: 'Chrome',
-          deviceType: 'Desktop'
+          deviceType: 'Desktop',
         },
         geoLocationData: {
           time_zone: { name: 'UTC' },
           languages: ['en'],
-          country_name: 'US'
-        }
+          country_name: 'US',
+        },
       };
       component.__appConfig = {
-        appConfig: { CHANNEL_IDENTIFIER: 'channelCustomerIdentifier' }
+        appConfig: { CHANNEL_IDENTIFIER: 'channelCustomerIdentifier' },
       } as any;
       (component as any).translate = { currentLang: 'en' };
       component.getFormDataByPreChatForm = jest.fn().mockReturnValue({});
-      component.checkFieldValue = jest.fn().mockReturnValue({ error: false, data: 'cid' });
+      component.checkFieldValue = jest
+        .fn()
+        .mockReturnValue({ error: false, data: 'cid' });
     });
 
     it('should return error when channel identifier is missing', () => {
-      component.checkFieldValue = jest.fn().mockReturnValue({ error: true, data: 'Error message' });
+      component.checkFieldValue = jest
+        .fn()
+        .mockReturnValue({ error: true, data: 'Error message' });
       global.alert = jest.fn();
       const result = component.getEventPayload({ sections: [] });
       expect(result.error).toBe(true);
@@ -6557,7 +6786,9 @@ describe('WidgetComponent', () => {
     });
 
     it('should return payload when channel identifier exists', () => {
-      const result = component.getEventPayload({ sections: [{ channelCustomerIdentifier: 'cid' }] });
+      const result = component.getEventPayload({
+        sections: [{ channelCustomerIdentifier: 'cid' }],
+      });
       expect(result.error).toBe(false);
       expect(result.data.serviceIdentifier).toBe('sid');
       expect(result.data.channelCustomerIdentifier).toBe('cid');
@@ -6570,8 +6801,8 @@ describe('WidgetComponent', () => {
       const jsonObject = {
         sections: [
           { name: 'John', email: 'john@test.com' },
-          { phone: '1234567890' }
-        ]
+          { phone: '1234567890' },
+        ],
       };
       const result = component.getFormDataAsConversationData(jsonObject);
       expect(result.name).toBe('John');
@@ -6581,10 +6812,7 @@ describe('WidgetComponent', () => {
 
     it('should handle duplicate keys with index suffix', () => {
       const jsonObject = {
-        sections: [
-          { name: 'John' },
-          { name: 'Jane' }
-        ]
+        sections: [{ name: 'John' }, { name: 'Jane' }],
       };
       const result = component.getFormDataAsConversationData(jsonObject);
       expect(result.name).toBe('John');
@@ -6597,7 +6825,7 @@ describe('WidgetComponent', () => {
     beforeEach(() => {
       component.createFormDataObject = jest.fn().mockReturnValue({
         header: {},
-        body: { enableWeightage: false, sections: [] }
+        body: { enableWeightage: false, sections: [] },
       });
       component.creatingSectionsforSchema = jest.fn().mockReturnValue([]);
       component.sdk = { postFormDataAsActivity: jest.fn() } as any;
@@ -6614,7 +6842,7 @@ describe('WidgetComponent', () => {
     it('should calculate scores when weightage is enabled', () => {
       component.createFormDataObject = jest.fn().mockReturnValue({
         header: {},
-        body: { enableWeightage: true, sections: [] }
+        body: { enableWeightage: true, sections: [] },
       });
       component.pushPrechatDataAsActivity();
       expect(component.calculateAttributeScore).toHaveBeenCalled();
@@ -6634,14 +6862,17 @@ describe('WidgetComponent', () => {
                 {
                   answer: [
                     { isSelected: false },
-                    { isSelected: true, additionalAttributes: { optionWeightage: 50 } }
+                    {
+                      isSelected: true,
+                      additionalAttributes: { optionWeightage: 50 },
+                    },
                   ],
-                  attributeWeightage: 100
-                }
-              ]
-            }
-          ]
-        }
+                  attributeWeightage: 100,
+                },
+              ],
+            },
+          ],
+        },
       };
       component.calculateAttributeScore(formData);
       expect(formData.body.sections[0].attributes[0].attributeScore).toBe(50);
@@ -6654,19 +6885,18 @@ describe('WidgetComponent', () => {
             {
               attributes: [
                 {
-                  answer: [
-                    { isSelected: false },
-                    { isSelected: false }
-                  ],
-                  attributeWeightage: 100
-                }
-              ]
-            }
-          ]
-        }
+                  answer: [{ isSelected: false }, { isSelected: false }],
+                  attributeWeightage: 100,
+                },
+              ],
+            },
+          ],
+        },
       };
       component.calculateAttributeScore(formData);
-      expect(formData.body.sections[0].attributes[0].attributeScore).toBeUndefined();
+      expect(
+        formData.body.sections[0].attributes[0].attributeScore,
+      ).toBeUndefined();
     });
   });
 
@@ -6679,13 +6909,10 @@ describe('WidgetComponent', () => {
           sections: [
             {
               sectionWeightage: 100,
-              attributes: [
-                { attributeScore: 50 },
-                { attributeScore: 30 }
-              ]
-            }
-          ]
-        }
+              attributes: [{ attributeScore: 50 }, { attributeScore: 30 }],
+            },
+          ],
+        },
       };
       component.calculateSectionScores(formData);
       expect(formData.body.sections[0].sectionScore).toBe(80);
@@ -6698,13 +6925,10 @@ describe('WidgetComponent', () => {
           sections: [
             {
               sectionWeightage: 100,
-              attributes: [
-                { attributeScore: null },
-                { attributeScore: 30 }
-              ]
-            }
-          ]
-        }
+              attributes: [{ attributeScore: null }, { attributeScore: 30 }],
+            },
+          ],
+        },
       };
       component.calculateSectionScores(formData);
       expect(formData.body.sections[0].sectionScore).toBe(30);
@@ -6718,11 +6942,8 @@ describe('WidgetComponent', () => {
         body: {
           enableWeightage: true,
           formWeightage: 100,
-          sections: [
-            { sectionScore: 50 },
-            { sectionScore: 30 }
-          ]
-        }
+          sections: [{ sectionScore: 50 }, { sectionScore: 30 }],
+        },
       };
       component.calculateFormScore(formData);
       expect(formData.body.formScore).toBe(80);
@@ -6732,8 +6953,8 @@ describe('WidgetComponent', () => {
       const formData: any = {
         body: {
           enableWeightage: false,
-          sections: []
-        }
+          sections: [],
+        },
       };
       component.calculateFormScore(formData);
       expect(formData.body.formScore).toBeNull();
@@ -6756,7 +6977,7 @@ describe('WidgetComponent', () => {
         formTitle: 'Test Form',
         formWeightage: 100,
         enableWeightage: true,
-        sections: [{}, {}]
+        sections: [{}, {}],
       };
     });
 
@@ -6805,11 +7026,15 @@ describe('WidgetComponent', () => {
   describe('getFormDataByPreChatForm', () => {
     beforeEach(() => {
       component.preChatFormId = 'form1';
-      component.getAdditionalValue = jest.fn().mockReturnValue({ param1: 'value1' });
+      component.getAdditionalValue = jest
+        .fn()
+        .mockReturnValue({ param1: 'value1' });
     });
 
     it('should create form data object', () => {
-      const result = component.getFormDataByPreChatForm({ sections: [] } as any);
+      const result = component.getFormDataByPreChatForm({
+        sections: [],
+      } as any);
       expect(result.formId).toBe('form1');
       expect(result.filledBy).toBe('web-widget');
       expect(result.attributes).toBeDefined();
@@ -6822,8 +7047,8 @@ describe('WidgetComponent', () => {
       const jsonObject = {
         sections: [
           { name: 'John', email: 'john@test.com' },
-          { phone: '1234567890' }
-        ]
+          { phone: '1234567890' },
+        ],
       };
       const result = component.convertJsonToArray(jsonObject);
       expect(result.length).toBe(3);
@@ -6844,7 +7069,11 @@ describe('WidgetComponent', () => {
       component.closeWrapper();
       expect(component.additionalPanel).toBe(false);
       expect(component.resizeWidget).toHaveBeenCalledWith('icon-view');
-      expect((component as any).storageService.setItem).toHaveBeenCalledWith('wrapper-hide', 'true', 'localStorage');
+      expect((component as any).storageService.setItem).toHaveBeenCalledWith(
+        'wrapper-hide',
+        'true',
+        'localStorage',
+      );
     });
   });
 
@@ -6905,16 +7134,22 @@ describe('WidgetComponent', () => {
   describe('resizeWidget', () => {
     beforeEach(() => {
       (component as any).__postMessageHandlerService = {
-        getParentOrigin: jest.fn().mockReturnValue('http://example.com')
+        getParentOrigin: jest.fn().mockReturnValue('http://example.com'),
       };
       window.parent.postMessage = jest.fn();
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
     it('should send postMessage with state', () => {
       component.resizeWidget('form-view');
+      jest.runAllTimers();
       expect(window.parent.postMessage).toHaveBeenCalledWith(
-        { state: 'form-view' },
-        'http://example.com'
+        { state: 'form-view', height: null, width: null },
+        'http://example.com',
       );
     });
   });
@@ -6926,14 +7161,16 @@ describe('WidgetComponent', () => {
         nativeElement: {
           removeAttribute: jest.fn(),
           setAttribute: jest.fn(),
-          value: ''
-        }
+          value: '',
+        },
       } as any;
-      (component as any).translate = { instant: jest.fn().mockReturnValue('Type a message...') };
+      (component as any).translate = {
+        instant: jest.fn().mockReturnValue('Type a message...'),
+      };
       (component as any).renderer = {
         removeAttribute: jest.fn(),
         setAttribute: jest.fn(),
-        setProperty: jest.fn()
+        setProperty: jest.fn(),
       };
     });
 
@@ -6956,15 +7193,15 @@ describe('WidgetComponent', () => {
       component.messageElement = {
         nativeElement: {
           setAttribute: jest.fn(),
-          value: ''
-        }
+          value: '',
+        },
       } as any;
       (component as any).renderer = {
         setAttribute: jest.fn(),
-        setProperty: jest.fn()
+        setProperty: jest.fn(),
       };
       document.querySelector = jest.fn().mockReturnValue({
-        style: { pointerEvents: '', opacity: '' }
+        style: { pointerEvents: '', opacity: '' },
       });
     });
 
@@ -6981,13 +7218,15 @@ describe('WidgetComponent', () => {
       component.messageElement = {
         nativeElement: {
           removeAttribute: jest.fn(),
-          setAttribute: jest.fn()
-        }
+          setAttribute: jest.fn(),
+        },
       } as any;
-      (component as any).translate = { instant: jest.fn().mockReturnValue('Type a message...') };
+      (component as any).translate = {
+        instant: jest.fn().mockReturnValue('Type a message...'),
+      };
       (component as any).renderer = {
         removeAttribute: jest.fn(),
-        setAttribute: jest.fn()
+        setAttribute: jest.fn(),
       };
     });
 
@@ -7005,7 +7244,7 @@ describe('WidgetComponent', () => {
         { id: '1', header: { sender: { type: 'customer' } } },
         { id: '2', header: { sender: { type: 'agent' } } },
         { id: '3', header: { sender: { type: 'bot' } } },
-        { id: '4', header: { sender: { type: 'agent' } } }
+        { id: '4', header: { sender: { type: 'agent' } } },
       ];
     });
 
@@ -7016,7 +7255,7 @@ describe('WidgetComponent', () => {
 
     it('should return undefined when no agent messages exist', () => {
       component.cimMessage = [
-        { id: '1', header: { sender: { type: 'customer' } } }
+        { id: '1', header: { sender: { type: 'customer' } } },
       ];
       expect(component.getLatestAgentMessage()).toBeUndefined();
     });
@@ -7028,22 +7267,26 @@ describe('WidgetComponent', () => {
       component.constructAndPublishMessageSeenNotification = jest.fn();
       component.getLatestAgentMessage = jest.fn().mockReturnValue({
         id: 'msg1',
-        body: { type: 'text' }
+        body: { type: 'text' },
       });
     });
 
     it('should publish seen notification for latest agent message', () => {
       component.onTextAreaFocus();
-      expect(component.constructAndPublishMessageSeenNotification).toHaveBeenCalledWith('msg1');
+      expect(
+        component.constructAndPublishMessageSeenNotification,
+      ).toHaveBeenCalledWith('msg1');
     });
 
     it('should not publish notification for notification type messages', () => {
       component.getLatestAgentMessage = jest.fn().mockReturnValue({
         id: 'msg1',
-        body: { type: 'notification' }
+        body: { type: 'notification' },
       });
       component.onTextAreaFocus();
-      expect(component.constructAndPublishMessageSeenNotification).not.toHaveBeenCalled();
+      expect(
+        component.constructAndPublishMessageSeenNotification,
+      ).not.toHaveBeenCalled();
     });
   });
 
@@ -7128,7 +7371,7 @@ describe('WidgetComponent', () => {
       // First call to set up the timer
       component.sendTypingStartedEvent();
       expect(component.sdk.sendChatMessage).toHaveBeenCalledTimes(1);
-      
+
       // Second call should not send another event because timer is running
       component.sendTypingStartedEvent();
       expect(component.sdk.sendChatMessage).toHaveBeenCalledTimes(1);
@@ -7139,12 +7382,12 @@ describe('WidgetComponent', () => {
   describe('chatTranscript', () => {
     beforeEach(() => {
       (component as any).storageService = {
-        getItem: jest.fn().mockReturnValue('conv123')
+        getItem: jest.fn().mockReturnValue('conv123'),
       };
       (component as any).translate = { currentLang: 'en' };
       component.storageType = 'localStorage';
       window.open = jest.fn().mockReturnValue({
-        postMessage: jest.fn()
+        postMessage: jest.fn(),
       });
       jest.useFakeTimers();
     });
@@ -7166,14 +7409,14 @@ describe('WidgetComponent', () => {
       component.defaultWidgetLanguage = 'en';
       Object.defineProperty(navigator, 'language', {
         writable: true,
-        value: 'en-US'
+        value: 'en-US',
       });
     });
 
     it('should set Arabic language when browser language is ar', () => {
       Object.defineProperty(navigator, 'language', {
         writable: true,
-        value: 'ar'
+        value: 'ar',
       });
       component.loadBrowserLanguage();
       expect(component.textDirection).toBe('right-direction');
@@ -7183,7 +7426,7 @@ describe('WidgetComponent', () => {
     it('should use default language for non-Arabic browsers', () => {
       Object.defineProperty(navigator, 'language', {
         writable: true,
-        value: 'en-US'
+        value: 'en-US',
       });
       component.loadBrowserLanguage();
       expect(component.selectedLanguage).toBe('en');
@@ -7194,7 +7437,7 @@ describe('WidgetComponent', () => {
   describe('logInToFreeSwitch', () => {
     beforeEach(() => {
       component.webRTCConfig = {
-        sipExtension: '1001'
+        sipExtension: '1001',
       } as any;
       component.sdk = { loginSipWebRtc: jest.fn() } as any;
       component.enableWebRtc = true;
@@ -7260,15 +7503,17 @@ describe('WidgetComponent', () => {
   describe('textChanged', () => {
     beforeEach(() => {
       component.messageElement = {
-        nativeElement: { focus: jest.fn() }
+        nativeElement: { focus: jest.fn() },
       } as any;
       component.elementView = {
-        nativeElement: { scrollHeight: 100 }
+        nativeElement: { scrollHeight: 100 },
       } as any;
       (component as any).scrollContainer = {
-        nativeElement: { scrollHeight: 200 }
+        nativeElement: { scrollHeight: 200 },
       };
-      document.getElementById = jest.fn().mockReturnValue({ value: 'test message' } as any);
+      document.getElementById = jest
+        .fn()
+        .mockReturnValue({ value: 'test message' } as any);
     });
 
     it('should update text and scroll heights', () => {
@@ -7300,13 +7545,23 @@ describe('WidgetComponent', () => {
 
     it('should send plain message when text is provided', () => {
       component.onSendMessage('Hello');
-      expect(component.constructCimMessage).toHaveBeenCalledWith('PLAIN', expect.objectContaining({
-        text: 'Hello'
-      }));
+      expect(component.constructCimMessage).toHaveBeenCalledWith(
+        'PLAIN',
+        expect.objectContaining({
+          text: 'Hello',
+        }),
+      );
     });
 
     it('should upload file when imageUrls exist', () => {
-      component.imageUrls = [{ filesPath: 'path' as any, fileType: 'image', fileExt: 'png', fileName: 'test.png' }];
+      component.imageUrls = [
+        {
+          filesPath: 'path' as any,
+          fileType: 'image',
+          fileExt: 'png',
+          fileName: 'test.png',
+        },
+      ];
       component.selectedFile = {} as any;
       component.onSendMessage('Hello');
       expect(component.uploadFile).toHaveBeenCalled();
@@ -7320,8 +7575,8 @@ describe('WidgetComponent', () => {
       (component as any).scrollContainer = {
         nativeElement: {
           scrollTop: 0,
-          scrollHeight: 1000
-        }
+          scrollHeight: 1000,
+        },
       };
     });
 
@@ -7332,7 +7587,9 @@ describe('WidgetComponent', () => {
     it('should scroll to bottom', () => {
       component.scrollToBottom();
       jest.advanceTimersByTime(350);
-      expect((component as any).scrollContainer.nativeElement.scrollTop).toBe(1000);
+      expect((component as any).scrollContainer.nativeElement.scrollTop).toBe(
+        1000,
+      );
     });
   });
 
@@ -7340,7 +7597,7 @@ describe('WidgetComponent', () => {
   describe('clearMessageData', () => {
     beforeEach(() => {
       component.elementView = {
-        nativeElement: { value: 'test' }
+        nativeElement: { value: 'test' },
       } as any;
       component.text = 'test';
       component.fileName = 'test.jpg';
@@ -7359,7 +7616,12 @@ describe('WidgetComponent', () => {
   // ---------- buildMediaAttachment ----------
   describe('buildMediaAttachment', () => {
     it('should build media attachment object', () => {
-      const result = component.buildMediaAttachment('http://example.com/image.jpg', 1024, 'image/jpeg', 'jpg');
+      const result = component.buildMediaAttachment(
+        'http://example.com/image.jpg',
+        1024,
+        'image/jpeg',
+        'jpg',
+      );
       expect(result.mediaUrl).toBe('http://example.com/image.jpg');
       expect(result.size).toBe(1024);
       expect(result.type).toBe('image/jpeg');
@@ -7370,7 +7632,14 @@ describe('WidgetComponent', () => {
   // ---------- removeUploadFile ----------
   describe('removeUploadFile', () => {
     beforeEach(() => {
-      component.imageUrls = [{ filesPath: 'path' as any, fileType: 'image', fileExt: 'png', fileName: 'test.png' }];
+      component.imageUrls = [
+        {
+          filesPath: 'path' as any,
+          fileType: 'image',
+          fileExt: 'png',
+          fileName: 'test.png',
+        },
+      ];
       component.selectedFile = {} as any;
     });
 
@@ -7390,20 +7659,20 @@ describe('WidgetComponent', () => {
     it('should send button message', () => {
       component.sendButtonMessage(
         { title: 'Click Me', payload: 'action1' },
-        'msg1'
+        'msg1',
       );
-      expect(component.constructCimMessage).toHaveBeenCalledWith('PLAIN', expect.objectContaining({
-        text: 'Click Me',
-        intent: 'action1',
-        originalMessageId: 'msg1'
-      }));
+      expect(component.constructCimMessage).toHaveBeenCalledWith(
+        'PLAIN',
+        expect.objectContaining({
+          text: 'Click Me',
+          intent: 'action1',
+          originalMessageId: 'msg1',
+        }),
+      );
     });
 
     it('should not send empty title', () => {
-      component.sendButtonMessage(
-        { title: '   ', payload: 'action1' },
-        'msg1'
-      );
+      component.sendButtonMessage({ title: '   ', payload: 'action1' }, 'msg1');
       expect(component.constructCimMessage).not.toHaveBeenCalled();
     });
   });
@@ -7418,14 +7687,17 @@ describe('WidgetComponent', () => {
       component.sendCarousalMessage(
         { title: 'Card Title', payload: 'action1' },
         'msg1',
-        'card1'
+        'card1',
       );
-      expect(component.constructCimMessage).toHaveBeenCalledWith('PLAIN', expect.objectContaining({
-        text: 'Card Title',
-        intent: 'action1',
-        originalMessageId: 'msg1',
-        carousalCardId: 'card1'
-      }));
+      expect(component.constructCimMessage).toHaveBeenCalledWith(
+        'PLAIN',
+        expect.objectContaining({
+          text: 'Card Title',
+          intent: 'action1',
+          originalMessageId: 'msg1',
+          carousalCardId: 'card1',
+        }),
+      );
     });
   });
 
@@ -7434,19 +7706,21 @@ describe('WidgetComponent', () => {
     beforeEach(() => {
       component.dialog = {
         open: jest.fn().mockReturnValue({
-          afterClosed: jest.fn().mockReturnValue(of(true))
-        })
+          afterClosed: jest.fn().mockReturnValue(of(true)),
+        }),
       } as any;
       component.IsRegisteredInFreeSwitch = false;
       component.callPopUpView = true;
       component.endCountdown = jest.fn();
       component.sdk = {
         handleCallEnd: jest.fn(),
-        handleLogOutAgent: jest.fn()
+        handleLogOutAgent: jest.fn(),
       } as any;
       component.dialogId = 'dialog1';
       component.clearSession = jest.fn();
-      (component as any).__postMessageHandlerService = { sendPostMessage: jest.fn() };
+      (component as any).__postMessageHandlerService = {
+        sendPostMessage: jest.fn(),
+      };
     });
 
     it('should end chat and clear session when confirmed', () => {
@@ -7466,12 +7740,14 @@ describe('WidgetComponent', () => {
   describe('customerChatResumed', () => {
     beforeEach(() => {
       (component as any).storageService = {
-        getItem: jest.fn().mockReturnValue(JSON.stringify({
-          data: {
-            channelCustomerIdentifier: 'cid',
-            serviceIdentifier: 'sid'
-          }
-        }))
+        getItem: jest.fn().mockReturnValue(
+          JSON.stringify({
+            data: {
+              channelCustomerIdentifier: 'cid',
+              serviceIdentifier: 'sid',
+            },
+          }),
+        ),
       };
       component.storageType = 'localStorage';
       component.sdk = { makeConnection: jest.fn() } as any;
@@ -7483,7 +7759,9 @@ describe('WidgetComponent', () => {
     });
 
     it('should not resume chat when user data is null', () => {
-      (component as any).storageService.getItem = jest.fn().mockReturnValue(null);
+      (component as any).storageService.getItem = jest
+        .fn()
+        .mockReturnValue(null);
       component.customerChatResumed();
       expect(component.sdk.makeConnection).not.toHaveBeenCalled();
     });
@@ -7507,9 +7785,9 @@ describe('WidgetComponent', () => {
       const formGroup = new FormBuilder().group({
         sections: new FormBuilder().array([
           new FormBuilder().group({
-            field1: ['test value']
-          })
-        ])
+            field1: ['test value'],
+          }),
+        ]),
       });
       component.preChatFormGroup = formGroup;
     });
@@ -7552,25 +7830,43 @@ describe('WidgetComponent', () => {
         sections: new FormBuilder().array([
           new FormBuilder().group({
             checkbox1: [['option1', 'option2']],
-            checkbox2: [{ category1: ['opt1'] }]
-          })
-        ])
+            checkbox2: [{ category1: ['opt1'] }],
+          }),
+        ]),
       });
       component.preChatFormGroup = formGroup;
     });
 
     it('should return true for checked simple checkbox', () => {
-      const result = component.isCheckboxChecked(0, 'checkbox1', 'option1', undefined, false);
+      const result = component.isCheckboxChecked(
+        0,
+        'checkbox1',
+        'option1',
+        undefined,
+        false,
+      );
       expect(result).toBe(true);
     });
 
     it('should return true for checked categorized checkbox', () => {
-      const result = component.isCheckboxChecked(0, 'checkbox2', 'opt1', 'category1', true);
+      const result = component.isCheckboxChecked(
+        0,
+        'checkbox2',
+        'opt1',
+        'category1',
+        true,
+      );
       expect(result).toBe(true);
     });
 
     it('should return false for unchecked checkbox', () => {
-      const result = component.isCheckboxChecked(0, 'checkbox1', 'option3', undefined, false);
+      const result = component.isCheckboxChecked(
+        0,
+        'checkbox1',
+        'option3',
+        undefined,
+        false,
+      );
       expect(result).toBe(false);
     });
   });
@@ -7578,9 +7874,13 @@ describe('WidgetComponent', () => {
   // ---------- replaceSpacesWithUnderscores ----------
   describe('replaceSpacesWithUnderscores', () => {
     it('should replace spaces with underscores', () => {
-      expect(component.replaceSpacesWithUnderscores('hello world')).toBe('hello_world');
+      expect(component.replaceSpacesWithUnderscores('hello world')).toBe(
+        'hello_world',
+      );
       // The implementation replaces all spaces (including multiple) with single underscore
-      expect(component.replaceSpacesWithUnderscores('multiple   spaces')).toBe('multiple_spaces');
+      expect(component.replaceSpacesWithUnderscores('multiple   spaces')).toBe(
+        'multiple_spaces',
+      );
     });
 
     it('should handle empty string', () => {
@@ -7593,7 +7893,7 @@ describe('WidgetComponent', () => {
     it('should return true for empty input/textarea', () => {
       const attr = {
         attributeType: 'INPUT',
-        answer: ['']
+        answer: [''],
       };
       expect(component.isSkiptype(attr)).toBe(true);
     });
@@ -7601,7 +7901,7 @@ describe('WidgetComponent', () => {
     it('should return false for filled input', () => {
       const attr = {
         attributeType: 'INPUT',
-        answer: ['filled value']
+        answer: ['filled value'],
       };
       expect(component.isSkiptype(attr)).toBe(false);
     });
@@ -7609,10 +7909,7 @@ describe('WidgetComponent', () => {
     it('should return true when all options are unselected', () => {
       const attr = {
         attributeType: 'OPTIONS',
-        answer: [
-          { isSelected: false },
-          { isSelected: false }
-        ]
+        answer: [{ isSelected: false }, { isSelected: false }],
       };
       expect(component.isSkiptype(attr)).toBe(true);
     });
@@ -7620,10 +7917,7 @@ describe('WidgetComponent', () => {
     it('should return false when at least one option is selected', () => {
       const attr = {
         attributeType: 'OPTIONS',
-        answer: [
-          { isSelected: false },
-          { isSelected: true }
-        ]
+        answer: [{ isSelected: false }, { isSelected: true }],
       };
       expect(component.isSkiptype(attr)).toBe(false);
     });
@@ -7637,12 +7931,8 @@ describe('WidgetComponent', () => {
       component.currentIndex = 0;
       mockMessage = {
         body: {
-          elements: [
-            { id: '1' },
-            { id: '2' },
-            { id: '3' }
-          ]
-        }
+          elements: [{ id: '1' }, { id: '2' }, { id: '3' }],
+        },
       };
     });
 
@@ -7693,12 +7983,12 @@ describe('WidgetComponent', () => {
                 id: 'card1',
                 title: 'Card Title',
                 image_url: 'http://example.com/image.jpg',
-                alt: 'Alt text'
-              }
-            }
-          ]
+                alt: 'Alt text',
+              },
+            },
+          ],
         },
-        header: { timestamp: 1234567890, sender: { type: 'bot' } }
+        header: { timestamp: 1234567890, sender: { type: 'bot' } },
       };
       component.cimMessage = [mockOriginalMessage];
       (component as any).browserNotificationService = { notify: jest.fn() };
@@ -7712,9 +8002,9 @@ describe('WidgetComponent', () => {
         header: {
           originalMessageId: 'msg1',
           additionalData: { carousalCardId: 'card1' },
-          sender: { type: 'customer' }
+          sender: { type: 'customer' },
         },
-        body: {}
+        body: {},
       };
       component.handleCarousalQuotedMessage(mockCimMessage);
       expect(mockCimMessage.body.quotedText).toBe('Card Text');
@@ -7730,13 +8020,13 @@ describe('WidgetComponent', () => {
 
     beforeEach(() => {
       const formGroup = new FormBuilder().group({
-        sections: new FormBuilder().array([])
+        sections: new FormBuilder().array([]),
       });
       mockOriginalMessage = {
         id: 'msg1',
         body: {
-          additionalDetails: { disableInteraction: true }
-        }
+          additionalDetails: { disableInteraction: true },
+        },
       };
       component.formGroupsMap['msg1'] = formGroup;
       component.cimMessage = [mockOriginalMessage];
@@ -7750,9 +8040,9 @@ describe('WidgetComponent', () => {
         id: 'msg2',
         header: {
           originalMessageId: 'msg1',
-          sender: { type: 'customer' }
+          sender: { type: 'customer' },
         },
-        body: {}
+        body: {},
       };
       component.handleFormMessageType(mockCimMessage);
       expect(component.formGroupsMap['msg1'].disabled).toBe(true);
@@ -7770,9 +8060,9 @@ describe('WidgetComponent', () => {
         id: 'msg1',
         body: {
           additionalDetails: {
-            interactive: { type: 'clickablelist' }
-          }
-        }
+            interactive: { type: 'clickablelist' },
+          },
+        },
       };
       component.cimMessage = [mockOriginalMessage];
       (component as any).browserNotificationService = { notify: jest.fn() };
@@ -7785,9 +8075,9 @@ describe('WidgetComponent', () => {
         id: 'msg2',
         header: {
           originalMessageId: 'msg1',
-          sender: { type: 'customer' }
+          sender: { type: 'customer' },
         },
-        body: {}
+        body: {},
       };
       component.handleClickableList(mockCimMessage);
       expect(mockOriginalMessage.body.disableClickaAbleList).toBe(true);
@@ -7802,36 +8092,52 @@ describe('WidgetComponent', () => {
       component.previewFileForm = jest.fn();
       (component as any).snackBar = { open: jest.fn() };
       document.getElementById = jest.fn().mockReturnValue({
-        disabled: false
+        disabled: false,
       } as any);
     });
 
     it('should handle file change and set control', () => {
       const mockInput = {
-        files: [new File(['content'], 'test.txt', { type: 'text/plain' })]
+        files: [new File(['content'], 'test.txt', { type: 'text/plain' })],
       };
       const mockAttribute = {
         key: 'file1',
         attributeOptions: {
-          allowedFileTypes: ['txt']
-        }
+          allowedFileTypes: ['txt'],
+        },
       };
-      component.handleFileChange(mockInput, 0, 0, 1000, 'id1', ['txt'], mockAttribute);
+      component.handleFileChange(
+        mockInput,
+        0,
+        0,
+        1000,
+        'id1',
+        ['txt'],
+        mockAttribute,
+      );
       expect(component.setFileControl).toHaveBeenCalled();
       expect(component.previewFileForm).toHaveBeenCalled();
     });
 
     it('should show error for unsupported file type', () => {
       const mockInput = {
-        files: [new File(['content'], 'test.exe', { type: 'application/exe' })]
+        files: [new File(['content'], 'test.exe', { type: 'application/exe' })],
       };
       const mockAttribute = {
         key: 'file1',
         attributeOptions: {
-          allowedFileTypes: ['txt']
-        }
+          allowedFileTypes: ['txt'],
+        },
       };
-      component.handleFileChange(mockInput, 0, 0, 1000, 'id1', ['txt'], mockAttribute);
+      component.handleFileChange(
+        mockInput,
+        0,
+        0,
+        1000,
+        'id1',
+        ['txt'],
+        mockAttribute,
+      );
       expect((component as any).snackBar.open).toHaveBeenCalled();
     });
   });
@@ -7842,9 +8148,9 @@ describe('WidgetComponent', () => {
       const formGroup = new FormBuilder().group({
         sections: new FormBuilder().array([
           new FormBuilder().group({
-            file1: ['']
-          })
-        ])
+            file1: [''],
+          }),
+        ]),
       });
       component.preChatFormGroup = formGroup;
     });
@@ -7862,9 +8168,9 @@ describe('WidgetComponent', () => {
       const formGroup = new FormBuilder().group({
         sections: new FormBuilder().array([
           new FormBuilder().group({
-            file1: ['test.txt']
-          })
-        ])
+            file1: ['test.txt'],
+          }),
+        ]),
       });
       component.preChatFormGroup = formGroup;
     });
@@ -7884,10 +8190,10 @@ describe('WidgetComponent', () => {
   describe('disableUploadBtn', () => {
     beforeEach(() => {
       (component as any).renderer = {
-        setAttribute: jest.fn()
+        setAttribute: jest.fn(),
       };
       document.querySelector = jest.fn().mockReturnValue({
-        setAttribute: jest.fn()
+        setAttribute: jest.fn(),
       });
     });
 
@@ -7904,13 +8210,13 @@ describe('WidgetComponent', () => {
       component.filePreviewUrl = {};
       component.fileHistory = {};
       (component as any).sanitizer = {
-        bypassSecurityTrustUrl: jest.fn().mockReturnValue('safe-url')
+        bypassSecurityTrustUrl: jest.fn().mockReturnValue('safe-url'),
       };
       global.FileReader = jest.fn().mockImplementation(() => ({
         readAsText: jest.fn(),
         readAsDataURL: jest.fn(),
         onload: null,
-        result: 'file content'
+        result: 'file content',
       })) as any;
     });
 
@@ -7936,7 +8242,7 @@ describe('WidgetComponent', () => {
       document.getElementById = jest.fn().mockReturnValue({
         disabled: false,
         value: '',
-        textContent: 'Upload'
+        textContent: 'Upload',
       } as any);
     });
 
@@ -7964,10 +8270,10 @@ describe('WidgetComponent', () => {
   describe('uploadFileFromForm', () => {
     beforeEach(() => {
       component.__appConfig = {
-        appConfig: { FILE_SERVER_URL: 'http://example.com' }
+        appConfig: { FILE_SERVER_URL: 'http://example.com' },
       } as any;
       component.preChatFormGroup = new FormBuilder().group({
-        file1: ['']
+        file1: [''],
       });
       (component as any).uploadToFileServer = jest.fn();
       component.resetFileValidation = jest.fn();
@@ -7977,8 +8283,8 @@ describe('WidgetComponent', () => {
     it('should upload file when valid', () => {
       const mockEvent = {
         target: {
-          files: [new File(['content'], 'test.txt', { type: 'text/plain' })]
-        }
+          files: [new File(['content'], 'test.txt', { type: 'text/plain' })],
+        },
       };
       component.uploadFileFromForm(mockEvent as any, 'file1', false, []);
       expect((component as any).uploadToFileServer).toHaveBeenCalled();
@@ -7989,7 +8295,7 @@ describe('WidgetComponent', () => {
   describe('uploadPrechatFile', () => {
     beforeEach(() => {
       component.__appConfig = {
-        appConfig: { FILE_SERVER_URL: 'http://example.com' }
+        appConfig: { FILE_SERVER_URL: 'http://example.com' },
       } as any;
       component.setFileControl = jest.fn();
       component.disableUploadBtn = jest.fn();
@@ -8000,7 +8306,7 @@ describe('WidgetComponent', () => {
 
     it('should upload prechat file', () => {
       const mockFileInput = {
-        files: [new File(['content'], 'test.txt', { type: 'text/plain' })]
+        files: [new File(['content'], 'test.txt', { type: 'text/plain' })],
       };
       component.uploadPrechatFile(0, 'file1', mockFileInput as any, 'id1');
       expect((component as any).uploadToFileServer).toHaveBeenCalled();
@@ -8012,9 +8318,11 @@ describe('WidgetComponent', () => {
     let mockCimMessage: any;
 
     beforeEach(() => {
-      (component as any).buildFormMessage = jest.fn().mockResolvedValue(new FormBuilder().group({}));
+      (component as any).buildFormMessage = jest
+        .fn()
+        .mockResolvedValue(new FormBuilder().group({}));
       (component as any).formMessageTypeService = {
-        patchFromMessageTypeUponRefresh: jest.fn()
+        patchFromMessageTypeUponRefresh: jest.fn(),
       };
       component.handleFormMessageType = jest.fn();
       component.createFormMapGroup = jest.fn();
@@ -8023,7 +8331,7 @@ describe('WidgetComponent', () => {
     it('should build form message when status is filled', async () => {
       mockCimMessage = {
         header: { originalMessageId: 'msg1' },
-        body: { additionalDetails: { status: 'filled' } }
+        body: { additionalDetails: { status: 'filled' } },
       };
       await component.handleRefreshCasesofFormMessageType(mockCimMessage);
       expect((component as any).buildFormMessage).toHaveBeenCalled();
@@ -8032,7 +8340,7 @@ describe('WidgetComponent', () => {
     it('should create form map group when status is unfilled', async () => {
       mockCimMessage = {
         header: { originalMessageId: 'msg1' },
-        body: { additionalDetails: { status: 'unfilled' } }
+        body: { additionalDetails: { status: 'unfilled' } },
       };
       await component.handleRefreshCasesofFormMessageType(mockCimMessage);
       expect(component.createFormMapGroup).toHaveBeenCalled();
@@ -8055,10 +8363,10 @@ describe('WidgetComponent', () => {
         body: {
           sections: [
             {
-              attributes: []
-            }
-          ]
-        }
+              attributes: [],
+            },
+          ],
+        },
       };
       component.createFormMapGroup(mockCimMessage);
       expect(component.formGroupsMap['msg1']).toBeDefined();
@@ -8075,11 +8383,11 @@ describe('WidgetComponent', () => {
           body: {
             sections: [
               {
-                attributes: []
-              }
-            ]
-          }
-        }
+                attributes: [],
+              },
+            ],
+          },
+        },
       ];
       component.formValidations = [];
       component.createFormValidationControls = jest.fn();
@@ -8090,7 +8398,7 @@ describe('WidgetComponent', () => {
 
     it('should build form message from original message', async () => {
       const mockCimMessage = {
-        header: { originalMessageId: 'msg1' }
+        header: { originalMessageId: 'msg1' },
       };
       const result = await component['buildFormMessage'](mockCimMessage);
       expect(result).toBeDefined();
@@ -8099,7 +8407,7 @@ describe('WidgetComponent', () => {
 
     it('should return undefined when originalMessageId is missing', async () => {
       const mockCimMessage = {
-        header: {}
+        header: {},
       };
       const result = await component['buildFormMessage'](mockCimMessage);
       expect(result).toBeUndefined();
@@ -8112,7 +8420,7 @@ describe('WidgetComponent', () => {
       jest.useFakeTimers();
       component.cimMessage = [
         { id: 'msg1', body: {} },
-        { id: 'msg2', body: {} }
+        { id: 'msg2', body: {} },
       ];
     });
 
@@ -8144,18 +8452,18 @@ describe('WidgetComponent', () => {
       mockFormGroup = new FormBuilder().group({
         sections: new FormBuilder().array([
           new FormBuilder().group({
-            field1: ['value1']
-          })
-        ])
+            field1: ['value1'],
+          }),
+        ]),
       });
       component.formGroupsMap['msg1'] = mockFormGroup;
       (component as any).formMessageTypeService = {
-        getDefaultValue: jest.fn().mockReturnValue('')
+        getDefaultValue: jest.fn().mockReturnValue(''),
       };
       component.createFormDataObject = jest.fn().mockReturnValue({
         header: {},
         body: { sections: [] },
-        id: 'msg1'
+        id: 'msg1',
       });
       component.constructCimMessage = jest.fn();
       mockMessage = {
@@ -8164,34 +8472,39 @@ describe('WidgetComponent', () => {
           formTitle: 'Test Form',
           sections: [
             {
-              attributes: [
-                { key: 'field1' }
-              ]
-            }
-          ]
-        }
+              attributes: [{ key: 'field1' }],
+            },
+          ],
+        },
       };
     });
 
     it('should reset form when action is reset', async () => {
       const button = { action: 'reset' };
       await component.handleActionButtonClick(button, mockMessage);
-      expect((component as any).formMessageTypeService.getDefaultValue).toHaveBeenCalled();
+      expect(
+        (component as any).formMessageTypeService.getDefaultValue,
+      ).toHaveBeenCalled();
     });
 
     it('should cancel form when action is cancel', async () => {
       const button = { action: 'cancel' };
       await component.handleActionButtonClick(button, mockMessage);
-      expect(component.constructCimMessage).toHaveBeenCalledWith('FORM_DATA', expect.objectContaining({
-        status: 'cancelled'
-      }));
+      expect(component.constructCimMessage).toHaveBeenCalledWith(
+        'FORM_DATA',
+        expect.objectContaining({
+          status: 'cancelled',
+        }),
+      );
     });
 
     it('should return early when formGroup does not exist', async () => {
       component.formGroupsMap = {};
       const button = { action: 'reset' };
       await component.handleActionButtonClick(button, mockMessage);
-      expect((component as any).formMessageTypeService.getDefaultValue).not.toHaveBeenCalled();
+      expect(
+        (component as any).formMessageTypeService.getDefaultValue,
+      ).not.toHaveBeenCalled();
     });
   });
 

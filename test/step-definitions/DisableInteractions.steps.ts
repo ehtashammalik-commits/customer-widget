@@ -68,7 +68,7 @@ defineFeature(feature, (test) => {
       mockRouter, // Router
       mockDocument, // Document,
       undefined,
-      undefined
+      undefined,
     );
 
     component.customerData = {
@@ -96,58 +96,58 @@ defineFeature(feature, (test) => {
   let cimMessage: any;
   let disableOldSpy: any;
   const mockMessages = [
+    {
+      header: { sender: { type: 'BOT' } },
+      body: {
+        type: 'button',
+        additionalDetails: {
+          disableButtonType: true,
+          interactive: {
+            disableInteraction: true,
+          },
+        },
+      },
+    },
+    {
+      header: { sender: { type: 'BOT' } },
+      body: {
+        type: 'carousel',
+        elements: [
           {
-            header: { sender: { type: 'BOT' } },
-            body: {
-              type: 'button',
-              additionalDetails: {
-                disableButtonType: true,
-                interactive: {
-                  disableInteraction: true,
-                },
-              },
+            additionalCarouselElementDetails: {
+              disableInteraction: true,
             },
           },
-          {
-            header: { sender: { type: 'BOT' } },
-            body: {
-              type: 'carousel',
-              elements: [
-                {
-                  additionalCarouselElementDetails: {
-                    disableInteraction: true,
-                  },
-                },
-              ],
-              additionalDetails: {
-                disableButtonType: true,
-              },
-            },
+        ],
+        additionalDetails: {
+          disableButtonType: true,
+        },
+      },
+    },
+    {
+      header: { sender: { type: 'BOT' } },
+      body: {
+        type: 'button',
+        additionalDetails: {
+          interactive: {
+            disableInteraction: false,
           },
-          {
-            header: { sender: { type: 'BOT' } },
-            body: {
-              type: 'button',
-              additionalDetails: {
-                interactive: {
-                  disableInteraction: false,
-                },
-              },
-            },
+        },
+      },
+    },
+    {
+      header: { sender: { type: 'BOT' } }, // should not be affected
+      body: {
+        type: 'plain',
+        markdownText: 'https://example.com',
+        additionalDetails: {
+          interactive: {
+            disableInteraction: true,
           },
-          {
-            header: { sender: { type: 'BOT' } }, // should not be affected
-            body: {
-              type: 'plain',
-              markdownText: 'https://example.com',
-              additionalDetails: {
-                interactive: {
-                  disableInteraction: true,
-                },
-              },
-            },
-          },
-        ];
+        },
+      },
+    },
+  ];
 
   test('Disable actionable elements when disableInteraction is set to true', ({
     given,
@@ -190,8 +190,7 @@ defineFeature(feature, (test) => {
     );
 
     and('the message includes the flag disableInteraction set to true', () => {
-      cimMessage.data.body.elements[0].additionalCarouselElementDetails.disableInteraction =
-        true;
+      cimMessage.data.body.elements[0].additionalCarouselElementDetails.disableInteraction = true;
     });
 
     when('the customer sends a new message', () => {
@@ -210,7 +209,6 @@ defineFeature(feature, (test) => {
     then(
       'all actionable elements in previous messages should be disabled',
       () => {
-
         component.disableOldInteractiveMessages(mockMessages);
 
         // Assert the logic
@@ -228,7 +226,9 @@ defineFeature(feature, (test) => {
           if (isBot && shouldDisable) {
             expect(msg.body.additionalDetails.disableButtonType).toBe(true);
           } else {
-            expect(msg.body?.additionalDetails?.disableButtonType).toBeUndefined();
+            expect(
+              msg.body?.additionalDetails?.disableButtonType,
+            ).toBeUndefined();
           }
         });
       },
@@ -289,38 +289,35 @@ defineFeature(feature, (test) => {
     );
 
     and('the message includes the flag disableInteraction set to true', () => {
-      cimMessage.data.body.elements[0].additionalCarouselElementDetails.disableInteraction =
-        true;
+      cimMessage.data.body.elements[0].additionalCarouselElementDetails.disableInteraction = true;
     });
 
     and(
       'the elements are subsequently disabled after a user interaction',
       () => {
         const customerMessage = {
-        body: { type: 'plain', markdownText: 'Clicked list option' },
-        header: {
-          sender: { type: 'customer' },
-          intent: 'reply',
-          originalMessageId: 'msg456',
-          additionalData: {},
-        },
-      };
-      component.handleCimMessage(customerMessage);
-      expect(disableOldSpy).toHaveBeenCalled();
+          body: { type: 'plain', markdownText: 'Clicked list option' },
+          header: {
+            sender: { type: 'customer' },
+            intent: 'reply',
+            originalMessageId: 'msg456',
+            additionalData: {},
+          },
+        };
+        component.handleCimMessage(customerMessage);
+        expect(disableOldSpy).toHaveBeenCalled();
       },
     );
 
     and('the customer refreshes their browser session', () => {
       const disableSpy = jest.spyOn(component, 'disableOldInteractiveMessages');
-        component.handleResumedMessages(mockMessages);
-        expect(disableSpy).toHaveBeenCalled();
+      component.handleResumedMessages(mockMessages);
+      expect(disableSpy).toHaveBeenCalled();
     });
 
     then(
       'the previously disabled actionable elements in the chat history should remain visually disabled',
-      () => {
-        
-      },
+      () => {},
     );
 
     and('clicking on them should still not trigger any action', () => {
@@ -373,8 +370,7 @@ defineFeature(feature, (test) => {
     );
 
     and('the message includes the flag disableInteraction set to true', () => {
-      cimMessage.data.body.elements[0].additionalCarouselElementDetails.disableInteraction =
-        true;
+      cimMessage.data.body.elements[0].additionalCarouselElementDetails.disableInteraction = true;
     });
 
     and('the customer refreshes their browser session', () => {
@@ -385,11 +381,9 @@ defineFeature(feature, (test) => {
 
     then(
       'the latest messages that were previously interactive should remain visually enabled',
-      () => {
-      },
+      () => {},
     );
 
-    and('clicking on them should trigger an action', () => {
-    });
+    and('clicking on them should trigger an action', () => {});
   });
 });
