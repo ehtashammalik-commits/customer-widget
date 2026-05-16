@@ -12,6 +12,7 @@ describe('SafeFileURLPipe', () => {
     };
     mockSanitizer = {
       bypassSecurityTrustUrl: jest.fn((url) => `safe:${url}`),
+      bypassSecurityTrustResourceUrl: jest.fn((url) => `resource:${url}`),
     };
     pipe = new SafeFileURLPipe(mockSdk, mockSanitizer as DomSanitizer);
   });
@@ -43,6 +44,15 @@ describe('SafeFileURLPipe', () => {
       'blob:bar',
     );
     expect(pipe['cache']['bar']).toBe('safe:blob:bar');
+  });
+
+  it('should return null and skip the sdk for unsafe urls', () => {
+    const result = pipe.transform('javascript:alert(1)');
+
+    expect(result).toBeNull();
+    expect(mockSdk.getFileURLfromServer).not.toHaveBeenCalled();
+    expect(mockSanitizer.bypassSecurityTrustUrl).not.toHaveBeenCalled();
+    expect(mockSanitizer.bypassSecurityTrustResourceUrl).not.toHaveBeenCalled();
   });
 
   it('should not call sdk.getFileURLfromServer again if cache is empty string', () => {

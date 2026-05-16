@@ -2453,7 +2453,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleCustomerCimMessage(cimMessage: any) {
-    this.disableOldInteractiveMessages(this.cimMessage);
+    const type = cimMessage.body.type?.toLowerCase();
+    const senderType = cimMessage.header.sender?.type?.toLowerCase();
+
+    if (!this.isTypingNotification(type, cimMessage, senderType)) {
+      this.disableOldInteractiveMessages(this.cimMessage);
+    }
     if (
       cimMessage.header.originalMessageId &&
       cimMessage.header.intent &&
@@ -2504,7 +2509,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return (
       type === 'notification' &&
       cimMessage.body.notificationType?.toLowerCase() === 'typing_started' &&
-      senderType === 'agent'
+      (senderType === 'agent' || senderType === 'customer')
     );
   }
 
@@ -2896,7 +2901,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.handleClickableList(cimMessage);
     }
 
-    if (cimMessage.body.type.toLowerCase() != 'deliverynotification') {
+    if (
+      !this.isDeliveryNotification(type, senderType) &&
+      !this.isTypingNotification(type, cimMessage, senderType)
+    ) {
       this.disableOldInteractiveMessages(this.cimMessage);
     }
     this.cimMessage.push(cimMessage);

@@ -1840,6 +1840,7 @@
                           *ngFor="let btn of message.body.buttons; let i = index"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
                           (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
+                          (keydown)="($event.key === 'Enter' || $event.key === ' ') && !message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
                           [disabled]="message.body.additionalDetails?.disableButtonType"
                           [ngClass]="[
                             message.body?.additionalDetails?.interactive?.type,
@@ -1907,7 +1908,7 @@
                         </video>
                       </a>
                       <iframe *ngIf="message.body.type == 'VIDEO' && message.body.additionalDetails?.videoProvider == 'YOUTUBE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
-                        [src]="srcURL" width="280" height="150" frameborder="0" allowfullscreen>
+                        [src]="srcURL" width="280" height="150" title="YouTube video player" allowfullscreen>
                       </iframe>
                       <a *ngIf="message.body.type == 'AUDIO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
                         [href]="srcURL" target="_blank">

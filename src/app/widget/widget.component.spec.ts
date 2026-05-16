@@ -1706,6 +1706,52 @@ describe('WidgetComponent', () => {
       expect(component.scrollToBottom).toHaveBeenCalled();
       expect(component.handleMessageReport).toHaveBeenCalledWith(cimMessage);
     });
+
+    it('should NOT call disableOldInteractiveMessages for typing_started notification from agent', () => {
+      const disableSpy = jest.spyOn(component, 'disableOldInteractiveMessages');
+      const cimMessage = {
+        body: { type: 'notification', notificationType: 'typing_started' },
+        header: { sender: { type: 'agent' } },
+      };
+      component.handleCimMessage(cimMessage);
+      expect(disableSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------- handleResumedMessages ----------
+  describe('handleResumedMessages', () => {
+    beforeEach(() => {
+      component.cimMessage = [];
+      component.scrollToBottom = jest.fn();
+      component.processSeenMessages = jest.fn();
+      component.clearMessageData = jest.fn();
+    });
+
+    it('should NOT call disableOldInteractiveMessages when processing a typing notification in resumed messages', () => {
+      const disableSpy = jest.spyOn(component, 'disableOldInteractiveMessages');
+      const typingNotification = {
+        id: 'typing-1',
+        body: { type: 'notification', notificationType: 'typing_started' },
+        header: { sender: { type: 'agent' }, intent: null, additionalData: {} },
+      };
+      component.handleResumedMessages([typingNotification]);
+      expect(disableSpy).not.toHaveBeenCalled();
+    });
+
+    it('should call disableOldInteractiveMessages when processing a customer message in resumed messages', () => {
+      const disableSpy = jest.spyOn(component, 'disableOldInteractiveMessages');
+      const customerMessage = {
+        id: 'msg-1',
+        body: { type: 'plain', markdownText: 'Hello' },
+        header: {
+          sender: { type: 'customer' },
+          intent: null,
+          additionalData: {},
+        },
+      };
+      component.handleResumedMessages([customerMessage]);
+      expect(disableSpy).toHaveBeenCalled();
+    });
   });
 
   // ---------- handleDialogStates ----------
