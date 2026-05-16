@@ -22,7 +22,9 @@ export class SafeFileURLPipe implements PipeTransform {
     if (this.cache[imageUrl] === undefined) {
       this.cache[imageUrl] = '';
       this.sdk.getFileURLfromServer(imageUrl, (blobUrl: any) => {
-        const safeUrl = this.sanitizer.bypassSecurityTrustUrl(blobUrl);
+        const safeUrl = blobUrl
+          ? this.sanitizer.bypassSecurityTrustUrl(blobUrl)
+          : this.sanitizer.bypassSecurityTrustResourceUrl(imageUrl);
         this.cache[imageUrl] = safeUrl;
         return safeUrl;
       });

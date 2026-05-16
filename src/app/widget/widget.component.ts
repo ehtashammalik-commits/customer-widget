@@ -105,6 +105,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private localStreamSubscription: Subscription | null = null;
   private remoteStreamSubscription: Subscription | null = null;
+  @ViewChild('topWrapper') topWrapper!: ElementRef;
+  @ViewChild('widgetWrapper') widgetWrapper!: ElementRef;
+  @ViewChild('widgetIcon') widgetIcon!: ElementRef;
 
   scrollTop = 0;
   fontSize = new FormControl('12');
@@ -421,6 +424,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     currentAttempt: 0,
     maxAttempts: 5,
   };
+  // Guards against duplicate makeConnection retries when the server forcibly
+  // disconnects the old socket while a new chat start is in progress.
+  private isReconnectingForNewChat: boolean = false;
   private endViewTimerSubscription: Subscription | null = null;
 
   constructor(
@@ -585,6 +591,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.__postMessageHandlerService.sendPostMessage({
           state: 'EF_WIDGET_LOADED',
           message: 'Customer Widget Loaded Successfully',
+          ...this.getDimensions()
         });
       },
     );
@@ -649,12 +656,24 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log('on Chat Resumed Response:', data.data);
 
           if (data.data && data.data.length > 0) {
+            this.changeScreen('chat');
+            this.enableComposer();
             this.handleResumedMessages(data.data);
           } else {
+            // Session exists but has no messages — treat as stale/not found
+            console.log('Session found but no messages, treating as new session');
             this.clearSession();
+            if (this.getAdditionalValue('AUTO_MAXIMIZE_WIDGET') === true) {
+              console.log('AUTO_MAXIMIZE_WIDGET enabled — navigating to chatForm');
+              this.changeScreen('chatForm');
+            }
           }
         } else {
           this.clearSession();
+          if (this.getAdditionalValue('AUTO_MAXIMIZE_WIDGET') === true) {
+            console.log('AUTO_MAXIMIZE_WIDGET enabled — navigating to chatForm');
+            this.changeScreen('chatForm');
+          }
         }
         this.scrollToBottom();
       },
@@ -1740,6 +1759,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         break;
       case 'chatForm':
+        this.stopEndViewTimer();
         if (this.getAdditionalValue('PRECHAT_FORM_DISABLED')) {
           this.changeScreen('chat');
           this.initializeChatWithRandomIdentifier();
@@ -2110,10 +2130,43 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   resizeWidget(state: string): void {
     // send height and width of widget-form-area to parent window
+    setTimeout(() => {
     window.parent.postMessage(
-      { state },
+      { state, ...this.getDimensions(state) },
       this.__postMessageHandlerService.getParentOrigin(),
     );
+    }, 0);
+  }
+
+  getDimensions(state?: string) {
+    if (state === 'icon-view') {
+      const element = this.widgetIcon?.nativeElement;
+      return {
+        height: element?.offsetHeight + 5,
+        width: element?.offsetWidth + 5
+      };
+    } else if (state === 'wraper-view') {
+      if (this.isCalloutViewCompact) {
+        const wrapperHeight = this.widgetWrapper?.nativeElement?.offsetHeight || 0;
+        const iconHeight = this.widgetIcon?.nativeElement?.offsetHeight || 0;
+        return {
+          height: wrapperHeight + iconHeight + 50,
+          width: this.widgetWrapper?.nativeElement?.offsetWidth + 20
+        };
+      } else {
+        const wrapperHeight = this.widgetWrapper?.nativeElement?.offsetHeight || 0;
+        const iconHeight = this.widgetIcon?.nativeElement?.offsetHeight || 0;
+        return {
+          height: wrapperHeight + iconHeight + 5,
+          width: this.widgetWrapper?.nativeElement?.offsetWidth + 15
+        };
+      }
+    } else {
+      return {
+        height: null,
+        width: null
+      };
+    }
   }
 
   eventListener(event: any) {
@@ -2203,6 +2256,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (this.enabledWebhook)
         this.sdk.sendWebhookNotification(this.webhookUrl, this.chatPayLoad);
       console.log('New Chat Start Request Sent');
+      this.changeScreen('chat');
+      this.enableComposer();
     } else if (this.eventTriggerType === '') {
       console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
       if (this.customerData) {
@@ -2223,8 +2278,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         );
       }
     }
-    this.changeScreen('chat');
-    this.enableComposer();
   }
 
   private handleConversationResumed(event: any) {
@@ -2255,6 +2308,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.isChatActive = true;
     this.isComposerDisable = false;
     this.preChatFormLoader = false;
+    this.eventTriggerType = '';
     this.conversationId = event.data.header.conversationId;
     this.customerId = event.data.header.customer._id;
     this.storageService.setItem(
@@ -2272,14 +2326,34 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private handleSocketDisconnected(event: any, messageType: string) {
     console.log('event response:', event.data);
     this.composerDisable();
-    this.eventTriggerType = '';
-    if (messageType !== 'survey') {
-      if (event.data.includes('server')) {
-        this.changeScreen('end');
+    if (this.eventTriggerType === 'startChat') {
+      // We are in the middle of starting a new chat.
+      // The old resume socket was server-disconnected before the new socket
+      // could establish. Socket.io will NOT auto-reconnect after 'io server
+      // disconnect', so we manually retry makeConnection with the new user data.
+      if (this.customerData && !this.isReconnectingForNewChat) {
+        this.isReconnectingForNewChat = true;
+        console.log('[SOCKET_DISCONNECTED] New chat pending — retrying connection for new chat');
+        setTimeout(() => {
+          this.isReconnectingForNewChat = false;
+          this.sdk.makeConnection(
+            this.customerData.serviceIdentifier,
+            this.customerData.channelCustomerIdentifier,
+          );
+        }, 500);
       } else {
-        this.handleReconnectsAttempts(
-          this.reconnectAttemptsConfig.currentAttempt + 1,
-        );
+        console.log('[SOCKET_DISCONNECTED] Reconnect already in progress, skipping duplicate retry');
+      }
+    } else {
+      this.eventTriggerType = '';
+      if (messageType !== 'survey') {
+        if (event.data.includes('server')) {
+          this.changeScreen('end');
+        } else {
+          this.handleReconnectsAttempts(
+            this.reconnectAttemptsConfig.currentAttempt + 1,
+          );
+        }
       }
     }
   }
@@ -3585,12 +3659,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.channelCustomerIdentifier,
         parsedUserData.data.serviceIdentifier,
       );
+      // Ensure eventTriggerType is '' (resume path) so SOCKET_CONNECTED
+      // triggers onChatResumed() and not a new chat request.
+      this.eventTriggerType = '';
       this.sdk.makeConnection(
         parsedUserData.data.serviceIdentifier,
         parsedUserData.data.channelCustomerIdentifier,
       );
-      // } else {
-      //     this.changeScreen('widget');
     }
   }
 
