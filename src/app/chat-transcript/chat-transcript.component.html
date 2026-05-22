@@ -89,11 +89,11 @@
             <strong><mat-icon role="img" class="mat-icon notranslate material-icons-outlined material-icons mat-ligature-font mat-icon-no-color" aria-hidden="true" data-mat-icon-type="font">
 sticky_note_2</mat-icon>
 {{ message.body.formTitle }} | {{ message.body.formDescription }}</strong>
-        
+
             <span class="message-stamp">
               <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
             </span>
-          </div> 
+          </div>
 
 
 
@@ -114,7 +114,10 @@ sticky_note_2</mat-icon>
                 }}</span>
             </p>
             <ul class="structured-actions">
-              <li *ngFor="let btn of message.body.buttons">{{ btn.title }}</li>
+              <li *ngFor="let btn of message.body.buttons"
+                  [style.border-radius]="message.body.additionalDetails?.cornerShape | cornerShape">
+                  {{ btn.title }}
+              </li>
             </ul>
             <span class="message-stamp">
               <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
@@ -148,11 +151,14 @@ sticky_note_2</mat-icon>
           <div class="chat-message-content file-type-message image-type">
             <p>
               <span>
-                <video class="videoPlayer" autoplay muted>
+                <video *ngIf="message.body.additionalDetails?.videoProvider != 'YOUTUBE'" class="videoPlayer" autoplay muted>
                   <source [src]="message.body.attachment.mediaUrl | safeFileURL" type="video/mp4" />
                    <track kind="subtitles" src="" srclang="en" label="English" default />
                   Your browser does not support the video tag.
                 </video>
+                <iframe *ngIf="message.body.additionalDetails?.videoProvider == 'YOUTUBE'"
+                                  [src]="message.body.attachment.mediaUrl | safeFileURL" width="280" height="150" title="YouTube video player" allowfullscreen>
+                </iframe>
               </span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
@@ -372,11 +378,14 @@ sticky_note_2</mat-icon>
             </div>
             <p>
               <span>
-                <video class="videoPlayer" controls>
+                <video *ngIf="message.body.additionalDetails?.videoProvider != 'YOUTUBE'" class="videoPlayer" controls>
                   <source [src]="message.body.attachment.mediaUrl | safeFileURL" type="video/mp4" />
                   Your browser does not support the video tag.
                   <track kind="subtitles" src="" srclang="en" label="English" default />
                 </video>
+                <iframe *ngIf="message.body.additionalDetails?.videoProvider == 'YOUTUBE'"
+                  [src]="message.body.attachment.mediaUrl | safeFileURL" width="280" height="150" title="YouTube video player" allowfullscreen>
+                </iframe>
               </span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
@@ -604,41 +613,41 @@ sticky_note_2</mat-icon>
             </div>
           </div>
           <div class="chat-message-content ppp">
-        
-        
+
+
             <ng-container *ngIf="message.header.originalMessageId && getMessageData(message)?.body?.type === 'Carousel'">
-        
+
               <div *ngIf="getMessageData(message)?.body as carouselData">
-        
+
                 <ng-container *ngFor="let item of carouselData?.elements">
-        
+
                   <div class="carousel-card-inner"
                     *ngIf="message.header?.additionalData?.carousalCardId === item.additionalCarouselElementDetails?.id">
-        
+
                     <!-- IMAGE -->
                     <div class="inner-carousel-banner" [ngStyle]="{
                      'background-image': 'url(' + item.additionalCarouselElementDetails?.image_url + ')'
                    }">
                     </div>
-        
+
                     <!-- TITLE + TEXT -->
                     <div class="inner-carousel-title">
-        
+
                       <h3>{{ item.additionalCarouselElementDetails?.title }}</h3>
                       <!-- multiline text -->
                       <p>
                         {{ item?.text}}
-        
+
                       </p>
-        
+
                     </div>
-        
-        
-        
+
+
+
                   </div>
-        
+
                 </ng-container>
-        
+
               </div>
             </ng-container>
             <p class="{{getMessageData(message)?.body?.type === 'Carousel' ? 'w-100': '' }}">
@@ -666,11 +675,14 @@ sticky_note_2</mat-icon>
           <div class="chat-message-content file-type-message image-type">
             <p>
               <span>
-                <video class="videoPlayer" controls>
+                <video *ngIf="message.body.additionalDetails?.videoProvider != 'YOUTUBE'" class="videoPlayer" controls>
                   <source [src]="message.body.attachment.mediaUrl | safeFileURL" type="video/mp4" />
                    <track kind="subtitles" src="" srclang="en" label="English" default />
                   Your browser does not support the video tag.
                 </video>
+                <iframe *ngIf="message.body.additionalDetails?.videoProvider == 'YOUTUBE'"
+                  [src]="message.body.attachment.mediaUrl | safeFileURL" width="280" height="150" title="YouTube video player" allowfullscreen>
+                </iframe>
               </span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
@@ -943,9 +955,9 @@ sticky_note_2</mat-icon>
 
     </div>
 
-        
-        
-    
+
+
+
 
 
 

@@ -178,13 +178,13 @@ export class SdkService {
 
   getFormValidation(callback: any) {
     // Try cache first
-      const cached = localStorage.getItem('formValidations');
-      if (cached) {
-        console.log('Using cached validations ✅');
-        const parsed = JSON.parse(cached);
-        this.preChatFormValidationSubject.next(parsed);
-        callback();
-        return;
+    const cached = localStorage.getItem('formValidations');
+    if (cached) {
+      console.log('Using cached validations ✅');
+      const parsed = JSON.parse(cached);
+      this.preChatFormValidationSubject.next(parsed);
+      callback();
+      return;
     }
 
     // Otherwise, hit API
@@ -194,18 +194,14 @@ export class SdkService {
       this.preChatFormValidationSubject.next(res);
       callback();
     });
-    
   }
 
-  // getFormValidation(callback: any) { 
-  //   formValidation(this.ConfigData.FORM_URL, (res: any) => { 
-  //     this.preChatFormValidationSubject.next(res); 
-  //     callback(); 
-  //   }); 
+  // getFormValidation(callback: any) {
+  //   formValidation(this.ConfigData.FORM_URL, (res: any) => {
+  //     this.preChatFormValidationSubject.next(res);
+  //     callback();
+  //   });
   // }
-
-
- 
 
   renderCallbackForm(form_id: any) {
     getPreChatForm(this.ConfigData.FORM_URL, form_id, (res: any) => {
@@ -391,7 +387,10 @@ export class SdkService {
   }
 
   handleCallStart(callPayload: any) {
-    console.log('Step 6 ==== > handle start call in sdk service: ===> ', callPayload);
+    console.log(
+      'Step 6 ==== > handle start call in sdk service: ===> ',
+      callPayload,
+    );
     const dialCall = {
       action: 'makeCall',
       parameter: {
@@ -421,9 +420,8 @@ export class SdkService {
         dialogId: sessionDialogId,
         clientCallbackFunction: (res: any) => {
           this.onWebRtcCallSubject.next(res);
-           this.localStreamSubject.next(null);
+          this.localStreamSubject.next(null);
           this.remoteStreamSubject.next(null);
-
         },
       },
     };

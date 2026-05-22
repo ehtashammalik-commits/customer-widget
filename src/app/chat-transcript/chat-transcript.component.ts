@@ -27,8 +27,7 @@ export class TranscriptComponent implements OnInit {
   state: string = '';
   enableTranscriptNotifications: boolean = false;
   private receivedToken: string = '';
-    isExpanded = false;
-
+  isExpanded = false;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -94,9 +93,9 @@ export class TranscriptComponent implements OnInit {
 
       this.ngxLoader.start();
       // Wait briefly for postMessage token, then fallback to storage
-      await new Promise(resolve => setTimeout(resolve, 1000)); 
-      const jwtToken = this.receivedToken || 
-                       this.storageService.getItem('jwt_token') || '';
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const jwtToken =
+        this.receivedToken || this.storageService.getItem('jwt_token') || '';
       this.storageService.setItem('jwt_token', jwtToken);
       await this.loadChatData(req);
       this.ngxLoader.stop();
@@ -322,99 +321,101 @@ export class TranscriptComponent implements OnInit {
     this.carouselIndexMap.set(messageId, index);
   }
 
-  
-
-
-hasSelectedOption(answer: any[]): boolean {
-  return answer?.some(opt => opt.isSelected) || false;
-}
-
-
-
-
-// ✅ Check if attribute has valid answer
-isAnswered(attr: any): boolean {
-  if (!attr?.answer || !attr.answer.length) return false;
-
-  if (attr.attributeType === 'OPTIONS') {
-    return attr.answer.some(opt => opt.isSelected);
+  hasSelectedOption(answer: any[]): boolean {
+    return answer?.some((opt) => opt.isSelected) || false;
   }
 
-  return attr.answer[0] !== null && attr.answer[0] !== '';
-}
+  // ✅ Check if attribute has valid answer
+  isAnswered(attr: any): boolean {
+    if (!attr?.answer || !attr.answer.length) return false;
 
-// ✅ Get selected options (radio / checkbox / dropdown)
-getSelectedOptions(answer: any[]): string {
-  if (!answer) return '';
-
-  return answer
-    .filter(opt => opt.isSelected)
-    .map(opt => opt.label)
-    .join(', ');
-}
-
-// ✅ Count total answered questions
-getTotalCount(sections: any[]): number {
-  let count = 0;
-
-  sections?.forEach(section => {
-    section.attributes.forEach(attr => {
-      if (this.isAnswered(attr)) count++;
-    });
-  });
-
-  return count;
-}
-
-// ✅ Global index (ONLY for answered questions)
-getGlobalIndex(sections: any[], currentSection: any, attrIndex: number): number {
-  let count = 0;
-
-  for (let sec of sections) {
-    for (let i = 0; i < sec.attributes.length; i++) {
-      const attr = sec.attributes[i];
-
-      if (!this.isAnswered(attr)) continue;
-
-      if (sec === currentSection && i === attrIndex) {
-        return count;
-      }
-
-      count++;
+    if (attr.attributeType === 'OPTIONS') {
+      return attr.answer.some((opt) => opt.isSelected);
     }
+
+    return attr.answer[0] !== null && attr.answer[0] !== '';
   }
 
-  return count;
-}
+  // ✅ Get selected options (radio / checkbox / dropdown)
+  getSelectedOptions(answer: any[]): string {
+    if (!answer) return '';
 
-// ✅ Section has at least one answered question
-sectionHasAnswers(section: any): boolean {
-  return section?.attributes?.some(attr => this.isAnswered(attr)) || false;
-}
+    return answer
+      .filter((opt) => opt.isSelected)
+      .map((opt) => opt.label)
+      .join(', ');
+  }
 
-// ✅ Get form title and description from original message
-getMessageData(message: any): { title: string; description: string } {
-  // Check if current message has formTitle and formDescription
-  if (message?.body?.formTitle && message?.body?.formDescription) {
+  // ✅ Count total answered questions
+  getTotalCount(sections: any[]): number {
+    let count = 0;
+
+    sections?.forEach((section) => {
+      section.attributes.forEach((attr) => {
+        if (this.isAnswered(attr)) count++;
+      });
+    });
+
+    return count;
+  }
+
+  // ✅ Global index (ONLY for answered questions)
+  getGlobalIndex(
+    sections: any[],
+    currentSection: any,
+    attrIndex: number,
+  ): number {
+    let count = 0;
+
+    for (let sec of sections) {
+      for (let i = 0; i < sec.attributes.length; i++) {
+        const attr = sec.attributes[i];
+
+        if (!this.isAnswered(attr)) continue;
+
+        if (sec === currentSection && i === attrIndex) {
+          return count;
+        }
+
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  // ✅ Section has at least one answered question
+  sectionHasAnswers(section: any): boolean {
+    return section?.attributes?.some((attr) => this.isAnswered(attr)) || false;
+  }
+
+  // ✅ Get form title and description from original message
+  getMessageData(message: any): { title: string; description: string } {
+    // Check if current message has formTitle and formDescription
+    if (message?.body?.formTitle && message?.body?.formDescription) {
+      return {
+        title: message.body.formTitle,
+        description: message.body.formDescription,
+      };
+    }
+
+    // Try to get from original message using originalMessageId
+    const originalMessageId = message?.header?.originalMessageId;
+    if (originalMessageId) {
+      const originalMessage = this.processedMessages.find(
+        (msg) =>
+          msg.id === originalMessageId ||
+          msg.header?.messageId === originalMessageId,
+      );
+      if (originalMessage?.body) {
+        return originalMessage;
+      }
+    }
+
+    // Fallback to current message or default values
     return {
-      title: message.body.formTitle,
-      description: message.body.formDescription
+      title: message?.body?.formTitle || 'Form',
+      description: message?.body?.formDescription || '',
     };
   }
-
-  // Try to get from original message using originalMessageId
-  const originalMessageId = message?.header?.originalMessageId;
-  if (originalMessageId) {
-    const originalMessage = this.processedMessages.find(msg => msg.id === originalMessageId || msg.header?.messageId === originalMessageId);
-    if (originalMessage?.body) {
-      return originalMessage;
-    }
-  }
-
-  // Fallback to current message or default values
-  return {
-    title: message?.body?.formTitle || 'Form',
-    description: message?.body?.formDescription || ''
-  };
-}
 }

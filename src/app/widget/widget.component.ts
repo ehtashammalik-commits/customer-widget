@@ -105,6 +105,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   private localStreamSubscription: Subscription | null = null;
   private remoteStreamSubscription: Subscription | null = null;
+  @ViewChild('topWrapper') topWrapper!: ElementRef;
+  @ViewChild('widgetWrapper') widgetWrapper!: ElementRef;
+  @ViewChild('widgetIcon') widgetIcon!: ElementRef;
 
   scrollTop = 0;
   fontSize = new FormControl('12');
@@ -168,10 +171,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   // If this flag is 'true' than that's mean ScreenShare Call is Active (In Side Chat Screen)
   isScreenShareActive = false;
   fontSizes = [
-  { value: '12', tooltip: '12px', iconClass: 'font-dropdown-icon-top' },
-  { value: '14', tooltip: '14px', iconClass: 'font-dropdown-icon-middle' },
-  { value: '16', tooltip: '16px', iconClass: 'font-dropdown-icon-bottom' }
-];
+    { value: '12', tooltip: '12px', iconClass: 'font-dropdown-icon-top' },
+    { value: '14', tooltip: '14px', iconClass: 'font-dropdown-icon-middle' },
+    { value: '16', tooltip: '16px', iconClass: 'font-dropdown-icon-bottom' },
+  ];
 
   // Teneo
   formatLabel(value: number): string {
@@ -421,6 +424,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     currentAttempt: 0,
     maxAttempts: 5,
   };
+  // Guards against duplicate makeConnection retries when the server forcibly
+  // disconnects the old socket while a new chat start is in progress.
+  private isReconnectingForNewChat: boolean = false;
   private endViewTimerSubscription: Subscription | null = null;
 
   constructor(
@@ -585,6 +591,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         this.__postMessageHandlerService.sendPostMessage({
           state: 'EF_WIDGET_LOADED',
           message: 'Customer Widget Loaded Successfully',
+          ...this.getDimensions(),
         });
       },
     );
@@ -649,12 +656,30 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           console.log('on Chat Resumed Response:', data.data);
 
           if (data.data && data.data.length > 0) {
+            this.changeScreen('chat');
+            this.enableComposer();
             this.handleResumedMessages(data.data);
           } else {
+            // Session exists but has no messages — treat as stale/not found
+            console.log(
+              'Session found but no messages, treating as new session',
+            );
             this.clearSession();
+            if (this.getAdditionalValue('AUTO_MAXIMIZE_WIDGET') === true) {
+              console.log(
+                'AUTO_MAXIMIZE_WIDGET enabled — navigating to chatForm',
+              );
+              this.changeScreen('chatForm');
+            }
           }
         } else {
           this.clearSession();
+          if (this.getAdditionalValue('AUTO_MAXIMIZE_WIDGET') === true) {
+            console.log(
+              'AUTO_MAXIMIZE_WIDGET enabled — navigating to chatForm',
+            );
+            this.changeScreen('chatForm');
+          }
         }
         this.scrollToBottom();
       },
@@ -1152,12 +1177,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       'formMessageType',
     );
 
-      // Step 2: Update fields from form data (if needed)
-      finalPayload.header.timestamp = Date.now();
-      finalPayload.id = messageId;
-      finalPayload.header.intent = '';
-      finalPayload.body.formId = message.body.formId || '';
-      finalPayload.body.formTitle= message.body.formTitle || '';
+    // Step 2: Update fields from form data (if needed)
+    finalPayload.header.timestamp = Date.now();
+    finalPayload.id = messageId;
+    finalPayload.header.intent = '';
+    finalPayload.body.formId = message.body.formId || '';
+    finalPayload.body.formTitle = message.body.formTitle || '';
 
     this.constructCimMessage('FORM_DATA', {
       text: null,
@@ -1740,6 +1765,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         }
         break;
       case 'chatForm':
+        this.stopEndViewTimer();
         if (this.getAdditionalValue('PRECHAT_FORM_DISABLED')) {
           this.changeScreen('chat');
           this.initializeChatWithRandomIdentifier();
@@ -2110,10 +2136,45 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   resizeWidget(state: string): void {
     // send height and width of widget-form-area to parent window
-    window.parent.postMessage(
-      { state },
-      this.__postMessageHandlerService.getParentOrigin(),
-    );
+    setTimeout(() => {
+      window.parent.postMessage(
+        { state, ...this.getDimensions(state) },
+        this.__postMessageHandlerService.getParentOrigin(),
+      );
+    }, 0);
+  }
+
+  getDimensions(state?: string) {
+    if (state === 'icon-view') {
+      const element = this.widgetIcon?.nativeElement;
+      return {
+        height: element?.offsetHeight + 5,
+        width: element?.offsetWidth + 5,
+      };
+    } else if (state === 'wraper-view') {
+      if (this.isCalloutViewCompact) {
+        const wrapperHeight =
+          this.widgetWrapper?.nativeElement?.offsetHeight || 0;
+        const iconHeight = this.widgetIcon?.nativeElement?.offsetHeight || 0;
+        return {
+          height: wrapperHeight + iconHeight + 50,
+          width: this.widgetWrapper?.nativeElement?.offsetWidth + 20,
+        };
+      } else {
+        const wrapperHeight =
+          this.widgetWrapper?.nativeElement?.offsetHeight || 0;
+        const iconHeight = this.widgetIcon?.nativeElement?.offsetHeight || 0;
+        return {
+          height: wrapperHeight + iconHeight + 5,
+          width: this.widgetWrapper?.nativeElement?.offsetWidth + 15,
+        };
+      }
+    } else {
+      return {
+        height: null,
+        width: null,
+      };
+    }
   }
 
   eventListener(event: any) {
@@ -2203,6 +2264,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (this.enabledWebhook)
         this.sdk.sendWebhookNotification(this.webhookUrl, this.chatPayLoad);
       console.log('New Chat Start Request Sent');
+      this.changeScreen('chat');
+      this.enableComposer();
     } else if (this.eventTriggerType === '') {
       console.log('[SOCKET_CONNECTED] ==> Chat Resume Request Sent');
       if (this.customerData) {
@@ -2223,8 +2286,6 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         );
       }
     }
-    this.changeScreen('chat');
-    this.enableComposer();
   }
 
   private handleConversationResumed(event: any) {
@@ -2255,6 +2316,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     this.isChatActive = true;
     this.isComposerDisable = false;
     this.preChatFormLoader = false;
+    this.eventTriggerType = '';
     this.conversationId = event.data.header.conversationId;
     this.customerId = event.data.header.customer._id;
     this.storageService.setItem(
@@ -2272,14 +2334,38 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   private handleSocketDisconnected(event: any, messageType: string) {
     console.log('event response:', event.data);
     this.composerDisable();
-    this.eventTriggerType = '';
-    if (messageType !== 'survey') {
-      if (event.data.includes('server')) {
-        this.changeScreen('end');
-      } else {
-        this.handleReconnectsAttempts(
-          this.reconnectAttemptsConfig.currentAttempt + 1,
+    if (this.eventTriggerType === 'startChat') {
+      // We are in the middle of starting a new chat.
+      // The old resume socket was server-disconnected before the new socket
+      // could establish. Socket.io will NOT auto-reconnect after 'io server
+      // disconnect', so we manually retry makeConnection with the new user data.
+      if (this.customerData && !this.isReconnectingForNewChat) {
+        this.isReconnectingForNewChat = true;
+        console.log(
+          '[SOCKET_DISCONNECTED] New chat pending — retrying connection for new chat',
         );
+        setTimeout(() => {
+          this.isReconnectingForNewChat = false;
+          this.sdk.makeConnection(
+            this.customerData.serviceIdentifier,
+            this.customerData.channelCustomerIdentifier,
+          );
+        }, 500);
+      } else {
+        console.log(
+          '[SOCKET_DISCONNECTED] Reconnect already in progress, skipping duplicate retry',
+        );
+      }
+    } else {
+      this.eventTriggerType = '';
+      if (messageType !== 'survey') {
+        if (event.data.includes('server')) {
+          this.changeScreen('end');
+        } else {
+          this.handleReconnectsAttempts(
+            this.reconnectAttemptsConfig.currentAttempt + 1,
+          );
+        }
       }
     }
   }
@@ -2367,7 +2453,12 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   handleCustomerCimMessage(cimMessage: any) {
-    this.disableOldInteractiveMessages(this.cimMessage);
+    const type = cimMessage.body.type?.toLowerCase();
+    const senderType = cimMessage.header.sender?.type?.toLowerCase();
+
+    if (!this.isTypingNotification(type, cimMessage, senderType)) {
+      this.disableOldInteractiveMessages(this.cimMessage);
+    }
     if (
       cimMessage.header.originalMessageId &&
       cimMessage.header.intent &&
@@ -2418,7 +2509,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     return (
       type === 'notification' &&
       cimMessage.body.notificationType?.toLowerCase() === 'typing_started' &&
-      senderType === 'agent'
+      (senderType === 'agent' || senderType === 'customer')
     );
   }
 
@@ -2810,7 +2901,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.handleClickableList(cimMessage);
     }
 
-    if (cimMessage.body.type.toLowerCase() != 'deliverynotification') {
+    if (
+      !this.isDeliveryNotification(type, senderType) &&
+      !this.isTypingNotification(type, cimMessage, senderType)
+    ) {
       this.disableOldInteractiveMessages(this.cimMessage);
     }
     this.cimMessage.push(cimMessage);
@@ -2940,7 +3034,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       if (
         latestReadNotificationMessage?.body?.status?.toLowerCase() === 'read'
       ) {
-        const latestReadMessageId = latestReadNotificationMessage?.body?.messageId;
+        const latestReadMessageId =
+          latestReadNotificationMessage?.body?.messageId;
         if (latestReadMessageId) {
           this.markMessageStatusToSeenOrSucceed(latestReadMessageId, 'seen');
         }
@@ -3222,8 +3317,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
     header.intent = intent || null;
 
     body.sections = formMessageTypeData?.body?.sections || [];
-    body.additionalDetails =
-      formMessageTypeData?.body?.additionalDetails || {};
+    body.additionalDetails = formMessageTypeData?.body?.additionalDetails || {};
     body.formId = formMessageTypeData?.body?.formId || '';
     body.formTitle = formMessageTypeData?.body?.formTitle || '';
     if (status) {
@@ -3585,12 +3679,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         parsedUserData.data.channelCustomerIdentifier,
         parsedUserData.data.serviceIdentifier,
       );
+      // Ensure eventTriggerType is '' (resume path) so SOCKET_CONNECTED
+      // triggers onChatResumed() and not a new chat request.
+      this.eventTriggerType = '';
       this.sdk.makeConnection(
         parsedUserData.data.serviceIdentifier,
         parsedUserData.data.channelCustomerIdentifier,
       );
-      // } else {
-      //     this.changeScreen('widget');
     }
   }
 
@@ -4235,7 +4330,7 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       case 'Audio/Video Device is being used by Someother Party':
         return 'Audio/Video Device is being used by Someother Party';
       case 'Invalid Credentials. Please provide valid credentials.':
-        return 'Authentication failed. Please verify your SIP credentials and try again.'
+        return 'Authentication failed. Please verify your SIP credentials and try again.';
       default:
         return 'An unknown general error occurred.';
     }
@@ -4420,7 +4515,10 @@ export class WidgetComponent implements OnInit, AfterViewInit {
 
   setFontFromLocalStorage() {
     try {
-      const storedFontSize = this.storageService.getItem('fontSize', this.storageType);
+      const storedFontSize = this.storageService.getItem(
+        'fontSize',
+        this.storageType,
+      );
       if (storedFontSize !== null) {
         this.fontSize.setValue(String(storedFontSize));
       }

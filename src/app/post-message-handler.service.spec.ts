@@ -87,7 +87,10 @@ describe('PostMessageHandlerService', () => {
       const msg = { type: 'TEST' };
       service.sendPostMessage(msg);
       expect(postMessageSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'TEST', timestamp: expect.any(String) }),
+        expect.objectContaining({
+          type: 'TEST',
+          timestamp: expect.any(String),
+        }),
         'https://example.com',
       );
     });
@@ -154,7 +157,11 @@ describe('PostMessageHandlerService', () => {
       const link = 'https://foo.com';
       service.sendLinkClickedPostMessage(link);
       expect(postMessageSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'LINK_CLICKED', url: link, timestamp: expect.any(String) }),
+        expect.objectContaining({
+          type: 'LINK_CLICKED',
+          url: link,
+          timestamp: expect.any(String),
+        }),
         'https://example.com',
       );
     });
@@ -180,21 +187,33 @@ describe('PostMessageHandlerService', () => {
     });
 
     afterEach(() => {
-      Object.defineProperty(document, 'referrer', { value: originalReferrer, configurable: true });
+      Object.defineProperty(document, 'referrer', {
+        value: originalReferrer,
+        configurable: true,
+      });
     });
 
     it('should return null if referrer is empty', () => {
-      Object.defineProperty(document, 'referrer', { value: '', configurable: true });
+      Object.defineProperty(document, 'referrer', {
+        value: '',
+        configurable: true,
+      });
       expect(service.getParentOrigin()).toBeNull();
     });
 
     it('should return origin if referrer is valid', () => {
-      Object.defineProperty(document, 'referrer', { value: 'https://foo.com/page', configurable: true });
+      Object.defineProperty(document, 'referrer', {
+        value: 'https://foo.com/page',
+        configurable: true,
+      });
       expect(service.getParentOrigin()).toBe('https://foo.com');
     });
 
     it('should return null if referrer is malformed', () => {
-      Object.defineProperty(document, 'referrer', { value: 'not-a-valid-url', configurable: true });
+      Object.defineProperty(document, 'referrer', {
+        value: 'not-a-valid-url',
+        configurable: true,
+      });
       expect(service.getParentOrigin()).toBeNull();
     });
   });

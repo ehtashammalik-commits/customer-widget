@@ -21,7 +21,7 @@
   </div>
 </ng-template>
 
-<div class="top-wrapper" *ngIf="widgetLoaded" [ngClass]="{
+<div #topWrapper class="top-wrapper" *ngIf="widgetLoaded" [ngClass]="{
     'right-direction': selectedLanguage == 'ar',
     'mobile-view': isMobile,
     'dark-theme': appliedColorTheme == 'dark'
@@ -32,7 +32,7 @@
   <!-- /Addition Panel HTML/ -->
   <!--------------------------->
   <ng-container *ngIf="additionalPanel && !standaloneWebRtc && !isChatActive">
-    <div class="widget-wrapper" [ngClass]="{'compact-widget': isCalloutViewCompact}">
+    <div #widgetWrapper class="widget-wrapper" [ngClass]="{'compact-widget': isCalloutViewCompact}">
       <div class="wrapper-inner">
 
         <div class="widget-wrapper-header widget-color">
@@ -1827,10 +1827,20 @@
                         }}" [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}">
                       </span>
                       <mat-chip-list class="structure-message-chips" aria-label="Fish selection">
-                        <mat-chip [ngStyle]="{'font-size.px': fontSize.value,'line-height.px': +fontSize.value + 6}" *ngFor="let btn of message.body.buttons; let i = index"
+                        <mat-chip [ngStyle]="{
+                          'font-size': fontSize.value + 'px',
+                          'line-height':
+                            fontSize.value == '14'
+                              ? '20px'
+                              : fontSize.value == '16'
+                              ? '24px'
+                              : '18px'
+                        }"
+                          [style.border-radius]="message.body.additionalDetails?.cornerShape | cornerShape"
+                          *ngFor="let btn of message.body.buttons; let i = index"
                           [style.justify-content]="getTextAlignment(message.body.additionalDetails?.textAlignment)"
                           (click)="!message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
-                          (keydown.enter)="($event.key === 'Enter' || $event.key === ' ') && !message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
+                          (keydown)="($event.key === 'Enter' || $event.key === ' ') && !message.body.additionalDetails?.disableButtonType && sendButtonMessage(btn, message.id)"
                           [disabled]="message.body.additionalDetails?.disableButtonType"
                           [ngClass]="[
                             message.body?.additionalDetails?.interactive?.type,
@@ -1890,13 +1900,16 @@
                              [src]="srcURL"
                              alt="{{ message.body.caption }}" />
                       </button>
-                      <a *ngIf="message.body.type == 'VIDEO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
+                      <a *ngIf="message.body.type == 'VIDEO' && message.body.additionalDetails?.videoProvider != 'YOUTUBE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
                         [href]="srcURL" target="_blank">
                         <video *ngIf="srcURL" width="225" height="120" controls>
                           <source [src]="srcURL" type="video/mp4" />
                           {{ message.body.caption }}
                         </video>
                       </a>
+                      <iframe *ngIf="message.body.type == 'VIDEO' && message.body.additionalDetails?.videoProvider == 'YOUTUBE' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
+                        [src]="srcURL" width="280" height="150" title="YouTube video player" allowfullscreen>
+                      </iframe>
                       <a *ngIf="message.body.type == 'AUDIO' && (message.body.attachment.mediaUrl | safeFileURL) as srcURL"
                         [href]="srcURL" target="_blank">
                         <audio *ngIf="srcURL" class="audioPlayer" controls>
@@ -2006,7 +2019,7 @@
             <div class="maxLimitError" *ngIf="messageElement?.nativeElement?.value?.length >= messageLimit">
             <span>Max Limit Reached</span>
             </div>
-            <textarea class="widget-chat-composer" #messageComposer
+            <textarea class="widget-chat-composer" #messageComposer style="font-size: 16px !important"
               [attr.data-emoji-picker]="enableEmoji" matInput
               id="messageTextarea" cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
               cdkAutosizeMaxRows="4" placeholder="{{ 'composer-placeholder' | translate }}" #message
@@ -2577,7 +2590,7 @@
   <!---------------------->
   <ng-container *ngIf="isIconWidget">
     <!-- Callback Icon -->
-    <div class="widget-icon widget-icon-chat changed 1">
+    <div #widgetIcon class="widget-icon widget-icon-chat changed 1">
 
 <div class="widget-icon-content changed 2" *ngIf="standaloneCallback && enabledCallback && !standaloneWebRtc">
   <button
