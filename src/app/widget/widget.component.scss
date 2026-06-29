@@ -503,6 +503,17 @@ button.close-widget-wrapper {
   border-radius: 10px;
   filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2));
   background: #ffffff;
+
+  form {
+    margin: 0;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .widget-form{
+    form{
+      padding: 0 0 0 15px;
+    }
+  }
 }
 
 .field-error {
@@ -584,19 +595,6 @@ button.close-widget-wrapper {
 .widget-form-header .widget-header-icon img {
   height: 20px;
   width: 20px;
-}
-
-.widget-form-area{
-  form {
-  margin: 0;
-  height: 100%;
-  overflow-y: auto;
-}
-.widget-form{
-  form{
-    padding: 0 0 0 15px;
-  }
-}
 }
 
 .widget-form-content {
@@ -1185,7 +1183,8 @@ border: 0;
     border: 1px solid;
     border-color: #eff2f7;
     background: #eff2f7;
-    border-radius: 3px;
+    border-radius: 10px;
+    box-shadow: 2px 3px 3px -1px lightgray;
     padding: 0px 5px;
     width: auto;
     max-width: 80%;
@@ -1226,7 +1225,7 @@ border: 0;
 
     .delivery-checks {
       position: absolute;
-      bottom: -15px;
+      bottom: -18px;
       right: 0px;
       font-size: 20px;
 
@@ -1266,7 +1265,7 @@ border: 0;
     font-weight: normal;
 
     color: #777777;
-    top: 2px;
+    top: 5px;
     left: 0px;
     max-width: 50px;
     min-width: 35px;
@@ -1294,10 +1293,23 @@ border: 0;
         margin: 2px !important;
 
         &.selected-chip{
-          color: #fff !important;
-          opacity: 1;
+          cursor: default !important;
+          background: #c2c2c2 !important;
+          color: #000000 !important;
+          opacity: 0.6 !important;
+          text-shadow: none !important;
+          pointer-events: none !important;
           }
+
+        &.mat-chip-disabled {
+          cursor: default;
+          background: #ffffff;
+          color: #666666;
+          opacity: 0.6;
+          text-shadow: none;
+          pointer-events: none;
         }
+      }
       }
     }
 
@@ -1307,7 +1319,8 @@ border: 0;
     max-width: 80%;
     border: 1px solid #f2f2f2;
     background: #f2f2f2;
-    border-radius: 0 3px 3px 10px;
+    border-radius: 0 9px 9px 20px;
+    box-shadow: 0px 1px 3px 0px lightgrey;
     padding: 0 10px;
 
     .header {
@@ -1389,7 +1402,7 @@ border: 0;
     font-weight: normal;
 
     color: #777777;
-    bottom: 0px;
+    bottom: -2px;
     max-width: inherit;
     left: 0px;
     min-width: inherit;
@@ -1633,7 +1646,7 @@ mat-spinner {
     bottom: 20px;
     left: 20px;
     text-transform: uppercase;
-    background: #f15642;
+    background: #e42a11;
     padding: 0px 5px;
     font-size: 13px;
     color: rgb(255, 255, 255);
@@ -1699,8 +1712,23 @@ mat-spinner {
     background: var(--main-color);
     color: $white-color;
   }
-  &:disabled {
+
+  &.selected-chip {
+    cursor: default !important;
+    background: #c2c2c2 !important;
+    color: #000000 !important;
+    opacity: 0.6 !important;
+    text-shadow: none !important;
+    pointer-events: none !important;
+  }
+
+  &.mat-chip-disabled {
     cursor: default;
+    background: #ffffff;
+    color: #666666;
+    opacity: 0.6;
+    text-shadow: none;
+    pointer-events: none;
   }
 }
 
@@ -1714,6 +1742,24 @@ mat-spinner {
     font-weight: normal;
     cursor: pointer;
     margin: 2px;
+
+      &.selected-chip {
+      cursor: default !important;
+      background: #c2c2c2 !important;
+      color: #000000 !important;
+      opacity: 0.6 !important;
+      text-shadow: none !important;
+      pointer-events: none !important;
+    }
+
+    &.mat-chip-disabled {
+      cursor: default;
+      background: #ffffff;
+      color: #666666;
+      opacity: 0.6;
+      text-shadow: none;
+      pointer-events: none;
+    }
   }
 }
 
@@ -2207,9 +2253,9 @@ mat-spinner {
 
     .iconHide {
       display: block;
-      border: 1px solid red;
+      border: 1px solid #e00000;
       border-radius: 25px;
-      background: red;
+      background: #e00000;
       color: white;
     }
   }
@@ -3800,6 +3846,14 @@ input[type='radio'] {
       &:focus {
         outline: none;
         }
+
+      &:disabled, &.disabled {
+        cursor: default !important;
+        background: #ffffff !important;
+        color: #666666 !important;
+        opacity: 0.6 !important;
+        pointer-events: none !important;
+      }
       }
     }
 
@@ -3951,8 +4005,11 @@ input[type='radio'] {
   }
 
 .selected-button {
-  color: #fff !important;
-  opacity: 1;
+  cursor: default !important;
+  background: #ffffff !important;
+  color: #666666 !important;
+  opacity: 0.6 !important;
+  pointer-events: none !important;
 }
 .fields-validation-error{
   position: absolute;

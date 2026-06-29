@@ -1,5 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { FormArray, FormBuilder, FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms'; // Import FormBuilder
+import {
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  FormControl,
+  ReactiveFormsModule,
+} from '@angular/forms'; // Import FormBuilder
 
 import { FormMessageTypeService } from './form-message-type.service';
 
@@ -10,7 +16,7 @@ describe('FormMessageTypeService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ReactiveFormsModule], // Import ReactiveFormsModule
-      providers: [FormMessageTypeService, FormBuilder] // Provide FormBuilder
+      providers: [FormMessageTypeService, FormBuilder], // Provide FormBuilder
     });
     service = TestBed.inject(FormMessageTypeService);
     fb = TestBed.inject(FormBuilder); // Inject FormBuilder
@@ -30,8 +36,10 @@ describe('FormMessageTypeService', () => {
       const attribute = {
         valueType: 'dropdown',
         attributeOptions: {
-          attributeData: [{ values: [{ value: 'Option1' }, { value: 'Option2' }] }]
-        }
+          attributeData: [
+            { values: [{ value: 'Option1' }, { value: 'Option2' }] },
+          ],
+        },
       };
       expect(service.getDefaultValue(attribute)).toBe('Option1');
     });
@@ -40,8 +48,8 @@ describe('FormMessageTypeService', () => {
       const attribute = {
         valueType: 'dropdown',
         attributeOptions: {
-          attributeData: [{ values: [] }]
-        }
+          attributeData: [{ values: [] }],
+        },
       };
       expect(service.getDefaultValue(attribute)).toBe(null);
     });
@@ -50,8 +58,8 @@ describe('FormMessageTypeService', () => {
       const attribute = {
         valueType: 'dropdown',
         attributeOptions: {
-          attributeData: []
-        }
+          attributeData: [],
+        },
       };
       expect(service.getDefaultValue(attribute)).toBe(null);
     });
@@ -59,7 +67,7 @@ describe('FormMessageTypeService', () => {
     it('should return null for type "dropdown" if attributeOptions is undefined', () => {
       const attribute = {
         valueType: 'dropdown',
-        attributeOptions: undefined
+        attributeOptions: undefined,
       };
       expect(service.getDefaultValue(attribute)).toBe(null);
     });
@@ -88,9 +96,19 @@ describe('FormMessageTypeService', () => {
   describe('patchFromMessageTypeUponRefresh', () => {
     it('should not patch if sectionArray is empty or null', () => {
       const formGroup = fb.group({
-        sections: fb.array([])
+        sections: fb.array([]),
       });
-      const cimMessage = { body: { sections: [{ attributes: [{ key: 'test', attributeType: 'INPUT', answer: 'value' }] }] } };
+      const cimMessage = {
+        body: {
+          sections: [
+            {
+              attributes: [
+                { key: 'test', attributeType: 'INPUT', answer: 'value' },
+              ],
+            },
+          ],
+        },
+      };
       service.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
       expect(formGroup.get('sections')?.value).toEqual([]);
     });
@@ -100,24 +118,34 @@ describe('FormMessageTypeService', () => {
         sections: fb.array([
           fb.group({
             inputField: new FormControl(''),
-            textareaField: new FormControl('')
-          })
-        ])
+            textareaField: new FormControl(''),
+          }),
+        ]),
       });
       const cimMessage = {
         body: {
           sections: [
             {
               attributes: [
-                { key: 'inputField', attributeType: 'INPUT', answer: 'Input Value' },
-                { key: 'textareaField', attributeType: 'TEXTAREA', answer: ['Textarea Value'] } // Array for TEXTAREA
-              ]
-            }
-          ]
-        }
+                {
+                  key: 'inputField',
+                  attributeType: 'INPUT',
+                  answer: 'Input Value',
+                },
+                {
+                  key: 'textareaField',
+                  attributeType: 'TEXTAREA',
+                  answer: ['Textarea Value'],
+                }, // Array for TEXTAREA
+              ],
+            },
+          ],
+        },
       };
       service.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
-      const sectionGroup = (formGroup.get('sections') as FormArray).at(0) as FormGroup;
+      const sectionGroup = (formGroup.get('sections') as FormArray).at(
+        0,
+      ) as FormGroup;
       expect(sectionGroup.get('inputField')?.value).toBe('Input Value');
       expect(sectionGroup.get('textareaField')?.value).toBe('Textarea Value');
     });
@@ -127,24 +155,34 @@ describe('FormMessageTypeService', () => {
         sections: fb.array([
           fb.group({
             inputField: new FormControl('initial'),
-            textareaField: new FormControl('initial')
-          })
-        ])
+            textareaField: new FormControl('initial'),
+          }),
+        ]),
       });
       const cimMessage = {
         body: {
           sections: [
             {
               attributes: [
-                { key: 'inputField', attributeType: 'INPUT', answer: undefined },
-                { key: 'textareaField', attributeType: 'TEXTAREA', answer: null }
-              ]
-            }
-          ]
-        }
+                {
+                  key: 'inputField',
+                  attributeType: 'INPUT',
+                  answer: undefined,
+                },
+                {
+                  key: 'textareaField',
+                  attributeType: 'TEXTAREA',
+                  answer: null,
+                },
+              ],
+            },
+          ],
+        },
       };
       service.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
-      const sectionGroup = (formGroup.get('sections') as FormArray).at(0) as FormGroup;
+      const sectionGroup = (formGroup.get('sections') as FormArray).at(
+        0,
+      ) as FormGroup;
       expect(sectionGroup.get('inputField')?.value).toBe('');
       expect(sectionGroup.get('textareaField')?.value).toBe('');
     });
@@ -153,9 +191,9 @@ describe('FormMessageTypeService', () => {
       const formGroup = fb.group({
         sections: fb.array([
           fb.group({
-            selectField: new FormControl('')
-          })
-        ])
+            selectField: new FormControl(''),
+          }),
+        ]),
       });
       const cimMessage = {
         body: {
@@ -166,15 +204,20 @@ describe('FormMessageTypeService', () => {
                   key: 'selectField',
                   attributeType: 'OPTIONS',
                   valueType: 'radio',
-                  answer: [{ value: 'Option1', isSelected: false }, { value: 'Option2', isSelected: true }]
-                }
-              ]
-            }
-          ]
-        }
+                  answer: [
+                    { value: 'Option1', isSelected: false },
+                    { value: 'Option2', isSelected: true },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       };
       service.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
-      const sectionGroup = (formGroup.get('sections') as FormArray).at(0) as FormGroup;
+      const sectionGroup = (formGroup.get('sections') as FormArray).at(
+        0,
+      ) as FormGroup;
       expect(sectionGroup.get('selectField')?.value).toBe('Option2');
     });
 
@@ -182,9 +225,9 @@ describe('FormMessageTypeService', () => {
       const formGroup = fb.group({
         sections: fb.array([
           fb.group({
-            selectField: new FormControl('initial')
-          })
-        ])
+            selectField: new FormControl('initial'),
+          }),
+        ]),
       });
       const cimMessage = {
         body: {
@@ -195,15 +238,20 @@ describe('FormMessageTypeService', () => {
                   key: 'selectField',
                   attributeType: 'OPTIONS',
                   valueType: 'radio',
-                  answer: [{ value: 'Option1', isSelected: false }, { value: 'Option2', isSelected: false }]
-                }
-              ]
-            }
-          ]
-        }
+                  answer: [
+                    { value: 'Option1', isSelected: false },
+                    { value: 'Option2', isSelected: false },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       };
       service.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
-      const sectionGroup = (formGroup.get('sections') as FormArray).at(0) as FormGroup;
+      const sectionGroup = (formGroup.get('sections') as FormArray).at(
+        0,
+      ) as FormGroup;
       expect(sectionGroup.get('selectField')?.value).toBe('');
     });
 
@@ -211,9 +259,9 @@ describe('FormMessageTypeService', () => {
       const formGroup = fb.group({
         sections: fb.array([
           fb.group({
-            checkboxField: new FormControl([])
-          })
-        ])
+            checkboxField: new FormControl([]),
+          }),
+        ]),
       });
       const cimMessage = {
         body: {
@@ -228,26 +276,31 @@ describe('FormMessageTypeService', () => {
                   answer: [
                     { value: 'Check1', isSelected: true },
                     { value: 'Check2', isSelected: false },
-                    { value: 'Check3', isSelected: true }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
+                    { value: 'Check3', isSelected: true },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       };
       service.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
-      const sectionGroup = (formGroup.get('sections') as FormArray).at(0) as FormGroup;
-      expect(sectionGroup.get('checkboxField')?.value).toEqual(['Check1', 'Check3']);
+      const sectionGroup = (formGroup.get('sections') as FormArray).at(
+        0,
+      ) as FormGroup;
+      expect(sectionGroup.get('checkboxField')?.value).toEqual([
+        'Check1',
+        'Check3',
+      ]);
     });
 
     it('should patch OPTIONS type (checkbox) correctly with categorized multiple selection', () => {
       const formGroup = fb.group({
         sections: fb.array([
           fb.group({
-            categorizedCheckboxField: new FormControl({})
-          })
-        ])
+            categorizedCheckboxField: new FormControl({}),
+          }),
+        ]),
       });
       const cimMessage = {
         body: {
@@ -260,24 +313,42 @@ describe('FormMessageTypeService', () => {
                   valueType: 'checkbox',
                   attributeOptions: { enableCategory: true },
                   answer: [
-                    { value: 'Cat1_Item1', isSelected: true, category: 'Category1' },
-                    { value: 'Cat1_Item2', isSelected: false, category: 'Category1' },
-                    { value: 'Cat2_Item1', isSelected: true, category: 'Category2' },
-                    { value: 'Cat2_Item2', isSelected: true, category: 'Category2' },
-                    { value: 'NoCat_Item', isSelected: true } // Should go to 'default'
-                  ]
-                }
-              ]
-            }
-          ]
-        }
+                    {
+                      value: 'Cat1_Item1',
+                      isSelected: true,
+                      category: 'Category1',
+                    },
+                    {
+                      value: 'Cat1_Item2',
+                      isSelected: false,
+                      category: 'Category1',
+                    },
+                    {
+                      value: 'Cat2_Item1',
+                      isSelected: true,
+                      category: 'Category2',
+                    },
+                    {
+                      value: 'Cat2_Item2',
+                      isSelected: true,
+                      category: 'Category2',
+                    },
+                    { value: 'NoCat_Item', isSelected: true }, // Should go to 'default'
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       };
       service.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
-      const sectionGroup = (formGroup.get('sections') as FormArray).at(0) as FormGroup;
+      const sectionGroup = (formGroup.get('sections') as FormArray).at(
+        0,
+      ) as FormGroup;
       expect(sectionGroup.get('categorizedCheckboxField')?.value).toEqual({
         Category1: ['Cat1_Item1'],
         Category2: ['Cat2_Item1', 'Cat2_Item2'],
-        default: ['NoCat_Item']
+        default: ['NoCat_Item'],
       });
     });
 
@@ -285,9 +356,9 @@ describe('FormMessageTypeService', () => {
       const formGroup = fb.group({
         sections: fb.array([
           fb.group({
-            checkboxField: new FormControl(['initial'])
-          })
-        ])
+            checkboxField: new FormControl(['initial']),
+          }),
+        ]),
       });
       const cimMessage = {
         body: {
@@ -299,15 +370,17 @@ describe('FormMessageTypeService', () => {
                   attributeType: 'OPTIONS',
                   valueType: 'checkbox',
                   attributeOptions: { enableCategory: false },
-                  answer: []
-                }
-              ]
-            }
-          ]
-        }
+                  answer: [],
+                },
+              ],
+            },
+          ],
+        },
       };
       service.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
-      const sectionGroup = (formGroup.get('sections') as FormArray).at(0) as FormGroup;
+      const sectionGroup = (formGroup.get('sections') as FormArray).at(
+        0,
+      ) as FormGroup;
       expect(sectionGroup.get('checkboxField')?.value).toEqual('');
     });
 
@@ -315,9 +388,9 @@ describe('FormMessageTypeService', () => {
       const formGroup = fb.group({
         sections: fb.array([
           fb.group({
-            categorizedCheckboxField: new FormControl({ initial: 'value' })
-          })
-        ])
+            categorizedCheckboxField: new FormControl({ initial: 'value' }),
+          }),
+        ]),
       });
       const cimMessage = {
         body: {
@@ -329,15 +402,17 @@ describe('FormMessageTypeService', () => {
                   attributeType: 'OPTIONS',
                   valueType: 'checkbox',
                   attributeOptions: { enableCategory: true },
-                  answer: []
-                }
-              ]
-            }
-          ]
-        }
+                  answer: [],
+                },
+              ],
+            },
+          ],
+        },
       };
       service.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
-      const sectionGroup = (formGroup.get('sections') as FormArray).at(0) as FormGroup;
+      const sectionGroup = (formGroup.get('sections') as FormArray).at(
+        0,
+      ) as FormGroup;
       expect(sectionGroup.get('categorizedCheckboxField')?.value).toEqual('');
     });
 
@@ -345,23 +420,29 @@ describe('FormMessageTypeService', () => {
       const formGroup = fb.group({
         sections: fb.array([
           fb.group({
-            existingField: new FormControl('initial')
-          })
-        ])
+            existingField: new FormControl('initial'),
+          }),
+        ]),
       });
       const cimMessage = {
         body: {
           sections: [
             {
               attributes: [
-                { key: 'nonExistingField', attributeType: 'INPUT', answer: 'value' }
-              ]
-            }
-          ]
-        }
+                {
+                  key: 'nonExistingField',
+                  attributeType: 'INPUT',
+                  answer: 'value',
+                },
+              ],
+            },
+          ],
+        },
       };
       service.patchFromMessageTypeUponRefresh(formGroup, cimMessage);
-      const sectionGroup = (formGroup.get('sections') as FormArray).at(0) as FormGroup;
+      const sectionGroup = (formGroup.get('sections') as FormArray).at(
+        0,
+      ) as FormGroup;
       expect(sectionGroup.get('existingField')?.value).toBe('initial');
       expect(sectionGroup.get('nonExistingField')).toBeNull(); // Ensure it wasn't added
     });

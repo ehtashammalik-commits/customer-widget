@@ -26,13 +26,12 @@ defineFeature(feature, (test) => {
       array: jest.fn().mockReturnValue([]),
     } as any;
 
-
-     mockStorageService = {
-          setItem: jest.fn(),
-          getItem: jest.fn().mockReturnValue('conv-123'),
-          removeItem: jest.fn(),
-          clear: jest.fn()
-        } as any;
+    mockStorageService = {
+      setItem: jest.fn(),
+      getItem: jest.fn().mockReturnValue('conv-123'),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+    } as any;
     const mockSdkService = {
       sendChatMessage: jest.fn(),
       setConversationDataAgainstCustomerIdentifier: jest.fn(),
@@ -76,7 +75,7 @@ defineFeature(feature, (test) => {
       undefined,
       undefined,
       undefined,
-      undefined
+      undefined,
     );
 
     component.customerData = {
@@ -121,16 +120,16 @@ defineFeature(feature, (test) => {
       component.eventListener(mockEvent);
       expect(component.isChatActive).toBe(true);
       expect(mockStorageService.setItem).toHaveBeenCalledWith(
-              'conversationId',
-              'conv-123',
-              component.storageType
-            );
+        'conversationId',
+        'conv-123',
+        component.storageType,
+      );
     });
 
     when('the customer receives a form message', () => {
       formMessage = {
         type: 'MESSAGE_RECEIVED',
-          data: {
+        data: {
           body: {
             type: 'form_data',
             additionalDetails: {
@@ -185,10 +184,9 @@ defineFeature(feature, (test) => {
             customer: {
               _id: '789',
             },
+          },
         },
-      }
       };
-
 
       // Spy on constructCimMessage
       jest.spyOn(component, 'constructCimMessage');
@@ -204,64 +202,64 @@ defineFeature(feature, (test) => {
     and('the customer submits the form', async () => {
       formMessage = {
         id: '123',
-          body: {
-            type: 'form_data',
-            additionalDetails: {
-              actionButtons: [
-                {
-                  type: 'control',
-                  text: 'Cancel',
-                  action: 'cancel',
-                },
-                {
-                  type: 'control',
-                  text: 'OK',
-                  action: 'submit',
-                },
-              ],
-              disableInteraction: true,
-              status: 'filled',
-            },
-
-            sections: [
+        body: {
+          type: 'form_data',
+          additionalDetails: {
+            actionButtons: [
               {
-                sectionName:
-                  'This is an additional label to let people know * means required',
-                sectionWeightage: null,
-                sectionScore: null,
-                attributes: [
-                  {
-                    label: 'Text Input Required Example',
-                    valueType: 'shortAnswer',
-                    attributeWeightage: null,
-                    attributeScore: null,
-                    attributeType: 'INPUT',
-                    skipType: null,
-                    key: '298d6627-277a-4bb2-9480-4e824ed9701c',
-                    attributeAttachment: '',
-                    answer: ['jkljlkj'],
-                  },
-                  {
-                    label: 'Text Input Validation Pattern Example - 3 letters',
-                    valueType: 'shortAnswer',
-                    attributeWeightage: null,
-                    attributeScore: null,
-                    attributeType: 'INPUT',
-                    skipType: null,
-                    key: '3a4c8011-880a-4ed6-bdfd-3bc74621e9a8',
-                    attributeAttachment: '',
-                    answer: ['lkjk'],
-                  },
-                ],
+                type: 'control',
+                text: 'Cancel',
+                action: 'cancel',
+              },
+              {
+                type: 'control',
+                text: 'OK',
+                action: 'submit',
               },
             ],
+            disableInteraction: true,
+            status: 'filled',
           },
-          header: {
-            originalMessageId: '789',
-            timestamp: '2023-01-01T12:00:00Z',
-            sender: {
-              type: 'customer',
+
+          sections: [
+            {
+              sectionName:
+                'This is an additional label to let people know * means required',
+              sectionWeightage: null,
+              sectionScore: null,
+              attributes: [
+                {
+                  label: 'Text Input Required Example',
+                  valueType: 'shortAnswer',
+                  attributeWeightage: null,
+                  attributeScore: null,
+                  attributeType: 'INPUT',
+                  skipType: null,
+                  key: '298d6627-277a-4bb2-9480-4e824ed9701c',
+                  attributeAttachment: '',
+                  answer: ['jkljlkj'],
+                },
+                {
+                  label: 'Text Input Validation Pattern Example - 3 letters',
+                  valueType: 'shortAnswer',
+                  attributeWeightage: null,
+                  attributeScore: null,
+                  attributeType: 'INPUT',
+                  skipType: null,
+                  key: '3a4c8011-880a-4ed6-bdfd-3bc74621e9a8',
+                  attributeAttachment: '',
+                  answer: ['lkjk'],
+                },
+              ],
             },
+          ],
+        },
+        header: {
+          originalMessageId: '789',
+          timestamp: '2023-01-01T12:00:00Z',
+          sender: {
+            type: 'customer',
+          },
         },
       };
 
@@ -285,7 +283,7 @@ defineFeature(feature, (test) => {
         'FORM_DATA',
         null,
         null,
-        '123',               // the messageId
+        '123', // the messageId
         null,
         null,
         null,
@@ -299,7 +297,7 @@ defineFeature(feature, (test) => {
             formTitle: '',
           }),
         }),
-        'filled'
+        'filled',
       );
     });
 
@@ -307,7 +305,7 @@ defineFeature(feature, (test) => {
       'the customer should see the submitted form data in the conversation with all filled entries',
       () => {
         formMessage = {
-        id: '123',
+          id: '123',
           body: {
             type: 'form_data',
             additionalDetails: {
@@ -366,16 +364,16 @@ defineFeature(feature, (test) => {
             sender: {
               type: 'customer',
             },
-        },
-      };
-      const scrollSpy = jest.spyOn(component, 'scrollToBottom');
-      const reportSpy = jest.spyOn(component, 'handleMessageReport');
+          },
+        };
+        const scrollSpy = jest.spyOn(component, 'scrollToBottom');
+        const reportSpy = jest.spyOn(component, 'handleMessageReport');
 
-      component.handleCimMessage(formMessage);
+        component.handleCimMessage(formMessage);
 
-      expect(scrollSpy).toHaveBeenCalled();
-      expect(reportSpy).toHaveBeenCalledWith(formMessage);
-    },
+        expect(scrollSpy).toHaveBeenCalled();
+        expect(reportSpy).toHaveBeenCalledWith(formMessage);
+      },
     );
 
     and('the submitted form should be displayed as non-interactive', () => {

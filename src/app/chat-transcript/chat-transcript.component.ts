@@ -27,6 +27,7 @@ export class TranscriptComponent implements OnInit {
   state: string = '';
   enableTranscriptNotifications: boolean = false;
   private receivedToken: string = '';
+  isExpanded = false;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -204,8 +205,8 @@ export class TranscriptComponent implements OnInit {
     }, 2000);
   }
 
-  getInitialsFromFullName(name: string = ''): string {
-    const trimmedName = name.trim();
+  getInitialsFromFullName(name: string | null | undefined = ''): string {
+    const trimmedName = (name ?? '').trim();
     if (!trimmedName) return ''; // safeguard for empty input
 
     const nameParts = trimmedName.split(' ').filter((part) => part.length > 0);
@@ -286,5 +287,135 @@ export class TranscriptComponent implements OnInit {
 
   async downloadAsPDF() {
     window.print();
+  }
+
+  getFormAnswerLabels(answer: any[]): string {
+    if (!Array.isArray(answer)) return '';
+    return answer
+      .filter((a: any) => a?.isSelected)
+      .map((a: any) => a.label)
+      .join(', ');
+  }
+
+  private carouselIndexMap: Map<string, number> = new Map();
+
+  getCarouselIndex(messageId: string): number {
+    return this.carouselIndexMap.get(messageId) ?? 0;
+  }
+
+  nextSlide(messageId: string, totalElements: number): void {
+    const current = this.getCarouselIndex(messageId);
+    if (current < totalElements - 1) {
+      this.carouselIndexMap.set(messageId, current + 1);
+    }
+  }
+
+  prevSlide(messageId: string): void {
+    const current = this.getCarouselIndex(messageId);
+    if (current > 0) {
+      this.carouselIndexMap.set(messageId, current - 1);
+    }
+  }
+
+  setCarouselIndex(messageId: string, index: number): void {
+    this.carouselIndexMap.set(messageId, index);
+  }
+
+  hasSelectedOption(answer: any[]): boolean {
+    return answer?.some((opt) => opt.isSelected) || false;
+  }
+
+  // ✅ Check if attribute has valid answer
+  isAnswered(attr: any): boolean {
+    if (!attr?.answer || !attr.answer.length) return false;
+
+    if (attr.attributeType === 'OPTIONS') {
+      return attr.answer.some((opt) => opt.isSelected);
+    }
+
+    return attr.answer[0] !== null && attr.answer[0] !== '';
+  }
+
+  // ✅ Get selected options (radio / checkbox / dropdown)
+  getSelectedOptions(answer: any[]): string {
+    if (!answer) return '';
+
+    return answer
+      .filter((opt) => opt.isSelected)
+      .map((opt) => opt.label)
+      .join(', ');
+  }
+
+  // ✅ Count total answered questions
+  getTotalCount(sections: any[]): number {
+    let count = 0;
+
+    sections?.forEach((section) => {
+      section.attributes.forEach((attr) => {
+        if (this.isAnswered(attr)) count++;
+      });
+    });
+
+    return count;
+  }
+
+  // ✅ Global index (ONLY for answered questions)
+  getGlobalIndex(
+    sections: any[],
+    currentSection: any,
+    attrIndex: number,
+  ): number {
+    let count = 0;
+
+    for (let sec of sections) {
+      for (let i = 0; i < sec.attributes.length; i++) {
+        const attr = sec.attributes[i];
+
+        if (!this.isAnswered(attr)) continue;
+
+        if (sec === currentSection && i === attrIndex) {
+          return count;
+        }
+
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  // ✅ Section has at least one answered question
+  sectionHasAnswers(section: any): boolean {
+    return section?.attributes?.some((attr) => this.isAnswered(attr)) || false;
+  }
+
+  // ✅ Get form title and description from original message
+  getMessageData(message: any): { title: string; description: string } {
+    // Check if current message has formTitle and formDescription
+    if (message?.body?.formTitle && message?.body?.formDescription) {
+      return {
+        title: message.body.formTitle,
+        description: message.body.formDescription,
+      };
+    }
+
+    // Try to get from original message using originalMessageId
+    const originalMessageId = message?.header?.originalMessageId;
+    if (originalMessageId) {
+      const originalMessage = this.processedMessages.find(
+        (msg) =>
+          msg.id === originalMessageId ||
+          msg.header?.messageId === originalMessageId,
+      );
+      if (originalMessage?.body) {
+        return originalMessage;
+      }
+    }
+
+    // Fallback to current message or default values
+    return {
+      title: message?.body?.formTitle || 'Form',
+      description: message?.body?.formDescription || '',
+    };
   }
 }

@@ -19,6 +19,87 @@
 
       <div [ngSwitch]="message.body.type">
 
+      <div *ngSwitchCase="'Carousel'" class="chat-message agent-message bot-message">
+          <div class="profile-pic">
+            <div class="profile-pic-area user-img">
+              <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="Bot" />
+            </div>
+          </div>
+          <div class="chat-message-content structured-message">
+            <div class="carousel-container-main">
+              <div class="carousel-container">
+                <div class="carousel-wrapper">
+                  <div class="carousel-track" [style.transform]="'translateX(-' + getCarouselIndex(message.id) * 100 + '%)'">
+                    <mat-card class="carousel-card pt-0" *ngFor="let item of message.body.elements">
+                      <div class="carousel-banner" [ngStyle]="{'background-image': 'url(' + item.additionalCarouselElementDetails?.image_url + ')'}">
+                      </div>
+                      <mat-card-content>
+                        <h3>{{ item.additionalCarouselElementDetails?.title }}</h3>
+                        <p>{{ item.text }}</p>
+                        <div class="carousel-actions">
+                          <ng-container *ngFor="let button of item.buttons">
+                            <a *ngIf="button.type === 'linkButton'"
+                              [href]="button.additionalButtonDetails?.url"
+                              [attr.target]="button.additionalButtonDetails?.target"
+                              class="link-button">
+                              {{ button.payload }}
+                            </a>
+                            <span *ngIf="button.type === 'button' || button.type === 'clickableList'"
+                              class="structured-action-btn">
+                              {{ button.title }}
+                            </span>
+                          </ng-container>
+                        </div>
+                      </mat-card-content>
+                    </mat-card>
+                  </div>
+                </div>
+                <div class="carousel-trigger-area">
+                  <button class="carousel-trigger" mat-icon-button (click)="prevSlide(message.id)" [style.visibility]="getCarouselIndex(message.id) === 0 ? 'hidden' : 'visible'">
+                    <mat-icon>chevron_left</mat-icon>
+                  </button>
+                  <button class="carousel-trigger" mat-icon-button (click)="nextSlide(message.id, message.body.elements.length)" [style.visibility]="getCarouselIndex(message.id) === message.body.elements.length - 1 ? 'hidden' : 'visible'">
+                    <mat-icon>chevron_right</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <div class="carousel-dots-area">
+                <span *ngFor="let el of message.body.elements; let i = index"
+                  class="dot"
+                 >
+                </span>
+              </div>
+            </div>
+            <span class="message-stamp">
+              <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+            </span>
+          </div>
+        </div>
+
+
+
+        <div *ngSwitchCase="'FORM_DATA'" class="chat-message agent-message bot-message">
+          <div class="profile-pic">
+            <div class="profile-pic-area user-img">
+              <img src="../../widget-assets/chat-transcript/images/robot-dark.svg" alt="Bot" />
+            </div>
+          </div>
+
+           <div class="chat-message-content structured-message form-data-message form-data-message-heading">
+            <strong><mat-icon role="img" class="mat-icon notranslate material-icons-outlined material-icons mat-ligature-font mat-icon-no-color" aria-hidden="true" data-mat-icon-type="font">
+sticky_note_2</mat-icon>
+{{ message.body.formTitle }} | {{ message.body.formDescription }}</strong>
+
+            <span class="message-stamp">
+              <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+            </span>
+          </div>
+
+
+
+
+        </div>
+
         <div *ngSwitchCase="'BUTTON'" class="chat-message agent-message bot-message">
           <div class="profile-pic">
             <div class="profile-pic-area user-img">
@@ -33,7 +114,10 @@
                 }}</span>
             </p>
             <ul class="structured-actions">
-              <li *ngFor="let btn of message.body.buttons">{{ btn.title }}</li>
+              <li *ngFor="let btn of message.body.buttons"
+                  [style.border-radius]="message.body.additionalDetails?.cornerShape | cornerShape">
+                  {{ btn.title }}
+              </li>
             </ul>
             <span class="message-stamp">
               <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
@@ -67,11 +151,14 @@
           <div class="chat-message-content file-type-message image-type">
             <p>
               <span>
-                <video class="videoPlayer" autoplay muted>
+                <video *ngIf="message.body.additionalDetails?.videoProvider != 'YOUTUBE'" class="videoPlayer" autoplay muted>
                   <source [src]="message.body.attachment.mediaUrl | safeFileURL" type="video/mp4" />
                    <track kind="subtitles" src="" srclang="en" label="English" default />
                   Your browser does not support the video tag.
                 </video>
+                <iframe *ngIf="message.body.additionalDetails?.videoProvider == 'YOUTUBE'"
+                                  [src]="message.body.attachment.mediaUrl | safeFileURL" width="280" height="150" title="YouTube video player" allowfullscreen>
+                </iframe>
               </span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
@@ -253,7 +340,6 @@
           </div>
         </div>
 
-
         <div *ngSwitchCase="'PLAIN'" class="chat-message agent-message"
           [ngClass]="{'message-blurred': message.isBlurred}">
           <div class="profile-pic">
@@ -292,11 +378,14 @@
             </div>
             <p>
               <span>
-                <video class="videoPlayer" controls>
+                <video *ngIf="message.body.additionalDetails?.videoProvider != 'YOUTUBE'" class="videoPlayer" controls>
                   <source [src]="message.body.attachment.mediaUrl | safeFileURL" type="video/mp4" />
                   Your browser does not support the video tag.
                   <track kind="subtitles" src="" srclang="en" label="English" default />
                 </video>
+                <iframe *ngIf="message.body.additionalDetails?.videoProvider == 'YOUTUBE'"
+                  [src]="message.body.attachment.mediaUrl | safeFileURL" width="280" height="150" title="YouTube video player" allowfullscreen>
+                </iframe>
               </span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
@@ -511,28 +600,64 @@
           </div>
         </div>
 
-        <div *ngSwitchCase="'PLAIN'" class="chat-message user-message"
-          [ngClass]="{'message-blurred': message.isBlurred}">
+        <div *ngSwitchCase="'PLAIN'" class="chat-message user-message" [ngClass]="{'message-blurred': message.isBlurred}">
           <div class="profile-pic">
             <div class="active-channel channel-icon web">
               <img [src]="getChannelIconURL(
-                      message.header.sender.senderName,
-                      message.header.sender.id
-                    )" alt="channel-icon" width="20" />
+                              message.header.sender.senderName,
+                              message.header.sender.id
+                            )" alt="channel-icon" width="20" />
             </div>
             <div class="profile-pic-area user-img">
               {{ getInitialsFromFullName(message.header.customer.firstName) }}
             </div>
           </div>
-          <div class="chat-message-content">
-            <p>
+          <div class="chat-message-content ppp">
+
+
+            <ng-container *ngIf="message.header.originalMessageId && getMessageData(message)?.body?.type === 'Carousel'">
+
+              <div *ngIf="getMessageData(message)?.body as carouselData">
+
+                <ng-container *ngFor="let item of carouselData?.elements">
+
+                  <div class="carousel-card-inner"
+                    *ngIf="message.header?.additionalData?.carousalCardId === item.additionalCarouselElementDetails?.id">
+
+                    <!-- IMAGE -->
+                    <div class="inner-carousel-banner" [ngStyle]="{
+                     'background-image': 'url(' + item.additionalCarouselElementDetails?.image_url + ')'
+                   }">
+                    </div>
+
+                    <!-- TITLE + TEXT -->
+                    <div class="inner-carousel-title">
+
+                      <h3>{{ item.additionalCarouselElementDetails?.title }}</h3>
+                      <!-- multiline text -->
+                      <p>
+                        {{ item?.text}}
+
+                      </p>
+
+                    </div>
+
+
+
+                  </div>
+
+                </ng-container>
+
+              </div>
+            </ng-container>
+            <p class="{{getMessageData(message)?.body?.type === 'Carousel' ? 'w-100': '' }}">
               <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
               </span>
             </p>
           </div>
-        </div>
+          </div>
 
         <div *ngSwitchCase="'VIDEO'" class="chat-message user-message"
           [ngClass]="{'message-blurred': message.isBlurred}">
@@ -550,11 +675,14 @@
           <div class="chat-message-content file-type-message image-type">
             <p>
               <span>
-                <video class="videoPlayer" controls>
+                <video *ngIf="message.body.additionalDetails?.videoProvider != 'YOUTUBE'" class="videoPlayer" controls>
                   <source [src]="message.body.attachment.mediaUrl | safeFileURL" type="video/mp4" />
                    <track kind="subtitles" src="" srclang="en" label="English" default />
                   Your browser does not support the video tag.
                 </video>
+                <iframe *ngIf="message.body.additionalDetails?.videoProvider == 'YOUTUBE'"
+                  [src]="message.body.attachment.mediaUrl | safeFileURL" width="280" height="150" title="YouTube video player" allowfullscreen>
+                </iframe>
               </span>
               <span class="message-stamp">
                 <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
@@ -728,6 +856,119 @@
         </div>
       </ngswitch>
     </ng-container>
+    <ng-container *ngIf="message?.body?.type === 'FORM_DATA' && (message?.body.additionalDetails?.status === 'filled' || message?.body.additionalDetails?.status === 'cancelled')">
+      <div class="chat-message user-message">
+        <div class="profile-pic">
+          <div class="profile-pic-area user-img">
+            {{ getInitialsFromFullName(message.header.customer?.firstName) }}
+          </div>
+        </div>
+
+        <div class="chat-message-content structured-message form-data-message">
+           <strong><mat-icon role="img" class="mat-icon notranslate material-icons-outlined material-icons mat-ligature-font mat-icon-no-color" aria-hidden="true" data-mat-icon-type="font">
+sticky_note_2</mat-icon>
+{{ getMessageData(message)?.body?.formTitle || 'Form' }} | {{ getMessageData(message)?.body?.formDescription || '' }} <small *ngIf="message.body?.additionalDetails?.status === 'cancelled'" class="form-status ml-1">(Cancelled)</small></strong>
+
+           <div class="main-form-attr mt-2 {{isExpanded ? 'expanded-data' : 'less-data'}} pb-0"
+            *ngIf="message.body?.additionalDetails?.status !== 'cancelled'">
+
+      <!-- SECTIONS -->
+      <ng-container *ngIf="message?.body?.sections as sections">
+
+        <ng-container *ngFor="let section of sections">
+
+          <div class="form-section-main" *ngIf="sectionHasAnswers(section)">
+
+            <!-- SECTION TITLE -->
+            <div class="section-title" *ngIf="section.sectionName && isExpanded">
+              {{ section.sectionName }}
+            </div>
+
+            <!-- ATTRIBUTES -->
+            <ng-container *ngFor="let attr of section.attributes; let idx = index">
+
+              <!-- OPTIONS (radio / checkbox / dropdown) -->
+              <div class="form-attribute-main mb-2"
+                   *ngIf="attr.attributeType === 'OPTIONS'
+                          && isAnswered(attr)
+                          && (isExpanded || getGlobalIndex(sections, section, idx) < 3)">
+
+                <span class="attr-question">
+                  {{ attr.label }}:
+                </span>
+
+                <p class="form-answer">
+                  {{ getSelectedOptions(attr.answer) }}
+                </p>
+              </div>
+
+              <!-- INPUT / TEXT / DATE / TIME -->
+              <div class="form-attribute-main {{attr.attributeType}}"
+                   *ngIf="attr.attributeType !== 'OPTIONS'
+                          && isAnswered(attr)
+                          && (isExpanded || getGlobalIndex(sections, section, idx) < 3)">
+
+                <span class="attr-question">
+                  {{ attr.label }}:
+                </span>
+
+                <p class="form-answer">
+                  {{
+                    attr.answer?.[0]
+                      ? (
+                          attr.valueType === 'dateTime'
+                            ? (attr.answer[0] | date:'medium')
+                            : attr.valueType === 'date'
+                              ? (attr.answer[0] | date:'mediumDate')
+                              : attr.valueType === 'time'
+                                ? (attr.answer[0] | date:'shortTime')
+                                : attr.answer[0]
+                        )
+                      : ''
+                  }}
+                </p>
+
+              </div>
+
+            </ng-container>
+
+          </div>
+
+        </ng-container>
+
+      </ng-container>
+
+      <!-- TOGGLE BUTTON -->
+      <div class="form-toggle-btn"
+           *ngIf="getTotalCount(message?.body?.sections) > 3">
+
+        <button mat-flat-button
+                *ngIf="message.body?.additionalDetails?.status !== 'cancelled'"
+                type="button"
+                (click)="isExpanded = !isExpanded">
+
+          {{ isExpanded ? 'View less' : 'View more' }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+
+
+
+
+
+
+          <span class="message-stamp">
+            <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+          </span>
+        </div>
+      </div>
+    </ng-container>
+
     <ng-container *ngIf="enableTranscriptNotifications && message?.body?.notificationType === 'CHANNEL_SESSION_ENDED'">
       <div class="line-info agent-typing">
         <span>
@@ -754,7 +995,7 @@
     <ng-container *ngIf="enableTranscriptNotifications && message?.body?.notificationType === 'AGENT_SUBSCRIBED'">
       <div class="line-info agent-typing">
         <span>
-         {{ getAgentDisplayName(message.body.notificationData.data.agentParticipant.participant.keycloakUser) }}
+          {{ getAgentDisplayName(message.body.notificationData.data.agentParticipant.participant.keycloakUser) }}
           {{ 'agent-notifications.joined' | translate }}
           | {{ message.header.timestamp | formatTime }}
         </span>

@@ -55,6 +55,26 @@ parentSection.style.minHeight = '0px';
 parentSection.style.minWidth = '0px';
 parentSection.style.zIndex = '9999';
 
+if (window.visualViewport) {
+
+  const initialBottom = widgetBottomMargin || 10;
+
+  function handleKeyboard() {
+    const viewportHeight = window.visualViewport.height;
+    const fullHeight = window.innerHeight;
+
+    const keyboardHeight = fullHeight - viewportHeight;
+
+    if (keyboardHeight > 0) {
+      parentSection.style.bottom = keyboardHeight + initialBottom + 'px';
+    } else {
+      parentSection.style.bottom = initialBottom + 'px';
+    }
+  }
+
+  window.visualViewport.addEventListener('resize', handleKeyboard);
+}
+
 var chatIframe = document.createElement('iframe');
 chatIframe.setAttribute('id', 'init_widget');
 chatIframe.setAttribute('width', '100%');
@@ -113,13 +133,13 @@ window.addEventListener('message', (event) => {
   // }
   console.log("message call ", event.data)
   if (event.data.state == 'icon-view') {
-    parentSection.style.width = '100px';
-    parentSection.style.height = '80px';
+    parentSection.style.width = event.data.width ? event.data.width + 'px' : '100px';
+    parentSection.style.height = event.data.height ? event.data.height + 'px' : '80px';
     parentSection.style.boxShadow = 'none';
   }
   if (event.data.state == 'wraper-view') {
-    parentSection.style.width = '320px';
-    parentSection.style.height = '300px';
+    parentSection.style.width = event.data.width ? event.data.width + 'px' : '200px';
+    parentSection.style.height = event.data.height ? event.data.height + 'px' : '210px';
     parentSection.style.boxShadow = 'none';
   }
   if (event.data.state == 'compact-wraper-view') {

@@ -19,9 +19,9 @@ describe('ImageOverlayComponent', () => {
 
   it('should emit closeOverlay event when close() is called', () => {
     const emitSpy = jest.spyOn(component.closeOverlay, 'emit');
-    
+
     component.close();
-    
+
     expect(emitSpy).toHaveBeenCalled();
   });
 
@@ -31,7 +31,7 @@ describe('ImageOverlayComponent', () => {
       const mockElement = document.createElement('div');
       const event = {
         target: mockElement,
-        currentTarget: mockElement
+        currentTarget: mockElement,
       } as unknown as MouseEvent;
 
       component.onBackdropClick(event);
@@ -45,7 +45,7 @@ describe('ImageOverlayComponent', () => {
       const image = document.createElement('img');
       const event = {
         target: image,
-        currentTarget: backdrop
+        currentTarget: backdrop,
       } as unknown as MouseEvent;
 
       component.onBackdropClick(event);

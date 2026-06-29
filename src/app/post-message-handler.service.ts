@@ -41,7 +41,7 @@ export class PostMessageHandlerService {
   }
 
   sendLinkClickedPostMessage(link: any): void {
-    const targetOrigin =  this.getParentOrigin();
+    const targetOrigin = this.getParentOrigin();
 
     const message = {
       type: 'LINK_CLICKED',

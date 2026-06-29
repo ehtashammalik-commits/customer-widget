@@ -31,20 +31,21 @@ import { getMediaFromTask } from './getMediaFromTask.pipe';
 import { NpsColorPipe } from './npsColor.pipe';
 import { SvgNpsFormatPipe } from './svgFormat.pipe';
 import { IsEllipsisActiveDirective } from './isEllipsisActive.directive';
-import {MatCardModule} from "@angular/material/card";
-import {MatDatepickerModule} from "@angular/material/datepicker";
-import {MatRadioModule} from "@angular/material/radio";
-import {MatNativeDateModule} from "@angular/material/core";
-import {MatCheckboxModule} from "@angular/material/checkbox";
-import {OwlDateTimeModule, OwlNativeDateTimeModule} from "ng-pick-datetime";
+import { MatCardModule } from '@angular/material/card';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
 import { TranscriptComponent } from './chat-transcript/chat-transcript.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
+import { CornerShapePipe } from './pipes/corner-shape.pipe';
 import { NgxUiLoaderModule } from 'ngx-ui-loader';
 import { SanitizeHtmlPipe } from './sanitizeHtml.pipe';
 import { SafeAttachmentUrlPipe } from './pipes/safe-attachment-url.pipe';
 import { SanitizeHtmlForEmail } from './pipes/sanitize-html-for-email.pipe';
-import { SimplifyOptionsPipe } from  './pipes/simplify-options.pipe';
-import {MatSliderModule} from "@angular/material/slider";
+import { SimplifyOptionsPipe } from './pipes/simplify-options.pipe';
+import { MatSliderModule } from '@angular/material/slider';
 import { ImageOverlayComponent } from './image-overlay/image-overlay.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { SelectDropDownModule } from 'ngx-select-dropdown';
@@ -76,6 +77,7 @@ export function initializeApp1(appConfigService: ConfigService) {
     FormatTimePipe,
     SanitizeHtmlPipe,
     SafeAttachmentUrlPipe,
+    CornerShapePipe,
     SanitizeHtmlForEmail,
     ImageOverlayComponent,
   ],

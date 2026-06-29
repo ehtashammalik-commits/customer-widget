@@ -512,4 +512,414 @@ describe('TranscriptComponent (unit)', () => {
       expect(component.getAgentDisplayName(user)).toBe('Agent');
     });
   });
+
+  // ========================================
+  // CAROUSEL TESTS
+  // ========================================
+  describe('Carousel functions', () => {
+    describe('getCarouselIndex', () => {
+      it('should return 0 for unknown messageId', () => {
+        expect(component.getCarouselIndex('unknown')).toBe(0);
+      });
+
+      it('should return stored index for known messageId', () => {
+        component.setCarouselIndex('msg1', 3);
+        expect(component.getCarouselIndex('msg1')).toBe(3);
+      });
+    });
+
+    describe('setCarouselIndex', () => {
+      it('should set and update carousel index for messageId', () => {
+        component.setCarouselIndex('msg1', 0);
+        expect(component.getCarouselIndex('msg1')).toBe(0);
+
+        component.setCarouselIndex('msg1', 5);
+        expect(component.getCarouselIndex('msg1')).toBe(5);
+      });
+
+      it('should handle multiple messages independently', () => {
+        component.setCarouselIndex('msg1', 1);
+        component.setCarouselIndex('msg2', 2);
+
+        expect(component.getCarouselIndex('msg1')).toBe(1);
+        expect(component.getCarouselIndex('msg2')).toBe(2);
+      });
+    });
+
+    describe('nextSlide', () => {
+      it('should increment index when not at end', () => {
+        component.setCarouselIndex('msg1', 0);
+        component.nextSlide('msg1', 5);
+        expect(component.getCarouselIndex('msg1')).toBe(1);
+      });
+
+      it('should not increment when at last element', () => {
+        component.setCarouselIndex('msg1', 4);
+        component.nextSlide('msg1', 5);
+        expect(component.getCarouselIndex('msg1')).toBe(4);
+      });
+
+      it('should handle transition from unset to 1', () => {
+        component.nextSlide('newMsg', 3);
+        expect(component.getCarouselIndex('newMsg')).toBe(1);
+      });
+
+      it('should work with different totalElements sizes', () => {
+        component.setCarouselIndex('msg1', 0);
+        component.nextSlide('msg1', 10);
+        expect(component.getCarouselIndex('msg1')).toBe(1);
+
+        component.setCarouselIndex('msg2', 0);
+        component.nextSlide('msg2', 2);
+        expect(component.getCarouselIndex('msg2')).toBe(1);
+      });
+    });
+
+    describe('prevSlide', () => {
+      it('should decrement index when not at start', () => {
+        component.setCarouselIndex('msg1', 2);
+        component.prevSlide('msg1');
+        expect(component.getCarouselIndex('msg1')).toBe(1);
+      });
+
+      it('should not decrement when at index 0', () => {
+        component.setCarouselIndex('msg1', 0);
+        component.prevSlide('msg1');
+        expect(component.getCarouselIndex('msg1')).toBe(0);
+      });
+
+      it('should handle unset message id (default 0)', () => {
+        component.prevSlide('unsetMsg');
+        expect(component.getCarouselIndex('unsetMsg')).toBe(0);
+      });
+
+      it('should decrement from high index to lower', () => {
+        component.setCarouselIndex('msg1', 10);
+        component.prevSlide('msg1');
+        expect(component.getCarouselIndex('msg1')).toBe(9);
+      });
+    });
+  });
+
+  // ========================================
+  // FORM TESTS
+  // ========================================
+  describe('Form functions', () => {
+    describe('getFormAnswerLabels', () => {
+      it('should return empty string for non-array input', () => {
+        expect(component.getFormAnswerLabels(null as any)).toBe('');
+        expect(component.getFormAnswerLabels(undefined as any)).toBe('');
+        expect(component.getFormAnswerLabels('string' as any)).toBe('');
+      });
+
+      it('should return empty string for empty array', () => {
+        expect(component.getFormAnswerLabels([])).toBe('');
+      });
+
+      it('should filter and join selected option labels', () => {
+        const answer = [
+          { label: 'Option A', isSelected: true },
+          { label: 'Option B', isSelected: false },
+          { label: 'Option C', isSelected: true },
+        ];
+        expect(component.getFormAnswerLabels(answer)).toBe(
+          'Option A, Option C',
+        );
+      });
+
+      it('should handle all unselected options', () => {
+        const answer = [
+          { label: 'Option A', isSelected: false },
+          { label: 'Option B', isSelected: false },
+        ];
+        expect(component.getFormAnswerLabels(answer)).toBe('');
+      });
+
+      it('should handle single selected option', () => {
+        const answer = [{ label: 'Single', isSelected: true }];
+        expect(component.getFormAnswerLabels(answer)).toBe('Single');
+      });
+    });
+
+    describe('hasSelectedOption', () => {
+      it('should return false for null or undefined', () => {
+        expect(component.hasSelectedOption(null as any)).toBe(false);
+        expect(component.hasSelectedOption(undefined as any)).toBe(false);
+      });
+
+      it('should return false for empty array', () => {
+        expect(component.hasSelectedOption([])).toBe(false);
+      });
+
+      it('should return true if at least one option is selected', () => {
+        const answer = [
+          { isSelected: false },
+          { isSelected: true },
+          { isSelected: false },
+        ];
+        expect(component.hasSelectedOption(answer)).toBe(true);
+      });
+
+      it('should return false if no option is selected', () => {
+        const answer = [{ isSelected: false }, { isSelected: false }];
+        expect(component.hasSelectedOption(answer)).toBe(false);
+      });
+    });
+
+    describe('isAnswered', () => {
+      it('should return false for missing answer', () => {
+        expect(component.isAnswered({ attributeType: 'TEXT' })).toBe(false);
+        expect(component.isAnswered({ answer: null })).toBe(false);
+      });
+
+      it('should return false for empty answer array', () => {
+        expect(
+          component.isAnswered({ answer: [], attributeType: 'TEXT' }),
+        ).toBe(false);
+      });
+
+      it('should check OPTIONS type for selected items', () => {
+        const unselected = {
+          attributeType: 'OPTIONS',
+          answer: [{ isSelected: false }, { isSelected: false }],
+        };
+        expect(component.isAnswered(unselected)).toBe(false);
+
+        const selected = {
+          attributeType: 'OPTIONS',
+          answer: [{ isSelected: false }, { isSelected: true }],
+        };
+        expect(component.isAnswered(selected)).toBe(true);
+      });
+
+      it('should validate non-empty/non-null values for other types', () => {
+        expect(
+          component.isAnswered({
+            attributeType: 'TEXT',
+            answer: [null],
+          }),
+        ).toBe(false);
+
+        expect(
+          component.isAnswered({
+            attributeType: 'TEXT',
+            answer: [''],
+          }),
+        ).toBe(false);
+
+        expect(
+          component.isAnswered({
+            attributeType: 'TEXT',
+            answer: ['some text'],
+          }),
+        ).toBe(true);
+      });
+    });
+
+    describe('getSelectedOptions', () => {
+      it('should return empty string for null/undefined', () => {
+        expect(component.getSelectedOptions(null as any)).toBe('');
+        expect(component.getSelectedOptions(undefined as any)).toBe('');
+      });
+
+      it('should filter and join selected option labels', () => {
+        const answer = [
+          { label: 'Red', isSelected: true },
+          { label: 'Blue', isSelected: false },
+          { label: 'Green', isSelected: true },
+        ];
+        expect(component.getSelectedOptions(answer)).toBe('Red, Green');
+      });
+
+      it('should return empty string when no options selected', () => {
+        const answer = [
+          { label: 'A', isSelected: false },
+          { label: 'B', isSelected: false },
+        ];
+        expect(component.getSelectedOptions(answer)).toBe('');
+      });
+    });
+
+    describe('getTotalCount', () => {
+      it('should return 0 for empty sections', () => {
+        expect(component.getTotalCount([])).toBe(0);
+      });
+
+      it('should count only answered attributes across sections', () => {
+        const sections = [
+          {
+            attributes: [
+              { attributeType: 'TEXT', answer: ['yes'] }, // answered
+              { attributeType: 'TEXT', answer: [null] }, // not answered
+            ],
+          },
+          {
+            attributes: [
+              { attributeType: 'OPTIONS', answer: [{ isSelected: true }] }, // answered
+              { attributeType: 'TEXT', answer: [''] }, // not answered
+            ],
+          },
+        ];
+        expect(component.getTotalCount(sections)).toBe(2);
+      });
+
+      it('should handle null/undefined sections gracefully', () => {
+        expect(component.getTotalCount(null as any)).toBe(0);
+        expect(component.getTotalCount(undefined as any)).toBe(0);
+      });
+    });
+
+    describe('getGlobalIndex', () => {
+      it('should return correct index for answered questions only', () => {
+        const sections = [
+          {
+            attributes: [
+              { attributeType: 'TEXT', answer: ['yes'] }, // global index 0
+              { attributeType: 'TEXT', answer: [null] }, // not counted
+              { attributeType: 'TEXT', answer: ['answer'] }, // global index 1
+            ],
+          },
+          {
+            attributes: [
+              { attributeType: 'TEXT', answer: [null] }, // not counted
+              { attributeType: 'TEXT', answer: ['text'] }, // global index 2
+            ],
+          },
+        ];
+
+        expect(component.getGlobalIndex(sections, sections[0], 0)).toBe(0);
+        expect(component.getGlobalIndex(sections, sections[0], 2)).toBe(1);
+        expect(component.getGlobalIndex(sections, sections[1], 1)).toBe(2);
+      });
+
+      it('should return count if attribute not found', () => {
+        const sections = [
+          {
+            attributes: [{ attributeType: 'TEXT', answer: ['yes'] }],
+          },
+        ];
+
+        // Request index beyond section length
+        expect(component.getGlobalIndex(sections, sections[0], 99)).toBe(1);
+      });
+
+      it('should handle empty sections', () => {
+        expect(component.getGlobalIndex([], {} as any, 0)).toBe(0);
+      });
+    });
+
+    describe('sectionHasAnswers', () => {
+      it('should return false for null/undefined section', () => {
+        expect(component.sectionHasAnswers(null as any)).toBe(false);
+        expect(component.sectionHasAnswers(undefined as any)).toBe(false);
+      });
+
+      it('should return false when no attributes answered', () => {
+        const section = {
+          attributes: [
+            { attributeType: 'TEXT', answer: [null] },
+            { attributeType: 'TEXT', answer: [''] },
+          ],
+        };
+        expect(component.sectionHasAnswers(section)).toBe(false);
+      });
+
+      it('should return true if at least one attribute answered', () => {
+        const section = {
+          attributes: [
+            { attributeType: 'TEXT', answer: [null] },
+            { attributeType: 'TEXT', answer: ['answer'] },
+          ],
+        };
+        expect(component.sectionHasAnswers(section)).toBe(true);
+      });
+
+      it('should return false for empty attributes array', () => {
+        const section = { attributes: [] };
+        expect(component.sectionHasAnswers(section)).toBe(false);
+      });
+    });
+
+    describe('getFormTitleAndDescription', () => {
+      it('should return title and description from current message', () => {
+        const message = {
+          body: {
+            formTitle: 'Customer Feedback',
+            formDescription: 'Please provide feedback',
+          },
+          header: {},
+        };
+
+        const result = component.getMessageData(message);
+        expect(result.title).toBe('Customer Feedback');
+        expect(result.description).toBe('Please provide feedback');
+      });
+
+      it('should fallback to original message if not in current', () => {
+        const originalMsg = {
+          id: 'orig-123',
+          header: { messageId: 'orig-123' },
+          body: {
+            formTitle: 'Original Title',
+            formDescription: 'Original Description',
+          },
+        };
+
+        const updateMsg = {
+          header: { originalMessageId: 'orig-123' },
+          body: { formTitle: null, formDescription: null },
+        };
+
+        component.processedMessages = [originalMsg];
+
+        const result = component.getMessageData(updateMsg);
+        // Component returns the entire originalMessage object
+        expect((result as any).body?.formTitle).toBe('Original Title');
+        expect((result as any).body?.formDescription).toBe(
+          'Original Description',
+        );
+      });
+
+      it('should use default values when nothing found', () => {
+        const message = {
+          body: {},
+          header: {},
+        };
+
+        const result = component.getMessageData(message);
+        expect(result.title).toBe('Form');
+        expect(result.description).toBe('');
+      });
+
+      it('should handle null message gracefully', () => {
+        const result = component.getMessageData(null as any);
+        expect(result.title).toBe('Form');
+        expect(result.description).toBe('');
+      });
+
+      it('should prefer current message over original when both have values', () => {
+        const originalMsg = {
+          header: { messageId: 'orig-1' },
+          body: {
+            formTitle: 'Old Title',
+            formDescription: 'Old Description',
+          },
+        };
+
+        const currentMsg = {
+          header: { originalMessageId: 'orig-1' },
+          body: {
+            formTitle: 'New Title',
+            formDescription: 'New Description',
+          },
+        };
+
+        component.processedMessages = [originalMsg];
+
+        const result = component.getMessageData(currentMsg);
+        expect(result.title).toBe('New Title');
+        expect(result.description).toBe('New Description');
+      });
+    });
+  });
 });

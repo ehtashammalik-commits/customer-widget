@@ -7,10 +7,11 @@
 //     /*Firefox*/
 // }
 
-// html,
-// body {
-//     height: 100%;
-// }
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
 .transcript-header {
     padding: 0 15px;
     height: 40px;
@@ -177,9 +178,11 @@
 
 .chat-area {
     padding: 0 15px 2em 15px;
-    min-height: calc(100% - 120px);
-    overflow: auto;
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    overflow-x: hidden;
     display: block;
+    box-sizing: border-box;
 }
 
 .transcript-header {
@@ -753,4 +756,397 @@ small.edit-message {
     text-align: center;
     font-weight: 500;
     color: #ff4b4b;
+}
+
+.form-data-message {
+    min-width: 200px;
+
+    .form-title {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .form-section {
+        margin-bottom: 6px;
+    }
+
+    .form-section-name {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: #4773b5;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-attribute {
+        display: flex;
+        gap: 6px;
+        font-size: 12px;
+        margin-bottom: 3px;
+        line-height: 16px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #555;
+        white-space: nowrap;
+    }
+
+    .form-answer {
+        color: #000;
+        word-break: break-word;
+    }
+}
+
+
+//Carousel style
+.carousel-container-main{
+  .carousel-dots-area {
+    display: flex;
+    justify-content: center;
+    margin: 5px 0;
+
+    .dot {
+      height: 10px;
+      width: 10px;
+      margin: 0 5px;
+      background-color: #ccc;
+      border-radius: 50%;
+      display: inline-block;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &.active {
+        background-color: #555;
+        }
+      }
+    }
+  }
+.carousel-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  max-width: 100%;
+  }
+
+.carousel-wrapper {
+  width: 290px;
+  overflow: hidden;
+  position: relative;
+
+
+  .carousel-banner {
+    height: 170px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 5px 5px 0 0;
+    margin: 0 -15px;
+    }
+  }
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  width: 100%;
+  max-width: 275px;
+  gap: 5px;
+
+  h3{
+    margin: 10px 0 5px;
+    font-weight: 500;
+    font-size: 18px;
+    }
+  }
+
+.carousel-card {
+  min-width: 100%;
+  box-sizing: border-box;
+  }
+
+.carousel-actions {
+  margin: 10px -15px;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+
+  &.clickableList{
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+
+    button{
+      width: 100%;
+      max-width: 95%;
+      }
+    }
+  &.linkButton{
+    gap: 2em;
+    }
+
+  button {
+    background: var(--main-color);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+    text-align: center;
+    padding: 0 5px;
+    height: 32px;
+    min-height: 32px;
+    line-height: 31px;
+    &:focus {
+      outline: none;
+    }
+
+  }
+
+  .carousel-actions a {
+    color: var(--main-color);
+    font-size: 12px;
+    }
+  }
+
+.carousel-trigger-area {
+  position: absolute;
+  left: 4%;
+  width: 92%;
+  display: flex;
+  justify-content: space-between;
+  top: 45%;
+  transform: translate(0, -45%);
+
+  .carousel-trigger {
+    background: #E5E5E5;
+    color: #555555;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+
+    &:disabled{
+      opacity: .6;
+      }
+    &:focus{
+      outline: none;
+      }
+    &:hover{
+      filter: brightness(0.9);
+      }
+    }
+
+
+  }
+  .form-data-message{
+    strong{
+    display: flex;
+    color: #000000DE;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: inherit;
+    max-width: 780px;
+    width: auto;
+
+    mat-icon{
+    font-size: 18px;
+    background: rgba(204, 204, 204, .4705882353);
+    text-align: center;
+    border-radius: 100%;
+    padding: 2px;
+    width: 24px;
+    height: 24px;
+    align-content: space-around;
+    color: rgb(115 115 115 / 87%);
+    display: inline-flex;
+    vertical-align: middle;
+    margin-inline-end: 8px;
+    align-items: center;
+    justify-content: center;
+    }
+    }
+
+
+
+    
+.main-form-attr {
+    border-radius: 2px 6px 6px 6px;
+    border: 1px solid #78777780;
+    background: #FFF;
+    display: flex;
+    padding: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    align-self: stretch;
+
+    .form-attribute-main {
+      span{
+        color: #717171;
+    }
+    .form-answer, .option-attr{
+        color: #212427;
+        margin-inline-end: 10px;
+    }
+}
+&.less-data{
+    .form-attribute-main:last-child {
+    margin-bottom: 0 !important;
+}
+  .form-section-main {
+    padding: 0;
+    border: 0;
+}
+.form-attribute-main{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+}
+.form-attribute-main{
+  margin-bottom: 12px;
+}
+}
+.section-title {
+    color: #212427;
+    font-size: 16px;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.form-section-main {
+    padding: 5px 0;
+    border-bottom: 1px solid rgb(108 107 107 / 16%);
+    width: 100%;
+
+}
+.form-toggle-btn{
+     width: 100%;
+    text-align: center;
+  button{
+  color: #1A50A3;
+text-align: right;
+font-family: Roboto;
+font-size: 14px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+
+&:focus {
+  outline: none;
+}
+}
+.form-attribute-main{
+  &:last-child{
+    margin-bottom: 0 !important;
+}
+}
+  }
+}
+.expanded-data{
+    .form-answer{
+        display: block;
+    }
+}
+
+  .carousel-actions {
+  margin: 10px -15px;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+
+  &.clickableList{
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+
+    button{
+      width: 100%;
+      max-width: 95%;
+    }
+  }
+  &.linkButton{
+    gap: 2em;
+  }
+
+  .structured-action-btn {
+    background: #1A50A3;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+    text-align: center;
+    padding: 0 5px;
+    height: 32px;
+    min-height: 32px;
+    line-height: 31px;
+    border-radius: 3px;
+    &:focus {
+      outline: none;
+    }
+
+  }
+
+  a {
+    color: #1A50A3;
+  }
+}
+
+
+.carousel-card-inner{
+  background: #fff;
+  padding: 5px;
+  display: flex;
+  gap: 7px;
+  border-radius: 5px;
+  border-top: 2px solid #1A50A3;
+  border-inline-start: 2px solid #1A50A3;
+  margin-bottom: 5px;
+.inner-carousel-text{
+ line-height: 16px !important;
+    white-space: normal;
+    display: -webkit-box;
+    line-clamp:2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px !important;    
+}
+  .inner-carousel-banner {
+    width: 75px;
+    height: 55px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    border-radius: 4px;
+  }
+  h3{
+    font-size: 18px;
+    margin-bottom: 3px;
+  }
+  p{
+    line-height: 16px !important;
+    white-space: normal;
+    display: -webkit-box;
+    line-clamp:2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px !important;
+  }
+  .inner-carousel-title{
+    width: min-content;
+    min-width: 165px;
+  }
 }
