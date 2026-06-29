@@ -297,7 +297,7 @@ export class TranscriptComponent implements OnInit {
       .join(', ');
   }
 
-  private carouselIndexMap: Map<string, number> = new Map();
+  readonly carouselIndexMap: Map<string, number> = new Map();
 
   getCarouselIndex(messageId: string): number {
     return this.carouselIndexMap.get(messageId) ?? 0;
@@ -327,7 +327,7 @@ export class TranscriptComponent implements OnInit {
 
   // ✅ Check if attribute has valid answer
   isAnswered(attr: any): boolean {
-    if (!attr?.answer || !attr.answer.length) return false;
+    if (!attr?.answer?.length) return false;
 
     if (attr.attributeType === 'OPTIONS') {
       return attr.answer.some((opt) => opt.isSelected);

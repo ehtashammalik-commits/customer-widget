@@ -1047,7 +1047,6 @@ border: 0;
 
  &.font-selection {
     position: relative;
-    // margin-left: 4px;
     &:before {
       content: "|";
       position: absolute;
@@ -1067,8 +1066,6 @@ border: 0;
   background: rgb(255, 255, 255);
   font-size: 15px;
   text-align: center;
-  // padding-top: 4px;
-  // margin: 6px 4px 6px 4px;
 
   &:hover {
     cursor: pointer;
