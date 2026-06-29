@@ -71,7 +71,7 @@
               </div>
             </div>
             <span class="message-stamp">
-              <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+              <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
             </span>
           </div>
         </div>
@@ -91,7 +91,7 @@ sticky_note_2</mat-icon>
 {{ message.body.formTitle }} | {{ message.body.formDescription }}</strong>
 
             <span class="message-stamp">
-              <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+              <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
             </span>
           </div>
 
@@ -120,7 +120,7 @@ sticky_note_2</mat-icon>
               </li>
             </ul>
             <span class="message-stamp">
-              <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+              <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
             </span>
           </div>
         </div>
@@ -136,7 +136,7 @@ sticky_note_2</mat-icon>
               <span>{{ message.body.markdownText }}</span>
               <a [href]="message.body.mediaUrl" target="_blank"><span>{{ message.body.mediaUrl }}</span></a>
               <span class="message-stamp">
-                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
               </span>
             </p>
           </div>
@@ -161,7 +161,7 @@ sticky_note_2</mat-icon>
                 </iframe>
               </span>
               <span class="message-stamp">
-                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
               </span>
             </p>
           </div>
@@ -180,7 +180,7 @@ sticky_note_2</mat-icon>
                 <img alt="mediaUrl" [src]="message.body.attachment.mediaUrl | safeFileURL" class="imageViewer" />
               </a>
               <span class="message-stamp">
-                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
               </span>
             </p>
           </div> <!-- BOT PLAIN message markup -->
@@ -219,7 +219,7 @@ sticky_note_2</mat-icon>
             </div>
 
             <span class="message-stamp">
-              <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+              <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
             </span>
           </div>
         </div>
@@ -246,7 +246,7 @@ sticky_note_2</mat-icon>
             </div>
 
             <span class="message-stamp">
-              <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+              <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
             </span>
           </div>
         </div>
@@ -261,7 +261,7 @@ sticky_note_2</mat-icon>
             <p>
               <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
               <span class="message-stamp">
-                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
               </span>
             </p>
           </div>
@@ -291,7 +291,7 @@ sticky_note_2</mat-icon>
             </div>
 
             <span class="message-stamp">
-              <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+              <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
             </span>
           </div>
         </div>
@@ -318,7 +318,7 @@ sticky_note_2</mat-icon>
                 <li class="email-subject" matTooltip="{{ message.body.subject }}"><span>Subject:</span> {{
                   message.body.subject }}</li>
                 <li class="email-time">
-                  {{ message.header.timestamp | date: 'd/MMM/yy, h:mm a' }}
+                  {{ message.header.timestamp | date:'mediumTime' }}
                 </li>
               </ul>
             </div>
@@ -357,7 +357,7 @@ sticky_note_2</mat-icon>
               <span class="message-stamp">
                 <span class="chat-time">
                   <span *ngIf="message.isEdited" class="edit-message">Edited </span>{{ message.header.timestamp |
-                  formatTime }}
+                  date:'mediumTime' }}
                 </span>
               </span>
             </p>
@@ -388,7 +388,7 @@ sticky_note_2</mat-icon>
                 </iframe>
               </span>
               <span class="message-stamp">
-                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
               </span>
             </p>
           </div>
@@ -414,7 +414,7 @@ sticky_note_2</mat-icon>
                 </audio>
               </span>
               <span class="message-stamp">
-                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
               </span>
             </p>
           </div>
@@ -437,7 +437,7 @@ sticky_note_2</mat-icon>
               </a>
               <span>{{ message.body.caption }}</span>
               <span class="message-stamp">
-                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
               </span>
             </p>
           </div>
@@ -461,7 +461,7 @@ sticky_note_2</mat-icon>
                   <p>
                     <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
-                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                      <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
                     </span>
                   </p>
                 </div>
@@ -474,7 +474,7 @@ sticky_note_2</mat-icon>
                     </a>
                     <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
-                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                      <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
                     </span>
                   </p>
                 </div>
@@ -490,7 +490,7 @@ sticky_note_2</mat-icon>
                     </span>
                     <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
-                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                      <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
                     </span>
                   </p>
                 </div>
@@ -505,7 +505,7 @@ sticky_note_2</mat-icon>
                     </span>
                     <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
-                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                      <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
                     </span>
                   </p>
                 </div>
@@ -540,7 +540,7 @@ sticky_note_2</mat-icon>
               </span>
             </div>
             <span class="message-stamp">
-              <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+              <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
             </span>
           </div>
         </div>
@@ -576,7 +576,7 @@ sticky_note_2</mat-icon>
                 <li class="email-subject" matTooltip="{{ message.body.subject }}"><span>Subject:</span> {{
                   message.body.subject }}</li>
                 <li class="email-time">
-                  {{ message.body.receivingDate | date: 'd/MMM/yy, h:mm a' }}
+                  {{ message.body.receivingDate | date:'mediumTime' }}
                 </li>
               </ul>
 
@@ -653,7 +653,7 @@ sticky_note_2</mat-icon>
             <p class="{{getMessageData(message)?.body?.type === 'Carousel' ? 'w-100': '' }}">
               <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
               <span class="message-stamp">
-                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
               </span>
             </p>
           </div>
@@ -685,7 +685,7 @@ sticky_note_2</mat-icon>
                 </iframe>
               </span>
               <span class="message-stamp">
-                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
               </span>
             </p>
           </div>
@@ -715,7 +715,7 @@ sticky_note_2</mat-icon>
                 </audio>
               </span>
               <span class="message-stamp">
-                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
               </span>
             </p>
           </div>
@@ -741,7 +741,7 @@ sticky_note_2</mat-icon>
               </a>
               <span>{{ message.body.caption }}</span>
               <span class="message-stamp">
-                <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
               </span>
             </p>
           </div>
@@ -768,7 +768,7 @@ sticky_note_2</mat-icon>
                   <p>
                     <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
-                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                      <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
                     </span>
                   </p>
                 </div>
@@ -781,7 +781,7 @@ sticky_note_2</mat-icon>
                     </a>
                     <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
-                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                      <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
                     </span>
                   </p>
                 </div>
@@ -797,7 +797,7 @@ sticky_note_2</mat-icon>
                     </span>
                     <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
-                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                      <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
                     </span>
                   </p>
                 </div>
@@ -812,7 +812,7 @@ sticky_note_2</mat-icon>
                     </span>
                     <span [innerHtml]="message.body.markdownText | sanitizeHtml"></span>
                     <span class="message-stamp">
-                      <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+                      <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
                     </span>
                   </p>
                 </div>
@@ -850,7 +850,7 @@ sticky_note_2</mat-icon>
               </span>
             </div>
             <span class="message-stamp">
-              <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+              <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
             </span>
           </div>
         </div>
@@ -963,7 +963,7 @@ sticky_note_2</mat-icon>
 
 
           <span class="message-stamp">
-            <span class="chat-time">{{ message.header.timestamp | formatTime }}</span>
+            <span class="chat-time">{{ message.header.timestamp | date:'mediumTime' }}</span>
           </span>
         </div>
       </div>
@@ -974,7 +974,7 @@ sticky_note_2</mat-icon>
         <span>
           {{ message.body.notificationData.data.channel.channelType.name }}
           {{ ('session-end-reasons.' + (message.body.notificationData.data.state.reasonCode | lowercase)) | translate }}
-          | {{ message.header.timestamp | formatTime }}
+          | {{ message.header.timestamp | date:'mediumTime' }}
         </span>
       </div>
 
@@ -986,7 +986,7 @@ sticky_note_2</mat-icon>
         <span>
           {{ message.body.notificationData.data.channel.channelType.name }}
           {{ 'agent-notifications.started' | translate }}
-          | {{ message.header.timestamp | formatTime }}
+          | {{ message.header.timestamp | date:'mediumTime' }}
         </span>
       </div>
 
@@ -997,7 +997,7 @@ sticky_note_2</mat-icon>
         <span>
           {{ getAgentDisplayName(message.body.notificationData.data.agentParticipant.participant.keycloakUser) }}
           {{ 'agent-notifications.joined' | translate }}
-          | {{ message.header.timestamp | formatTime }}
+          | {{ message.header.timestamp | date:'mediumTime' }}
         </span>
       </div>
 
@@ -1008,7 +1008,7 @@ sticky_note_2</mat-icon>
         <span>
           {{ getAgentDisplayName(message.body.notificationData.data.agentParticipant.participant.keycloakUser) }}
           {{ 'agent-notifications.left' | translate }}
-          | {{ message.header.timestamp | formatTime }}
+          | {{ message.header.timestamp | date:'mediumTime' }}
         </span>
       </div>
 
