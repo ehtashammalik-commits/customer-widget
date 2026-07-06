@@ -1,0 +1,66 @@
+{
+  "/web-channel-manager": {
+    "target": "https://missouri.expertflow.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/web-channel-manager": "/web-channel-manager"
+    }
+  },
+  "/ccm": {
+    "target": "https://missouri.expertflow.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/ccm": "/ccm"
+    }
+  },
+  "/file-engine": {
+    "target": "https://missouri.expertflow.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/file-engine": "/file-engine"
+    }
+  },
+  "/bot-framework": {
+    "target": "https://missouri.expertflow.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/bot-framework": "/bot-framework"
+    }
+  },
+  "/unified-admin": {
+    "target": "https://missouri.expertflow.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/unified-admin": "/unified-admin"
+    }
+  },
+  "/conversation-manager": {
+    "target": "https://missouri.expertflow.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/conversation-manager": "/conversation-manager"
+    }
+  },
+  "/secure-link": {
+    "target": "https://missouri.expertflow.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/secure-link": "/secure-link"
+    }
+  },
+  "/business-calendar": {
+    "target": "https://missouri.expertflow.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/business-calendar": "/business-calendar"
+    }
+  }
+}

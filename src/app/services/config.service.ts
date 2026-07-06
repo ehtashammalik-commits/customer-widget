@@ -29,16 +29,19 @@ export class ConfigService {
     // const currentFQDN = "mtt02.expertflow.com"
     console.log('Current FQDN:', currentFQDN);
 
-    for (let key of this.configsToOverride) {
-      if (
-        this.appConfig[key] &&
-        typeof this.appConfig[key] === 'string' &&
-        this.appConfig[key].includes('http')
-      ) {
-        this.appConfig[key] = this.appConfig[key].replace(
-          /https?:\/\/[^/]*/,
-          `https://${currentFQDN}`,
-        );
+    // Skip hostname replacement for localhost development
+    if (!currentFQDN.includes('localhost') && !currentFQDN.includes('127.0.0.1')) {
+      for (let key of this.configsToOverride) {
+        if (
+          this.appConfig[key] &&
+          typeof this.appConfig[key] === 'string' &&
+          this.appConfig[key].includes('http')
+        ) {
+          this.appConfig[key] = this.appConfig[key].replace(
+            /https?:\/\/[^/]*/,
+            `https://${currentFQDN}`,
+          );
+        }
       }
     }
 
