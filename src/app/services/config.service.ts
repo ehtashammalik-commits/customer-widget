@@ -29,8 +29,11 @@ export class ConfigService {
     // const currentFQDN = "mtt02.expertflow.com"
     console.log('Current FQDN:', currentFQDN);
 
-    // Skip hostname replacement for localhost development
-    if (!currentFQDN.includes('localhost') && !currentFQDN.includes('127.0.0.1')) {
+    // Skip hostname replacement for localhost development and GitHub Pages
+    const isLocalhost = currentFQDN.includes('localhost') || currentFQDN.includes('127.0.0.1');
+    const isGitHubPages = currentFQDN.includes('github.io');
+
+    if (!isLocalhost && !isGitHubPages) {
       for (let key of this.configsToOverride) {
         if (
           this.appConfig[key] &&
