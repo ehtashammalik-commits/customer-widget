@@ -1,0 +1,95 @@
+{
+    "pleasureful-feedback": "It was our pleasure assisting you with your query.",
+    "videocam": "videocam",
+    "session-code": "Session Code",
+    "tagline": "Ask us a question, our support team is pleased to help you.",
+    "fill-widget-form-to-start-conversation-with-agent": "Please fill out the form below to start chatting with an agent now!",
+    "error": {
+        "server-down": "We are experiencing some technical problem with our server. Your chat with agent / BOT has been disabled.",
+        "get-back-to-you": "We will get back to you as soon as issue is resolved.",
+        "suggestion-when-server-down": "However, you can view your chat session.",
+        "incomplete-required-fields": "Please fill all the required fields",
+        "short-answer-required": "Short answer is required",
+        "is-required": "is required",
+        "invalid-format": "does not match the required format",
+        "invalid-password": "Password must include uppercase, lowercase, number, and special character",
+        "required-password-format": "Password must be at least 8 characters long",
+        "maximum-limit": "Maximum limit reached",
+        "invalid-session-code": "Invalid Session Code!",
+        "html5-not-supported": "Your browser does not support HTML5 video.",
+        "camera-access-denied": "Camera access is required for video calls. Please allow access and try again."
+    },
+    "session-end-reasons": {
+        "agent" :"session ended because the agent left the conversation",
+        "customer" :"session ended because the customer left the conversation",
+        "force-closed":"session ended due to customer's inactivity",
+        "force_closed":"session ended due to customer's inactivity",
+        "inactivity":"session ended due to customer's inactivity",
+        "network":"session ended due to customer's network connectivity issue",
+        "unknown":"session ended due to an unknown or unspecified reason"
+    },
+     "agent-notifications": {
+        "joined": "has joined",
+        "left": "has left",
+        "started": "session started"
+    },
+    "composer-placeholder": "Type message here ...",
+    "button": {
+        "live-chat": "Live Chat",
+        "callback": "Callback",
+        "help": "Need Help",
+        "connect-with-us": "Connect with us",
+        "minimize": "Minimize",
+        "download-transcript": "Download Transcript",
+        "start-chat": "Start Chat",
+        "file-transfer": "File Transfer",
+        "web-chat": "Web Chat",
+        "change-font-size": "Change Font Size",
+        "end-conversation": "End Conversation",
+        "click-here": "CLICK HERE",
+        "close": "Close",
+        "send-me-transcript": "Send me Transcript",
+        "call-on-my-number": "Call on my number",
+        "request-callback": "Request Callback",
+        "video-call": "Video Call",
+        "unmute": "Unmute",
+        "mute": "Mute"
+    },
+    "callback": {
+        "title": "Callback",
+        "request": "Request Callback",
+        "request-description": "Please fill out the form below to setup a callback request."
+    },
+    "notification": {
+        "participant-joined": "has joined the chat",
+        "participant-left": "has left the chat",
+        "agents-not-available": "No agents are available at the moment",
+        "transfering-request-to": "Your request is being transferred, please wait!",
+        "queue-please-wait": "queue, please wait!",
+        "supported-file-types-allowed": "All supported file types allowed"
+    },
+    "dialog": {
+        "confirm": "Confirm",
+        "end-conversation-confirmation": "Are you sure to end the conversation?",
+        "yes": "Yes",
+        "no": "No"
+    },
+    "label": {
+        "choose-file": "Choose File",
+        "sorry": "Sorry!",
+        "thankyou": "Thank You!"
+    },
+    "dropdown": {
+        "placeholder": "Select an option",
+        "search-placeholder": "🔍 Search",
+        "no-results": "No results found!"
+    },
+    "message": {
+        "you": "You"
+    },
+    "chat-transcript": {
+        "title": "Conversation Transcript",
+        "disclaimer-text": "Below is the transcript of your recent chat session with our support team.",
+        "print-or-download-pdf": "Print / Save as PDF"
+    }
+}

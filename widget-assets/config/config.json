@@ -1,0 +1,20 @@
+{
+  "SOCKET_URL": "https://missouri.expertflow.com/web-channel-manager",
+  "FILE_SERVER_URL": "https://missouri.expertflow.com/file-engine",
+  "BOT_FRAMEWORK_URL": "https://missouri.expertflow.com/bot-framework",
+  "CCM_URL": "https://missouri.expertflow.com/ccm",
+  "CONVERSATIONAL_URL": "https://missouri.expertflow.com/conversation-manager/customer-topics",
+  "FORM_URL": "https://missouri.expertflow.com/unified-admin",
+  "AUTHENTICATOR_URL": "https://missouri.expertflow.com/secure-link",
+  "BUSINESSCALENDAR_URL": "https://missouri.expertflow.com/business-calendar",
+  "CX_ACTIVITY": "https://missouri.expertflow.com/conversation-manager/activities",
+  "CHANNEL_IDENTIFIER": "phone",
+  "ENABLE_LOGO": true,
+  "VIDEO": true,
+  "USERNAME_ENABLED": false,
+  "MUTE_NOTIFICATIONS": false,
+  "IS_DIRECT_WEBRTC_CALL_ENABLED": true,
+  "ENABLE_TRANSCRIPT_NOTIFICATIONS": true,
+  "AUTO_RESUME_ON_NEW_TAB": true,
+  "WIDGET_END_VIEW_TIMEOUT_SECONDS": 10
+}
