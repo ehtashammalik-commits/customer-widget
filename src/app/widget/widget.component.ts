@@ -508,6 +508,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.widgetIdentifier = params['widgetIdentifier'];
       this.source = params['Source'] || 'Web';
       this.audioStart = params['audioStart'] === 'true' || params['audioStart'] === true;
+      // Extract customerId from URL for auto-start video calls
+      // This allows the auto-start flow to use real customer identifiers instead of auto-generating them
       const customerId = params['customerId'] || null;
 
       const rawEncryptedKey = params['encryptedKey'] || null;
@@ -521,7 +523,9 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.passUrlParamsToServices();
       this.getCalendarEvents();
 
-      // Store customerId for auto-start call
+      // Override customerIdentifier with customerId from URL if provided
+      // This enables auto-start calls to use real customer IDs for proper SIP routing
+      // Example URL: ?customerId=123123123&audioStart=true&widgetIdentifier=missouri&serviceIdentifier=1000
       if (customerId) {
         this.customerIdentifier = customerId;
       }
@@ -590,11 +594,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
           this.sdk.renderCallbackForm(this.callbackConfig.callBackForm);
         }
 
-        // Auto-start audio call if audioStart parameter is set
+        // Auto-start video call if audioStart parameter is set in URL
+        // This skips the pre-chat form and directly initiates a WebRTC video call with the customer ID
         if (this.audioStart) {
           console.log('Auto-starting video call...');
           console.log('WebRTC Config available:', this.webRTCConfig);
           console.log('WebRTC enabled:', this.enableWebRtc);
+          // Pass the customerIdentifier (from URL customerId param) to initialize the auto-start call
           this.initializeAutoStartAudioCall(this.customerIdentifier);
         } else {
           this.sdk.getFormValidation(() => {
@@ -1363,10 +1369,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    // Use provided customerId or fall back to auto-generated identifier
+    // Use provided customerId from URL parameter or fall back to auto-generated identifier
+    // Provided customerId enables proper SIP routing (e.g., "123123123" instead of "auto_12345678")
     const identifier = customerId || 'auto_' + Math.floor(10000000 + Math.random() * 90000000).toString();
     console.log('Auto-start video call using identifier:', identifier);
 
+    // Build customer data object for the WebRTC connection
+    // This includes browser info and locale data collected during widget initialization
     this.customerData = {
       serviceIdentifier: this.serviceIdentifier,
       channelCustomerIdentifier: identifier,
@@ -1382,6 +1391,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
         language: this.translate.currentLang || this.browserInfoData?.geoLocationData?.languages || null,
         country: this.browserInfoData?.geoLocationData?.country_name || null,
       },
+      // Minimal form data for auto-start (skips pre-chat form submission)
+      // Note: filledBy is set to 'auto-video-start' to differentiate from manual form submissions
       formData: {
         id: Math.random(),
         formId: '',
@@ -1392,7 +1403,8 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       },
     };
 
-    // Initialize preChatFormData for auto-start calls
+    // Initialize preChatFormData with minimal data for auto-start flow
+    // Normal flow populates this through form submission, but auto-start skips the form
     this.preChatFormData = {
       sections: [
         {
@@ -1401,10 +1413,14 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       ],
     };
 
+    // Mark this as a new chat start event for the connection handler
     this.eventTriggerType = 'startChat';
     let user = { data: this.customerData };
+    // Store user data in session/local storage for potential recovery
     this.storageService.setItem('user', user, this.storageType);
 
+    // Establish WebSocket connection with the backend using the customer identifier
+    // This triggers the channel session creation and eventually the video call
     if (this.storageService.getItem('user', this.storageType)) {
       this.sdk.makeConnection(
         this.customerData.serviceIdentifier,
@@ -4011,10 +4027,13 @@ export class WidgetComponent implements OnInit, AfterViewInit {
   }
 
   private handleStandardWebRtcCall(callType: string) {
+    // Initialize customer info in WebRTC config
+    this.webRTCConfig.customerName = '';
+    this.webRTCConfig.customerNumber = '';
+
+    // For normal flows (pre-chat form submission), extract customer data from form
     if (this.preChatFormData && typeof this.preChatFormData === 'object') {
       if (this.preChatFormData?.sections?.length > 0) {
-        this.webRTCConfig.customerName = '';
-        this.webRTCConfig.customerNumber = '';
         let sections: Array<any> = this.preChatFormData?.sections;
         sections.forEach((item) => {
           if (item?.name) this.webRTCConfig.customerName = item.name;
@@ -4023,6 +4042,16 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       }
     } else {
       this.handleRefreshCaseForWebRTC();
+    }
+
+    // For auto-start calls, use the customer identifier from URL parameter
+    // This ensures FreeSwitch receives the proper customer number for call routing
+    if (this.audioStart && this.customerIdentifier) {
+      console.log('Auto-start: Setting customer number from URL identifier:', this.customerIdentifier);
+      this.webRTCConfig.customerNumber = this.customerIdentifier;
+      if (!this.webRTCConfig.customerName) {
+        this.webRTCConfig.customerName = 'Auto Start Customer';
+      }
     }
 
     this.sdk.handleCallStart({
