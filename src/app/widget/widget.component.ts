@@ -2404,7 +2404,11 @@ export class WidgetComponent implements OnInit, AfterViewInit {
       this.customerData.channelCustomerIdentifier,
       this.getFormDataAsConversationData(this.preChatFormData),
     );
-    this.pushPrechatDataAsActivity();
+
+    // Skip form activity push for auto-start calls to avoid validation errors
+    if (!this.audioStart) {
+      this.pushPrechatDataAsActivity();
+    }
 
     // Auto-start video call if audioStart parameter is set
     if (this.audioStart) {
