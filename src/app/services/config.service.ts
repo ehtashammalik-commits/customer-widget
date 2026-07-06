@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 
 @Injectable()
 export class ConfigService {
-  configUrl = '/widget-assets/config/config.json';
+  configUrl = './widget-assets/config/config.json';
   configsToOverride: any = [
     'SOCKET_URL',
     'FILE_SERVER_URL',
